@@ -107,7 +107,5 @@ pip  install crewai
 - `<linearGradient id="catGradient">`，此类动画，id会被自动移除，动画会失效
 ### 关于软件模式
 为了支持软件模式，让大家更简单的体验项目，调试耗费了大量时间，给个star支持下吧~
-
 好消息，最近openrouter比较稳定，基本次次成功（瑕疵是好像deepseek0324算力有缩减，效果没开始那么好）。
-
 抓紧体验吧~更多功能开发中...
