@@ -113,7 +113,7 @@ def autowx_gzh(stop_event=None, ui_mode=False):
         topics = hotnews.get_platform_news(platform, 1)  # 使用不重复的平台
         if len(topics) == 0:
             topics = ["DeepSeek AI 提效秘籍"]
-            log.print_log("---------无法获取到热榜，请检查网络！------------", ui_mode)
+            log.print_log("无法获取到热榜，接口暂时不可用，将使用默认话题。", ui_mode)
 
         # 如果没用配置appid，则忽略该条
         if len(appid) == 0 or len(appsecret) == 0:
