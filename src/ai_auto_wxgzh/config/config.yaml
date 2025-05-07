@@ -19,14 +19,14 @@ platforms:
     weight: 0.01
 wechat:
   credentials:
-    - appid: "TEST"
-      appsecret: "TEST"
+    - appid: ""
+      appsecret: ""
       author: ""
     - appid: ""
       appsecret: ""
       author: ""
     - appid: ""
-      appsecret: "TEST"
+      appsecret: ""
       author: ""
 api:
   api_type: OpenRouter
@@ -44,7 +44,7 @@ api:
     key: OPENAI_API_KEY
     key_index: 0
     api_key:
-      - "TEST"
+      - ""
       - ""
     model_index: 3
     model:
