@@ -57,7 +57,8 @@ class AutowxGzh:
         return Agent(
             config=self.agents_config["publisher"],
             tools=[PublisherTool()],
-            verbose=True,
+            function_calling_llm=True,  # 纯本地工具
+            verbose=False,  # 纯本地工具，不要输出
         )
 
     @task

@@ -77,8 +77,10 @@ api:
       - ""
     model:
       - openrouter/deepseek/deepseek-chat-v3-0324:free
+      - openrouter/deepseek/deepseek-prover-v2:free
       - openrouter/deepseek/deepseek-r1:free
       - openrouter/deepseek/deepseek-chat:free
+      - openrouter/qwen/qwen3-32b:free
       - openrouter/qwen/qwq-32b:free
       - openrouter/google/gemini-2.0-flash-lite-preview-02-05:free
       - openrouter/google/gemini-2.0-flash-thinking-exp:free

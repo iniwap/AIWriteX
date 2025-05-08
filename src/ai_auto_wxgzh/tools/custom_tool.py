@@ -17,7 +17,7 @@ class ReadTemplateToolInput(BaseModel):
 # 1. Read Template Tool
 class ReadTemplateTool(BaseTool):
     name: str = "read_template_tool"
-    description: str = "从本地读取模板文件"
+    description: str = "从本地读取HTML文件"
     args_schema: Type[BaseModel] = ReadTemplateToolInput
 
     def _run(self, article_file: str) -> str:
@@ -56,7 +56,7 @@ class PublisherToolInput(BaseModel):
 # 2. Publisher Tool
 class PublisherTool(BaseTool):
     name: str = "publisher_tool"
-    description: str = "从排版设计后的文章中提取内容，保存为最终文章，并发布到微信公众号。"
+    description: str = "从本地读取HTML文件，提取内容，保存为最终文章并发布到微信公众号。"
     args_schema: Type[BaseModel] = PublisherToolInput
 
     def _run(
@@ -72,8 +72,8 @@ class PublisherTool(BaseTool):
         tmp_article = os.path.join(utils.get_current_dir(), "tmp_article.html")
 
         try:
-            with open(tmp_article, "r", encoding="utf-8") as file:
-                content = file.read()
+            with open(tmp_article, "r", encoding="utf-8") as f:
+                content = f.read()
         except Exception as e:
             print(str(e))
             return "读取tmp_article.html失败，无法发布文章！"
@@ -98,8 +98,8 @@ class PublisherTool(BaseTool):
         )
         # 保存为 final_article.html
         final_article = os.path.join(utils.get_current_dir(), "final_article.html")
-        with open(final_article, "w", encoding="utf-8") as file:
-            file.write(article)
+        with open(final_article, "w", encoding="utf-8") as f:
+            f.write(article)
 
         return result
 

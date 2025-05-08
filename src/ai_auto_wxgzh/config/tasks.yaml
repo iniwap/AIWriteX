@@ -36,17 +36,36 @@ design_content:
 template_content:
   name: "template_content"
   description: |
-    使用 read_template_tool 读取 HTML 模板,将读取的模板内容和前置任务生成的文章内容作为输入，
-    适当调整模板，去除原有内容，并填充新内容，保持整体风格不变。
-    生成一个包含填充后文章内容的压缩的 HTML 文件。
+    # HTML内容适配任务
+    ## 任务目标
+    使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅。
+
+    ## 具体要求
+    - 分析HTML模板的结构、样式和布局特点
+    - 识别所有内容占位区域（标题、副标题、正文段落、引用、列表等）
+    - 将新文章内容按照原模板的结构和布局规则填充：
+      * 保持<section>标签的布局结构和内联样式不变
+      * 保持原有的视觉层次、色彩方案和排版风格
+      * 保持原有的卡片式布局、圆角和阴影效果
+      * 保持SVG动画元素和交互特性
+
+    - 内容适配原则：
+      * 标题替换标题、段落替换段落、列表替换列表
+      * 当新内容比原模板内容长或短时，合理调整，不破坏布局
+      * 保持原有的强调部分（粗体、斜体、高亮等）应用于新内容的相应部分
+      * 保持图片位置
+      
+    - 严格限制：
+      * 不添加新的style标签或外部CSS
+      * 不修改模板的整体视觉效果和布局结构
   agent: templater
   context: ["write_content", "audit_content"]
-  expected_output: 模板填充后的文章（HTML格式）
+  expected_output: 填充新内容但保持原有视觉风格的文章（HTML格式）
 
 publish_task:
   name: "publish_task"
   description: |
-    使用 publisher_tool 从排版设计后的文章中提取内容，保存为最终文章，并发布到微信公众号，
+    使用工具 publisher_tool 从本地读取HTML文件，提取内容，保存为最终文章并发布到微信公众号，
     使用以下参数：
       appid={appid}，
       appsecret={appsecret}，
@@ -54,5 +73,14 @@ publish_task:
       img_api_type={img_api_type}，
       img_api_key={img_api_key}，
       img_api_model={img_api_model}。
+      
+    执行指南:
+    1. 直接调用publisher_tool工具
+    2. 不要生成任何额外内容
+    3. 只返回工具执行的结果
+    4. 不要添加任何解释或评论
+
+    这是一个完全由工具执行的任务，不需要AI生成内容。
+
   agent: publisher
-  expected_output: 最终文章（标准HTML格式）
+  expected_output: 工具执行状态报告（仅包含工具返回的内容，无额外生成）

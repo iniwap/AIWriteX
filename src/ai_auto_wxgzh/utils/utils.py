@@ -194,7 +194,10 @@ def download_and_save_image(image_url, local_image_folder):
         return None
 
 
-def compress_html(content):
+def compress_html(content, default=True):
+    if default:
+        return content
+
     # 移除注释
     content = re.sub(r"<!--.*?-->", "", content, flags=re.DOTALL)
     # 移除换行和制表符
@@ -208,7 +211,10 @@ def compress_html(content):
     return content
 
 
-def decompress_html(compressed_content):
+def decompress_html(compressed_content, default=True):
+    if default:
+        return compressed_content
+
     # 解析压缩的HTML
     soup = BeautifulSoup(compressed_content, "html.parser")
     # 格式化输出，添加换行和缩进

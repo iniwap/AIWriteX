@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立夏时节 | 回望北京的春天</title>
+</head>
+<body>
+    <section style="padding: 0; margin: 0; font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: linear-gradient(to bottom, #f9f9f9, #ffffff); color: #333; line-height: 1.6; max-width: 100%; overflow-x: hidden;">
+        
+        <!-- 封面区域 -->
+        <section style="height: 100vh; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #f5e3e6 0%, #d9e4f5 100%); padding: 2rem; box-sizing: border-box;">
+            <div style="margin-bottom: 2rem;">
+                <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0; letter-spacing: -0.5px; line-height: 1.2; color: #222;">立夏时节</h1>
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin: 0.5rem 0 0; color: #444; line-height: 1.3;">用66张图带你回望<br>北京的春天</h2>
+            </div>
+            
+            <div style="margin: 1.5rem 0;">
+                <svg width="100%" height="80" viewBox="0 0 300 80">
+                    <path d="M10,40 Q150,10 290,40" fill="none" stroke="#d88c9a" stroke-width="2">
+                        <animate attributeName="d" from="M10,40 Q150,10 290,40" to="M10,40 Q150,70 290,40" dur="3s" repeatCount="indefinite" />
+                    </path>
+                    <circle cx="150" cy="40" r="5" fill="#d88c9a">
+                        <animate attributeName="cy" from="25" to="55" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+            
+            <div style="font-size: 1rem; color: #666; letter-spacing: 1px; font-weight: 300;">
+                SPRING IN BEIJING · 2025
+            </div>
+        </section>
+        
+        <!-- 引言部分 -->
+        <section style="padding: 2.5rem 1.5rem; background-color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-radius: 20px; margin: -1rem 1rem 1.5rem; position: relative; z-index: 10;">
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: #333; margin: 0 0 1rem; border-left: 4px solid #d88c9a; padding-left: 0.8rem;">引言：立夏与春天的告别</h3>
+            
+            <p style="font-size: 1.05rem; line-height: 1.8; color: #444; margin: 0 0 1rem; text-align: justify; text-indent: 2em;">立夏已至，春意渐远。在这个充满希望的季节里，我们用66张照片记录下北京春天的每一个美好瞬间。从早春的萌动到暮春的温柔，每一帧都是这座城市对春天的深情告白。</p>
+        </section>
+        
+        <!-- 早春的萌动 -->
+        <section style="margin: 0 1rem 2rem; background-color: #fcfcfc; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(216,140,154,0.08);">
+            <div style="background-color: #f0f5fa; padding: 1.8rem; border-radius: 16px 16px 0 0;">
+                <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: #333; display: flex; align-items: center;">
+                    <span style="display: inline-block; width: 30px; height: 30px; border-radius: 50%; background-color: #d88c9a; margin-right: 0.8rem; flex-shrink: 0; color: white; font-size: 1rem; text-align: center; line-height: 30px;">1</span>
+                    早春的萌动
+                </h3>
+                <p style="font-size: 1rem; color: #666; margin: 0.5rem 0 0 2.6rem; font-style: italic;">The First Touch of Spring</p>
+            </div>
+            
+            <div style="padding: 1.5rem; background: white;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 1.2rem; font-weight: 700; color: #444; margin: 0 0 1rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;">二月春风似剪刀：北京的第一抹绿意</h4>
+                    <p style="font-size: 1rem; line-height: 1.7; margin: 0 0 1rem; text-indent: 2em; color: #555;">颐和园的冰雪初融，玉渊潭的早樱悄然绽放。胡同里的初绿与风筝，勾勒出早春的生机。</p>
+                    
+                    <div style="margin: 1.5rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+                        <img src="https://picsum.photos/600/350?random=1" alt="北京早春风光" style="width: 100%; height: auto; display: block; border-radius: 12px;">
+                        <div style="padding: 0.8rem; background: #f9f9f9; font-size: 0.85rem; color: #777; text-align: center;">颐和园·昆明湖冰雪初融（2月中旬）</div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 1.2rem; font-weight: 700; color: #444; margin: 1.5rem 0 1rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;">樱花与红墙：古都的浪漫碰撞</h4>
+                    <p style="font-size: 1rem; line-height: 1.7; margin: 0 0 1rem; text-indent: 2em; color: #555;">故宫的海棠与红墙相映成趣，元都遗址的"海棠花溪"如诗如画。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 盛春的绚烂 -->
+        <section style="margin: 0 1rem 2rem; background-color: #fcfcfc; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(216,140,154,0.08);">
+            <div style="background-color: #f5e6e9; padding: 1.8rem; border-radius: 16px 16px 0 0;">
+                <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: #333; display: flex; align-items: center;">
+                    <span style="display: inline-block; width: 30px; height: 30px; border-radius: 50%; background-color: #d88c9a; margin-right: 0.8rem; flex-shrink: 0; color: white; font-size: 1rem; text-align: center; line-height: 30px;">2</span>
+                    盛春的绚烂
+                </h3>
+                <p style="font-size: 1rem; color: #666; margin: 0.5rem 0 0 2.6rem; font-style: italic;">The Blooming Season</p>
+            </div>
+            
+            <div style="padding: 1.5rem; background: white;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 1.2rem; font-weight: 700; color: #444; margin: 0 0 1rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;">满城尽带花海棠：京城的春日高潮</h4>
+                    
+                    <div style="display: flex; margin: 1.5rem 0; gap: 10px;">
+                        <div style="flex: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.06);">
+                            <img src="https://picsum.photos/300/400?random=2" alt="胡同紫藤" style="width: 100%; height: auto; display: block; border-radius: 12px 12px 0 0;">
+                            <div style="padding: 0.5rem; font-size: 0.75rem; color: #777; text-align: center; background: #f9f9f9;">胡同紫藤花</div>
+                        </div>
+                        <div style="flex: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.06);">
+                            <img src="https://picsum.photos/300/400?random=3" alt="春日花海" style="width: 100%; height: auto; display: block; border-radius: 12px 12px 0 0;">
+                            <div style="padding: 0.5rem; font-size: 0.75rem; color: #777; text-align: center; background: #f9f9f9;">春花盛开</div>
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 1rem; line-height: 1.7; margin: 1rem 0; text-indent: 2em; color: #555;">胡同四合院的紫藤爬满老墙，老北京人的春日活动尽显烟火气。</p>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 1.2rem; font-weight: 700; color: #444; margin: 1.5rem 0 1rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;">市井与繁花：烟火气里的春天</h4>
+                    <p style="font-size: 1rem; line-height: 1.7; margin: 0 0 1rem; text-indent: 2em; color: #555;">遛鸟、品茶，市井生活与繁花交织，构成独特的春日画卷。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 暮春的余韵 -->
+        <section style="margin: 0 1rem 2rem; background-color: #fcfcfc; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(216,140,154,0.08);">
+            <div style="background-color: #e9f0f5; padding: 1.8rem; border-radius: 16px 16px 0 0;">
+                <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: #333; display: flex; align-items: center;">
+                    <span style="display: inline-block; width: 30px; height: 30px; border-radius: 50%; background-color: #7b98b2; margin-right: 0.8rem; flex-shrink: 0; color: white; font-size: 1rem; text-align: center; line-height: 30px;">3</span>
+                    暮春的余韵
+                </h3>
+                <p style="font-size: 1rem; color: #666; margin: 0.5rem 0 0 2.6rem; font-style: italic;">The Last Whisper of Spring</p>
+            </div>
+            
+            <div style="padding: 1.5rem; background: white;">
+                <h4 style="font-size: 1.2rem; font-weight: 700; color: #444; margin: 0 0 1rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;">柳絮与晚霞：春天最后的温柔</h4>
+                
+                <p style="font-size: 1rem; line-height: 1.7; margin: 0 0 1rem; text-indent: 2em; color: #555;">奥森公园的落英缤纷，胡同里的柳絮纷飞。立夏前的雷雨与晚霞，为春天画上浪漫句点。</p>
+                
+                <div style="margin: 1.5rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+                    <img src="https://picsum.photos/600/350?random=4" alt="北京暮春景色" style="width: 100%; height: auto; display: block; border-radius: 12px;">
+                    <div style="padding: 0.8rem; background: #f9f9f9; font-size: 0.85rem; color: #777; text-align: center;">立夏前的北京晚霞（4月下旬）</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 结语部分 -->
+        <section style="padding: 2rem 1.5rem 3rem; margin: 0 1rem 2rem; background: linear-gradient(135deg, #d9e4f5 0%, #f5e3e6 100%); border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <h3 style="font-size: 1.4rem; font-weight: 700; color: #333; margin: 0 0 1.5rem; text-align: center;">结语：从春天到夏天的期待</h3>
+            
+            <p style="font-size: 1.05rem; line-height: 1.8; color: #444; margin: 0 0 1.5rem; text-align: justify; text-indent: 2em;">66张照片，记录下北京春天短暂而珍贵的美丽。期待夏日的绿荫荷风，继续书写这座城市的四季故事。</p>
+            
+            <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                <div style="display: inline-flex; gap: 0.8rem;">
+                    <span style="background: #d88c9a; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">#北京春天记忆</span>
+                    <span style="background: #7b98b2; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">#立夏时节</span>
+                    <span style="background: #333; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">#城市影像</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <svg width="120" height="30" viewBox="0 0 120 30">
+                    <path d="M10,15 L110,15" stroke="#777" stroke-width="1" stroke-dasharray="1,3" />
+                    <text x="60" y="25" font-family="'PingFang SC'" font-size="8" fill="#777" text-anchor="middle">END OF SPRING</text>
+                </svg>
+            </div>
+        </section>
+    </section>
+</body>
+</html>
