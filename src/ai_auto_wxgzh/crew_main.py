@@ -125,6 +125,7 @@ def autowx_gzh(stop_event=None, ui_mode=False):
             "img_api_key": config.img_api_key,
             "img_api_model": config.img_api_model,
             "template": config.template,
+            "use_compress": config.use_compress,
         }
 
         log.print_log("CrewAI开始工作...", ui_mode)

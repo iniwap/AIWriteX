@@ -112,6 +112,7 @@ class Config:
             "use_template": True,
             "template": "",
             "need_auditor": False,
+            "use_compress": False,
         }
 
     @classmethod
@@ -215,6 +216,13 @@ class Config:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["need_auditor"]
+
+    @property
+    def use_compress(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["use_compress"]
 
     @property
     def api_list(self):

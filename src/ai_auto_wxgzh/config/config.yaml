@@ -107,3 +107,4 @@ img_api:
 use_template: true
 template: ""
 need_auditor: false
+use_compress: false

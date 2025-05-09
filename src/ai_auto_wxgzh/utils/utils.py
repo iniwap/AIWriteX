@@ -195,8 +195,8 @@ def download_and_save_image(image_url, local_image_folder):
         return None
 
 
-def compress_html(content, default=True):
-    if default:
+def compress_html(content, use_compress=True):
+    if use_compress:
         return content
 
     # 移除注释
@@ -212,13 +212,36 @@ def compress_html(content, default=True):
     return content
 
 
-def decompress_html(compressed_content, default=True):
-    if default:
+def decompress_html(compressed_content, use_compress=True):
+    """
+    格式化 HTML 内容，仅对压缩的 HTML 进行处理，尽量保留未压缩 HTML 的显示效果。
+
+    参数：
+        compressed_content: 输入的 HTML 字符串
+    返回：
+        格式化的 HTML 字符串
+    """
+
+    if use_compress:
         return compressed_content
 
-    # 解析压缩的HTML
+    # 检查是否可能是未压缩的（包含换行和缩进）
+    if re.search(r"\n\s+", compressed_content):
+        return compressed_content.strip()  # 保留原始内容，仅去除首尾空白
+
+    # 解析并格式化 HTML
     soup = BeautifulSoup(compressed_content, "html.parser")
-    # 格式化输出，添加换行和缩进
+
+    # 如果输入是片段，尝试避免自动补全 <html> 和 <body>
+    if not compressed_content.strip().startswith(
+        "<!DOCTYPE"
+    ) and not compressed_content.strip().startswith("<html"):
+        # 直接返回格式化的子树内容
+        return "\n".join(
+            str(child).strip() if not hasattr(child, "prettify") else child.prettify()
+            for child in soup.contents
+        )
+
     return soup.prettify()
 
 

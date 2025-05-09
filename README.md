@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
 
-基于 CrewAI 的微信公众号自动化工具，自动抓取抖音、微博等平台热点，生成高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
+基于 CrewAI 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
 
 **喜欢项目？点个 Star 支持一下吧！🌟**
 
@@ -22,7 +22,7 @@
 
 ### 🎁个性化功能
 
-为了更好的满足各种需求情况，通过配置文件（`config.yaml`）来完成
+为了更好的满足各种需求情况，通过配置文件`config.yaml`实现（通过界面/软件模式编辑更友好）：
 
 - platforms：可以设定每个平台的随机选取的权重
 - wechat: 支持配置多个微信公众号
@@ -34,6 +34,7 @@
 - use_template: 目前只有Claude 3.7有比较好的模板生成效果，由于无法直接使用（有API付费的可以，但消耗很高），这里特别设计是否使用内置模板（每天可以免费到Poe生成模板放到`knowledge/templates`文件夹下）
 - template: 设为非""时，使用该模板（只需要文件名，如template1，如果不存在则随机，默认随机）
 - need_auditor: 为了降低token消耗，提高发布成功率，可关闭“质量审核”agent/task（默认关闭）
+- use_compress: 为了降低token消耗，可开关是否压缩模板（读取模板后压缩上传），可能会影响AI对HTML的解析
 
 ## 🚀 快速开始
 ### 开发模式

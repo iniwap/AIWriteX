@@ -40,7 +40,8 @@ template_content:
     ## 任务目标
     使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅，
     使用以下参数：
-      template={template}。
+      template={template},
+      use_compress={use_compress}。
       
     ## 具体要求
     - 分析HTML模板的结构、样式和布局特点

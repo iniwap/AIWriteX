@@ -316,6 +316,7 @@ class ConfigEditor:
                 ),
             ],
             [sg.Checkbox("需要审核者", default=self.config.need_auditor, key="-NEED_AUDITOR-")],
+            [sg.Checkbox("压缩模板", default=self.config.use_compress, key="-USE_COMPRESS-")],
             [
                 sg.Text(
                     "Tips：\n"
@@ -325,9 +326,12 @@ class ConfigEditor:
                     "           选定模板：使用指定的模板\n"
                     "    - 不使用：AI根据要求生成模板，并填充文章\n"
                     "2、需要审核者：\n"
-                    "    - 需要：则在生成文章后执行审核，文章可能可能更好，但Token消耗更高\n"
-                    "    - 不需要：生成文章后直接填充模板，消耗低，文章可能略差\n",
-                    size=(70, 7),
+                    "    - 需要：生成文章后执行审核，文章可能更好，但token消耗更高\n"
+                    "    - 不需要：生成文章后直接填充模板，消耗低，文章可能略差\n"
+                    "3、压缩模板：\n"
+                    "    - 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
+                    "    - 不压缩：token消耗，AI可能理解更精确",
+                    size=(70, 12),
                     text_color="gray",
                 ),
             ],
@@ -636,6 +640,7 @@ class ConfigEditor:
                 config = self.config.get_config().copy()
                 config["use_template"] = values["-USE_TEMPLATE-"]
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
+                config["use_compress"] = values["-USE_COMPRESS-"]
                 # 处理 template 保存逻辑
                 template_value = values["-TEMPLATE-"]
                 config["template"] = "" if template_value == "随机模板" else template_value
@@ -728,6 +733,7 @@ class ConfigEditor:
                 config = self.config.get_config().copy()
                 config["use_template"] = self.config.default_config["use_template"]
                 config["need_auditor"] = self.config.default_config["need_auditor"]
+                config["use_compress"] = self.config.default_config["use_compress"]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
                     self.update_tab("-TAB_OTHER-", self.create_other_tab())
