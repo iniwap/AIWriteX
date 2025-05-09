@@ -12,6 +12,7 @@ from src.ai_auto_wxgzh.utils import utils
 
 class ReadTemplateToolInput(BaseModel):
     article_file: str = Field(description="前置任务生成的的文章内容")
+    template: str = Field(description="本地HTML模板")
 
 
 # 1. Read Template Tool
@@ -20,23 +21,36 @@ class ReadTemplateTool(BaseTool):
     description: str = "从本地读取HTML文件"
     args_schema: Type[BaseModel] = ReadTemplateToolInput
 
-    def _run(self, article_file: str) -> str:
+    def _run(self, article_file: str, template: str) -> str:
         # 获取模板文件的绝对路径
         template_dir_abs = utils.get_res_path(
             "templates",
             os.path.join(utils.get_current_dir("knowledge", False)),
         )
 
-        template_files_abs = glob.glob(os.path.join(template_dir_abs, "*.html"))
+        random_template = True
+        if template:  # 如果指定模板，且必须存在才能不随机
+            selected_template_file = os.path.join(template_dir_abs, f"{template}.html")
+            if os.path.exists(selected_template_file):  #
+                random_template = False
 
-        if not template_files_abs:
-            print(
-                f"在目录 '{template_dir_abs}' 中未找到任何模板文件。如果没有模板请将config.yaml中的use_template设置为false"
+        # 需要随机
+        if random_template:
+            template_dir_abs = utils.get_res_path(
+                "templates",
+                os.path.join(utils.get_current_dir("knowledge", False)),
             )
-            # 出现这种错误无法继续，立即终止程序，防止继续消耗Tokens（不终止CrewAI可能会重试）
-            sys.exit(1)
 
-        selected_template_file = random.choice(template_files_abs)
+            template_files_abs = glob.glob(os.path.join(template_dir_abs, "*.html"))
+
+            if not template_files_abs:
+                print(
+                    f"在目录 '{template_dir_abs}' 中未找到任何模板文件。如果没有模板请将config.yaml中的use_template设置为false"
+                )
+                # 出现这种错误无法继续，立即终止程序，防止继续消耗Tokens（不终止CrewAI可能会重试）
+                sys.exit(1)
+
+            selected_template_file = random.choice(template_files_abs)
 
         with open(selected_template_file, "r", encoding="utf-8") as file:
             selected_template_content = file.read()

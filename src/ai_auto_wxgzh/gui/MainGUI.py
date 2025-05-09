@@ -12,7 +12,6 @@ import queue
 import threading
 import os
 import glob
-import webbrowser
 from collections import deque
 
 import PySimpleGUI as sg
@@ -35,11 +34,13 @@ __copyright__ = "Copyright (C) 2025 iniwap"
 class MainGUI(object):
     def __init__(self):
         self._log_list = []
+        self._template_list = []
         self._is_running = False  # 跟踪任务状态
         self._update_queue = comm.get_update_queue()
         self._log_buffer = deque(maxlen=100)
         self._ui_log_path = log.get_log_path("UI")
         self._log_list = self.__get_logs()
+        self._template_list = self.__get_templates()
         # 配置 CrewAI 日志处理器
         log.setup_logging("crewai", self._update_queue)
         # 终止信号和线程
@@ -57,7 +58,10 @@ class MainGUI(object):
 
         menu_list = [
             ["配置", ["配置界面", "配置文件"]],
-            ["文件", ["日志", self._log_list, "文章"]],
+            [
+                "文件",
+                ["日志", self._log_list, "模板", self._template_list, "文章"],
+            ],
             ["帮助", ["帮助", "关于", "官网"]],
         ]
 
@@ -129,6 +133,35 @@ class MainGUI(object):
             self._log_list = self.__get_logs()
 
         return need_update
+
+    def __get_templates(self, max_files=10):
+        try:
+            template_files_abs = glob.glob(
+                os.path.join(
+                    utils.get_res_path(
+                        "templates",
+                        os.path.join(utils.get_current_dir("knowledge", False)),
+                    ),
+                    "*.html",
+                )
+            )
+
+            if not template_files_abs:
+                return ["更多..."]
+
+            # 提取文件名（不含路径），限制数量
+            template_filenames = sorted(
+                [
+                    os.path.splitext(os.path.basename(path))[0]
+                    for path in template_files_abs[:max_files]
+                ]
+            )
+            if len(template_files_abs) > max_files:
+                template_filenames.append("更多...")
+
+            return template_filenames
+        except Exception as e:  # noqa 841
+            return ["更多..."]
 
     def __get_logs(self, max_files=5):
         try:
@@ -310,7 +343,7 @@ class MainGUI(object):
                     icon=self.__get_icon(),
                 )
             elif event == "官网":
-                webbrowser.open("https://github.com/iniwap")
+                utils.open_url("https://github.com/iniwap")
             elif event == "帮助":
                 sg.popup(
                     "———————————配置说明———————————\n"
@@ -364,27 +397,46 @@ class MainGUI(object):
                             title="系统提示",
                             icon=self.__get_icon(),
                         )
+            elif event in self._template_list:
+                template_dir_abs = utils.get_res_path(
+                    "templates",
+                    os.path.join(utils.get_current_dir("knowledge", False)),
+                )
+                if event == "更多...":
+                    filename = sg.popup_get_file(
+                        "打开文件",
+                        default_path=template_dir_abs,
+                        file_types=(("模板文件", "*.html"),),
+                        no_window=True,
+                    )
+
+                    if len(filename) == 0:
+                        continue
+
+                    if ret := utils.open_url(filename):
+                        sg.popup(
+                            "无法打开模板 :( \n错误信息：" + ret,
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                else:
+                    if ret := utils.open_url(os.path.join(template_dir_abs, f"{event}.html")):
+                        sg.popup(
+                            "无法打开模板 :( \n错误信息：" + ret,
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
 
             elif event == "文章":
                 # 生成的最终文章
                 final_article = os.path.join(utils.get_current_dir(), "final_article.html")
-                if not os.path.exists(final_article):
+                if ret := utils.open_url(final_article):
                     sg.popup(
-                        "文章不存在，无法查看，请先执行并生成文章！",
+                        "无法查看，请先执行并生成文章！:( \n错误信息：" + ret,
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
-                else:
-                    try:
-                        # 转换为 file:// URL，确保中文路径正确处理
-                        html_url = f"file://{os.path.abspath(final_article).replace(os.sep, '/')}"
-                        webbrowser.open(html_url)
-                    except Exception as e:
-                        sg.popup(
-                            "无法打开文章 :( \n错误信息：" + str(e),
-                            title="系统提示",
-                            icon=self.__get_icon(),
-                        )
+
             # 处理队列更新（非阻塞）
             if self._is_running:
                 self.process_queue()

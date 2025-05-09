@@ -38,8 +38,10 @@ template_content:
   description: |
     # HTML内容适配任务
     ## 任务目标
-    使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅。
-
+    使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅，
+    使用以下参数：
+      template={template}。
+      
     ## 具体要求
     - 分析HTML模板的结构、样式和布局特点
     - 识别所有内容占位区域（标题、副标题、正文段落、引用、列表等）
@@ -57,6 +59,7 @@ template_content:
       
     - 严格限制：
       * 不添加新的style标签或外部CSS
+      * 不改变原有的色彩方案（限制在三种色系内）
       * 不修改模板的整体视觉效果和布局结构
   agent: templater
   context: ["write_content", "audit_content"]

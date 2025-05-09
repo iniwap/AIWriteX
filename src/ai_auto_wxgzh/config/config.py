@@ -110,6 +110,7 @@ class Config:
                 "picsum": {"api_key": "", "model": ""},
             },
             "use_template": True,
+            "template": "",
             "need_auditor": False,
         }
 
@@ -200,6 +201,13 @@ class Config:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["use_template"]
+
+    @property
+    def template(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["template"]
 
     @property
     def need_auditor(self):

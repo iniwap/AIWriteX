@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import re
 import os
 import copy  # noqa 841
+import glob
 
 from src.ai_auto_wxgzh.config.config import Config
 from src.ai_auto_wxgzh.utils import utils
@@ -29,6 +30,30 @@ class ConfigEditor:
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
+
+    def __get_templates(self):
+        try:
+            template_files_abs = glob.glob(
+                os.path.join(
+                    utils.get_res_path(
+                        "templates",
+                        os.path.join(utils.get_current_dir("knowledge", False)),
+                    ),
+                    "*.html",
+                )
+            )
+
+            if not template_files_abs:
+                return []
+
+            # 提取文件名（不含路径），限制数量
+            template_filenames = sorted(
+                [os.path.splitext(os.path.basename(path))[0] for path in template_files_abs]
+            )
+
+            return template_filenames
+        except Exception as e:  # noqa 841
+            return []
 
     def create_platforms_tab(self):
         """创建平台 TAB 布局"""
@@ -260,17 +285,47 @@ class ConfigEditor:
 
     def create_other_tab(self):
         """创建其他 TAB 布局"""
+        # 获取模板文件列表（仅文件名，不含扩展名）
+        template_files = self.__get_templates()
+        template_options = ["随机模板"] + template_files
+        # 获取当前配置中的 template 值
+        current_template = self.config.template if self.config.template else "随机模板"
+        # 检查模板列表是否为空
+        is_template_empty = len(template_files) == 0
         layout = [
-            [sg.Checkbox("使用模板", default=self.config.use_template, key="-USE_TEMPLATE-")],
+            [
+                sg.Checkbox(
+                    "使用模板",
+                    default=self.config.use_template
+                    and not is_template_empty,  # 仅当模板非空且配置启用时默认选中
+                    key="-USE_TEMPLATE-",
+                    enable_events=True,
+                    disabled=is_template_empty,  # 模板为空时禁用
+                )
+            ],
+            [
+                sg.Text("模板:", size=(15, 1)),
+                sg.Combo(
+                    template_options,
+                    default_value=current_template,
+                    key="-TEMPLATE-",
+                    size=(30, 1),
+                    disabled=not self.config.use_template
+                    or is_template_empty,  # 模板为空或未启用时禁用
+                    readonly=True,
+                ),
+            ],
             [sg.Checkbox("需要审核者", default=self.config.need_auditor, key="-NEED_AUDITOR-")],
             [
                 sg.Text(
                     "Tips：\n"
                     "1、使用模板：\n"
-                    "    - 使用：本地内置，程序自动选取一个并将生成的文章填充到模板里\n"
+                    "    - 使用：\n"
+                    "           随机模板：程序随机选取一个并将生成的文章填充到模板里\n"
+                    "           选定模板：使用指定的模板\n"
                     "    - 不使用：AI根据要求生成模板，并填充文章\n"
                     "2、需要审核者：\n"
-                    "    - 需要：则在生成文章后执行审核，文章可能更好，但Token消耗更高\n"
+                    "    - 需要：则在生成文章后执行审核，文章可能可能更好，但Token消耗更高\n"
                     "    - 不需要：生成文章后直接填充模板，消耗低，文章可能略差\n",
                     size=(70, 7),
                     text_color="gray",
@@ -345,6 +400,11 @@ class ConfigEditor:
             event, values = self.window.read()
             if event in (sg.WIN_CLOSED, "-EXIT-"):
                 break
+
+            # 动态启用/禁用 template 下拉列表
+            elif event == "-USE_TEMPLATE-":
+                self.window["-TEMPLATE-"].update(disabled=not values["-USE_TEMPLATE-"])
+                self.window.refresh()
 
             # 切换API TAB
             elif event == "-API_TYPE-":
@@ -576,6 +636,9 @@ class ConfigEditor:
                 config = self.config.get_config().copy()
                 config["use_template"] = values["-USE_TEMPLATE-"]
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
+                # 处理 template 保存逻辑
+                template_value = values["-TEMPLATE-"]
+                config["template"] = "" if template_value == "随机模板" else template_value
                 if self.config.save_config(config):
                     sg.popup(
                         "其他配置已保存",
@@ -665,8 +728,8 @@ class ConfigEditor:
                 config = self.config.get_config().copy()
                 config["use_template"] = self.config.default_config["use_template"]
                 config["need_auditor"] = self.config.default_config["need_auditor"]
+                config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
-                    # 清空并重建其他 tab
                     self.update_tab("-TAB_OTHER-", self.create_other_tab())
                     sg.popup(
                         "已恢复默认其他配置",

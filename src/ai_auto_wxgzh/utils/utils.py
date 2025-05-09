@@ -7,6 +7,7 @@ import requests
 import time
 import sys
 import shutil
+import webbrowser
 
 
 def copy_file(src_file, dest_file):
@@ -219,3 +220,21 @@ def decompress_html(compressed_content, default=True):
     soup = BeautifulSoup(compressed_content, "html.parser")
     # 格式化输出，添加换行和缩进
     return soup.prettify()
+
+
+def open_url(file_url):
+    try:
+        # 检查是否为网络 URL（以 http:// 或 https:// 开头）
+        if file_url.startswith(("http://", "https://")):
+            # 直接打开网络 URL
+            webbrowser.open(file_url)
+        else:
+            # 视为本地文件路径，转换为 file:// 格式
+            if not os.path.exists(file_url):
+                return "文件不存在！"
+
+            html_url = f"file://{os.path.abspath(file_url).replace(os.sep, '/')}"
+            webbrowser.open(html_url)
+        return ""
+    except Exception as e:
+        return str(e)

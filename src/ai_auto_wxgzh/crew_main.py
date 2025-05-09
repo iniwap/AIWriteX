@@ -101,10 +101,6 @@ def autowx_gzh(stop_event=None, ui_mode=False):
     os.environ["MODEL"] = config.api_model
     os.environ["OPENAI_API_BASE"] = config.api_apibase
 
-    img_api_type = config.img_api_type
-    img_api_key = config.img_api_key
-    img_api_model = config.img_api_model
-
     for credential in config.wechat_credentials:
         appid = credential["appid"]
         appsecret = credential["appsecret"]
@@ -125,9 +121,10 @@ def autowx_gzh(stop_event=None, ui_mode=False):
             "appid": appid,
             "appsecret": appsecret,
             "author": author,
-            "img_api_type": img_api_type,
-            "img_api_key": img_api_key,
-            "img_api_model": img_api_model,
+            "img_api_type": config.img_api_type,
+            "img_api_key": config.img_api_key,
+            "img_api_model": config.img_api_model,
+            "template": config.template,
         }
 
         log.print_log("CrewAI开始工作...", ui_mode)
