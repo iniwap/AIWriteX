@@ -2,13 +2,9 @@
 name = "ai_auto_wxgzh"
 version = "1.0.0"
 description = "ai_auto_wxgzh using crewAI"
-authors = [
-    { name = "iniwap", email = "iniwaper@gmail.com" },
-]
+authors = [{ name = "iniwap", email = "iniwaper@gmail.com" }]
 requires-python = ">=3.10,<3.13"
-dependencies = [
-    "crewai[tools]>=0.102.0,<1.0.0",
-]
+dependencies = ["crewai[tools]>=0.102.0,<1.0.0"]
 
 [project.scripts]
 ai_auto_wxgzh = "ai_auto_wxgzh.main:run"
@@ -18,7 +14,5 @@ replay = "ai_auto_wxgzh.main:replay"
 test = "ai_auto_wxgzh.main:test"
 
 [build-system]
-requires = [
-    "hatchling",
-]
+requires = ["hatchling"]
 build-backend = "hatchling.build"

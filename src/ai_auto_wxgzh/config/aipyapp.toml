@@ -1,0 +1,63 @@
+# 基础配置  
+workdir = 'aipy_work'  
+history = '.aipy_history.txt'  
+record = true  
+max_tokens = 4096  
+accept_disclaimer = true  
+  
+# 用于决定使用哪个LLM提供商  
+default_llm_provider = "openrouter"  # 可选值: openrouter, grok, qwen, gemini, ollama  
+  
+# OpenRouter配置  
+[llm.openrouter]  
+type = "openai"                                                                       # OpenRouter使用OpenAI兼容的API    
+model = "deepseek/deepseek-chat-v3-0324:free"  
+api_key = ""  
+base_url = "https://openrouter.ai/api/v1"  
+enable = true  
+default = true                                                                        # 如果您希望将其设为默认LLM    
+timeout = 30  
+max_tokens = 8192  
+  
+# Grok配置  
+[llm.grok]  
+type = "openai"                                                                       # Grok使用OpenAI兼容的API  
+model = "grok-3-mini"                                                                 # 或其他Grok模型  
+api_key = ""                                                                          # 您的Grok API密钥  
+base_url = "https://api.x.ai/v1/"                                                     # Grok API基础URL  
+enable = true  
+default = false  
+timeout = 30  
+max_tokens = 8192  
+  
+# Qwen配置  
+[llm.qwen]  
+type = "openai"                                                                       # Qwen使用OpenAI兼容的API  
+model = "openai/qwen-max"                                                             # 或其他Qwen模型  
+api_key = ""                                                                          # 您的Qwen API密钥  
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"                        # Qwen API基础URL  
+enable = true  
+default = false  
+timeout = 30  
+max_tokens = 8192  
+  
+# Gemini配置  
+[llm.gemini]  
+type = "openai"                                                                       # Gemini使用OpenAI兼容的API  
+model = "gemini-2.5-pro-exp-03-25"                                                    # 或其他Gemini模型  
+api_key = ""                                                                          # 您的Gemini API密钥  
+base_url = "https://generativelanguage.googleapis.com/v1beta/"                        # Gemini API基础URL  
+enable = true  
+default = false  
+timeout = 30  
+max_tokens = 8192  
+  
+# Ollama配置  
+[llm.ollama]  
+type = "ollama"                                                                       # Ollama使用自己的API类型  
+model = "llama3"                                                                      # 或其他Ollama支持的模型  
+base_url = "http://localhost:11434"                                                   # Ollama通常在本地运行  
+enable = true  
+default = false  
+timeout = 30  
+max_tokens = 8192

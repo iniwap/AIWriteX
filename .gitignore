@@ -6,3 +6,6 @@ logs/*.log
 tools
 final_article.html
 tmp_article.html
+user_config.toml
+aipy_work/*
+!aipy_work/.gitkeep

@@ -5,9 +5,13 @@ import os
 import glob
 import random
 import sys
+from rich.console import Console
+from aipyapp.aipy.taskmgr import TaskManager
+from typing import Optional
 
 from src.ai_auto_wxgzh.tools.wx_publisher import WeixinPublisher
 from src.ai_auto_wxgzh.utils import utils
+from src.ai_auto_wxgzh.config.config import Config
 
 
 class ReadTemplateToolInput(BaseModel):
@@ -199,3 +203,86 @@ class PublisherTool(BaseTool):
             return "无法将文章群发给用户，无法显示到公众号文章列表", article
 
         return "成功发布文章到微信公众号", article
+
+
+# 3. AIPy Search Tool
+class AIPySearchToolInput(BaseModel):
+    """输入参数模型"""
+
+    topic: str = Field(..., description="要搜索的话题")
+    max_results: Optional[int] = Field(10, description="返回的最大结果数量")
+
+
+class AIPySearchTool(BaseTool):
+    """AIPy搜索工具"""
+
+    name: str = "aipy_search_tool"
+    description: str = "使用AIPy搜索最新的信息、数据和趋势"
+    args_schema: type[BaseModel] = AIPySearchToolInput
+
+    def _run(self, topic: str, max_results: int = 10) -> str:
+        """执行AIPy搜索"""
+        # 保存当前工作目录
+        original_cwd = os.getcwd()
+        try:
+            # 初始化AIPy
+            console = Console()
+            # 创建TaskManager
+            try:
+                task_manager = TaskManager(Config.get_instance().get_aipy_config(), console=console)
+            except Exception as e:
+                console.print_exception()
+                raise e
+
+            # 创建搜索任务
+            # 考虑到墙的因素，不要优先使用谷歌搜索
+            # 微信需要无代理，所以为了整个执行成功，建议关闭
+            search_instruction = f"""
+            搜索关于{topic}的最新信息，包括
+            1. 最新数据和统计数字
+            2. 最近的事件和时间点
+            3. 当前趋势和发展
+            4. 权威来源的观点和分析
+
+            搜索方法优先级（不使用需要API密钥的方式）：
+            1. 使用DuckDuckGo搜索引擎，添加时间筛选参数
+            2. 使用百度搜索，添加时间筛选参数
+            3. 使用bing搜索，添加时间筛选参数
+            4. 直接访问相关领域的权威网站并抓取最新内容
+            5. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
+
+            请确保：
+            1. 添加时间筛选参数，优先获取最近7天内的内容
+            2. 对搜索结果按发布时间从新到旧排序
+            3. 提取每个结果的发布日期，仅保留最近的信息
+            4. 验证信息的时效性，过滤掉旧信息
+
+            返回结构化的搜索结果，包含来源URL、发布时间和内容摘要。
+            限制结果数量为{max_results}个，按时间从新到旧排序。
+            """
+
+            task = task_manager.new_task(search_instruction)
+
+            # 执行任务
+            task.run()
+
+            # 从任务历史中提取搜索结果
+            search_results = None
+            for entry in task.runner.history:
+                if "__result__" in entry.get("result", {}):
+                    search_results = entry["result"]["__result__"]
+                    break
+
+            # 完成任务并保存结果
+            task.done()
+
+            if search_results:
+                return str(search_results)
+            else:
+                return f"未能找到关于'{topic}'的搜索结果。"
+
+        except Exception as e:
+            return f"搜索过程中发生错误: {str(e)}"
+        finally:
+            # 恢复原始工作目录
+            os.chdir(original_cwd)

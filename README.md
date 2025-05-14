@@ -1,8 +1,8 @@
 # CrewAI微信公众号全自动生成排版发布工具
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
 
-基于 CrewAI 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
+基于 CrewAI / AIPy 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成高时效性/即时、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
 
 **喜欢项目？点个 Star 支持一下吧！🌟**
 
@@ -15,6 +15,7 @@
 - 自动获取各大平台热门话题
 - 自动根据话题生成文章、排版（CrewAI多个角色共同完成）
 - 自动发图文消息到公众号
+- **采用`AIPy`实现搜索功能，解决大模型文章的时效性问题**
 - UI可视化，界面操作，方便配置编辑
 - **支持开发模式和软件模式**
     - 开发模式：有定制开发需求，更灵活的改动（适用于技术自开发用户）
@@ -22,7 +23,7 @@
 
 ### 🎁个性化功能
 
-为了更好的满足各种需求情况，通过配置文件`config.yaml`实现（通过界面/软件模式编辑更友好）：
+1. 为了更好的满足各种需求情况，通过配置文件`config.yaml`实现（通过界面/软件模式编辑更友好）：
 
 - platforms：可以设定每个平台的随机选取的权重
 - wechat: 支持配置多个微信公众号
@@ -35,6 +36,11 @@
 - template: 设为非""时，使用该模板（只需要文件名，如template1，如果不存在则随机，默认随机）
 - need_auditor: 为了降低token消耗，提高发布成功率，可关闭“质量审核”agent/task（默认关闭）
 - use_compress: 为了降低token消耗，可开关是否压缩模板（读取模板后压缩上传），可能会影响AI对HTML的解析
+
+2. AIPy配置`aipyapp.toml`，必填字段：
+- default_llm_provider: 使用的模型，可以和CrewAI使用的不同，默认openrouter
+- api_key: 模型提供商的key
+- 其他选填
 
 ## 🚀 快速开始
 ### 开发模式
@@ -86,10 +92,14 @@ pip  install crewai
 - **template9**: https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA
 - **template10**: https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw
 
+- 全自动发文（使用AIPy解决时效性）文章预览（未使用模板）：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
+
+
 *有兴趣的可以继续微调（如边距等），上面的模板可以比较好的显示在微信公众号上了。执行代码时，自动随机选择模板，生成的文章会自动选取填充上面的模板发布文章。*
 
 
  ## 📢后续计划
+- `软件模式支持AIPy搜索`
 - 优化模板，减少token消耗
 - 优化处理，减少不必要的token消耗
 - 增加功能，使输出效果更好

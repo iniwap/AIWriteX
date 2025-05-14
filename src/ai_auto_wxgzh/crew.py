@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from src.ai_auto_wxgzh.tools.custom_tool import PublisherTool, ReadTemplateTool
+from src.ai_auto_wxgzh.tools.custom_tool import PublisherTool, ReadTemplateTool, AIPySearchTool
 from src.ai_auto_wxgzh.utils import utils
 
 
@@ -27,6 +27,7 @@ class AutowxGzh:
     def writer(self) -> Agent:
         return Agent(
             config=self.agents_config["writer"],
+            tools=[AIPySearchTool()],
             verbose=True,
         )
 
