@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
 
-基于 CrewAI / AIPy 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成高时效性/即时、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
+基于 CrewAI 、 AIPy 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成高时效性/即时、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
 
 **喜欢项目？点个 Star 支持一下吧！🌟**
 
@@ -80,7 +80,7 @@ pip  install crewai
 这应该跟其最近修改了付费策略有关系，免费的终究是没那么好用。
 
 ## 🔮模板发布效果预览
-经过反复的微调，已经完成发布到微信公众号的模板效果如下：
+1. 经过反复的微调，已经完成发布到微信公众号的模板效果如下：
 - **template1**: https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ
 - **template2**: https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg
 - **template3**: https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA
@@ -92,14 +92,14 @@ pip  install crewai
 - **template9**: https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA
 - **template10**: https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw
 
-- 全自动发文（使用AIPy解决时效性）文章预览（未使用模板）：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
+2. 全自动发文（使用AIPy解决时效性）文章预览（未使用模板）：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
 
 
 *有兴趣的可以继续微调（如边距等），上面的模板可以比较好的显示在微信公众号上了。执行代码时，自动随机选择模板，生成的文章会自动选取填充上面的模板发布文章。*
 
 
  ## 📢后续计划
-- `软件模式支持AIPy搜索`
+- **软件模式支持AIPy搜索**
 - 优化模板，减少token消耗
 - 优化处理，减少不必要的token消耗
 - 增加功能，使输出效果更好
