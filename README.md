@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
 
-基于 CrewAI 、AIPy 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成**高时效/即时**、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
+基于 CrewAI 、AIPy 的微信公众号自动化工具，自动获取抖音、微博等平台热点，生成**高时效（最新）**、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#模板发布效果预览)
 
 **喜欢项目？点个 Star 支持一下吧！🌟**
 
@@ -36,6 +36,7 @@
 - template: 设为非""时，使用该模板（只需要文件名，如template1，如果不存在则随机，默认随机）
 - need_auditor: 为了降低token消耗，提高发布成功率，可关闭“质量审核”agent/task（默认关闭）
 - use_compress: 为了降低token消耗，可开关是否压缩模板（读取模板后压缩上传），可能会影响AI对HTML的解析
+- use_search_service：AIPy搜索是否使用本地缓存，降低token消耗（首次执行比较耗时，可能需要成功后，再执行成功率更高）
 
 2. AIPy配置`aipyapp.toml`，必填字段：
 - default_llm_provider: 使用的模型，可以和CrewAI使用的不同，默认openrouter

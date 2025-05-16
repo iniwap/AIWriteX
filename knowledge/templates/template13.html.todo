@@ -1,0 +1,120 @@
+<div style="background-color:#0f0f1a; color:#e0e0e6; font-family:'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; line-height:1.6; padding:0; margin:0; max-width:100%; overflow-x:hidden;">
+
+  <section style="position:relative; padding:30px 20px 50px; background:linear-gradient(135deg, #2c2c44 0%, #0f0f1a 100%); color:#ffffff;">
+    <h1 style="font-size:2.4rem; font-weight:900; margin:0; line-height:1.2; letter-spacing:-0.5px; text-shadow:0 2px 12px rgba(0,0,0,0.3);">哔哩哔哩 | <span style="color:#7b68ee;">《白银之城》</span></h1>
+    <h2 style="font-size:1.5rem; font-weight:700; margin:10px 0 25px; color:#d0d0e8; letter-spacing:0.5px;">首曝PV+实机展示丨侦探的黄金时代</h2>
+    
+    <svg width="100%" height="80" viewBox="0 0 400 80" style="margin:15px 0;">
+      <line x1="10" y1="40" x2="390" y2="40" stroke="#7b68ee" stroke-width="2" stroke-dasharray="5,5">
+        <animate attributeName="stroke-dashoffset" from="100" to="0" dur="10s" repeatCount="indefinite" />
+      </line>
+      <circle cx="50" cy="40" r="8" fill="#7b68ee">
+        <animate attributeName="opacity" values="1;0.3;1" dur="3s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="200" cy="40" r="8" fill="#7b68ee">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="350" cy="40" r="8" fill="#7b68ee">
+        <animate attributeName="opacity" values="1;0.3;1" dur="3s" repeatCount="indefinite" />
+      </circle>
+    </svg>
+  </section>
+
+  <section style="padding:30px 20px; background-color:#ffffff; border-radius:30px 30px 0 0; margin-top:-20px; box-shadow:0 -5px 25px rgba(0,0,0,0.1);">
+    <h2 style="font-size:1.6rem; font-weight:800; color:#1a1a2e; margin:0 0 20px; position:relative; padding-left:15px; line-height:1.3;">
+      <span style="position:relative; z-index:1;">视觉符号解码</span>
+      <span style="position:relative; display:block; font-size:1rem; color:#7b68ee; font-weight:600; margin-top:5px;">PV中的蒸汽朋克美学盛宴</span>
+    </h2>
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; margin-bottom:18px; letter-spacing:0.3px;">开场3秒的俯视镜头中，齿轮状城市布局暗喻着精密运转的社会机器。主角手持雨伞的剪影划过霓虹灯下的雨幕，这一经典黑色电影意象被赋予新的生命力——伞骨间流动的全息投影数据，完美诠释了<span style="color:#7b68ee; font-weight:600;">"蒸汽朋克×近未来"</span>的混搭美学。</p>
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; margin-bottom:18px; letter-spacing:0.3px;">美术总监佐藤健一在采访中透露："UI设计灵感源自新艺术运动曲线，但交互逻辑采用量子计算机概念。"实机演示里，维多利亚风格的机械键盘与悬浮触控面板同框出现，这种视觉碰撞正是当代玩家最追捧的<span style="color:#7b68ee; font-weight:600;">"复古未来主义"</span>。</p>
+    
+    <div style="background:#f2f0ff; padding:20px; border-radius:12px; margin:25px 0; border-left:4px solid #7b68ee;">
+      <p style="font-size:0.95rem; font-style:italic; color:#4a4a6a; margin:0;">
+        <span style="font-weight:700;">彩蛋提示：</span>2分13秒背景墙的通缉令上，隐藏着前作《黄铜迷宫》主角的剪影
+      </p>
+    </div>
+  </section>
+
+  <section style="padding:35px 20px; background-color:#f8f8fc;">
+    <h2 style="font-size:1.6rem; font-weight:800; color:#1a1a2e; margin:0 0 25px; position:relative; line-height:1.3;">
+      <span style="position:relative; z-index:1;">交互革命</span>
+      <span style="position:relative; display:block; font-size:1rem; color:#7b68ee; font-weight:600; margin-top:5px;">三维推理系统重塑侦探游戏</span>
+    </h2>
+    
+    <p style="font-size:1.05rem; line-height:1.7; color:#333344; margin-bottom:20px;">核心玩法呈现三大突破：</p>
+    
+    <div style="background:#ffffff; border-radius:16px; padding:20px; margin-bottom:18px; box-shadow:0 4px 15px rgba(123,104,238,0.12);">
+      <p style="font-size:1.05rem; margin:0 0 5px; font-weight:700; color:#1a1a2e;">1. 立体现场勘察</p>
+      <p style="font-size:0.95rem; margin:0; color:#4a4a6a; line-height:1.6;">通过Lumen全局光照技术，雨夜中的血迹反光角度会随玩家移动实时变化</p>
+    </div>
+    
+    <div style="background:#ffffff; border-radius:16px; padding:20px; margin-bottom:18px; box-shadow:0 4px 15px rgba(123,104,238,0.12);">
+      <p style="font-size:1.05rem; margin:0 0 5px; font-weight:700; color:#1a1a2e;">2. 动态线索网络</p>
+      <p style="font-size:0.95rem; margin:0; color:#4a4a6a; line-height:1.6;">NPC证言关联度以神经网络图谱可视化，说谎者会出现表情肌抽搐（基于Metahuman引擎）</p>
+    </div>
+    
+    <div style="background:#ffffff; border-radius:16px; padding:20px; margin-bottom:25px; box-shadow:0 4px 15px rgba(123,104,238,0.12);">
+      <p style="font-size:1.05rem; margin:0 0 5px; font-weight:700; color:#1a1a2e;">3. 72小时破案机制</p>
+      <p style="font-size:0.95rem; margin:0; color:#4a4a6a; line-height:1.6;">游戏内时间流逝会改变场景状态，错过关键时段将永久失去证据</p>
+    </div>
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; letter-spacing:0.3px;">特别值得关注的是<span style="color:#7b68ee; font-weight:600;">"道德天平系统"</span>——当玩家在"法律程序"与"街头正义"间做出选择时，整个城市的帮派势力版图都会产生连锁反应。制作组确认这会导致<span style="color:#7b68ee; font-weight:600;">37种截然不同的结局分支</span>。</p>
+  </section>
+
+  <section style="padding:35px 20px; background-color:#ffffff; position:relative;">
+    <div style="width:180px; height:180px; background:radial-gradient(circle, rgba(123,104,238,0.15) 0%, rgba(255,255,255,0) 70%); border-radius:50%; z-index:0; margin:-80px 0 0 auto;"></div>
+    
+    <h2 style="font-size:1.6rem; font-weight:800; color:#1a1a2e; margin:0 0 25px; position:relative; line-height:1.3; z-index:1;">
+      <span style="position:relative; z-index:1;">技术标杆</span>
+      <span style="position:relative; display:block; font-size:1rem; color:#7b68ee; font-weight:600; margin-top:5px;">物理引擎如何服务叙事</span>
+    </h2>
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; margin-bottom:20px; position:relative; z-index:1;">相比2023年TGA演示版本，最新实机展示了建筑可破坏系统的叙事价值：</p>
+    
+    <div style="display:flex; margin-bottom:15px; align-items:center;">
+      <div style="width:8px; height:8px; border-radius:50%; background-color:#7b68ee; margin-right:12px; flex-shrink:0;"></div>
+      <p style="font-size:1rem; margin:0; color:#333344; line-height:1.6;">子弹击碎玻璃的轨迹会永久保留在现场</p>
+    </div>
+    
+    <div style="display:flex; margin-bottom:15px; align-items:center;">
+      <div style="width:8px; height:8px; border-radius:50%; background-color:#7b68ee; margin-right:12px; flex-shrink:0;"></div>
+      <p style="font-size:1rem; margin:0; color:#333344; line-height:1.6;">暴雨中的泥泞地面会保留NPC脚印随时间淡化的过程</p>
+    </div>
+    
+    <div style="display:flex; margin-bottom:25px; align-items:center;">
+      <div style="width:8px; height:8px; border-radius:50%; background-color:#7b68ee; margin-right:12px; flex-shrink:0;"></div>
+      <p style="font-size:1rem; margin:0; color:#333344; line-height:1.6;">关键证物可以被故意破坏（但会影响案件评级）</p>
+    </div>
+    
+    <div style="background:#f2f0ff; border-radius:12px; padding:20px; margin:20px 0;">
+      <p style="font-size:1.05rem; color:#333344; margin:0; line-height:1.7;">Epic中国区技术总监评价："这是首次看到Nanite技术被用于增强推理玩法——墙皮剥落程度能反映建筑年代，这本身就是重要线索。"</p>
+    </div>
+  </section>
+  
+  <section style="padding:35px 20px; background-color:#f8f8fc;">
+    <h2 style="font-size:1.6rem; font-weight:800; color:#1a1a2e; margin:0 0 20px; position:relative; line-height:1.3;">
+      <span style="position:relative; z-index:1;">侦探游戏的文艺复兴时代</span>
+    </h2>
+    
+    <img src="https://picsum.photos/400/200?random=1" style="width:100%; height:auto; border-radius:16px; margin-bottom:25px; object-fit:cover; box-shadow:0 5px 15px rgba(0,0,0,0.15);" alt="侦探游戏场景">
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; margin-bottom:20px; letter-spacing:0.3px;">从《逆转裁判》的法庭对峙到《极乐迪斯科》的意识流思辨，《白银之城》将开放世界与硬核推理结合的做法，标志着侦探游戏正迎来黄金时代。游戏史学专家李明指出："当玩家可以自由选择用黑客技术、暴力手段或传统侦查来破案时，我们实际上是在重新定义'侦探'这个职业。"</p>
+    
+    <p style="font-size:1.05rem; line-height:1.8; color:#333344; letter-spacing:0.3px;">随着AI对话系统与物理引擎的进步，未来侦探游戏很可能突破"线索预设"的局限，实现真正的涌现式叙事。而《白银之城》展示的，正是这个令人兴奋的未来图景。</p>
+  </section>
+
+  <section style="padding:30px 20px; background-color:#1a1a2e; color:#ffffff;">
+    <div style="background:#2a2a4a; border-radius:16px; padding:25px; margin-bottom:5px;">
+      <p style="font-size:1.1rem; font-weight:600; color:#d0d0e8; margin:0 0 15px; border-left:3px solid #7b68ee; padding-left:12px;">行业观察</p>
+      <p style="font-size:1rem; line-height:1.7; color:#c0c0d6; margin:0; letter-spacing:0.2px;">该作Steam愿望单新增量在PV发布24小时内暴涨<span style="color:#7b68ee; font-weight:600;">300%</span>，说明市场对创新性侦探题材的强烈需求。亚洲玩家特别关注游戏中东方街区的场景设计，这或许暗示着文化融合的新趋势。</p>
+    </div>
+    
+    <svg width="100%" height="60" viewBox="0 0 300 60" style="margin-top:20px;">
+      <path d="M150,10 C70,10 30,50 10,50 L10,60 L290,60 L290,50 C270,50 230,10 150,10Z" fill="#7b68ee" opacity="0.2">
+        <animate attributeName="d" values="M150,10 C70,10 30,50 10,50 L10,60 L290,60 L290,50 C270,50 230,10 150,10Z; M150,15 C70,15 30,45 10,45 L10,60 L290,60 L290,45 C270,45 230,15 150,15Z; M150,10 C70,10 30,50 10,50 L10,60 L290,60 L290,50 C270,50 230,10 150,10Z" dur="4s" repeatCount="indefinite" />
+      </path>
+    </svg>
+  </section>
+</div>

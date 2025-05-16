@@ -3,24 +3,43 @@ analyze_topic:
   description: |
     解析话题{topic}，确定文章的核心要点和结构。
     生成一份包含文章大纲和核心要点的报告。
+    注意：
+    1. 关于文章标题的日期处理：
+       - 严格检查：{topic}中是否已包含具体年份或日期信息
+       - 如果包含，则保留该日期信息在文章标题中
+       - 如果不包含，则文章标题必须完全不包含任何年份或日期信息
+       - 禁止自行添加当前年份或任何其他年份到文章标题中
+    2. 内容中的日期处理：
+       - 如果{topic}包含日期，在内容中使用该日期
+       - 如果不包含，对于需要提及年份的内容，使用"20xx年"格式
   agent: researcher
   expected_output: 文章正文（标准Markdown格式）
 
 write_content:
   name: "write_content"
   description: |
-    基于生成的文章大纲和AIPy搜索获取的最新数据，撰写一篇高质量的微信公众号文章。  
-      
-    首先，使用工具 aipy_search_tool 搜索关于{topic}的最新信息、数据和趋势。  
-    然后，将搜索结果与文章大纲结合，确保文章包含最新的事实、数据和时间点。  
-      
-    确保文章内容准确、逻辑清晰、语言流畅，并具有独到的见解。  
-    文章标题为{platform}|{topic}。  
-      
-    特别注意：  
-    1. 引用最新的数据和统计信息，包括具体的日期  
-    2. 提及当前的趋势和发展  
+    基于生成的文章大纲和AIPy搜索获取的最新数据，撰写一篇高质量的微信公众号文章。
+
+    首先，使用工具 aipy_search_tool 搜索关于{topic}的最新信息、数据和趋势。
+    然后，将搜索结果与文章大纲结合，确保文章包含最新的事实、数据和时间点。
+
+    确保文章内容准确、逻辑清晰、语言流畅，并具有独到的见解。
+    文章标题为{platform}|{topic}。
+
+    特别注意：
+    1. 引用最新的数据和统计信息，包括具体的日期
+    2. 提及当前的趋势和发展
     3. 引用权威来源的最新观点
+    4. 日期处理要求：
+       - 严格检查并替换所有"20xx年"格式的占位符日期
+       - 如果搜索结果中有具体日期，使用搜索结果中的实际日期替换占位符
+       - 如果搜索结果中没有具体日期，使用以下替代表述：
+         * "近期"、"最近"、"当前"等时间表述
+         * "据最新数据显示"、"根据最新研究"等表述
+         * 完全省略时间表述，直接陈述事实
+       - 绝对不允许在最终文章中出现"20xx年"格式的占位符
+
+    在提交最终文章前，请再次检查并确保没有任何"20xx年"格式的日期出现在文章中。
   agent: writer
   expected_output: 文章标题 + 文章正文（标准Markdown格式）
 
@@ -35,11 +54,12 @@ audit_content:
 design_content:
   name: "design_content"
   description: |
-    将生成的文章转化为精美的微信公众号排版，提升阅读体验和视觉吸引力。
+    将前置任务生成的文章转化为精美的微信公众号排版，提升阅读体验和视觉吸引力。
     请严格遵循以下要求：  
     - 仅对文章进行排版设计和风格优化，不得生成新的文章内容。  
     - 不得过多删减原文章内容，保持原内容的完整性和核心信息。
   agent: designer
+  context: ["write_content", "audit_content"]
   expected_output: 排版设计后的文章（HTML格式）
 
 template_content:
@@ -47,11 +67,8 @@ template_content:
   description: |
     # HTML内容适配任务
     ## 任务目标
-    使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅，
-    使用以下参数：
-      template={template},
-      use_compress={use_compress}。
-      
+    使用工具 read_template_tool 读取本地HTML模板，将前置任务生成的文章内容适配填充到读取的HTML模板中，保持视觉效果和风格不变，同时确保内容呈现自然流畅。
+
     ## 具体要求
     - 分析HTML模板的结构、样式和布局特点
     - 识别所有内容占位区域（标题、副标题、正文段落、引用、列表等）
@@ -74,26 +91,3 @@ template_content:
   agent: templater
   context: ["write_content", "audit_content"]
   expected_output: 填充新内容但保持原有视觉风格的文章（HTML格式）
-
-publish_task:
-  name: "publish_task"
-  description: |
-    使用工具 publisher_tool 从本地读取HTML文件，提取内容，保存为最终文章并发布到微信公众号，
-    使用以下参数：
-      appid={appid}，
-      appsecret={appsecret}，
-      author={author}，
-      img_api_type={img_api_type}，
-      img_api_key={img_api_key}，
-      img_api_model={img_api_model}。
-      
-    执行指南:
-    1. 直接调用publisher_tool工具
-    2. 不要生成任何额外内容
-    3. 只返回工具执行的结果
-    4. 不要添加任何解释或评论
-
-    这是一个完全由工具执行的任务，不需要AI生成内容。
-
-  agent: publisher
-  expected_output: 工具执行状态报告（仅包含工具返回的内容，无额外生成）

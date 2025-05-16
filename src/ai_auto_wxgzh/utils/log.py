@@ -3,7 +3,9 @@ import sys
 import re
 import os
 import time
+import traceback
 from datetime import datetime
+
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.utils import comm
 
@@ -74,3 +76,18 @@ def print_log(msg, ui_mode=False, msg_type="status"):
         comm.send_update(msg_type, msg)
     else:
         print(f"[{time.strftime('%H:%M:%S')}] [{msg_type.upper()}]: {msg}")
+
+
+def print_traceback(what, e):
+    error_traceback = traceback.format_exc()
+
+    # 获取错误位置信息
+    tb = e.__traceback__
+    filename = tb.tb_frame.f_code.co_filename
+    line_number = tb.tb_lineno
+
+    ret = (
+        f"{what}发生错误: {str(e)}\n错误位置: {filename}:{line_number}\n错误详情:{error_traceback}"
+    )
+    print(ret)
+    return ret

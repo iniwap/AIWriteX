@@ -14,6 +14,7 @@ import json
 import time
 
 from src.ai_auto_wxgzh.utils import utils
+from src.ai_auto_wxgzh.config.config import Config
 
 
 class PublishStatus(Enum):
@@ -36,22 +37,17 @@ class PublishResult:
 class WeixinPublisher:
     BASE_URL = "https://api.weixin.qq.com/cgi-bin"
 
-    def __init__(
-        self,
-        app_id: str,
-        app_secret: str,
-        author: str,
-        img_api_type: str,
-        img_api_key: str,
-        img_api_model: str,
-    ):
+    def __init__(self, app_id: str, app_secret: str, author: str):
+        # 获取配置数据，只能使用确定的配置，微信配置是循环发布的，需要传递
+        config = Config.get_instance()
+
         self.access_token_data = None
         self.app_id = app_id
         self.app_secret = app_secret
         self.author = author
-        self.img_api_type = img_api_type
-        self.img_api_key = img_api_key
-        self.img_api_model = img_api_model
+        self.img_api_type = config.img_api_type  # 只有一种模型，统一从配置读取
+        self.img_api_key = config.img_api_key
+        self.img_api_model = config.img_api_model
 
     def _ensure_access_token(self):
         # 检查现有token是否有效

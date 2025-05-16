@@ -1,23 +1,24 @@
-from crewai.tools import BaseTool
-from typing import Type
-from pydantic import BaseModel, Field
 import os
 import glob
 import random
 import sys
+from typing import Type, Optional
+
+from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
+
 from rich.console import Console
 from aipyapp.aipy.taskmgr import TaskManager
-from typing import Optional
 
 from src.ai_auto_wxgzh.tools.wx_publisher import WeixinPublisher
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.config.config import Config
+from src.ai_auto_wxgzh.tools.search_service import SearchService
+from src.ai_auto_wxgzh.utils import log
 
 
 class ReadTemplateToolInput(BaseModel):
     article_file: str = Field(description="前置任务生成的的文章内容")
-    template: str = Field(description="本地HTML模板")
-    use_compress: str = Field(description="是否压缩模板")
 
 
 # 1. Read Template Tool
@@ -26,7 +27,9 @@ class ReadTemplateTool(BaseTool):
     description: str = "从本地读取HTML文件"
     args_schema: Type[BaseModel] = ReadTemplateToolInput
 
-    def _run(self, article_file: str, template: str, use_compress: bool) -> str:
+    def _run(self, article_file: str) -> str:
+        config = Config.get_instance()
+
         # 获取模板文件的绝对路径
         template_dir_abs = utils.get_res_path(
             "templates",
@@ -34,8 +37,10 @@ class ReadTemplateTool(BaseTool):
         )
 
         random_template = True
-        if template:  # 如果指定模板，且必须存在才能不随机
-            template_filename = template if template.endswith(".html") else f"{template}.html"
+        if config.template:  # 如果指定模板，且必须存在才能不随机
+            template_filename = (
+                config.template if config.template.endswith(".html") else f"{config.template}.html"
+            )
             selected_template_file = os.path.join(template_dir_abs, template_filename)
             if os.path.exists(selected_template_file):  #
                 random_template = False
@@ -63,44 +68,15 @@ class ReadTemplateTool(BaseTool):
 
         return utils.compress_html(
             selected_template_content,
-            use_compress,
+            config.use_compress,
         )  # 压缩html，降低token消耗
 
 
-class PublisherToolInput(BaseModel):
-    appid: str = Field(description="微信公众号 AppID")
-    appsecret: str = Field(description="微信公众号 Key")
-    author: str = Field(description="微信公众号作者")
-    img_api_type: str = Field(description="文生图平台方")
-    img_api_key: str = Field(description="文生图平台方 Key")
-    img_api_model: str = Field(description="文生图模型")
-
-
 # 2. Publisher Tool
-class PublisherTool(BaseTool):
-    name: str = "publisher_tool"
-    description: str = "从本地读取HTML文件，提取内容，保存为最终文章并发布到微信公众号。"
-    args_schema: Type[BaseModel] = PublisherToolInput
-
-    def _run(
-        self,
-        appid: str,
-        appsecret: str,
-        author: str,
-        img_api_type: str,
-        img_api_key: str,
-        img_api_model: str,
-    ) -> str:
-        # 自定义工具接收上一个task数据有很大随机性，这里只能从保存的文件读取数据
-        tmp_article = os.path.join(utils.get_current_dir(), "tmp_article.html")
-
-        try:
-            with open(tmp_article, "r", encoding="utf-8") as f:
-                content = f.read()
-        except Exception as e:
-            print(str(e))
-            return "读取tmp_article.html失败，无法发布文章！"
-
+# - 考虑到纯本地函数执行，采用回调形式
+# - 降低token消耗，降低AI出错率
+class PublisherTool:
+    def run(self, content, appid, appsecret, author):
         try:
             content = utils.decompress_html(content)  # 因为不需要直接看生成文章源码，默认不解压了
         except Exception as e:
@@ -110,32 +86,15 @@ class PublisherTool(BaseTool):
         article = utils.extract_modified_article(content)
 
         # 发布到微信公众号
-        result, article = self.pub2wx(
-            article,
-            appid,
-            appsecret,
-            author,
-            img_api_type,
-            img_api_key,
-            img_api_model,
-        )
+        result, article = self.pub2wx(article, appid, appsecret, author)
         # 保存为 final_article.html
         final_article = os.path.join(utils.get_current_dir(), "final_article.html")
         with open(final_article, "w", encoding="utf-8") as f:
             f.write(article)
 
-        return result
+        log.print_log(result)
 
-    def pub2wx(
-        self,
-        article,
-        appid,
-        appsecret,
-        author,
-        img_api_type,
-        img_api_key,
-        img_api_model,
-    ):
+    def pub2wx(self, article, appid, appsecret, author):
         try:
             title, digest = utils.extract_html(article)
         except Exception as e:
@@ -143,9 +102,7 @@ class PublisherTool(BaseTool):
         if title is None:
             return "无法提取文章标题，请检查文章是否成功生成？", article
 
-        publisher = WeixinPublisher(
-            appid, appsecret, author, img_api_type, img_api_key, img_api_model
-        )
+        publisher = WeixinPublisher(appid, appsecret, author)
 
         image_url = publisher.generate_img(
             "主题：" + title.split("|")[-1] + "，内容：" + digest,
@@ -224,6 +181,33 @@ class AIPySearchTool(BaseTool):
         """执行AIPy搜索"""
         # 保存当前工作目录
         original_cwd = os.getcwd()
+
+        if Config.get_instance().use_search_service:
+            results = self._use_search_service(topic, max_results)
+        else:
+            results = self._nouse_search_service(topic, max_results)
+
+        # 恢复原始工作目录
+        os.chdir(original_cwd)
+
+        return results
+
+    def _use_search_service(self, topic, max_results):
+        try:
+            # 初始化搜索服务
+            search_service = SearchService()
+
+            # 执行搜索
+            results = search_service.search(topic, max_results, use_fix_results_parallel=True)
+
+            if results:
+                return str(results)
+            else:
+                return f"未能找到关于'{topic}'的搜索结果。"
+        except Exception as e:
+            return log.print_traceback("AIPy搜索时", e)
+
+    def _nouse_search_service(self, topic, max_results):
         try:
             # 初始化AIPy
             console = Console()
@@ -238,27 +222,52 @@ class AIPySearchTool(BaseTool):
             # 考虑到墙的因素，不要优先使用谷歌搜索
             # 微信需要无代理，所以为了整个执行成功，建议关闭
             search_instruction = f"""
-            搜索关于{topic}的最新信息，包括
-            1. 最新数据和统计数字
-            2. 最近的事件和时间点
-            3. 当前趋势和发展
-            4. 权威来源的观点和分析
+            请生成一个完整的Python函数，用于执行网络搜索并返回结构化结果。
 
-            搜索方法优先级（不使用需要API密钥的方式）：
-            1. 使用DuckDuckGo搜索引擎，添加时间筛选参数
-            2. 使用百度搜索，添加时间筛选参数
-            3. 使用bing搜索，添加时间筛选参数
-            4. 直接访问相关领域的权威网站并抓取最新内容
-            5. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
+            函数要求：
+            1. 函数名为search_web，接受两个参数：topic(搜索主题)和max_results(最大结果数)
+            2. 实现健壮的错误处理，包括：
+                - 网络连接错误处理
+                - 解析错误处理
+                - 超时处理
+                - 编码问题处理
+            3. 对于每个搜索结果，必须访问原始网页并提取以下内容：
+                - 详细的内容摘要（至少100字）
+                - 准确的发布时间
+                - 如果无法直接找到发布时间，尝试从URL、页面内容或其他元数据推断
+            4. 使用多种方法提取时间信息：
+                - 检查meta标签（如article:published_time）
+                - 查找页面中的时间标记（如time标签或日期格式文本）
+                - 分析页面结构中可能包含日期的区域（如文章头部）
+            5. 实现适当的请求间隔，避免过快发送请求被网站封禁
+            6. 按照以下优先级顺序尝试各种搜索方法（不使用需要API密钥的方式）：
+                a. 使用DuckDuckGo搜索引擎，添加时间筛选参数
+                b. 使用百度搜索，添加时间筛选参数
+                c. 使用bing搜索，添加时间筛选参数
+                d. 直接访问相关领域的权威网站并抓取最新内容
+                e. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
+            7. 搜索内容应包括：
+                a. 关于{topic}的最新数据和统计数字
+                b. 最近的事件和时间点
+                c. 当前趋势和发展
+                d. 权威来源的观点和分析
+            8. 确保搜索结果包含：
+                - 来源URL
+                - 发布时间
+                - 内容摘要
+            9. 对结果按发布时间从新到旧排序
+            10. 验证信息的时效性，过滤掉旧信息，优先获取最近7天内的内容
+            11. 返回格式为字典，包含以下字段：
+                - timestamp: 搜索执行时间戳
+                - topic: 搜索主题
+                - results: 搜索结果列表，每个结果必须包含url、title、abstract和pub_time
+                - success: 布尔值，表示搜索是否成功
+                - error: 如果失败，包含错误信息
 
-            请确保：
-            1. 添加时间筛选参数，优先获取最近7天内的内容
-            2. 对搜索结果按发布时间从新到旧排序
-            3. 提取每个结果的发布日期，仅保留最近的信息
-            4. 验证信息的时效性，过滤掉旧信息
-
-            返回结构化的搜索结果，包含来源URL、发布时间和内容摘要。
             限制结果数量为{max_results}个，按时间从新到旧排序。
+            只返回完整的Python代码，不要有任何解释。
+
+            执行代码后，将搜索结果存储在__result__变量中。
             """
 
             task = task_manager.new_task(search_instruction)
@@ -283,6 +292,3 @@ class AIPySearchTool(BaseTool):
 
         except Exception as e:
             return f"搜索过程中发生错误: {str(e)}"
-        finally:
-            # 恢复原始工作目录
-            os.chdir(original_cwd)

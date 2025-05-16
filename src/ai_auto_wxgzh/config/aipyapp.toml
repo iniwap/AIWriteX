@@ -61,3 +61,13 @@ enable = true
 default = false  
 timeout = 30  
 max_tokens = 8192
+
+# Deepseek配置  
+[llm.deepseek]
+type = "openai"
+model = "openai/deepseek-chat-v3-0324"  # 或指定具体版本如"deepseek-v3-0324"
+base_url = "https://api.deepseek.com"  # 官方API地址
+enable = true
+default = false
+timeout = 30
+max_tokens = 8192

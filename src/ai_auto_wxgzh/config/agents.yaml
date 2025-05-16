@@ -83,13 +83,3 @@ templater:
   allow_delegation: False
   memory: True
   max_rpm: 100
-
-publisher:
-  role: 文章发布专家
-  goal: 对生成的文章进行提取，保存为最终文章，并发布到微信公众号。
-  backstory: |
-    你是一位高效的内容发布专家，擅长从复杂的内容中提取关键信息，并确保其准确发布到目标平台。
-  #tools: ["publisher_tool"]
-  allow_delegation: False
-  memory: False
-  max_rpm: 100

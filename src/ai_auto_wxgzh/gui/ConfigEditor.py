@@ -226,6 +226,12 @@ class ConfigEditor:
                             )
                         ],
                         [sg.Tab("Ollama", self.create_api_sub_tab("Ollama", api_data["Ollama"]))],
+                        [
+                            sg.Tab(
+                                "Deepseek",
+                                self.create_api_sub_tab("Deepseek", api_data["Deepseek"]),
+                            )
+                        ],
                     ],
                     key="-API_TAB_GROUP-",
                 )
@@ -318,6 +324,13 @@ class ConfigEditor:
             [sg.Checkbox("需要审核者", default=self.config.need_auditor, key="-NEED_AUDITOR-")],
             [sg.Checkbox("压缩模板", default=self.config.use_compress, key="-USE_COMPRESS-")],
             [
+                sg.Checkbox(
+                    "AIPy搜索缓存",
+                    default=self.config.use_search_service,
+                    key="-USE_SEARCH_SERVICE-",
+                )
+            ],
+            [
                 sg.Text(
                     "Tips：\n"
                     "1、使用模板：\n"
@@ -330,8 +343,11 @@ class ConfigEditor:
                     "    - 不需要：生成文章后直接填充模板，消耗低，文章可能略差\n"
                     "3、压缩模板：\n"
                     "    - 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
-                    "    - 不压缩：token消耗，AI可能理解更精确",
-                    size=(70, 12),
+                    "    - 不压缩：token消耗，AI可能理解更精确\n"
+                    "4、AIPy搜索缓存：\n"
+                    "    - 使用：优先使用本地缓存，降低后续执行搜索任务的token消耗\n"
+                    "    - 不使用：可能更精准，但token消耗较高，总体执行成功率降低",
+                    size=(70, 15),
                     text_color="gray",
                 ),
             ],
@@ -641,6 +657,7 @@ class ConfigEditor:
                 config["use_template"] = values["-USE_TEMPLATE-"]
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
                 config["use_compress"] = values["-USE_COMPRESS-"]
+                config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
                 # 处理 template 保存逻辑
                 template_value = values["-TEMPLATE-"]
                 config["template"] = "" if template_value == "随机模板" else template_value
@@ -734,6 +751,7 @@ class ConfigEditor:
                 config["use_template"] = self.config.default_config["use_template"]
                 config["need_auditor"] = self.config.default_config["need_auditor"]
                 config["use_compress"] = self.config.default_config["use_compress"]
+                config["use_search_service"] = self.config.default_config["use_search_service"]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
                     self.update_tab("-TAB_OTHER-", self.create_other_tab())

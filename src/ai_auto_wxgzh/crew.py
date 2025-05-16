@@ -3,6 +3,7 @@ from crewai.project import CrewBase, agent, crew, task
 
 from src.ai_auto_wxgzh.tools.custom_tool import PublisherTool, ReadTemplateTool, AIPySearchTool
 from src.ai_auto_wxgzh.utils import utils
+from src.ai_auto_wxgzh.config.config import Config
 
 
 @CrewBase
@@ -12,9 +13,17 @@ class AutowxGzh:
     agents_config = utils.get_res_path("config/agents.yaml")
     tasks_config = utils.get_res_path("config/tasks.yaml")
 
-    def __init__(self, use_template=False, need_auditor=False):
-        self.use_template = use_template  # 是否使用本地模板
-        self.need_auditor = need_auditor  # 是否开启质量审核，关闭降低token消耗
+    def __init__(self, appid="", appsecret="", author=""):
+        # 由于有多个账号循环发布，这里需要传递微信信息
+        self.appid = appid
+        self.appsecret = appsecret
+        self.author = author
+
+    def publisher_tool_cb(self, appid, appsecret, author):
+        def callback_function(output):
+            PublisherTool().run(output.raw, appid, appsecret, author)
+
+        return callback_function
 
     @agent
     def researcher(self) -> Agent:
@@ -53,15 +62,6 @@ class AutowxGzh:
             verbose=True,
         )
 
-    @agent
-    def publisher(self) -> Agent:
-        return Agent(
-            config=self.agents_config["publisher"],
-            tools=[PublisherTool()],
-            function_calling_llm=True,  # 纯本地工具
-            verbose=False,  # 纯本地工具，不要输出
-        )
-
     @task
     def analyze_topic(self) -> Task:
         return Task(
@@ -84,29 +84,26 @@ class AutowxGzh:
     def design_content(self) -> Task:
         return Task(
             config=self.tasks_config["design_content"],
-            output_file="tmp_article.html",
+            # output_file="tmp_article.html", # 执行顺序受限，需要手动保存
+            callback=self.publisher_tool_cb(self.appid, self.appsecret, self.author),
         )
 
     @task
     def template_content(self) -> Task:
         return Task(
             config=self.tasks_config["template_content"],
-            output_file="tmp_article.html",
-        )
-
-    @task
-    def publish_task(self) -> Task:
-        return Task(
-            config=self.tasks_config["publish_task"],
+            # output_file="tmp_article.html", # 执行顺序受限，需要手动保存
+            callback=self.publisher_tool_cb(self.appid, self.appsecret, self.author),
         )
 
     @crew
     def crew(self) -> Crew:
         """Creates the AutowxGzh crew"""
 
+        config = Config.get_instance()
         no_use_agent = []
         no_use_task = []
-        if self.use_template:
+        if config.use_template:
             no_use_agent.append("微信排版专家")
             no_use_task.append("design_content")
         else:
@@ -114,7 +111,7 @@ class AutowxGzh:
             no_use_task.append("template_content")
 
         # 不开启质量审核
-        if not self.need_auditor:
+        if not config.need_auditor:
             no_use_agent.append("质量审核专家")
             no_use_task.append("audit_content")
 

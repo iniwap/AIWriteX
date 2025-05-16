@@ -46,9 +46,9 @@ class Config:
             ],
             "wechat": {
                 "credentials": [
-                    {"appid": "", "appsecret": "", "author": "作者01"},
-                    {"appid": "", "appsecret": "", "author": "作者02"},
-                    {"appid": "", "appsecret": "", "author": "作者03"},
+                    {"appid": "", "appsecret": "", "author": ""},
+                    {"appid": "", "appsecret": "", "author": ""},
+                    {"appid": "", "appsecret": "", "author": ""},
                 ]
             },
             "api": {
@@ -112,6 +112,20 @@ class Config:
                     "model": ["ollama/deepseek-r1:14b", "ollama/deepseek-r1:7b"],
                     "api_base": "http://localhost:11434",
                 },
+                "Deepseek": {
+                    "key": "OPENAI_API_KEY",
+                    "key_index": 0,
+                    "api_key": ["", ""],
+                    "model_index": 0,
+                    "model": [
+                        "openai/deepseek-v3",
+                        "openai/deepseek-r1",
+                        "openai/deepseek-chat",
+                        "openai/deepseek-v3-0324",
+                        "openai/deepseek-chat-v3-0324",
+                    ],
+                    "api_base": "https://api.deepseek.com/v1",
+                },
             },
             "img_api": {
                 "api_type": "picsum",
@@ -122,6 +136,7 @@ class Config:
             "template": "",
             "need_auditor": False,
             "use_compress": False,
+            "use_search_service": False,
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",
@@ -292,6 +307,13 @@ class Config:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["use_compress"]
+
+    @property
+    def use_search_service(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["use_search_service"]
 
     @property
     def api_list(self):
