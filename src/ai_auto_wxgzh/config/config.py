@@ -140,10 +140,8 @@ class Config:
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",
-            "history": ".aipy_history.txt",
             "record": True,
             "max_tokens": 4096,
-            "accept_disclaimer": True,
             "default_llm_provider": "openrouter",
             "llm": {
                 "openrouter": {
@@ -191,6 +189,16 @@ class Config:
                     "model": "llama3",
                     "api_key": "",
                     "base_url": "http://localhost:11434",
+                    "enable": True,
+                    "default": False,
+                    "timeout": 30,
+                    "max_tokens": 8192,
+                },
+                "deepseek": {
+                    "type": "openai",
+                    "model": "openai/deepseek-chat-v3-0324",
+                    "api_key": "",
+                    "base_url": "https://api.deepseek.com",
                     "enable": True,
                     "default": False,
                     "timeout": 30,
@@ -442,6 +450,12 @@ class Config:
                 raise ValueError("配置未加载")
             return self.config
 
+    def get_aipy_config(self):
+        with self._lock:
+            if self.aipy_config is None:
+                raise ValueError("配置未加载")
+            return self.aipy_config
+
     def __update_aipy_config(self):
         file_abs_path = os.path.abspath(self._config_aipy_path)
         dir_path = os.path.dirname(file_abs_path)
@@ -451,7 +465,7 @@ class Config:
 
         self._aipy_settings = settings
 
-    def get_aipy_config(self):
+    def get_aipy_settings(self):
         # 如果有变化，需要重新加载，在更新保存的地方加载
         with self._lock:
             if self._aipy_settings is None:
@@ -497,3 +511,6 @@ class Config:
 
     def get_config_path(self):
         return self._config_path
+
+    def get_aipy_config_path(self):
+        return self._config_aipy_path

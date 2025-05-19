@@ -18,7 +18,7 @@ class SearchService:
     def __init__(self):
         self.console = Console()
         # 从配置中获取工作目录
-        work_dir = Path(Config.get_instance().get_aipy_config().get("workdir", "aipy_work"))
+        work_dir = Path(Config.get_instance().get_aipy_settings().get("workdir", "aipy_work"))
 
         # 确保工作目录存在
         if not work_dir.is_absolute():
@@ -37,7 +37,7 @@ class SearchService:
         self.error_log_file = self.cache_dir / "search_errors.json"
 
         # 加载数据
-        self.default_cache_duration = 3600  # 超过1小时的搜索结果缓存清除
+        self.default_cache_duration = 3600 * 24  # 超过1天的搜索结果缓存清除
         self.modules_info = self._load_modules_info()
         self.cache = self._load_cache()
         self._clean_cache()  # 加载后立即清理
@@ -159,7 +159,7 @@ class SearchService:
         """初始化TaskManager"""
         if not self.task_manager:
             self.task_manager = TaskManager(
-                Config.get_instance().get_aipy_config(), console=self.console
+                Config.get_instance().get_aipy_settings(), console=self.console
             )
 
     def _ensure_search_modules(self):

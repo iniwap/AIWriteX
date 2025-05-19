@@ -17,7 +17,7 @@ class ConfigEditor:
         self.wechat_count = len(self.config.wechat_credentials)
         self.window = None
         self.window = sg.Window(
-            "配置编辑器",
+            "配置管理",
             self.create_layout(),
             size=(500, 600),
             resizable=False,
@@ -356,6 +356,135 @@ class ConfigEditor:
         # 使用 sg.Column 包裹布局，设置 pad=(0, 0) 确保顶部无额外边距
         return [[sg.Column(layout, scrollable=False, vertical_scroll_only=False, pad=(0, 0))]]
 
+    def create_aipy_tab(self):
+        """创建 AIPy 配置 TAB 布局，显示选中的 LLM 提供商的所有参数"""
+        aipy_config = self.config.aipy_config
+        llm_providers = list(aipy_config["llm"].keys())
+        default_provider = aipy_config["default_llm_provider"]
+
+        # 获取当前提供商的配置，防止键不存在
+        provider_config = aipy_config["llm"].get(default_provider, {})
+
+        layout = [
+            [
+                sg.Text("工作目录:", size=(15, 1)),
+                sg.InputText(aipy_config["workdir"], key="-AIPY_WORKDIR-", size=(45, 1)),
+            ],
+            [
+                sg.Checkbox(
+                    "记录控制台输出",
+                    default=aipy_config["record"],
+                    key="-AIPY_RECORD-",
+                ),
+            ],
+            [
+                sg.Text("模型提供商*:", size=(15, 1)),
+                sg.Combo(
+                    llm_providers,
+                    default_value=default_provider,
+                    key="-AIPY_DEFAULT_LLM_PROVIDER-",
+                    size=(15, 1),
+                    readonly=True,
+                    enable_events=True,  # 启用事件以动态更新
+                ),
+            ],
+            [
+                sg.Text("类型:", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("type", ""),
+                    key="-AIPY_TYPE-",
+                    size=(45, 1),
+                    disabled=True,  # 类型通常不可编辑
+                ),
+            ],
+            [
+                sg.Text("模型*:", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("model", ""),
+                    key="-AIPY_MODEL-",
+                    size=(45, 1),
+                ),
+            ],
+            [
+                sg.Text("API KEY*:", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("api_key", ""),
+                    key="-AIPY_API_KEY-",
+                    size=(45, 1),
+                ),
+            ],
+            [
+                sg.Text("Base URL*:", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("base_url", ""),
+                    key="-AIPY_BASE_URL-",
+                    size=(45, 1),
+                ),
+            ],
+            [
+                sg.Checkbox(
+                    "启用",
+                    default=provider_config.get("enable", True),
+                    key="-AIPY_ENABLE-",
+                ),
+            ],
+            [
+                sg.Checkbox(
+                    "默认提供商",
+                    default=provider_config.get("default", False),
+                    key="-AIPY_DEFAULT-",
+                ),
+            ],
+            [
+                sg.Text("超时时间 (秒):", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("timeout", 30),
+                    key="-AIPY_TIMEOUT-",
+                    size=(45, 1),
+                ),
+            ],
+            [
+                sg.Text("最大 Tokens:", size=(15, 1)),
+                sg.InputText(
+                    provider_config.get("max_tokens", 8192),
+                    key="-AIPY_MAX_TOKENS-",
+                    size=(45, 1),
+                ),
+            ],
+            [
+                sg.Text(
+                    "Tips：\n"
+                    "1、工作目录：AIPy的工作输出目录；\n"
+                    "2、记录控制台输出：用于控制流式响应的记录；\n"
+                    "3、模型提供商：AIPy使用的LLM 提供商；\n"
+                    "4、模型：使用的具体模型名称；\n"
+                    "5、API KEY：模型提供商的API KEY（必填）；\n"
+                    "6、基础URL：API的基础地址；\n"
+                    "7、启用：是否启用该提供商；\n"
+                    "8、默认提供商：是否为默认选择的提供商；\n"
+                    "9、超时时间：API请求的超时时间（秒）；\n"
+                    "10、最大 Tokens：控制生成内容的长度，建议根据模型支持范围设置。",
+                    size=(70, 11),
+                    text_color="gray",
+                ),
+            ],
+            [
+                sg.Button("保存配置", key="-SAVE_AIPY-"),
+                sg.Button("恢复默认", key="-RESET_AIPY-"),
+            ],
+        ]
+        return [
+            [
+                sg.Column(
+                    layout,
+                    scrollable=False,
+                    vertical_scroll_only=False,
+                    size=(480, 520),
+                    pad=(0, 0),
+                )
+            ]
+        ]
+
     def create_layout(self):
         """创建主布局"""
         return [
@@ -367,6 +496,7 @@ class ConfigEditor:
                         [sg.Tab("大模型API*", self.create_api_tab(), key="-TAB_API-")],
                         [sg.Tab("图片生成API", self.create_img_api_tab(), key="-TAB_IMG_API-")],
                         [sg.Tab("其他", self.create_other_tab(), key="-TAB_OTHER-")],
+                        [sg.Tab("AIPy*", self.create_aipy_tab(), key="-TAB_AIPY-")],
                     ],
                     key="-TAB_GROUP-",
                 )
@@ -764,6 +894,76 @@ class ConfigEditor:
                         self.config.error_message,
                         icon=self.__get_icon(),
                     )
+
+            # 动态更新 AIPy 提供商的所有参数
+            elif event == "-AIPY_DEFAULT_LLM_PROVIDER-":
+                try:
+                    selected_provider = values["-AIPY_DEFAULT_LLM_PROVIDER-"]
+                    # 获取新选中的提供商的配置
+                    provider_config = self.config.aipy_config["llm"].get(selected_provider, {})
+                    # 更新所有参数的输入框
+                    self.window["-AIPY_TYPE-"].update(value=provider_config.get("type", ""))
+                    self.window["-AIPY_MODEL-"].update(value=provider_config.get("model", ""))
+                    self.window["-AIPY_API_KEY-"].update(value=provider_config.get("api_key", ""))
+                    self.window["-AIPY_BASE_URL-"].update(value=provider_config.get("base_url", ""))
+                    self.window["-AIPY_ENABLE-"].update(value=provider_config.get("enable", True))
+                    self.window["-AIPY_DEFAULT-"].update(
+                        value=provider_config.get("default", False)
+                    )
+                    self.window["-AIPY_TIMEOUT-"].update(value=provider_config.get("timeout", 30))
+                    self.window["-AIPY_MAX_TOKENS-"].update(
+                        value=provider_config.get("max_tokens", 8192)
+                    )
+                    self.window.refresh()
+                except Exception as e:
+                    sg.popup_error(f"更新 AIPy 提供商配置失败: {e}", icon=self.__get_icon())
+
+            # 保存 AIPy 配置
+            elif event.startswith("-SAVE_AIPY-"):
+                aipy_config = self.config.aipy_config.copy()
+                try:
+                    selected_provider = values["-AIPY_DEFAULT_LLM_PROVIDER-"]
+                    aipy_config["default_llm_provider"] = selected_provider
+                    aipy_config["workdir"] = values["-AIPY_WORKDIR-"]
+                    aipy_config["record"] = values["-AIPY_RECORD-"]
+
+                    # 更新选中的提供商的所有参数
+                    aipy_config["llm"][selected_provider]["type"] = values.get("-AIPY_TYPE-", "")
+                    aipy_config["llm"][selected_provider]["model"] = values.get("-AIPY_MODEL-", "")
+                    aipy_config["llm"][selected_provider]["api_key"] = values.get(
+                        "-AIPY_API_KEY-", ""
+                    )
+                    aipy_config["llm"][selected_provider]["base_url"] = values.get(
+                        "-AIPY_BASE_URL-", ""
+                    )
+                    aipy_config["llm"][selected_provider]["enable"] = values.get(
+                        "-AIPY_ENABLE-", True
+                    )
+                    aipy_config["llm"][selected_provider]["default"] = values.get(
+                        "-AIPY_DEFAULT-", False
+                    )
+                    aipy_config["llm"][selected_provider]["timeout"] = int(
+                        values.get("-AIPY_TIMEOUT-", 30)
+                    )
+                    aipy_config["llm"][selected_provider]["max_tokens"] = int(
+                        values.get("-AIPY_MAX_TOKENS-", 8192)
+                    )
+
+                    if self.config.save_config(self.config.get_config(), aipy_config):
+                        sg.popup("AIPy 配置已保存", icon=self.__get_icon())
+                    else:
+                        sg.popup_error(self.config.error_message, icon=self.__get_icon())
+                except ValueError:
+                    sg.popup_error("超时时间或最大 Tokens 必须是整数", icon=self.__get_icon())
+
+            # 恢复默认 AIPy 配置
+            elif event.startswith("-RESET_AIPY-"):
+                aipy_config = copy.deepcopy(self.config.default_aipy_config)
+                if self.config.save_config(self.config.get_config(), aipy_config):
+                    self.update_tab("-TAB_AIPY-", self.create_aipy_tab())
+                    sg.popup("已恢复默认 AIPy 配置", icon=self.__get_icon())
+                else:
+                    sg.popup_error(self.config.error_message, icon=self.__get_icon())
 
         self.window.close()
 

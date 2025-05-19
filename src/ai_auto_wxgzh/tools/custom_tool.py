@@ -213,7 +213,9 @@ class AIPySearchTool(BaseTool):
             console = Console()
             # 创建TaskManager
             try:
-                task_manager = TaskManager(Config.get_instance().get_aipy_config(), console=console)
+                task_manager = TaskManager(
+                    Config.get_instance().get_aipy_settings(), console=console
+                )
             except Exception as e:
                 console.print_exception()
                 raise e

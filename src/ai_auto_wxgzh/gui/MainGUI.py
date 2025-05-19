@@ -57,7 +57,7 @@ class MainGUI(object):
         sg.theme("systemdefault")
 
         menu_list = [
-            ["配置", ["配置界面", "配置文件"]],
+            ["配置", ["管理界面", "CrewAI文件", "AIPy文件"]],
             [
                 "文件",
                 ["日志", self._log_list, "模板", self._template_list, "文章"],
@@ -104,7 +104,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v1.0",
+            "微信公众号AI工具 v1.1",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),  # 展开650
@@ -280,14 +280,23 @@ class MainGUI(object):
                     else:
                         log.print_log("CrewAI 任务被终止（程序退出）", True)
                 break
-            elif event == "配置界面":
+            elif event == "管理界面":
                 self.__gui_config_start()
-            elif event == "配置文件":
+            elif event == "CrewAI文件":
                 try:
                     os.system("start /B  notepad " + Config.get_instance().get_config_path())
                 except Exception as e:
                     sg.popup(
-                        "无法打开配置文件 :( \n错误信息：" + str(e),
+                        "无法打开CrewAI配置文件 :( \n错误信息：" + str(e),
+                        title="系统提示",
+                        icon=self.__get_icon(),
+                    )
+            elif event == "AIPy文件":
+                try:
+                    os.system("start /B  notepad " + Config.get_instance().get_aipy_config_path())
+                except Exception as e:
+                    sg.popup(
+                        "无法打开AIPy配置文件 :( \n错误信息：" + str(e),
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
@@ -348,8 +357,9 @@ class MainGUI(object):
                 sg.popup(
                     "———————————配置说明———————————\n"
                     "1、微信公众号AppID，AppSecrect必填（至少一个）\n"
-                    "2、API的API KEY必填（使用的）\n"
-                    "3、其他使用默认即可，根据需求填写\n"
+                    "2、CrewAI使用的API的API KEY必填（使用的）\n"
+                    "3、AIPy的模型提供商的API KEY必填（使用的）\n"
+                    "4、其他使用默认即可，根据需求填写\n"
                     "———————————操作说明———————————\n"
                     "1、打开配置界面，首先进行必要的配置\n"
                     "2、点击开始执行，AI自动开始工作\n"
@@ -358,6 +368,7 @@ class MainGUI(object):
                     "1、文件->日志：查看日志文件\n"
                     "2、文件->模板：查看内置模板文件\n"
                     "3、文件->文章：查看生成的文章",
+                    "4、配置->CrewAI/AIPy：直接查看或编辑配置文件",
                     title="使用帮助",
                     icon=self.__get_icon(),
                 )
