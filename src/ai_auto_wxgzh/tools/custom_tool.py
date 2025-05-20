@@ -140,6 +140,8 @@ class PublisherTool:
 
         if image_url is None:
             log.print_log("生成图片出错，使用默认图片")
+            # 这里使用默认的好像会出错，采用默认背景图
+            image_url = utils.get_res_path("UI\\bg.png", os.path.dirname(__file__) + "/../gui/")
 
         # 封面图片
         media_id, _, err_msg = publisher.upload_image(image_url)

@@ -38,6 +38,10 @@ import glob  # noqa 841
 from crewai import Agent, Crew, Process, Task  # noqa 841
 from crewai.project import CrewBase, agent, crew, task  # noqa 841
 
+from rich.console import Console  # noqa 841
+from aipyapp.aipy.taskmgr import TaskManager  # noqa 841
+import importlib.util  # noqa 841
+from pathlib import Path  # noqa 841
 
 import src.ai_auto_wxgzh.gui.MainGUI as MainGUI
 

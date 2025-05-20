@@ -77,12 +77,8 @@ def autowx_gzh(stop_event=None, ui_mode=False):
             continue
 
         platform = utils.get_random_platform(config.platforms)
-        topics = hotnews.get_platform_news(platform, 1)  # 使用不重复的平台
-        if len(topics) == 0:
-            topics = ["DeepSeek AI 提效秘籍"]
-            log.print_log("无法获取到热榜，接口暂时不可用，将使用默认话题。")
-
-        inputs = {"platform": platform, "topic": topics[0]}
+        topic = hotnews.select_platform_topic(platform, 5)  # 前五个热门话题根据一定权重选一个
+        inputs = {"platform": platform, "topic": topic}
 
         log.print_log("CrewAI开始工作...")
         if ui_mode:

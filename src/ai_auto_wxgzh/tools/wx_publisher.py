@@ -99,7 +99,7 @@ class WeixinPublisher:
                 "only_fans_can_comment": 0,
             },
         ]
-        ret = None
+        ret = None, None
         try:
             data = {"articles": articles}
 
@@ -110,15 +110,13 @@ class WeixinPublisher:
             data = response.json()
 
             if "errcode" in data and data.get("errcode") != 0:
-                log.print_log(f"上传草稿失败: {data.get('errmsg')}")
+                ret = None, f"上传草稿失败: {data.get('errmsg')}"
             elif "media_id" not in data:
-                log.print_log("上传草稿失败: 响应中缺少 media_id")
+                ret = None, "上传草稿失败: 响应中缺少 media_id"
             else:
-                ret = {
-                    "media_id": data.get("media_id"),
-                }
+                ret = {"media_id": data.get("media_id")}, None
         except requests.exceptions.RequestException as e:
-            log.print_log(f"上传微信草稿失败: {e}")
+            ret = None, f"上传微信草稿失败: {e}"
 
         return ret
 
@@ -224,7 +222,7 @@ class WeixinPublisher:
         ret = None, None
         try:
             # 上传草稿
-            draft = self._upload_draft(article, title, digest, media_id)
+            draft, err_msg = self._upload_draft(article, title, digest, media_id)
             if draft is not None:
                 ret = (
                     PublishResult(
@@ -236,6 +234,8 @@ class WeixinPublisher:
                     ),
                     None,
                 )
+            else:
+                ret = None, err_msg
         except Exception as e:
             ret = None, f"微信添加草稿失败: {e}"
 
