@@ -8,6 +8,7 @@ from datetime import datetime
 
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.utils import comm
+from src.ai_auto_wxgzh.config.config import Config
 
 
 def strip_ansi_codes(text):
@@ -71,8 +72,10 @@ def get_log_path(log_name="log"):
     return os.path.join(logs_path, f"{log_name}_{timestamp}.log")
 
 
-def print_log(msg, ui_mode=False, msg_type="status"):
-    if ui_mode:
+def print_log(msg, msg_type="status"):
+    config = Config.get_instance()
+
+    if config.ui_mode:
         comm.send_update(msg_type, msg)
     else:
         print(f"[{time.strftime('%H:%M:%S')}] [{msg_type.upper()}]: {msg}")

@@ -17,13 +17,14 @@ from collections import deque
 import PySimpleGUI as sg
 import tkinter as tk
 
-from . import ConfigEditor
 from src.ai_auto_wxgzh.crew_main import autowx_gzh
 
 from src.ai_auto_wxgzh.utils import comm
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.utils import log
 from src.ai_auto_wxgzh.config.config import Config
+
+from src.ai_auto_wxgzh.gui.ConfigEditor import ConfigEditor
 
 
 __author__ = "iniwaper@gmail.com"
@@ -51,7 +52,7 @@ class MainGUI(object):
         config = Config.get_instance()
         if not config.load_config():
             # 配置信息未填写，仅作提示，用户点击开始任务时才禁止操作并提示错误
-            log.print_log(config.error_message, True, "error")
+            log.print_log(config.error_message, "error")
 
         # 设置主题
         sg.theme("systemdefault")
@@ -228,7 +229,7 @@ class MainGUI(object):
             if msg["type"] == "progress":
                 self._window["-PROGRESS-"].update(f"{msg['value']}%")
                 self._window["-PROGRESS_BAR-"].update(msg["value"])
-            elif msg["type"] in ["status", "error"]:
+            elif msg["type"] in ["status", "warning", "error"]:
                 # 追加日志到缓冲区
                 if msg["value"].startswith("PRINT:"):
                     log_entry = f"[{time.strftime('%H:%M:%S')}][PRINT]: {msg['value'][6:]}"
@@ -265,6 +266,13 @@ class MainGUI(object):
                     self._window["-STOP_BTN-"].update(disabled=True)
                     self._is_running = False
                     self._crew_thread = None
+                elif msg["type"] == "warning":
+                    sg.popup(
+                        f"出现错误但不影响运行，告警信息：{msg['value']}",
+                        title="系统提示",
+                        icon=self.__get_icon(),
+                        non_blocking=True,
+                    )
         except queue.Empty:
             pass
 
@@ -276,9 +284,9 @@ class MainGUI(object):
                     self._stop_event.set()
                     self._crew_thread.join(timeout=2.0)
                     if self._crew_thread.is_alive():
-                        log.print_log("警告：任务终止超时，可能未完全停止", True)
+                        log.print_log("警告：任务终止超时，可能未完全停止")
                     else:
-                        log.print_log("CrewAI 任务被终止（程序退出）", True)
+                        log.print_log("CrewAI 任务被终止（程序退出）")
                 break
             elif event == "管理界面":
                 self.__gui_config_start()
@@ -330,9 +338,9 @@ class MainGUI(object):
                     self._stop_event.set()
                     self._crew_thread.join(timeout=2.0)
                     if self._crew_thread.is_alive():
-                        log.print_log("警告：任务终止超时，可能未完全停止", True)
+                        log.print_log("警告：任务终止超时，可能未完全停止")
                     else:
-                        log.print_log("CrewAI 任务被终止", True)
+                        log.print_log("CrewAI 任务被终止")
                     self._crew_thread = None
                     self._window["-START_BTN-"].update(disabled=False)
                     self._window["-STOP_BTN-"].update(disabled=True)

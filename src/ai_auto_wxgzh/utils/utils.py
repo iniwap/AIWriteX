@@ -8,6 +8,7 @@ import time
 import sys
 import shutil
 import webbrowser
+from src.ai_auto_wxgzh.utils import log
 
 
 def copy_file(src_file, dest_file):
@@ -188,10 +189,10 @@ def download_and_save_image(image_url, local_image_folder):
         return local_filename
 
     except requests.exceptions.RequestException as e:
-        print(f"下载图片失败：{image_url}，错误：{e}")
+        log.print_log(f"下载图片失败：{image_url}，错误：{e}")
         return None
     except Exception as e:
-        print(f"处理图片失败：{image_url}，错误：{e}")
+        log.print_log(f"处理图片失败：{image_url}，错误：{e}")
         return None
 
 
@@ -222,7 +223,7 @@ def decompress_html(compressed_content, use_compress=True):
         格式化的 HTML 字符串
     """
 
-    if use_compress:
+    if not use_compress:
         return compressed_content
 
     # 检查是否可能是未压缩的（包含换行和缩进）

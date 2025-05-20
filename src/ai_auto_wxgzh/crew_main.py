@@ -60,6 +60,9 @@ def autowx_gzh(stop_event=None, ui_mode=False):
             log.print_log(f"配置填写有错误：{config.error_message}")
             return
 
+    # 设置模式
+    config.ui_mode = ui_mode
+
     os.environ[config.api_key_name] = config.api_key
     os.environ["MODEL"] = config.api_model
     os.environ["OPENAI_API_BASE"] = config.api_apibase
@@ -77,31 +80,31 @@ def autowx_gzh(stop_event=None, ui_mode=False):
         topics = hotnews.get_platform_news(platform, 1)  # 使用不重复的平台
         if len(topics) == 0:
             topics = ["DeepSeek AI 提效秘籍"]
-            log.print_log("无法获取到热榜，接口暂时不可用，将使用默认话题。", ui_mode)
+            log.print_log("无法获取到热榜，接口暂时不可用，将使用默认话题。")
 
         inputs = {"platform": platform, "topic": topics[0]}
 
-        log.print_log("CrewAI开始工作...", ui_mode)
+        log.print_log("CrewAI开始工作...")
         if ui_mode:
             try:
                 # 运行异步 kickoff
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 try:
-                    result = loop.run_until_complete(
+                    loop.run_until_complete(
                         run_crew_async(stop_event, inputs, appid, appsecret, author)
                     )
-                    log.print_log(f"任务完成！结果: {result}", True)
+                    log.print_log("任务完成！")
                 finally:
                     loop.close()
             except StopCrewException as e:
-                log.print_log(str(e), True)
+                log.print_log(f"执行出错：{str(e)}")
             except Exception as e:
-                log.print_log(str(e), True, "error")
+                log.print_log(str(e), "error")
         else:
             try:
                 run(inputs, appid, appsecret, author)
-                # log.print_log("任务完成！")
+                log.print_log("任务完成！")
             except Exception as e:
                 log.print_log(f"执行出错：{str(e)}")
 

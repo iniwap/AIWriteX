@@ -18,16 +18,18 @@ from src.ai_auto_wxgzh.utils import log
 
 
 class ReadTemplateToolInput(BaseModel):
-    article_file: str = Field(description="前置任务生成的的文章内容")
+    pass
 
 
 # 1. Read Template Tool
 class ReadTemplateTool(BaseTool):
     name: str = "read_template_tool"
-    description: str = "从本地读取HTML文件"
+    description: str = (
+        "从本地读取HTML模板文件，此模板必须作为最终输出的基础结构，保持视觉风格和布局效果，仅替换内容部分"
+    )
     args_schema: Type[BaseModel] = ReadTemplateToolInput
 
-    def _run(self, article_file: str) -> str:
+    def _run(self) -> str:
         config = Config.get_instance()
 
         # 获取模板文件的绝对路径
@@ -55,7 +57,7 @@ class ReadTemplateTool(BaseTool):
             template_files_abs = glob.glob(os.path.join(template_dir_abs, "*.html"))
 
             if not template_files_abs:
-                print(
+                log.print_log(
                     f"在目录 '{template_dir_abs}' 中未找到任何模板文件。如果没有模板请将config.yaml中的use_template设置为false"
                 )
                 # 出现这种错误无法继续，立即终止程序，防止继续消耗Tokens（不终止CrewAI可能会重试）
@@ -66,10 +68,37 @@ class ReadTemplateTool(BaseTool):
         with open(selected_template_file, "r", encoding="utf-8") as file:
             selected_template_content = file.read()
 
-        return utils.compress_html(
+        template_content = utils.compress_html(
             selected_template_content,
             config.use_compress,
         )  # 压缩html，降低token消耗
+
+        return f"""
+        【HTML模板 - 必须作为最终输出的基础】
+        {template_content}
+
+        【模板使用指南】
+        1. 上面是完整的HTML模板，您必须基于此模板进行内容适配
+        2. 必须保持的元素：
+        - 所有<section>标签的布局结构和内联样式
+        - 原有的视觉层次、色彩方案和排版风格
+        - 卡片式布局、圆角和阴影效果
+        - SVG动画元素和交互特性
+        3. 内容适配规则：
+        - 标题替换标题、段落替换段落、列表替换列表
+        - 当新内容比原模板内容长或短时，合理调整，不破坏布局
+        - 保持原有的强调部分（粗体、斜体、高亮等）应用于新内容的相应部分
+        - 保持图片位置不变
+        4. 严格禁止：
+        - 不添加新的style标签或外部CSS
+        - 不改变原有的色彩方案（限制在三种色系内）
+        - 不修改模板的整体视觉效果和布局结构
+        5. 最终输出必须是基于此模板的HTML，保持相同的视觉效果和样式，但内容已更新
+
+        【重要提示】
+        您的任务是将前置任务生成的文章内容适配到此模板中，而不是创建新的HTML。
+        请分析模板结构，识别内容区域，然后将新内容填充到对应位置。
+        """
 
 
 # 2. Publisher Tool
@@ -78,9 +107,9 @@ class ReadTemplateTool(BaseTool):
 class PublisherTool:
     def run(self, content, appid, appsecret, author):
         try:
-            content = utils.decompress_html(content)  # 因为不需要直接看生成文章源码，默认不解压了
+            content = utils.decompress_html(content)  # 固定格式化HTML
         except Exception as e:
-            print(f"解压html出错：{str(e)}")
+            log.print_log(f"解压html出错：{str(e)}")
 
         # 提取审核报告中修改后的文章
         article = utils.extract_modified_article(content)
@@ -110,12 +139,12 @@ class PublisherTool:
         )
 
         if image_url is None:
-            print("生成图片出错，使用默认图片")
+            log.print_log("生成图片出错，使用默认图片")
 
         # 封面图片
-        media_id, _ = publisher.upload_image(image_url)
+        media_id, _, err_msg = publisher.upload_image(image_url)
         if media_id is None:
-            return "上传封面图片出错，无法发布文章", article
+            return f"封面{err_msg}，无法发布文章", article
 
         # 这里需要将文章中的图片url替换为上传到微信返回的图片url
         try:
@@ -126,38 +155,42 @@ class PublisherTool:
                     utils.get_current_dir("image"),
                 )
                 if local_filename:
-                    _, url = publisher.upload_image(local_filename)
+                    _, url, _ = publisher.upload_image(local_filename)
                     article = article.replace(image_url, url)
         except Exception as e:
-            print(f"上传配图出错，影响阅读，可继续发布文章:{e}")
+            log.print_log(f"上传配图出错，影响阅读，可继续发布文章:{e}")
 
-        add_draft_result = publisher.add_draft(article, title, digest, media_id)
+        add_draft_result, err_msg = publisher.add_draft(article, title, digest, media_id)
         if add_draft_result is None:
             # 添加草稿失败，不再继续执行
-            return "上传草稿失败，无法发布文章", article
+            return f"{err_msg}，无法发布文章", article
 
-        publish_result = publisher.publish(
-            add_draft_result.publishId
-        )  # 可以利用返回值，做重试等处理
+        publish_result, err_msg = publisher.publish(add_draft_result.publishId)
         if publish_result is None:
-            return "发布草稿失败，无法继续发布文章", article
+            return f"{err_msg}，无法继续发布文章", article
 
         article_url = publisher.poll_article_url(publish_result.publishId)
         if article_url is not None:
             # 该接口需要认证，将文章添加到菜单中去，用户可以通过菜单“最新文章”获取到
-            _ = publisher.create_menu(article_url)
+            ret = publisher.create_menu(article_url)
+            if not ret:
+                log.print_log(f"{ret}（公众号未认证，发布已成功）")
         else:
-            print("无法获取到文章URL")  # 这里无所谓，不影响后面
+            log.print_log("无法获取到文章URL，无法创建菜单（可忽略，发布已成功）")
 
+        # 最近好像会有个消息提示，但不会显示到列表，用户可以收到文章发布的消息
         # 只有下面执行成功，文章才会显示到公众号列表，否则只能通过后台复制链接分享访问
         # 通过群发使得文章显示到公众号列表 ——> 该接口需要认证
-        media_id = publisher.media_uploadnews(article, title, digest, media_id)
+        ret, media_id = publisher.media_uploadnews(article, title, digest, media_id)
         if media_id is None:
-            return "上传图文素材失败，无法显示到公众号文章列表", article
+            return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article
 
-        sndall_ret = publisher.message_mass_sendall(media_id)
-        if sndall_ret is None:
-            return "无法将文章群发给用户，无法显示到公众号文章列表", article
+        ret = publisher.message_mass_sendall(media_id)
+        if ret is not None:
+            return (
+                f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）",
+                article,
+            )
 
         return "成功发布文章到微信公众号", article
 

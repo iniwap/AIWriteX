@@ -207,12 +207,25 @@ class Config:
             },
         }
 
+        # 全局变量
+        self._ui_mode = False
+
     @classmethod
     def get_instance(cls):
         with cls._lock:
             if cls._instance is None:
                 cls._instance = cls()
             return cls._instance
+
+    @property
+    def ui_mode(self):  # Getter
+        return self._ui_mode
+
+    @ui_mode.setter
+    def ui_mode(self, value):  # Setter with validation
+        if not isinstance(value, bool):
+            raise ValueError("ui_mode must be a boolean")
+        self._ui_mode = value
 
     @property
     def platforms(self):

@@ -1,6 +1,8 @@
 import requests
 from typing import Optional, List, Dict
 
+from src.ai_auto_wxgzh.utils import log
+
 
 def get_hotnews() -> Optional[List[Dict]]:
     """
@@ -20,10 +22,10 @@ def get_hotnews() -> Optional[List[Dict]]:
         return None
 
     except requests.exceptions.RequestException as e:
-        print(f"请求异常: {str(e)}")
+        log.print_log(f"请求异常: {str(e)}")
         return None
     except ValueError as e:
-        print(f"JSON解析异常: {str(e)}")
+        log.print_log(f"JSON解析异常: {str(e)}")
         return None
 
 
@@ -34,7 +36,7 @@ def get_platform_news(platform, cnt=1):
         result = {}
 
         for pf in hotnews:
-            result[pf['name']] = [item['title'] for item in pf['data']]
+            result[pf["name"]] = [item["title"] for item in pf["data"]]
         platform_news.extend(result[platform][:cnt])
 
     return platform_news
@@ -46,7 +48,7 @@ if __name__ == "__main__":
         result = {}
 
         for platform in hotnews:
-            result[platform['name']] = [item['title'] for item in platform['data']]
-        print(result.keys())
+            result[platform["name"]] = [item["title"] for item in platform["data"]]
+        log.print_log(result.keys())
     else:
-        print("未能获取热点数据")
+        log.print_log("未能获取热点数据")
