@@ -118,8 +118,8 @@ img_api:
   picsum:
     api_key: ""
     model: ""
-use_template: false
+use_template: true
 template: ""
 need_auditor: false
-use_compress: false
+use_compress: true
 use_search_service: true
