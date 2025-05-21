@@ -38,10 +38,20 @@ import glob  # noqa 841
 from crewai import Agent, Crew, Process, Task  # noqa 841
 from crewai.project import CrewBase, agent, crew, task  # noqa 841
 
-from rich.console import Console  # noqa 841
-from aipyapp.aipy.taskmgr import TaskManager  # noqa 841
 import importlib.util  # noqa 841
 from pathlib import Path  # noqa 841
+import tomlkit  # noqa 841
+from io import StringIO
+
+# aipyapp 的term_image 在--noconsole 时会出错，添加重定向代码
+if sys.stdout is None:
+    sys.stdout = StringIO()
+if sys.stderr is None:
+    sys.stderr = StringIO()
+
+from rich.console import Console  # noqa 841
+from aipyapp.aipy.taskmgr import TaskManager  # noqa 841
+
 
 import src.ai_auto_wxgzh.gui.MainGUI as MainGUI
 

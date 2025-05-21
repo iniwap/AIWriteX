@@ -24,7 +24,7 @@ from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.utils import log
 from src.ai_auto_wxgzh.config.config import Config
 
-from src.ai_auto_wxgzh.gui.ConfigEditor import ConfigEditor
+from src.ai_auto_wxgzh.gui import ConfigEditor
 
 
 __author__ = "iniwaper@gmail.com"
@@ -354,7 +354,7 @@ class MainGUI(object):
             elif event == "关于":
                 sg.popup(
                     "关于软件",
-                    "当前Version 1.0",
+                    "当前Version 1.1",
                     "Copyright (C) 2025 iniwap,All Rights Reserved",
                     title="系统提示",
                     icon=self.__get_icon(),
