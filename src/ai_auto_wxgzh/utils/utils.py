@@ -68,13 +68,11 @@ def get_random_platform(platforms):
     """
     根据权重随机选择一个平台。
     """
-
     total_weight = sum(p["weight"] for p in platforms)
 
     if int(total_weight * 100) / 100 != 1:
         warnings.warn(f"平台权重总和应为1，当前为{total_weight:.2f}，将默认选择微博", UserWarning)
-
-        return platforms[0]["微博"]
+        return "微博"
 
     rand = random.uniform(0, total_weight)
     cumulative_weight = 0
