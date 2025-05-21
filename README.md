@@ -45,7 +45,9 @@
 
 ## 🚀 快速开始
 ### 开发模式
-1. 克隆仓库：`git clone https://github.com/iniwap/ai_auto_wxgzh.git`
+1. 克隆仓库：
+    - **推荐 `GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/iniwap/ai_auto_wxgzh.git`**(*忽略微信公众号AI工具_Setup.exe下载，否则过慢*)
+    - `git clone https://github.com/iniwap/ai_auto_wxgzh.git`
 2. 安装依赖：
    - `pip install -r requirements.txt`
    - `pip install PySimpleGUI-4.60.5-py3-none-any.whl`
@@ -55,7 +57,10 @@
     - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main`
 
 ### 软件模式
-1. 安装`output`目录下的`微信公众号AI工具_Setup.exe`文件
+1. 安装`output`目录下的`微信公众号AI工具_Setup.exe`文件（考虑到大文件下载过慢，**请从网盘下载**👇）
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/ERl3UjTu6YJOk3AJ599TKKkBcjJ0TDILRBNYw1dH_nSvRw?e=bxLEP0)
+    - [移动云盘 提取码:4aq9](https://caiyun.139.com/w/i/2nc6jo9B48Yk7)
+    - [Google Drive](https://drive.google.com/file/d/18OdFizbwsPFJEe-PxzAdEBrhZg7B_1lp/view?usp=sharing)
 2. 打开软件，进行必须要配置（`微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY`）
 3. 点击`开始执行`
 
