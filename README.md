@@ -46,7 +46,8 @@
 ## 🚀 快速开始
 ### 开发模式
 1. 克隆仓库：
-    - `$env:GIT_LFS_SKIP_SMUDGE=1; git clone https://github.com/iniwap/ai_auto_wxgzh.git` (**推荐方式：忽略微信公众号AI工具_Setup.exe下载，否则过慢**)
+    - `$env:GIT_LFS_SKIP_SMUDGE=1; git clone https://github.com/iniwap/ai_auto_wxgzh.git` 
+    (**推荐方式：忽略微信公众号AI工具_Setup.exe下载，否则过慢**)
     - `git clone https://github.com/iniwap/ai_auto_wxgzh.git`
 2. 安装依赖：
    - `pip install -r requirements.txt`
@@ -58,9 +59,9 @@
 
 ### 软件模式
 1. 安装`output`目录下的`微信公众号AI工具_Setup.exe`文件（考虑到大文件下载过慢，**请从网盘下载**👇）
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/ERl3UjTu6YJOk3AJ599TKKkBcjJ0TDILRBNYw1dH_nSvRw?e=bxLEP0)
-    - [移动云盘 提取码:4aq9](https://caiyun.139.com/w/i/2nc6jo9B48Yk7)
-    - [Google Drive](https://drive.google.com/file/d/18OdFizbwsPFJEe-PxzAdEBrhZg7B_1lp/view?usp=sharing)
+    - [移动云盘 提取码:fu2i](https://caiyun.139.com/w/i/2nc6jRbCkwa5x)
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/ESlGqMV6c-1Oo0cs-Njy6FABuSks5EJ6RYnn-Du9Yz6gLg?e=IBxzSg)
+    - [Google Drive](https://drive.google.com/file/d/10kllXTRlvDNij1aXTNzqJy3mRdR61ZBe/view?usp=sharing)
 2. 打开软件，进行必须要配置（`微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY`）
 3. 点击`开始执行`
 

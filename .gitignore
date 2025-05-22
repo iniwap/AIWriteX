@@ -3,8 +3,9 @@ __pycache__/
 .DS_Store
 .git-backup/
 logs/*.log
-/tools
+make_exe/
 final_article.html
 user_config.toml
 aipy_work/*
 !aipy_work/.gitkeep
+config.bk
