@@ -476,6 +476,12 @@ class Config:
         conf.check_config()
         settings = conf.get_config()
 
+        # 软件模式直接安装
+        if utils.get_is_release_ver():
+            settings.auto_install = True
+        else:
+            settings.auto_install = False
+
         self._aipy_settings = settings
 
     def get_aipy_settings(self):

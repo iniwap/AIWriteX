@@ -48,6 +48,15 @@ class QueueStreamHandler:
         if self.original_stdout is not None:  # 检查 stdout 是否可用
             self.original_stdout.flush()
 
+    def fileno(self):
+        # 返回一个有效的文件描述符或引发适当的异常
+        if self.original_stdout is not None:
+            try:
+                return self.original_stdout.fileno()
+            except (AttributeError, IOError):
+                pass
+        raise IOError("Stream has no fileno")
+
 
 def setup_logging(log_name, queue):
     """配置日志处理器，将 CrewAI 日志发送到队列"""

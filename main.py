@@ -44,16 +44,33 @@ import tomlkit  # noqa 841
 from io import StringIO
 
 # aipyapp 的term_image 在--noconsole 时会出错，添加重定向代码
-if sys.stdout is None:
+if sys.stdout is None or not hasattr(sys.stdout, "write"):
     sys.stdout = StringIO()
-if sys.stderr is None:
+if sys.stderr is None or not hasattr(sys.stderr, "write"):
     sys.stderr = StringIO()
+
+# 解决GUI模式，没有命令行输入，AIPY出错问题
+# 保存原始的 os.write 函数
+original_os_write = os.write
+
+
+def safe_os_write(fd, data):
+    try:
+        return original_os_write(fd, data)
+    except OSError as e:
+        if e.errno == 9 and fd == 1:  # Bad file descriptor on stdout
+            return len(data)  # 假装写入成功
+        raise
+
+
+# 替换 os.write 函数
+os.write = safe_os_write
 
 from rich.console import Console  # noqa 841
 from aipyapp.aipy.taskmgr import TaskManager  # noqa 841
 
 
-import src.ai_auto_wxgzh.gui.MainGUI as MainGUI
+import src.ai_auto_wxgzh.gui.MainGUI as MainGUI  # noqa 402
 
 
 def is_admin():

@@ -11,11 +11,11 @@
 ## 🎯项目背景
 为了学习CrewAI，特开发了这个小项目。最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。
 
-## 💎基本功能介绍
+## 💎基本功能
 - 自动获取各大平台热门话题
 - 自动根据话题生成文章、排版（CrewAI多个角色共同完成）
 - 自动发图文消息到公众号
-- **采用`AIPy`实现搜索功能，解决大模型生成文章的时效性问题**
+- **生成实时性文章，拒绝文章数据过时（利用AIPy搜索）**
 - UI可视化，界面操作，方便配置编辑
 - **支持开发模式和软件模式**
     - 开发模式：有定制开发需求，更灵活的改动（适用于技术自开发用户）
@@ -46,7 +46,7 @@
 ## 🚀 快速开始
 ### 开发模式
 1. 克隆仓库：
-    - `$env:GIT_LFS_SKIP_SMUDGE=1; git clone https://github.com/iniwap/ai_auto_wxgzh.git` 
+    - `$env:GIT_LFS_SKIP_SMUDGE=1; git clone https://github.com/iniwap/ai_auto_wxgzh.git`  
     (**推荐！忽略微信公众号AI工具_Setup.exe下载，否则过慢**)
     - `git clone https://github.com/iniwap/ai_auto_wxgzh.git`
 2. 安装依赖：
@@ -59,9 +59,9 @@
 
 ### 软件模式
 1. 安装`output`目录下的`微信公众号AI工具_Setup.exe`文件（考虑到大文件下载过慢，**请从网盘下载**👇）
-    - [移动云盘 提取码:fu2i](https://caiyun.139.com/w/i/2nc6jRbCkwa5x)
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/ESlGqMV6c-1Oo0cs-Njy6FABuSks5EJ6RYnn-Du9Yz6gLg?e=IBxzSg)
-    - [Google Drive](https://drive.google.com/file/d/10kllXTRlvDNij1aXTNzqJy3mRdR61ZBe/view?usp=sharing)
+    - [移动云盘 提取码:sm3u](https://caiyun.139.com/w/i/2nc6jGaXyJg5f)
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EWP7UqX2JgVDo9XTCsjVpJQBeOL9bJgPtg6ZL-di0TZfzQ?e=frAZhD)
+    - [Google Drive](https://drive.google.com/file/d/1S2tZjfl3FfkJMXWpQ2q8XyGyUia1aGwL/view?usp=sharing)
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
 3. 点击`开始执行`
 
@@ -74,8 +74,7 @@
 pip  uninstall crewai
 pip  install crewai==0.102.0
 ```
-*此版本会输出过程日志，仍看不出问题的，可将日志提交Issue*
-
+*此版本会输出过程日志，仍看不出问题的，可将日志提交Issue*  
 - 恢复到最新版本：
 ```shell
 pip  uninstall crewai
@@ -84,10 +83,11 @@ pip  install crewai
 ### 软件模式
 请选择`文件->日志->UI_2025-05-20.log（选择当天的日志）`，点击打开、复制、提交Issue
 
-### AIPy相关
-1. 首次执行需要初始化搜索代码（开启use_search_service缓存时），速度较慢，请耐心等待，后续执行会很快；
-2. 执行过程中可能会依赖某些库，请注意查看日志输出，需要安装（会提示安装）；
-3. 不是所有话题搜索引擎都能搜索到，如果失败属于正常现象，任务会继续执行的。
+### AIPy相关问题
+1. **首次执行需要初始化搜索代码（开启use_search_service缓存时），速度较慢，请耐心等待，后续执行会很快；**
+2. 不是所有话题搜索引擎都能搜索到，如果失败属于正常现象，任务会继续执行的；
+3. 搜索代码生成过程中会有错误，请忽略（有自动纠错机制，后续运行会修复），不影响整体运行；
+4. 执行过程中可能会依赖某些库，请注意查看日志输出，需要安装（会提示安装）。
 
 ⚠️**免费的OpenRouter有可能服务不正常，无法正确运行（这种情况只能等用的人少的时候再试）；一个账号首次执行成功率比较高，后续执行使用模板时候可能被截断。**
 *这应该跟其最近修改了付费策略有关系，免费的终究是没那么好用。*

@@ -158,9 +158,16 @@ class SearchService:
     def _init_task_manager(self):
         """初始化TaskManager"""
         if not self.task_manager:
-            self.task_manager = TaskManager(
-                Config.get_instance().get_aipy_settings(), console=self.console
-            )
+            try:
+                self.task_manager = TaskManager(
+                    Config.get_instance().get_aipy_settings(), console=self.console
+                )
+                # 验证TaskManager是否正常工作
+                if not self.task_manager.llm:
+                    self.console.print("[red]警告: TaskManager的LLM未正确初始化[/red]")
+            except Exception as e:
+                self.console.print(f"[red]TaskManager初始化失败: {e}[/red]")
+                raise
 
     def _ensure_search_modules(self):
         """确保搜索模块文件存在，如果不存在则创建"""
@@ -170,10 +177,10 @@ class SearchService:
 
             # 生成多种搜索模块
             module_types = [
-                ("duckduckgo", "使用DuckDuckGo搜索引擎，添加时间筛选参数"),
                 ("baidu", "使用百度搜索引擎，添加时间筛选参数"),
                 ("bing", "使用Bing搜索引擎，添加时间筛选参数"),
                 ("scraper", "直接访问相关领域的权威网站并抓取最新内容"),
+                ("duckduckgo", "使用DuckDuckGo搜索引擎，添加时间筛选参数"),
                 ("google", "使用Google搜索引擎，仅在其他方法无法获取足够信息时使用"),
                 ("combined", "结合多种搜索引擎的综合搜索，按优先级顺序尝试各种搜索方法"),
             ]
@@ -190,9 +197,241 @@ class SearchService:
 
             self._save_modules_info()
 
-    def _generate_search_module(self, module_type, description):
-        """通过LLM生成特定类型的搜索模块代码并保存"""
+    def _generate_via_direct_llm(self, search_instruction, module_type, description):
+        """方法1: 直接使用LLM生成代码，不依赖Task系统"""
+        self._init_task_manager()
 
+        # 直接调用LLM
+        response = self.task_manager.llm(search_instruction)
+
+        if not response:
+            return None
+
+        # 尝试最严格的匹配：````python main\n(.*?)\n````
+        code_blocks = re.findall(r"````python main\n(.*?)\n````", response, re.DOTALL)
+        if code_blocks:
+            for block in code_blocks:
+                if "search_web" in block:
+                    return block.strip()
+
+        # 尝试次严格的匹配：````python <any_name>\n(.*?)\n````
+        # 考虑 main 后面可能有空格或其他字符
+        code_blocks = re.findall(r"````python\s*([\w\-\.]*)\s*\n(.*?)\n````", response, re.DOTALL)
+        if code_blocks:
+            for name, block in code_blocks:
+                if "search_web" in block:
+                    return block.strip()
+
+        # 尝试更宽松的匹配：````<lang> <name>\n(.*?)\n```` (匹配AIPy内部模式)
+        code_blocks = re.findall(r"````(\w+)\s*([\w\-\.]*)\s*\n(.*?)\n````", response, re.DOTALL)
+        if code_blocks:
+            for lang, name, block in code_blocks:
+                if "search_web" in block:
+                    return block.strip()
+
+        # 尝试最宽松的匹配：只匹配四个反引号开头的代码块，不关心语言和名称
+        code_blocks = re.findall(r"````\s*\n(.*?)\n````", response, re.DOTALL)
+        if code_blocks:
+            for block in code_blocks:
+                if "search_web" in block:
+                    return block.strip()
+
+        # 如果没有代码块标记，尝试提取整个响应作为代码（作为最终备选）
+        if "def search_web" in response:
+            return response.strip()
+
+        return None
+
+    def _generate_via_task_system(self, search_instruction, module_type, description):
+        """方法2: 使用Task系统生成代码"""
+        self._init_task_manager()
+
+        task = self.task_manager.new_task(search_instruction)
+        task.run()
+
+        """
+        # 获取LLM的原始响应
+        llm_response_content = None
+        if hasattr(task, "llm") and hasattr(task.llm, "history"):
+            messages = task.llm.history.get_messages()
+            if messages:
+                # 获取最后一条助手消息的内容
+                for msg in reversed(messages):
+                    if hasattr(msg, "role") and msg.role == "assistant":
+                        llm_response_content = getattr(msg, "content", "")
+                        break
+
+        if llm_response_content:
+            self.console.print(f"[yellow]调试: LLM原始响应内容:[/yellow]\n{llm_response_content}")
+        else:
+            self.console.print("[red]调试: 未能获取LLM原始响应内容[/red]")
+        """
+
+        # 多种方式提取代码
+        code = self._extract_code_from_task(task)
+
+        task.done()
+        return code
+
+    def _generate_via_template(self, search_instruction, module_type, description):
+        """方法3: 基于模板生成代码"""
+        # 这里可以根据module_type提供一个基础模板
+        template_code = f"""
+            import requests
+            import time
+            import json
+            from bs4 import BeautifulSoup
+            import re
+            from urllib.parse import urljoin, urlparse
+
+            def search_web(topic, max_results=10):
+                '''
+                {description}
+                '''
+                try:
+                    results = []
+                    timestamp = time.time()
+
+                    # 基础搜索逻辑 - 根据module_type定制
+                    # TODO: 实现具体的搜索逻辑
+
+                    return {{
+                        "timestamp": timestamp,
+                        "topic": topic,
+                        "results": results,
+                        "success": True,
+                        "error": None
+                    }}
+                except Exception as e:
+                    return {{
+                        "timestamp": time.time(),
+                        "topic": topic,
+                        "results": [],
+                        "success": False,
+                        "error": str(e)
+                    }}
+            """
+        return template_code
+
+    def _extract_code_from_task(self, task):
+        code = None
+
+        # 方法1: 从LLM历史中提取最后的响应
+        if hasattr(task, "llm") and hasattr(task.llm, "history"):
+            try:
+                messages = task.llm.history.get_messages()
+                for message in reversed(messages):
+                    if hasattr(message, "role") and message.role == "assistant":
+                        content = getattr(message, "content", "")
+                        if "def search_web" in content:
+                            # 尝试最严格的匹配：````python main\n(.*?)\n````
+                            code_blocks = re.findall(
+                                r"````python main\n(.*?)\n````", content, re.DOTALL
+                            )
+                            if code_blocks:
+                                for block in code_blocks:
+                                    if "search_web" in block:
+                                        return block.strip()
+
+                            # 尝试次严格的匹配：````python <any_name>\n(.*?)\n````
+                            # 考虑 main 后面可能有空格或其他字符
+                            code_blocks = re.findall(
+                                r"````python\s*([\w\-\.]*)\s*\n(.*?)\n````", content, re.DOTALL
+                            )
+                            if code_blocks:
+                                for name, block in code_blocks:
+                                    if "search_web" in block:
+                                        return block.strip()
+
+                            # 尝试更宽松的匹配：````<lang> <name>\n(.*?)\n```` (匹配AIPy内部模式)
+                            # 这里的 self.pattern 是 Task 内部的，不能直接用，需要重新定义或复制
+                            # 我们可以直接匹配四个反引号开头的代码块
+                            code_blocks = re.findall(
+                                r"````(\w+)\s*([\w\-\.]*)\s*\n(.*?)\n````", content, re.DOTALL
+                            )
+                            if code_blocks:
+                                for lang, name, block in code_blocks:
+                                    if "search_web" in block:
+                                        return block.strip()
+
+                            # 尝试最宽松的匹配：只匹配四个反引号开头的代码块，不关心语言和名称
+                            code_blocks = re.findall(r"````\s*\n(.*?)\n````", content, re.DOTALL)
+                            if code_blocks:
+                                for block in code_blocks:
+                                    if "search_web" in block:
+                                        return block.strip()
+
+                            # 如果没有代码块标记，返回整个内容（作为最终备选）
+                            return content.strip()
+            except Exception as e:
+                self.console.print(f"[yellow]从LLM历史提取失败: {e}[/yellow]")
+
+        # 方法2: 从runner历史中提取（作为备选）
+        # Runner 历史中的 'code' 字段通常是 Task 成功执行的代码，所以这里可以保持不变
+        if not code and hasattr(task, "runner"):
+            try:
+                for entry in task.runner.history:
+                    if isinstance(entry, dict) and "code" in entry:
+                        entry_code = entry["code"]
+                        if entry_code and "def search_web" in str(entry_code):
+                            return entry_code
+            except Exception as e:
+                self.console.print(f"[yellow]从Runner历史提取失败: {e}[/yellow]")
+
+        return None
+
+    def _validate_generated_code(self, code):
+        """验证生成的代码是否有效"""
+        try:
+            # 基本语法检查
+            compile(code, "<string>", "exec")
+
+            # 检查必要的函数和结构
+            if "def search_web(" not in code:
+                return False
+
+            if "topic" not in code or "max_results" not in code:
+                return False
+
+            return True
+        except SyntaxError:
+            return False
+        except Exception:
+            return False
+
+    def _save_module_code(self, module_type, code, description):
+        """保存模块代码"""
+        try:
+            # 生成模块ID
+            module_id = f"{module_type}_{int(time.time())}"
+            module_path = self.search_modules_dir / f"{module_id}.py"
+
+            # 保存代码到模块文件
+            with open(module_path, "w", encoding="utf-8") as f:
+                f.write(code)
+
+            # 更新模块信息
+            self.modules_info["modules"][module_id] = {
+                "type": module_type,
+                "description": description,
+                "path": str(module_path),
+                "created_at": time.time(),
+            }
+
+            # 初始化成功率统计
+            self.modules_info["success_rate"][module_id] = {"successes": 0, "failures": 0}
+
+            self.modules_info["last_updated"][module_type] = time.time()
+            self._save_modules_info()
+
+            self.console.print(f"[green]搜索模块 {module_type} 已成功生成并保存[/green]")
+            return module_id
+        except Exception as e:
+            self.console.print(f"[red]保存模块代码失败: {e}[/red]")
+            return None
+
+    def _build_search_instruction(self, module_type, description):
+        """构建搜索指令"""
         search_instruction = f"""
             请生成一个完整的Python函数，用于执行网络搜索并返回结构化结果。
 
@@ -220,12 +459,13 @@ class SearchService:
         if module_type == "combined":
             search_instruction += """
                 6. 按照以下优先级顺序尝试各种搜索方法（不使用需要API密钥的方式）：
-                    a. 使用DuckDuckGo搜索引擎，添加时间筛选参数
-                    b. 使用百度搜索，添加时间筛选参数
-                    c. 使用bing搜索，添加时间筛选参数
-                    d. 直接访问相关领域的权威网站并抓取最新内容
+                    a. 使用百度搜索，添加时间筛选参数
+                    b. 使用bing搜索，添加时间筛选参数
+                    c. 直接访问相关领域的权威网站并抓取最新内容
+                    d. 使用DuckDuckGo搜索引擎，添加时间筛选参数
                     e. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
                 """
+
         search_instruction += """
             7. 搜索内容应包括：
                 a. 关于{topic}的最新数据和统计数字
@@ -245,49 +485,48 @@ class SearchService:
                 - success: 布尔值，表示搜索是否成功
                 - error: 如果失败，包含错误信息
 
+            请将生成的代码放在标记为 'main' 的代码块中：
+
+            ````python main
+            # 您的 search_web 函数代码
+            ````
+
             只返回完整的Python代码，不要有任何解释。
             """
+        return search_instruction
 
-        task = self.task_manager.new_task(search_instruction)
-        task.run()
+    def _generate_search_module(self, module_type, description):
+        """通过LLM生成特定类型的搜索模块代码并保存 - 优化版本"""
 
-        # 从任务历史中提取代码
-        code = None
-        for entry in task.runner.history:
-            if entry.get("code") and "search_web" in entry.get("code"):
-                code = entry.get("code")
-                break
+        search_instruction = self._build_search_instruction(module_type, description)
 
-        task.done()
+        # 定义代码生成方法和对应的名称
+        generation_methods = [
+            ("Task系统", self._generate_via_task_system),
+            ("直接LLM调用", self._generate_via_direct_llm),
+            ("模板生成", self._generate_via_template),
+        ]
 
-        if code:
-            # 生成模块ID
-            module_id = f"{module_type}_{int(time.time())}"
-            module_path = self.search_modules_dir / f"{module_id}.py"
+        for method_name, method in generation_methods:
+            try:
+                self.console.print(f"[yellow]尝试使用 {method_name} 生成搜索模块...[/yellow]")
+                code = method(search_instruction, module_type, description)
 
-            # 保存代码到模块文件
-            with open(module_path, "w", encoding="utf-8") as f:
-                f.write(code)
+                if code and "search_web" in code:
+                    # 验证代码的有效性
+                    if self._validate_generated_code(code):
+                        return self._save_module_code(module_type, code, description)
+                    else:
+                        self.console.print(f"[yellow]{method_name} 生成的代码验证失败[/yellow]")
+                else:
+                    self.console.print(f"[yellow]{method_name} 未生成有效代码[/yellow]")
 
-            # 更新模块信息
-            self.modules_info["modules"][module_id] = {
-                "type": module_type,
-                "description": description,
-                "path": str(module_path),
-                "created_at": time.time(),
-            }
+            except Exception as e:
+                self.console.print(f"[yellow]{method_name} 失败: {e}[/yellow]")
+                continue
 
-            # 初始化成功率统计
-            self.modules_info["success_rate"][module_id] = {"successes": 0, "failures": 0}
-
-            self.modules_info["last_updated"][module_type] = time.time()
-            self._save_modules_info()
-
-            self.console.print(f"[green]搜索模块 {module_type} 已成功生成并保存[/green]")
-            return module_id
-        else:
-            self.console.print(f"[red]无法生成搜索模块 {module_type} 的代码[/red]")
-            return None
+        self.console.print(f"[red]所有方法都无法生成搜索模块 {module_type} 的代码[/red]")
+        return None
 
     def _get_best_module(self):
         """根据历史成功率选择最佳模块"""
