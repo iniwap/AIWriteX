@@ -2,7 +2,7 @@ import os
 import glob
 import random
 import sys
-from typing import Type, Optional
+from typing import Type
 
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -202,7 +202,6 @@ class AIPySearchToolInput(BaseModel):
     """输入参数模型"""
 
     topic: str = Field(..., description="要搜索的话题")
-    max_results: Optional[int] = Field(10, description="返回的最大结果数量")
 
 
 class AIPySearchTool(BaseTool):
@@ -212,15 +211,17 @@ class AIPySearchTool(BaseTool):
     description: str = "使用AIPy搜索最新的信息、数据和趋势"
     args_schema: type[BaseModel] = AIPySearchToolInput
 
-    def _run(self, topic: str, max_results: int = 10) -> str:
+    def _run(self, topic: str) -> str:
         """执行AIPy搜索"""
         # 保存当前工作目录
         original_cwd = os.getcwd()
 
+        config = Config.get_instance()
+
         if Config.get_instance().use_search_service:
-            results = self._use_search_service(topic, max_results)
+            results = self._use_search_service(topic, config.aipy_search_max_results)
         else:
-            results = self._nouse_search_service(topic, max_results)
+            results = self._nouse_search_service(topic, config.aipy_search_max_results)
 
         # 恢复原始工作目录
         os.chdir(original_cwd)
@@ -303,8 +304,6 @@ class AIPySearchTool(BaseTool):
 
             限制结果数量为{max_results}个，按时间从新到旧排序。
             只返回完整的Python代码，不要有任何解释。
-
-            执行代码后，将搜索结果存储在__result__变量中。
             """
 
             task = task_manager.new_task(search_instruction)

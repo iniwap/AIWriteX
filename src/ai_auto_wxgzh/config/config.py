@@ -137,6 +137,7 @@ class Config:
             "need_auditor": False,
             "use_compress": False,
             "use_search_service": False,
+            "aipy_search_max_results": 10,
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",
@@ -335,6 +336,13 @@ class Config:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["use_search_service"]
+
+    @property
+    def aipy_search_max_results(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["aipy_search_max_results"]
 
     @property
     def api_list(self):

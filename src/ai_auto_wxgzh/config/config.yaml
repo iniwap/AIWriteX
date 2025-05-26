@@ -123,3 +123,4 @@ template: ""
 need_auditor: false
 use_compress: true
 use_search_service: true
+aipy_search_max_results: 10

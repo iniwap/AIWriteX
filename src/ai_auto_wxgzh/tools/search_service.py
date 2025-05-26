@@ -204,37 +204,43 @@ class SearchService:
         # 直接调用LLM
         response = self.task_manager.llm(search_instruction)
 
-        if not response:
+        if not response or not isinstance(response, str):
             return None
 
-        # 尝试最严格的匹配：````python main\n(.*?)\n````
-        code_blocks = re.findall(r"````python main\n(.*?)\n````", response, re.DOTALL)
-        if code_blocks:
-            for block in code_blocks:
-                if "search_web" in block:
-                    return block.strip()
+        # 使用AIPy的正则表达式模式进行匹配
+        pattern = re.compile(r"^(`{4})(\w+)\s+([\w\-\.]+)\n(.*?)^\1\s*$", re.DOTALL | re.MULTILINE)
 
-        # 尝试次严格的匹配：````python <any_name>\n(.*?)\n````
-        # 考虑 main 后面可能有空格或其他字符
-        code_blocks = re.findall(r"````python\s*([\w\-\.]*)\s*\n(.*?)\n````", response, re.DOTALL)
-        if code_blocks:
-            for name, block in code_blocks:
-                if "search_web" in block:
-                    return block.strip()
+        code_blocks = {}
+        for match in pattern.finditer(response):
+            _, _, name, content = match.groups()
+            code_blocks[name] = content.rstrip("\n")
 
-        # 尝试更宽松的匹配：````<lang> <name>\n(.*?)\n```` (匹配AIPy内部模式)
-        code_blocks = re.findall(r"````(\w+)\s*([\w\-\.]*)\s*\n(.*?)\n````", response, re.DOTALL)
-        if code_blocks:
-            for lang, name, block in code_blocks:
-                if "search_web" in block:
-                    return block.strip()
+        # 优先查找main块
+        if "main" in code_blocks and "search_web" in code_blocks["main"]:
+            return code_blocks["main"]
 
-        # 尝试最宽松的匹配：只匹配四个反引号开头的代码块，不关心语言和名称
-        code_blocks = re.findall(r"````\s*\n(.*?)\n````", response, re.DOTALL)
-        if code_blocks:
-            for block in code_blocks:
-                if "search_web" in block:
-                    return block.strip()
+        # 如果没有main块，查找其他包含search_web的块
+        for _, block_content in code_blocks.items():
+            if "search_web" in block_content:
+                return block_content
+
+        # 统一的代码块匹配模式（支持3个或4个反引号）
+        patterns = [
+            # 三个反引号的python代码块
+            r"```python\s*\n(.*?)\n```",
+            # 四个反引号的python代码块
+            r"````python\s*\n(.*?)\n````",
+            # 三个反引号的任意代码块
+            r"```\s*\n(.*?)\n```",
+            # 四个反引号的任意代码块
+            r"````\s*\n(.*?)\n````",
+        ]
+
+        for pattern in patterns:
+            matches = re.findall(pattern, response, re.DOTALL)
+            for code_content in matches:
+                if "def search_web" in code_content:
+                    return code_content.strip()
 
         # 如果没有代码块标记，尝试提取整个响应作为代码（作为最终备选）
         if "def search_web" in response:
@@ -248,24 +254,6 @@ class SearchService:
 
         task = self.task_manager.new_task(search_instruction)
         task.run()
-
-        """
-        # 获取LLM的原始响应
-        llm_response_content = None
-        if hasattr(task, "llm") and hasattr(task.llm, "history"):
-            messages = task.llm.history.get_messages()
-            if messages:
-                # 获取最后一条助手消息的内容
-                for msg in reversed(messages):
-                    if hasattr(msg, "role") and msg.role == "assistant":
-                        llm_response_content = getattr(msg, "content", "")
-                        break
-
-        if llm_response_content:
-            self.console.print(f"[yellow]调试: LLM原始响应内容:[/yellow]\n{llm_response_content}")
-        else:
-            self.console.print("[red]调试: 未能获取LLM原始响应内容[/red]")
-        """
 
         # 多种方式提取代码
         code = self._extract_code_from_task(task)
@@ -314,70 +302,54 @@ class SearchService:
         return template_code
 
     def _extract_code_from_task(self, task):
-        code = None
+        # 首先检查runner历史，这里包含实际执行的代码
+        if hasattr(task, "runner") and task.runner.history:
+            for entry in task.runner.history:
+                if isinstance(entry, dict) and "code" in entry:
+                    code = entry["code"]
+                    if code and "def search_web" in str(code):
+                        return code
 
-        # 方法1: 从LLM历史中提取最后的响应
+        # 然后检查LLM历史
         if hasattr(task, "llm") and hasattr(task.llm, "history"):
-            try:
-                messages = task.llm.history.get_messages()
-                for message in reversed(messages):
-                    if hasattr(message, "role") and message.role == "assistant":
-                        content = getattr(message, "content", "")
-                        if "def search_web" in content:
-                            # 尝试最严格的匹配：````python main\n(.*?)\n````
-                            code_blocks = re.findall(
-                                r"````python main\n(.*?)\n````", content, re.DOTALL
-                            )
-                            if code_blocks:
-                                for block in code_blocks:
-                                    if "search_web" in block:
-                                        return block.strip()
+            messages = task.llm.history.get_messages()
+            for message in reversed(messages):
+                if hasattr(message, "role") and message.role == "assistant":
+                    content = message.content
+                    # 添加对None内容的检查
+                    if content is not None and "def search_web" in content:
+                        # 使用AIPy的parse_reply方法
+                        blocks = task.parse_reply(content)
+                        if "main" in blocks:
+                            return blocks["main"]
+                        # 如果没有main块，尝试其他块
+                        for _, block_content in blocks.items():
+                            if "def search_web" in block_content:
+                                return block_content
 
-                            # 尝试次严格的匹配：````python <any_name>\n(.*?)\n````
-                            # 考虑 main 后面可能有空格或其他字符
-                            code_blocks = re.findall(
-                                r"````python\s*([\w\-\.]*)\s*\n(.*?)\n````", content, re.DOTALL
-                            )
-                            if code_blocks:
-                                for name, block in code_blocks:
-                                    if "search_web" in block:
-                                        return block.strip()
+                        # 分别处理三个和四个反引号的情况
+                        patterns = [
+                            # 三个反引号的python代码块
+                            r"```python\s*\n(.*?)\n```",
+                            # 四个反引号的python代码块
+                            r"````python\s*\n(.*?)\n````",
+                            # 三个反引号的任意代码块
+                            r"```\s*\n(.*?)\n```",
+                            # 四个反引号的任意代码块
+                            r"````\s*\n(.*?)\n````",
+                        ]
 
-                            # 尝试更宽松的匹配：````<lang> <name>\n(.*?)\n```` (匹配AIPy内部模式)
-                            # 这里的 self.pattern 是 Task 内部的，不能直接用，需要重新定义或复制
-                            # 我们可以直接匹配四个反引号开头的代码块
-                            code_blocks = re.findall(
-                                r"````(\w+)\s*([\w\-\.]*)\s*\n(.*?)\n````", content, re.DOTALL
-                            )
-                            if code_blocks:
-                                for lang, name, block in code_blocks:
-                                    if "search_web" in block:
-                                        return block.strip()
+                        for pattern in patterns:
+                            matches = re.findall(pattern, content, re.DOTALL)
+                            for code_content in matches:
+                                if "def search_web" in code_content:
+                                    return code_content.strip()
 
-                            # 尝试最宽松的匹配：只匹配四个反引号开头的代码块，不关心语言和名称
-                            code_blocks = re.findall(r"````\s*\n(.*?)\n````", content, re.DOTALL)
-                            if code_blocks:
-                                for block in code_blocks:
-                                    if "search_web" in block:
-                                        return block.strip()
+                        # 如果没有代码块标记，返回整个内容（作为最终备选）
+                        return content.strip()
 
-                            # 如果没有代码块标记，返回整个内容（作为最终备选）
-                            return content.strip()
-            except Exception as e:
-                self.console.print(f"[yellow]从LLM历史提取失败: {e}[/yellow]")
-
-        # 方法2: 从runner历史中提取（作为备选）
-        # Runner 历史中的 'code' 字段通常是 Task 成功执行的代码，所以这里可以保持不变
-        if not code and hasattr(task, "runner"):
-            try:
-                for entry in task.runner.history:
-                    if isinstance(entry, dict) and "code" in entry:
-                        entry_code = entry["code"]
-                        if entry_code and "def search_web" in str(entry_code):
-                            return entry_code
-            except Exception as e:
-                self.console.print(f"[yellow]从Runner历史提取失败: {e}[/yellow]")
-
+        print("task.runner.history：：：：", task.runner.history)
+        print(" task.llm.history.get_messages：：：：", task.llm.history.get_messages())
         return None
 
     def _validate_generated_code(self, code):
@@ -458,7 +430,7 @@ class SearchService:
         # 为combined模块添加特殊指令
         if module_type == "combined":
             search_instruction += """
-                6. 按照以下优先级顺序尝试各种搜索方法（不使用需要API密钥的方式）：
+                6. 按照以下优先级顺序尝试各种搜索方法（不能使用需要API密钥的方式）：
                     a. 使用百度搜索，添加时间筛选参数
                     b. 使用bing搜索，添加时间筛选参数
                     c. 直接访问相关领域的权威网站并抓取最新内容
@@ -468,7 +440,7 @@ class SearchService:
 
         search_instruction += """
             7. 搜索内容应包括：
-                a. 关于{topic}的最新数据和统计数字
+                a. 关于搜索主题的最新数据和统计数字
                 b. 最近的事件和时间点
                 c. 当前趋势和发展
                 d. 权威来源的观点和分析
@@ -485,18 +457,12 @@ class SearchService:
                 - success: 布尔值，表示搜索是否成功
                 - error: 如果失败，包含错误信息
 
-            请将生成的代码放在标记为 'main' 的代码块中：
-
-            ````python main
-            # 您的 search_web 函数代码
-            ````
-
             只返回完整的Python代码，不要有任何解释。
             """
         return search_instruction
 
     def _generate_search_module(self, module_type, description):
-        """通过LLM生成特定类型的搜索模块代码并保存 - 优化版本"""
+        """通过LLM生成特定类型的搜索模块代码并保存"""
 
         search_instruction = self._build_search_instruction(module_type, description)
 

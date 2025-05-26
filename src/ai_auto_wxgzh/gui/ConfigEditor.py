@@ -331,6 +331,14 @@ class ConfigEditor:
                 )
             ],
             [
+                sg.Text("AIPy搜索数量:", size=(15, 1)),
+                sg.InputText(
+                    self.config.aipy_search_max_results,
+                    key="-AIPY_SEARCH_MAX_RESULTS-",
+                    disabled=True,
+                ),
+            ],
+            [
                 sg.Text(
                     "Tips：\n"
                     "1、使用模板：\n"
@@ -346,8 +354,9 @@ class ConfigEditor:
                     "    - 不压缩：token消耗，AI可能理解更精确\n"
                     "4、AIPy搜索缓存：\n"
                     "    - 使用：优先使用本地缓存，降低后续执行搜索任务的token消耗\n"
-                    "    - 不使用：可能更精准，但token消耗较高，总体执行成功率降低",
-                    size=(70, 15),
+                    "    - 不使用：可能更精准，但token消耗较高，总体执行成功率降低\n"
+                    "5、AIPy搜索数量：返回的最大搜索结果数量",
+                    size=(70, 16),
                     text_color="gray",
                 ),
             ],
@@ -788,6 +797,7 @@ class ConfigEditor:
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
                 config["use_compress"] = values["-USE_COMPRESS-"]
                 config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
+                config["aipy_search_max_results"] = values["-AIPY_SEARCH_MAX_RESULTS-"]
                 # 处理 template 保存逻辑
                 template_value = values["-TEMPLATE-"]
                 config["template"] = "" if template_value == "随机模板" else template_value
@@ -882,6 +892,9 @@ class ConfigEditor:
                 config["need_auditor"] = self.config.default_config["need_auditor"]
                 config["use_compress"] = self.config.default_config["use_compress"]
                 config["use_search_service"] = self.config.default_config["use_search_service"]
+                config["aipy_search_max_results"] = self.config.default_config[
+                    "aipy_search_max_results"
+                ]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
                     self.update_tab("-TAB_OTHER-", self.create_other_tab())
