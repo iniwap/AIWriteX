@@ -198,6 +198,28 @@ def search_web(topic, max_results=10):
         }
 
 
+def parse_reply(markdown):
+    """
+    解析markdown文本中的代码块
+
+    Args:
+        markdown (str): 包含代码块的markdown文本
+
+    Returns:
+        dict: 代码块字典，键为代码块名称，值为代码内容
+    """
+    # AIPy使用的正则表达式模式，匹配四个反引号格式的代码块
+    pattern = re.compile(r"^(`{4})(\w+)\s+([\w\-\.]+)\n(.*?)^\1\s*$", re.DOTALL | re.MULTILINE)
+
+    code_blocks = {}
+    for match in pattern.finditer(markdown):
+        _, _, name, content = match.groups()
+        code_blocks[name] = content.rstrip("\n")
+
+    return code_blocks
+
+
 if __name__ == "__main__":
-    __result__ = search_web("历史上的今天", 5)
-    print(__result__)
+    # __result__ = search_web("历史上的今天", 5)
+    # print(__result__)
+    pass

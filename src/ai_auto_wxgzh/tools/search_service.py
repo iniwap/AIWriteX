@@ -314,9 +314,12 @@ class SearchService:
         if hasattr(task, "llm") and hasattr(task.llm, "history"):
             messages = task.llm.history.get_messages()
             for message in reversed(messages):
-                if hasattr(message, "role") and message.role == "assistant":
-                    content = message.content
-                    # 添加对None内容的检查
+                # 直接访问字典的键，而不是使用hasattr和.属性访问
+                msg_role = message.get("role")
+                content = message.get("content")
+
+                if msg_role == "assistant":
+                    # 修正：确保content不为None，并且包含"def search_web"
                     if content is not None and "def search_web" in content:
                         # 使用AIPy的parse_reply方法
                         blocks = task.parse_reply(content)
@@ -348,9 +351,7 @@ class SearchService:
                         # 如果没有代码块标记，返回整个内容（作为最终备选）
                         return content.strip()
 
-        print("task.runner.history：：：：", task.runner.history)
-        print(" task.llm.history.get_messages：：：：", task.llm.history.get_messages())
-        return None
+            return None
 
     def _validate_generated_code(self, code):
         """验证生成的代码是否有效"""

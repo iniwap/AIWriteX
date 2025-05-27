@@ -213,12 +213,11 @@ class AIPySearchTool(BaseTool):
 
     def _run(self, topic: str) -> str:
         """执行AIPy搜索"""
-        # 保存当前工作目录
-        original_cwd = os.getcwd()
-
         config = Config.get_instance()
 
-        if Config.get_instance().use_search_service:
+        # 保存当前工作目录
+        original_cwd = os.getcwd()
+        if config.use_search_service:
             results = self._use_search_service(topic, config.aipy_search_max_results)
         else:
             results = self._nouse_search_service(topic, config.aipy_search_max_results)
