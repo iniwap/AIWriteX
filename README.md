@@ -60,9 +60,9 @@
 
 ### 软件模式
 1. 安装`output`目录下的`微信公众号AI工具_Setup.exe`文件（考虑到大文件下载过慢，**请从网盘下载**👇）
-    - [移动云盘 提取码:sm3u](https://caiyun.139.com/w/i/2nc6jGaXyJg5f)
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EWP7UqX2JgVDo9XTCsjVpJQBeOL9bJgPtg6ZL-di0TZfzQ?e=frAZhD)
-    - [Google Drive](https://drive.google.com/file/d/1S2tZjfl3FfkJMXWpQ2q8XyGyUia1aGwL/view?usp=sharing)
+    - [移动云盘 提取码:gmbd](https://caiyun.139.com/w/i/2nc6jxagM19yt)
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EbZkiEFihXVAtEdiZgm_MQcBWxHXtX7jfbmtycbmimfvjw?e=KyA2sv)
+    - [Google Drive](https://drive.google.com/file/d/1bECmFmAqZOmAv8LM-unVPnnQoZdlTSCe/view?usp=sharing)
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
 3. 点击`开始执行`
 
@@ -87,9 +87,10 @@ pip  install crewai
 ### AIPy相关问题
 1. **首次执行需要初始化搜索代码，速度较慢，请耐心等待，后续执行会很快（开启use_search_service缓存时）；**
 2. 不是所有话题搜索引擎都能搜索到，如果失败属于正常现象，任务会继续执行的；
-3. 搜索代码生成过程中会有错误，请忽略（有自动纠错机制，后续运行会修复），不影响整体运行；
-4. 执行过程中可能会依赖某些库，请注意查看日志输出，需要安装（会提示安装）；
-5. 生成搜索代码有随机性，由于采用了缓存机制，多运行几次，搜索效果会提升。
+3. 搜索代码生成过程中可能会有错误，请忽略（有自动纠错机制，后续运行会修复），不影响整体运行；
+4. 生成搜索代码有随机性，由于采用了缓存机制，多运行几次，搜索效果会提升；
+5. 由于搜索引擎的限制以及人工验证的存在，会出现搜索不到结果的情况，请忽略，不影响整体运行。
+
 
 ⚠️**免费的OpenRouter有可能服务不正常，无法正确运行（这种情况只能等用的人少的时候再试）；一个账号首次执行成功率比较高，后续执行使用模板时候可能被截断。**
 *这应该跟其最近修改了付费策略有关系，免费的终究是没那么好用。*
@@ -131,7 +132,7 @@ pip  install crewai
 - 不支持button，会被自动移除
 - 会自动移除 background: url
 - `<linearGradient id="catGradient">`，此类动画，id会被自动移除，动画会失效
-- **最近发现发布的文章不会显示到公众号文章列表，但是有时会收到消息通知（关注者），之前完全没通知**
+- **最近发现发布的文章不会显示到公众号文章列表，但是有时会收到消息通知（关注者），之前完全没通知（每天大概3-5篇的，后续不会有通知）**
 ### 关于软件模式
 - 为了支持软件模式，让大家更简单的体验项目，调试花费了很长时间(CrewAI使用大量资源，一个个试探出来的)，给个star支持下吧~
 - 好消息，最近openrouter比较稳定，基本次次成功（瑕疵是好像deepseek0324算力有缩减，效果没开始那么好）。
