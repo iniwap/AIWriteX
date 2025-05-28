@@ -55,6 +55,9 @@ def select_platform_topic(platform, cnt=10):
     ]  # 权重递减，如 [68.30%,17.08%,7.59%,4.27%,2.73%,...]
     selected_topic = random.choices(topics, weights=weights, k=1)[0]
 
+    # 考虑到最终标题格式，替换其中已经有的|
+    selected_topic = selected_topic.replace("|", "——")
+
     return selected_topic
 
 
