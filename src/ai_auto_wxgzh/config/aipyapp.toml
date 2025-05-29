@@ -5,7 +5,7 @@ default_llm_provider = "openrouter"
 
 [llm.openrouter]
 type = "openai"
-model = "deepseek/deepseek-chat-v3-0324:free"
+model = "deepseek/deepseek-chat-v3-0324:free"  # deepseek/deepseek-r1-0528:free
 api_key = ""
 base_url = "https://openrouter.ai/api/v1"
 enable = true

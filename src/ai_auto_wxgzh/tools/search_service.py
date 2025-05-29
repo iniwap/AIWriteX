@@ -418,7 +418,7 @@ class SearchService:
                 - 超时处理
                 - 编码问题处理
             3. 对于每个搜索结果，必须访问原始网页并提取以下内容：
-                - 详细的内容摘要
+                - 详细的内容摘要（不少于100字）
                 - 准确的发布时间
                 - 如果无法直接找到发布时间，尝试从URL、页面内容或其他元数据推断
             4. 使用多种方法提取时间信息：
@@ -452,6 +452,8 @@ class SearchService:
                 - results: 搜索结果列表，每个结果必须包含url、title、abstract和pub_time
                 - success: 布尔值，表示搜索是否成功
                 - error: 如果失败，包含错误信息
+
+            **重要：生成的代码必须能够直接执行并返回有效结果。**
 
             只返回完整的Python代码，不要有任何解释。
             """
@@ -548,7 +550,7 @@ class SearchService:
         total = stats["successes"] + stats["failures"]
 
         # 如果失败次数过多，重新生成
-        if total >= 5 and stats["failures"] / total > 0.7:
+        if total >= 4 and stats["failures"] / total > 0.6:
             self.console.print(f"[yellow]模块 {module_type} 失败率过高，正在重新生成...[/yellow]")
             description = self.modules_info["modules"][latest_module_id]["description"]
             return self._generate_search_module(module_type, description)

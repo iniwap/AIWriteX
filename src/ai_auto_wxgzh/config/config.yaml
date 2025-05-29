@@ -70,13 +70,14 @@ api:
     api_base: https://generativelanguage.googleapis.com
   OpenRouter:
     key: OPENROUTER_API_KEY
-    model_index: 0
     key_index: 0
     api_key:
       - ""
       - ""
+    model_index: 0
     model:
       - openrouter/deepseek/deepseek-chat-v3-0324:free
+      - openrouter/deepseek/deepseek-r1-0528:free
       - openrouter/deepseek/deepseek-prover-v2:free
       - openrouter/deepseek/deepseek-r1:free
       - openrouter/deepseek/deepseek-chat:free
@@ -87,11 +88,11 @@ api:
     api_base: https://openrouter.ai/api/v1
   Ollama:
     key: OPENAI_API_KEY
-    model_index: 0
     key_index: 0
     api_key:
       - tmp-key
       - ""
+    model_index: 0
     model:
       - ollama/deepseek-r1:14b
       - ollama/deepseek-r1:7b
