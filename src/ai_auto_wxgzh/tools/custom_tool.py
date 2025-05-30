@@ -15,6 +15,7 @@ from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.config.config import Config
 from src.ai_auto_wxgzh.tools.search_service import SearchService
 from src.ai_auto_wxgzh.utils import log
+from src.ai_auto_wxgzh.tools import search_template
 
 
 class ReadTemplateToolInput(BaseModel):
@@ -244,84 +245,147 @@ class AIPySearchTool(BaseTool):
 
     def _nouse_search_service(self, topic, max_results):
         try:
-            # 初始化AIPy
+            # 第一步：尝试使用本地模板代码
+            template_result = search_template.search_web(topic, max_results)
+            if template_result:
+                return str(template_result)
+
+            # 第二步：渐进式AI生成
             console = Console()
-            # 创建TaskManager
-            try:
-                task_manager = TaskManager(
-                    Config.get_instance().get_aipy_settings(), console=console
-                )
-            except Exception as e:
-                console.print_exception()
-                raise e
+            console.print("[yellow]本地模板搜索失败，尝试AI生成搜索代码...[/yellow]")
+            task_manager = TaskManager(Config.get_instance().get_aipy_settings(), console=console)
 
-            # 创建搜索任务
-            # 考虑到墙的因素，不要优先使用谷歌搜索
-            # 微信需要无代理，所以为了整个执行成功，建议关闭
-            search_instruction = f"""
-            请生成一个完整的Python函数，用于执行网络搜索并返回结构化结果。
+            # 先尝试基于模板的约束性生成
+            constrained_result = self._try_template_guided_ai(topic, max_results, task_manager)
+            if search_template.validate_search_result(constrained_result, "ai_guided"):
+                return str(constrained_result)
 
-            函数要求：
-            1. 函数名为search_web，接受两个参数：topic(搜索主题)和max_results(最大结果数)
-            2. 实现健壮的错误处理，包括：
-                - 网络连接错误处理
-                - 解析错误处理
-                - 超时处理
-                - 编码问题处理
-            3. 对于每个搜索结果，必须访问原始网页并提取以下内容：
-                - 详细的内容摘要（不少于100字）
-                - 准确的发布时间
-                - 如果无法直接找到发布时间，尝试从URL、页面内容或其他元数据推断
-            4. 使用多种方法提取时间信息：
-                - 检查meta标签（如article:published_time）
-                - 查找页面中的时间标记（如time标签或日期格式文本）
-                - 分析页面结构中可能包含日期的区域（如文章头部）
-            5. 实现适当的请求间隔，避免过快发送请求被网站封禁
-            6. 按照以下优先级顺序尝试各种搜索方法（不使用需要API密钥的方式）：
-                a. 使用百度搜索，添加时间筛选参数
-                b. 使用bing搜索，添加时间筛选参数
-                c. 直接访问相关领域的权威网站并抓取最新内容
-                d. 使用DuckDuckGo搜索引擎，添加时间筛选参数
-                e. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
-            7. 确保搜索结果包含：
-                - 来源URL
-                - 发布时间
-                - 内容摘要
-            8. 限制结果数量为{max_results}，对结果按发布时间从新到旧排序
-            9. 验证信息的时效性，过滤掉旧信息，优先获取最近7天内的内容
-            10. 返回格式为字典，包含以下字段：
-                - timestamp: 搜索执行时间戳
-                - topic: 搜索主题
-                - results: 搜索结果列表，每个结果必须包含url、title、abstract和pub_time
-                - success: 布尔值，表示搜索是否成功
-                - error: 如果失败，包含错误信息
+            # 最后尝试完全自由的AI生成
+            free_result = self._try_free_form_ai(topic, max_results, task_manager)
+            if free_result.validate_search_result(free_result, "ai_free"):
+                return str(free_result)
 
-            **执行调用搜索：**
-            __result__ = search_web("{topic}", {max_results})
-            当__result__["results"] 不为空列表时，结束生成代码，直接总结搜索结果。
-
-            只返回完整的Python代码，不要有任何解释。
-            """
-
-            task = task_manager.new_task(search_instruction)
-
-            # 执行任务
-            task.run()
-
-            # 从任务历史中提取搜索结果
-            search_results = None
-            for entry in task.runner.history:
-                if "__result__" in entry.get("result", {}):
-                    search_results = entry["result"]["__result__"]
-                    break
-
-            # 完成任务并保存结果
-            task.done()
-
-            if search_results:
-                return str(search_results)
-            else:
-                return f"未能找到关于'{topic}'的搜索结果。"
+            return f"未能找到关于'{topic}'的搜索结果。"
 
         except Exception as e:
             return f"搜索过程中发生错误: {str(e)}"
+
+    def _try_template_guided_ai(self, topic, max_results, task_manager):
+        """基于模板模式的约束性AI生成"""
+        search_instruction = f"""
+        请生成一个搜索函数，能够从四种搜索引擎获取结果。参考以下成功配置：
+
+        # 搜索引擎URL模式：
+        - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
+        - Bing: https://www.bing.com/search?q={{quote(topic)}}&count={{max_results}}
+        - 360: https://www.so.com/s?q={{quote(topic)}}&rn={{max_results}}
+        - 搜狗: https://www.sogou.com/web?query={{quote(topic)}}
+
+        # 关键CSS选择器：
+        百度结果容器: ["div.result", "div.c-container", "div[class*='result']"]
+        百度标题: ["h3", "h3 a", ".t", ".c-title"]
+        百度摘要: ["div.c-abstract", ".c-span9", "[class*='abstract']"]
+
+        Bing结果容器: ["li.b_algo", "div.b_algo", "li[class*='algo']"]
+        Bing标题: ["h2", "h3", "h2 a", ".b_title"]
+        Bing摘要: ["p.b_lineclamp4", "div.b_caption", ".b_snippet"]
+
+        360结果容器: ["li.res-list", "div.result", "li[class*='res']"]
+        360标题: ["h3.res-title", "h3", ".res-title"]
+        360摘要: ["p.res-desc", "div.res-desc", ".res-summary"]
+
+        搜狗结果容器: ["div.vrwrap", "div.results", "div.result"]
+        搜狗标题: ["h3.vr-title", "h3.vrTitle", "a.title", "h3"]
+        搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
+
+        # 重要处理逻辑：
+        1. 按优先级依次尝试四个搜索引擎，直到获得有效结果
+        2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
+        3. 从页面提取发布时间，优先meta标签: meta[property='article:published_time']
+        4. 验证结果质量：至少要有标题、URL，且有完整摘要和发布时间的结果
+        5. 按发布时间排序，优先最近7天内容
+
+        # 必须返回格式：
+        {{
+            "timestamp": time.time(),
+            "topic": "{topic}",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+
+        __result__ = search_web("{topic}", {max_results})
+        """
+
+        task = task_manager.new_task(search_instruction)
+        task.run()
+
+        for entry in task.runner.history:
+            if "__result__" in entry.get("result", {}):
+                result = entry["result"]["__result__"]
+                task.done()
+                return result
+
+        task.done()
+        return None
+
+    def _try_free_form_ai(self, topic, max_results, task_manager):
+        """完全自由的AI生成"""
+        search_instruction = f"""
+        请创新性地生成搜索函数，获取最新相关信息：
+
+        # 可选搜索策略：
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
+        2. 使用新闻聚合API（如NewsAPI、RSS源）
+        3. 尝试社交媒体平台搜索
+        4. 使用学术搜索引擎
+
+        # 核心要求：
+        - 函数名为search_web，参数topic和max_results
+        - 实现多重容错机制，至少尝试2-3种不同方法
+        - 对每个结果访问原始页面提取完整信息
+        - 优先获取最近7天内的新鲜内容
+        - 摘要长度至少100字，包含关键信息
+
+        # 时间提取策略：
+        - 优先meta标签：article:published_time, datePublished
+        - 备选方案：time标签、日期相关class、页面文本匹配
+        - 支持多种日期格式：YYYY-MM-DD、中文日期等
+
+        # 返回格式（严格遵守）：
+        {{
+            "timestamp": time.time(),
+            "topic": "{topic}",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要（至少100字）",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+
+        __result__ = search_web("{topic}", {max_results})
+        """
+
+        task = task_manager.new_task(search_instruction)
+        task.run()
+
+        for entry in task.runner.history:
+            if "__result__" in entry.get("result", {}):
+                result = entry["result"]["__result__"]
+                task.done()
+                return result
+
+        task.done()
+        return None

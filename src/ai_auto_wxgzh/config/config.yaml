@@ -124,4 +124,4 @@ template: ""
 need_auditor: false
 use_compress: true
 use_search_service: false
-aipy_search_max_results: 5
+aipy_search_max_results: 10

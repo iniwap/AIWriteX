@@ -105,7 +105,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v1.1",
+            "微信公众号AI工具 v1.2",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),  # 展开650

@@ -30,6 +30,9 @@ from dashscope import ImageSynthesis  # noqa 841
 import mimetypes  # noqa 841
 import json  # noqa 841
 import logging  # noqa 841
+from enum import Enum  # noqa 841
+import unicodedata  # noqa 841
+from urllib.parse import quote  # noqa 841
 
 from crewai.tools import BaseTool  # noqa 841
 from typing import Type  # noqa 841

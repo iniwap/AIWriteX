@@ -137,7 +137,7 @@ class Config:
             "need_auditor": False,
             "use_compress": False,
             "use_search_service": False,
-            "aipy_search_max_results": 5,
+            "aipy_search_max_results": 10,
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",

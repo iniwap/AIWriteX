@@ -10,6 +10,7 @@ from rich.console import Console
 
 from src.ai_auto_wxgzh.config.config import Config
 from src.ai_auto_wxgzh.utils import log
+from src.ai_auto_wxgzh.tools import search_template
 
 
 class SearchService:
@@ -17,36 +18,34 @@ class SearchService:
 
     def __init__(self):
         self.console = Console()
-        # 从配置中获取工作目录
-        work_dir = Path(Config.get_instance().get_aipy_settings().get("workdir", "aipy_work"))
+        self._setup_directories()
+        self._load_data()
+        self._init_task_manager()
 
-        # 确保工作目录存在
+    def _setup_directories(self):
+        """设置目录结构"""
+        work_dir = Path(Config.get_instance().get_aipy_settings().get("workdir", "aipy_work"))
         if not work_dir.is_absolute():
             work_dir = Path.cwd() / work_dir
         work_dir.mkdir(parents=True, exist_ok=True)
 
-        # 使用工作目录下的cache子目录
         self.cache_dir = work_dir / "cache"
         self.cache_dir.mkdir(exist_ok=True)
-
-        # 其他目录和文件路径
         self.search_modules_dir = self.cache_dir / "search_modules"
         self.search_modules_dir.mkdir(exist_ok=True)
+
+        # 文件路径
         self.modules_info_file = self.cache_dir / "modules_info.json"
         self.cache_file = self.cache_dir / "search_cache.json"
         self.error_log_file = self.cache_dir / "search_errors.json"
 
-        # 加载数据
-        self.default_cache_duration = 3600 * 24  # 超过1天的搜索结果缓存清除
+    def _load_data(self):
+        """加载所有数据"""
+        self.default_cache_duration = 3600 * 24
         self.modules_info = self._load_modules_info()
         self.cache = self._load_cache()
-        self._clean_cache()  # 加载后立即清理
+        self._clean_cache()
         self.error_log = self._load_error_log()
-
-        self.task_manager = None
-
-        # 确保搜索模块存在
-        self._ensure_search_modules()
 
     def _load_cache(self):
         """加载缓存数据并确保时间戳是浮点数"""
@@ -157,49 +156,40 @@ class SearchService:
 
     def _init_task_manager(self):
         """初始化TaskManager"""
-        if not self.task_manager:
-            try:
-                self.task_manager = TaskManager(
-                    Config.get_instance().get_aipy_settings(), console=self.console
-                )
-                # 验证TaskManager是否正常工作
-                if not self.task_manager.llm:
-                    self.console.print("[red]警告: TaskManager的LLM未正确初始化[/red]")
-            except Exception as e:
-                self.console.print(f"[red]TaskManager初始化失败: {e}[/red]")
-                raise
+        try:
+            self.task_manager = TaskManager(
+                Config.get_instance().get_aipy_settings(), console=self.console
+            )
+            # 验证TaskManager是否正常工作
+            if not self.task_manager.llm:
+                self.console.print("[red]警告: TaskManager的LLM未正确初始化[/red]")
+        except Exception as e:
+            self.console.print(f"[red]TaskManager初始化失败: {e}[/red]")
+            raise
 
-    def _ensure_search_modules(self):
+    def _ensure_ai_modules_exist(self):
         """确保搜索模块文件存在，如果不存在则创建"""
         # 检查是否有任何搜索模块
         if not self.modules_info["modules"]:
-            self._init_task_manager()
-
             # 生成多种搜索模块
             module_types = [
-                ("baidu", "使用百度搜索引擎，添加时间筛选参数"),
-                ("bing", "使用Bing搜索引擎，添加时间筛选参数"),
-                ("scraper", "直接访问相关领域的权威网站并抓取最新内容"),
-                ("duckduckgo", "使用DuckDuckGo搜索引擎，添加时间筛选参数"),
-                ("google", "使用Google搜索引擎，仅在其他方法无法获取足够信息时使用"),
-                ("combined", "结合多种搜索引擎的综合搜索，按优先级顺序尝试各种搜索方法"),
+                ("baidu", "通过解析百度搜索结果页面获取信息，使用网页爬取技术"),
+                ("bing", "通过解析bing搜索结果页面获取信息，使用网页爬取技术"),
+                ("sougou", "通过解析搜狗搜索结果页面获取信息，使用网页爬取技术"),
+                ("360", "通过解析360搜索结果页面获取信息，使用网页爬取技术"),
+                ("combined", "综合多种国内搜索引擎，按优先级尝试"),
             ]
 
             for module_type, description in module_types:
                 self._generate_search_module(module_type, description)
 
             # 设置默认模块
-            if "combined" in self.modules_info["modules"]:
-                self.modules_info["default_module"] = "combined"
-            elif self.modules_info["modules"]:
-                # 使用第一个可用模块作为默认
+            if self.modules_info["modules"]:
                 self.modules_info["default_module"] = list(self.modules_info["modules"].keys())[0]
-
-            self._save_modules_info()
+                self._save_modules_info()
 
     def _generate_via_direct_llm(self, search_instruction, module_type, description):
         """方法1: 直接使用LLM生成代码，不依赖Task系统"""
-        self._init_task_manager()
 
         # 直接调用LLM
         response = self.task_manager.llm(search_instruction)
@@ -250,7 +240,6 @@ class SearchService:
 
     def _generate_via_task_system(self, search_instruction, module_type, description):
         """方法2: 使用Task系统生成代码"""
-        self._init_task_manager()
 
         task = self.task_manager.new_task(search_instruction)
         task.run()
@@ -260,46 +249,6 @@ class SearchService:
 
         task.done()
         return code
-
-    def _generate_via_template(self, search_instruction, module_type, description):
-        """方法3: 基于模板生成代码"""
-        # 这里可以根据module_type提供一个基础模板
-        template_code = f"""
-            import requests
-            import time
-            import json
-            from bs4 import BeautifulSoup
-            import re
-            from urllib.parse import urljoin, urlparse
-
-            def search_web(topic, max_results=10):
-                '''
-                {description}
-                '''
-                try:
-                    results = []
-                    timestamp = time.time()
-
-                    # 基础搜索逻辑 - 根据module_type定制
-                    # TODO: 实现具体的搜索逻辑
-
-                    return {{
-                        "timestamp": timestamp,
-                        "topic": topic,
-                        "results": results,
-                        "success": True,
-                        "error": None
-                    }}
-                except Exception as e:
-                    return {{
-                        "timestamp": time.time(),
-                        "topic": topic,
-                        "results": [],
-                        "success": False,
-                        "error": str(e)
-                    }}
-            """
-        return template_code
 
     def _extract_code_from_task(self, task):
         # 首先检查runner历史，这里包含实际执行的代码
@@ -372,11 +321,11 @@ class SearchService:
         except Exception:
             return False
 
-    def _save_module_code(self, module_type, code, description):
-        """保存模块代码"""
+    def _save_module_code(self, module_type, code, description, source="ai"):
+        """保存模块代码，添加来源标识"""
         try:
-            # 生成模块ID
-            module_id = f"{module_type}_{int(time.time())}"
+            module_id = f"{module_type}_{source}_{int(time.time())}"
+
             module_path = self.search_modules_dir / f"{module_id}.py"
 
             # 保存代码到模块文件
@@ -386,6 +335,7 @@ class SearchService:
             # 更新模块信息
             self.modules_info["modules"][module_id] = {
                 "type": module_type,
+                "source": source,  # 新增：标识代码来源
                 "description": description,
                 "path": str(module_path),
                 "created_at": time.time(),
@@ -405,55 +355,37 @@ class SearchService:
 
     def _build_search_instruction(self, module_type, description):
         """构建搜索指令"""
-        search_instruction = f"""
-            请生成一个完整的Python函数，用于执行网络搜索并返回结构化结果。
+        search_instruction = """
+            本地模板搜索失败，请创新性地生成搜索函数：
 
-            这个模块应该专注于{description}。
+            1. 可以尝试任何搜索引擎或方法
+            2. 可以使用API、RSS、新闻聚合等创新方式
+            3. 可以尝试多种解析策略和容错机制
+            4. 重点关注获取最新、相关的搜索结果
 
             函数要求：
-            1. 函数名为search_web，接受两个参数：topic(搜索主题)和max_results(最大结果数)
-            2. 实现健壮的错误处理，包括：
-                - 网络连接错误处理
-                - 解析错误处理
-                - 超时处理
-                - 编码问题处理
-            3. 对于每个搜索结果，必须访问原始网页并提取以下内容：
-                - 详细的内容摘要（不少于100字）
-                - 准确的发布时间
-                - 如果无法直接找到发布时间，尝试从URL、页面内容或其他元数据推断
-            4. 使用多种方法提取时间信息：
-                - 检查meta标签（如article:published_time）
-                - 查找页面中的时间标记（如time标签或日期格式文本）
-                - 分析页面结构中可能包含日期的区域（如文章头部）
-            5. 实现适当的请求间隔，避免过快发送请求被网站封禁
-            """
+            - 函数名为search_web，参数topic和max_results
+            - 对每个搜索结果，访问原始页面提取：
+                * 标题、URL、内容摘要（至少100字）、发布时间（多种方法提取）
+            - 对结果按发布时间从新到旧排序
+            - 验证信息的时效性，过滤掉旧信息，优先获取最近7天内的内容
+            - 实现完整的错误处理
 
-        # 为combined模块添加特殊指令
-        if module_type == "combined":
-            search_instruction += """
-                6. 按照以下优先级顺序尝试各种搜索方法（不能使用需要API密钥的方式）：
-                    a. 使用百度搜索，添加时间筛选参数
-                    b. 使用bing搜索，添加时间筛选参数
-                    c. 直接访问相关领域的权威网站并抓取最新内容
-                    d. 使用DuckDuckGo搜索引擎，添加时间筛选参数
-                    e. 只有在上述方法都无法获取足够信息时，才考虑使用Google搜索
-                """
-
-        search_instruction += """
-            7. 确保搜索结果包含：
-                - 来源URL
-                - 发布时间
-                - 内容摘要
-            8. 对结果按发布时间从新到旧排序
-            9. 验证信息的时效性，过滤掉旧信息，优先获取最近7天内的内容
-            10. 返回格式为字典，包含以下字段：
-                - timestamp: 搜索执行时间戳
-                - topic: 搜索主题
-                - results: 搜索结果列表，每个结果必须包含url、title、abstract和pub_time
-                - success: 布尔值，表示搜索是否成功
-                - error: 如果失败，包含错误信息
-
-            **重要：生成的代码必须能够直接执行并返回有效结果。**
+            # 严格的返回格式：
+            {{
+                "timestamp": 时间戳,
+                "topic": 搜索主题,
+                "results": [
+                    {{
+                        "title": "标题",
+                        "url": "链接",
+                        "abstract": "详细摘要（至少100字）",
+                        "pub_time": "发布时间"
+                    }}
+                ],
+                "success": True/False,
+                "error": 错误信息或None
+            }}
 
             只返回完整的Python代码，不要有任何解释。
             """
@@ -462,57 +394,160 @@ class SearchService:
     def _generate_search_module(self, module_type, description):
         """通过LLM生成特定类型的搜索模块代码并保存"""
 
-        search_instruction = self._build_search_instruction(module_type, description)
+        # 直接使用AI生成，不再检查模板
+        # 先尝试基于模板的约束性生成
+        constrained_result = self._try_template_guided_generation(module_type, description)
+        if constrained_result:
+            return constrained_result
 
-        # 定义代码生成方法和对应的名称
-        generation_methods = [
-            ("Task系统", self._generate_via_task_system),
-            ("直接LLM调用", self._generate_via_direct_llm),
-            ("模板生成", self._generate_via_template),
-        ]
+        # 最后尝试完全自由的AI生成
+        return self._try_free_form_generation(module_type, description)
 
-        for method_name, method in generation_methods:
-            try:
-                self.console.print(f"[yellow]尝试使用 {method_name} 生成搜索模块...[/yellow]")
-                code = method(search_instruction, module_type, description)
+    def _generate_with_instruction(self, instruction, module_type, description, source="ai"):
+        """使用给定的指令通过AI生成代码并保存"""
+        task = self.task_manager.new_task(instruction)
+        task.run()
 
-                if code and "search_web" in code:
-                    # 验证代码的有效性
-                    if self._validate_generated_code(code):
-                        return self._save_module_code(module_type, code, description)
-                    else:
-                        self.console.print(f"[yellow]{method_name} 生成的代码验证失败[/yellow]")
-                else:
-                    self.console.print(f"[yellow]{method_name} 未生成有效代码[/yellow]")
+        code = None
+        for entry in task.runner.history:
+            if isinstance(entry, dict) and "code" in entry:
+                code = entry["code"]
+                if code and "def search_web" in str(code):
+                    break
+        task.done()
 
-            except Exception as e:
-                self.console.print(f"[yellow]{method_name} 失败: {e}[/yellow]")
-                continue
-
-        self.console.print(f"[red]所有方法都无法生成搜索模块 {module_type} 的代码[/red]")
+        if code and "search_web" in code:
+            if self._validate_generated_code(code):
+                return self._save_module_code(module_type, code, description, source=source)
+            else:
+                self.console.print("[yellow]AI生成代码验证失败[/yellow]")
+        else:
+            self.console.print("[yellow]AI未生成有效代码[/yellow]")
         return None
 
+    def _try_template_guided_generation(self, module_type, description):
+        """基于模板模式的约束性AI生成"""
+        # 从您的模板中提取关键模式
+        search_instruction = """
+        请生成一个搜索函数，能够从四种搜索引擎获取结果。参考以下成功配置：
+
+        # 搜索引擎URL模式：
+        - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
+        - Bing: https://www.bing.com/search?q={{quote(topic)}}&count={{max_results}}
+        - 360: https://www.so.com/s?q={{quote(topic)}}&rn={{max_results}}
+        - 搜狗: https://www.sogou.com/web?query={{quote(topic)}}
+
+        # 关键CSS选择器：
+        百度结果容器: ["div.result", "div.c-container", "div[class*='result']"]
+        百度标题: ["h3", "h3 a", ".t", ".c-title"]
+        百度摘要: ["div.c-abstract", ".c-span9", "[class*='abstract']"]
+
+        Bing结果容器: ["li.b_algo", "div.b_algo", "li[class*='algo']"]
+        Bing标题: ["h2", "h3", "h2 a", ".b_title"]
+        Bing摘要: ["p.b_lineclamp4", "div.b_caption", ".b_snippet"]
+
+        360结果容器: ["li.res-list", "div.result", "li[class*='res']"]
+        360标题: ["h3.res-title", "h3", ".res-title"]
+        360摘要: ["p.res-desc", "div.res-desc", ".res-summary"]
+
+        搜狗结果容器: ["div.vrwrap", "div.results", "div.result"]
+        搜狗标题: ["h3.vr-title", "h3.vrTitle", "a.title", "h3"]
+        搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
+
+        # 重要处理逻辑：
+        1. 按优先级依次尝试四个搜索引擎，直到获得有效结果
+        2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
+        3. 从页面提取发布时间，优先meta标签: meta[property='article:published_time']
+        4. 验证结果质量：至少要有标题、URL，且有完整摘要和发布时间的结果
+        5. 按发布时间排序，优先最近7天内容
+
+        # 必须返回格式：
+        {{
+            "timestamp": time.time(),
+            "topic": "搜索主题",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+
+        只返回完整的Python代码，不要有任何解释。
+        """
+
+        return self._generate_with_instruction(
+            search_instruction, module_type, description, source="ai_guided"
+        )
+
+    def _try_free_form_generation(self, module_type, description):
+        """完全自由的AI生成"""
+        search_instruction = """
+        请创新性地生成搜索函数，获取最新相关信息：
+
+        # 可选搜索策略：
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
+        2. 使用新闻聚合API（如NewsAPI、RSS源）
+        3. 尝试社交媒体平台搜索
+        4. 使用学术搜索引擎
+
+        # 核心要求：
+        - 函数名为search_web，参数topic和max_results
+        - 实现多重容错机制，至少尝试2-3种不同方法
+        - 对每个结果访问原始页面提取完整信息
+        - 优先获取最近7天内的新鲜内容
+        - 摘要长度至少100字，包含关键信息
+
+        # 时间提取策略：
+        - 优先meta标签：article:published_time, datePublished
+        - 备选方案：time标签、日期相关class、页面文本匹配
+        - 支持多种日期格式：YYYY-MM-DD、中文日期等
+
+        # 返回格式（严格遵守）：
+        {{
+            "timestamp": time.time(),
+            "topic": "搜索主题",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要（至少100字）",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+        只返回完整的Python代码，不要有任何解释。
+        """
+
+        return self._generate_with_instruction(
+            search_instruction, module_type, description, source="ai_free"
+        )
+
     def _get_best_module(self):
-        """根据历史成功率选择最佳模块"""
+        """根据历史成功率选择最佳AI模块"""
         if not self.modules_info["modules"]:
             return None
 
-        # 计算每个模块的成功率
-        success_rates = {}
+        # 只考虑AI模块的成功率，不再区分模板和AI
+        ai_modules = {}
+
         for module_id, stats in self.modules_info["success_rate"].items():
-            if module_id in self.modules_info["modules"]:  # 确保模块仍然存在
+            if module_id in self.modules_info["modules"]:
                 total = stats["successes"] + stats["failures"]
-                if total > 0:
-                    success_rates[module_id] = stats["successes"] / total
-                else:
-                    success_rates[module_id] = 0.5  # 默认值
+                success_rate = stats["successes"] / total if total > 0 else 0.5
+                ai_modules[module_id] = success_rate
 
-        # 如果没有足够的数据，使用默认模块
-        if not success_rates or max(success_rates.values()) < 0.1:
-            return self.modules_info["default_module"]
+        # 选择成功率最高的AI模块
+        if ai_modules:
+            return max(ai_modules, key=ai_modules.get)
 
-        # 返回成功率最高的模块
-        return max(success_rates, key=success_rates.get)
+        return self.modules_info["default_module"]
 
     def _import_module(self, module_id):
         """导入指定的搜索模块"""
@@ -735,16 +770,61 @@ class SearchService:
         force_module=None,
         use_fix_results_parallel=True,
     ):
-        """执行搜索，支持缓存和多种搜索方法"""
+        """执行搜索，采用递进策略"""
+
+        # 第一优先级：本地模板搜索
+        template_result = self._try_template_search(topic, max_results)
+        if template_result and search_template.validate_search_result(template_result, "local"):
+            return template_result.get("results")
+
+        # 第二优先级：AI搜索
+        return self._ai_search(
+            topic, max_results, use_cache, cache_duration, force_module, use_fix_results_parallel
+        )
+
+    def _try_template_search(self, topic, max_results):
+        """执行搜索，优化缓存策略"""
+        try:
+            template_result = search_template.search_web(topic, max_results)
+            if template_result:
+                self.console.print(f"[green]使用本地模板搜索成功: {topic}[/green]")
+                return template_result  # 返回完整的字典
+            else:
+                self.console.print("[yellow]本地模板搜索失败，启用AI生成代码搜索[/yellow]")
+        except Exception as e:
+            self.console.print(f"[yellow]本地模板搜索异常: {e}，启用AI生成代码搜索[/yellow]")
+        return None  # 确保在失败时返回 None
+
+    def _get_cache_key(self, topic, max_results, module_id=None):
+        """生成缓存键"""
+        if module_id and module_id in self.modules_info["modules"]:
+            module_source = self.modules_info["modules"][module_id].get("source", "ai")
+            return f"{topic}_{max_results}_{module_source}"
+        return f"{topic}_{max_results}"
+
+    def _ai_search(
+        self,
+        topic,
+        max_results,
+        use_cache,
+        cache_duration,
+        force_module,
+        use_fix_results_parallel,
+    ):
+        """AI搜索的完整逻辑"""
         current_time = time.time()
-        cache_key = f"{topic}_{max_results}"
+
+        # AI搜索前确保有可用模块
+        self._ensure_ai_modules_exist()
+
+        # 缓存键包含模块来源信息
+        module_id = force_module or self._get_best_module()
+        cache_key = self._get_cache_key(topic, max_results, module_id)
 
         # 检查缓存
         if use_cache and cache_key in self.cache:
             cached_data = self.cache[cache_key]
             timestamp = cached_data.get("timestamp", 0)
-
-            # 确保timestamp是浮点数
             if isinstance(timestamp, str):
                 try:
                     timestamp = float(timestamp)
@@ -755,12 +835,6 @@ class SearchService:
                 self.console.print(f"[blue]使用缓存结果: {topic}[/blue]")
                 return cached_data.get("results")
 
-        # 确保任务管理器已初始化
-        self._init_task_manager()
-
-        # 选择搜索模块
-        module_id = force_module or self._get_best_module()
-
         if not module_id or module_id not in self.modules_info["modules"]:
             self.console.print("[red]没有可用的搜索模块[/red]")
             return f"未能找到关于'{topic}'的搜索结果: 没有可用的搜索模块"
@@ -768,73 +842,146 @@ class SearchService:
         # 获取模块类型
         module_type = self.modules_info["modules"][module_id]["type"]
 
-        # 检查是否需要重新生成模块
-        new_module_id = self._regenerate_module_if_needed(module_type)
-        if new_module_id:
-            module_id = new_module_id
+        # 检查是否需要重新生成模块（恢复原有功能）
+        if module_id and not force_module:
+            new_module_id = self._regenerate_module_if_needed(module_type)
+            if new_module_id:
+                module_id = new_module_id
 
-        # 导入搜索模块
-        search_module = self._import_module(module_id)
-        if not search_module:
-            self.console.print(f"[red]无法导入搜索模块 {module_id}[/red]")
-            return f"未能找到关于'{topic}'的搜索结果: 无法导入搜索模块"
+        # 尝试执行搜索
+        search_result = self._execute_search_with_fallback(
+            module_id, module_type, topic, max_results
+        )
 
-        # 执行搜索
-        try:
-            result = search_module.search_web(topic, max_results)
-
-            # 检查搜索结果
-            if result.get("success", False):
-                # 验证并修复结果
-                results = result.get("results", [])
-                if results:
-                    if use_fix_results_parallel:
-                        fixed_results = self._validate_and_fix_results_parallel(results)
-                    else:
-                        fixed_results = self._validate_and_fix_results(results)
-
-                    result["results"] = fixed_results
-
-                # 更新模块成功率
-                if module_id in self.modules_info["success_rate"]:
-                    self.modules_info["success_rate"][module_id]["successes"] += 1
-                    self._save_modules_info()
-
-                # 更新缓存
-                if use_cache:
-                    self.cache[cache_key] = result
-                    self._save_cache()
-
-                return result.get("results")
+        if search_result and search_result.get("success") and search_result.get("results"):
+            # 验证并修复结果
+            results = search_result.get("results", [])
+            if use_fix_results_parallel:
+                fixed_results = self._validate_and_fix_results_parallel(results)
             else:
-                # 记录错误
-                self._log_error(module_id, "search_failed", result.get("error", "未知错误"), topic)
+                fixed_results = self._validate_and_fix_results(results)
 
-                # 尝试使用备用模块
-                if not force_module:
-                    # 找到一个不同类型的模块
-                    for alt_id in self.modules_info["modules"]:
-                        if self.modules_info["modules"][alt_id]["type"] != module_type:
-                            self.console.print(f"[yellow]尝试使用备用搜索模块: {alt_id}[/yellow]")
-                            return self.search(
-                                topic, max_results, use_cache, cache_duration, alt_id
-                            )
+            search_result["results"] = fixed_results
 
-                return f"未能找到关于'{topic}'的搜索结果: {result.get('error', '搜索失败')}"
+            # 更新模块成功率
+            if module_id in self.modules_info["success_rate"]:
+                self.modules_info["success_rate"][module_id]["successes"] += 1
+                self._save_modules_info()
 
-        except Exception as e:
-            # 记录错误
-            self._log_error(module_id, "exception", str(e), topic)
+            # 更新缓存
+            if use_cache:
+                self.cache[cache_key] = search_result
+                self._save_cache()
 
-            # 如果是第一次尝试，尝试使用备用模块
-            if not force_module:
-                # 找到一个不同类型的模块
-                for alt_id in self.modules_info["modules"]:
-                    if self.modules_info["modules"][alt_id]["type"] != module_type:
-                        self.console.print(
-                            f"[yellow]搜索出错，尝试使用备用搜索模块: {alt_id}[/yellow]"
-                        )
-                        return self.search(topic, max_results, use_cache, cache_duration, alt_id)
+            return search_result.get("results")
+        else:
+            # 记录搜索失败，用于后续模块质量评估
+            if module_id in self.modules_info["success_rate"]:
+                self.modules_info["success_rate"][module_id]["failures"] += 1
+                self._save_modules_info()
 
-            self.console.print(f"[red]搜索执行错误: {str(e)}[/red]")
-            return f"未能找到关于'{topic}'的搜索结果: {str(e)}"
+            return f"未能找到关于'{topic}'的搜索结果: 所有搜索方法都失败了"
+
+    def _find_alternative_modules(self, module_type, exclude_module_id):
+        """查找同类型的备选模块"""
+        alternatives = []
+        for module_id, info in self.modules_info["modules"].items():
+            if info["type"] == module_type and module_id != exclude_module_id:
+                alternatives.append(module_id)
+        return alternatives
+
+    def _regenerate_module_with_enhanced_prompt(self, module_type):
+        """使用增强提示重新生成模块"""
+        description = f"重新生成的{module_type}搜索模块"
+        return self._generate_search_module(module_type, description)
+
+    def _execute_search_with_fallback(self, module_id, module_type, topic, max_results):
+        """执行搜索，优化回退策略"""
+
+        # 获取模块来源信息
+        module_source = self.modules_info["modules"][module_id].get("source", "ai")
+
+        # 根据来源确定验证类型
+        if module_source == "ai_guided":
+            validation_type = "ai_guided"
+        elif module_source == "ai_free":
+            validation_type = "ai_free"
+        else:
+            validation_type = "local"
+
+        # 第一次尝试：使用现有模块
+        result = self._try_module_with_validation(module_id, topic, max_results, validation_type)
+        if result:
+            return result
+
+        # 第二次尝试：查找同类型的其他模块
+        alternative_modules = self._find_alternative_modules(module_type, module_id)
+        for alt_id in alternative_modules:
+            alt_source = self.modules_info["modules"][alt_id].get("source", "ai")
+            alt_validation_type = "ai_guided" if alt_source == "ai_guided" else "ai_free"
+
+            result = self._try_module_with_validation(
+                alt_id, topic, max_results, alt_validation_type
+            )
+            if result:
+                return result
+
+        # 第三次尝试：重新生成模块
+        new_module_id = self._regenerate_module_with_enhanced_prompt(module_type)
+        if new_module_id:
+            result = self._try_module_with_validation(
+                new_module_id, topic, max_results, "ai_guided"
+            )
+            if result:
+                return result
+
+        return None
+
+    def _try_module_with_validation(self, module_id, topic, max_results, validation_type="local"):
+        """尝试使用模块并验证结果"""
+        module = self._import_module(module_id)
+        if module:
+            try:
+                result = module.search_web(topic, max_results)
+                if search_template.validate_search_result(result, validation_type):
+                    return result
+                else:
+                    self._log_error(
+                        module_id,
+                        "poor_quality_result",
+                        f"搜索结果不满足{validation_type}验证",
+                        topic,
+                    )
+            except Exception as e:
+                self._log_error(module_id, "execution_error", str(e), topic)
+        return None
+
+    def _generate_search_module_ai_only(self, module_type, description):
+        """仅使用AI生成搜索模块代码，跳过模板"""
+        search_instruction = self._build_search_instruction(module_type, description)
+
+        # 定义代码生成方法（不包含模板）
+        generation_methods = [
+            ("Task系统", self._generate_via_task_system),
+            ("直接LLM调用", self._generate_via_direct_llm),
+        ]
+
+        for method_name, method in generation_methods:
+            try:
+                self.console.print(f"[yellow]尝试使用 {method_name} 生成搜索模块...[/yellow]")
+                code = method(search_instruction, module_type, description)
+
+                if code and "search_web" in code:
+                    if self._validate_generated_code(code):
+                        return self._save_module_code(module_type, code, description)
+                    else:
+                        self.console.print(f"[yellow]{method_name} 生成的代码验证失败[/yellow]")
+                else:
+                    self.console.print(f"[yellow]{method_name} 未生成有效代码[/yellow]")
+
+            except Exception as e:
+                self.console.print(f"[yellow]{method_name} 失败: {e}[/yellow]")
+                continue
+
+        self.console.print(f"[red]无法为 {module_type} 生成有效的搜索模块代码[/red]")
+        return None
