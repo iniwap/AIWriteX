@@ -260,9 +260,10 @@ class AIPySearchTool(BaseTool):
             if search_template.validate_search_result(constrained_result, "ai_guided"):
                 return str(constrained_result)
 
+            console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
             # 最后尝试完全自由的AI生成
             free_result = self._try_free_form_ai(topic, max_results, task_manager)
-            if free_result.validate_search_result(free_result, "ai_free"):
+            if search_template.validate_search_result(free_result, "ai_free"):
                 return str(free_result)
 
             return f"未能找到关于'{topic}'的搜索结果。"
@@ -273,7 +274,7 @@ class AIPySearchTool(BaseTool):
     def _try_template_guided_ai(self, topic, max_results, task_manager):
         """基于模板模式的约束性AI生成"""
         search_instruction = f"""
-        请生成一个搜索函数，能够从四种搜索引擎获取结果。参考以下成功配置：
+        请生成一个搜索函数，能够从四种搜索引擎（不要使用API密钥方式）获取结果。参考以下成功配置：
 
         # 搜索引擎URL模式：
         - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
@@ -299,11 +300,13 @@ class AIPySearchTool(BaseTool):
         搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
 
         # 重要处理逻辑：
-        1. 按优先级依次尝试四个搜索引擎，直到获得有效结果
+        1. 按优先级依次尝试四个搜索引擎（不要使用API密钥方式），直到获得有效结果，获得结果后停止尝试
         2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
-        3. 从页面提取发布时间，优先meta标签: meta[property='article:published_time']
-        4. 验证结果质量：至少要有标题、URL，且有完整摘要和发布时间的结果
-        5. 按发布时间排序，优先最近7天内容
+        3. 从页面提取发布时间，遵从以下策略：
+            - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
+            - 备选方案：time标签、日期相关class、页面文本匹配
+            - 支持多种日期格式：YYYY-MM-DD、中文日期等
+        4. 按发布时间排序，优先最近7天内容
 
         # 必须返回格式：
         {{
@@ -342,7 +345,7 @@ class AIPySearchTool(BaseTool):
         请创新性地生成搜索函数，获取最新相关信息：
 
         # 可选搜索策略：
-        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）,直到获得有效结果，获得结果后停止尝试
         2. 使用新闻聚合API（如NewsAPI、RSS源）
         3. 尝试社交媒体平台搜索
         4. 使用学术搜索引擎
@@ -351,11 +354,13 @@ class AIPySearchTool(BaseTool):
         - 函数名为search_web，参数topic和max_results
         - 实现多重容错机制，至少尝试2-3种不同方法
         - 对每个结果访问原始页面提取完整信息
-        - 优先获取最近7天内的新鲜内容
+        - 优先获取最近7天内的新鲜内容，按发布时间排序
         - 摘要长度至少100字，包含关键信息
+        - 不能使用需要API密钥的方式
+        - 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
 
         # 时间提取策略：
-        - 优先meta标签：article:published_time, datePublished
+        - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
         - 备选方案：time标签、日期相关class、页面文本匹配
         - 支持多种日期格式：YYYY-MM-DD、中文日期等
 

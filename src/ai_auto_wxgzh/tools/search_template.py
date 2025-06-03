@@ -1,6 +1,9 @@
-# 这部分代码费了好大劲才调出来，麻烦给个star
+# -*- coding: utf-8 -*-
+# Author: iniwap
+# Date: 2025-06-03
+# Description: 用于本地搜索，关注项目 https://github.com/iniwap/ai_auto_wxgzh
+# Copyright (c) 2025 iniwap. All rights reserved.
 
-# 本地模块化搜索，优先采用
 
 import time
 import re
