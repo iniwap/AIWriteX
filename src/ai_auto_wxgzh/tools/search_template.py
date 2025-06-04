@@ -339,8 +339,8 @@ def enhance_abstract(abstract, page_soup):
     增强摘要内容。
     如果原始摘要过短，尝试从页面内容中提取前几段作为补充。
     """
-    # 定义一个最小摘要长度，例如50个字符，如果摘要小于这个长度则尝试增强
-    MIN_ABSTRACT_LENGTH = 50
+    # 定义一个最小摘要长度，例如100个字符，如果摘要小于这个长度则尝试增强
+    MIN_ABSTRACT_LENGTH = 100
 
     # 检查原始摘要是否过短或不存在，并且 page_soup 存在
     if (not abstract or len(abstract.strip()) < MIN_ABSTRACT_LENGTH) and page_soup:

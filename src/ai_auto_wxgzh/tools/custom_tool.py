@@ -209,7 +209,8 @@ class AIPySearchTool(BaseTool):
     """AIPy搜索工具"""
 
     name: str = "aipy_search_tool"
-    description: str = "使用AIPy搜索最新的信息、数据和趋势"
+    description: str = "搜索关于特定主题的最新信息、数据和趋势。"
+
     args_schema: type[BaseModel] = AIPySearchToolInput
 
     def _run(self, topic: str) -> str:
@@ -218,6 +219,7 @@ class AIPySearchTool(BaseTool):
 
         # 保存当前工作目录
         original_cwd = os.getcwd()
+        log.print_log("开始执行搜索，请耐心等待...")
         if config.use_search_service:
             results = self._use_search_service(topic, config.aipy_search_max_results)
         else:
@@ -225,30 +227,32 @@ class AIPySearchTool(BaseTool):
 
         # 恢复原始工作目录
         os.chdir(original_cwd)
-
-        return results
+        if results:
+            # 结构化文本输出
+            formatted = f"关于'{topic}'的搜索结果：\n\n"
+            for i, result in enumerate(results, 1):
+                formatted += f"## 结果 {i}\n"
+                formatted += f"**标题**: {result.get('title', '无标题')}\n"
+                formatted += f"**发布时间**: {result.get('pub_time', '未知时间')}\n"
+                formatted += f"**摘要**: {result.get('abstract', '无摘要')}\n\n"
+            return formatted
+        else:
+            return f"未能找到关于'{topic}'的搜索结果。"
 
     def _use_search_service(self, topic, max_results):
         try:
-            # 初始化搜索服务
-            search_service = SearchService()
-
             # 执行搜索
-            results = search_service.search(topic, max_results, use_fix_results_parallel=True)
-
-            if results:
-                return str(results)
-            else:
-                return f"未能找到关于'{topic}'的搜索结果。"
+            return SearchService().search(topic, max_results, use_fix_results_parallel=True)
         except Exception as e:
-            return log.print_traceback("AIPy搜索时", e)
+            log.print_traceback("搜索过程中发生错误：", e)
+            return None
 
     def _nouse_search_service(self, topic, max_results):
         try:
             # 第一步：尝试使用本地模板代码
             template_result = search_template.search_web(topic, max_results)
             if template_result:
-                return str(template_result)
+                return template_result.get("results")
 
             # 第二步：渐进式AI生成
             console = Console()
@@ -258,18 +262,19 @@ class AIPySearchTool(BaseTool):
             # 先尝试基于模板的约束性生成
             constrained_result = self._try_template_guided_ai(topic, max_results, task_manager)
             if search_template.validate_search_result(constrained_result, "ai_guided"):
-                return str(constrained_result)
+                return constrained_result.get("results")
 
             console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
             # 最后尝试完全自由的AI生成
             free_result = self._try_free_form_ai(topic, max_results, task_manager)
             if search_template.validate_search_result(free_result, "ai_free"):
-                return str(free_result)
+                return free_result.get("results")
 
-            return f"未能找到关于'{topic}'的搜索结果。"
+            return None
 
         except Exception as e:
-            return f"搜索过程中发生错误: {str(e)}"
+            log.print_traceback("搜索过程中发生错误：", e)
+            return None
 
     def _try_template_guided_ai(self, topic, max_results, task_manager):
         """基于模板模式的约束性AI生成"""
@@ -327,17 +332,20 @@ class AIPySearchTool(BaseTool):
         __result__ = search_web("{topic}", {max_results})
         """
 
-        task = task_manager.new_task(search_instruction)
-        task.run()
+        task = None
+        try:
+            task = task_manager.new_task(search_instruction)
+            task.run()
 
-        for entry in task.runner.history:
-            if "__result__" in entry.get("result", {}):
-                result = entry["result"]["__result__"]
+            for entry in task.runner.history:
+                if "__result__" in entry.get("result", {}):
+                    result = entry["result"]["__result__"]
+                    return result
+
+            return None
+        finally:
+            if task:
                 task.done()
-                return result
-
-        task.done()
-        return None
 
     def _try_free_form_ai(self, topic, max_results, task_manager):
         """完全自由的AI生成"""
@@ -383,14 +391,17 @@ class AIPySearchTool(BaseTool):
         __result__ = search_web("{topic}", {max_results})
         """
 
-        task = task_manager.new_task(search_instruction)
-        task.run()
+        task = None
+        try:
+            task = task_manager.new_task(search_instruction)
+            task.run()
 
-        for entry in task.runner.history:
-            if "__result__" in entry.get("result", {}):
-                result = entry["result"]["__result__"]
+            for entry in task.runner.history:
+                if "__result__" in entry.get("result", {}):
+                    result = entry["result"]["__result__"]
+                    return result
+
+            return None
+        finally:
+            if task:
                 task.done()
-                return result
-
-        task.done()
-        return None
