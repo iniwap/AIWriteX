@@ -256,9 +256,8 @@ def decompress_html(compressed_content, use_compress=True):
         # 对于完整 HTML 文档，返回格式化输出
         return soup.prettify(formatter="minimal").strip()
 
-    except Exception as e:
+    except Exception as e:  # noqa 841
         # 错误处理：解析失败时返回原始内容
-        print(f"HTML 格式化错误：{e}")
         return compressed_content.strip()
 
 

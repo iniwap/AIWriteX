@@ -256,7 +256,7 @@ class AIPySearchTool(BaseTool):
 
             # 第二步：渐进式AI生成
             console = Console()
-            console.print("[yellow]本地模板搜索失败，尝试AI生成搜索代码...[/yellow]")
+            console.print("[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]")
             task_manager = TaskManager(Config.get_instance().get_aipy_settings(), console=console)
 
             # 先尝试基于模板的约束性生成
@@ -313,7 +313,7 @@ class AIPySearchTool(BaseTool):
             - 支持多种日期格式：YYYY-MM-DD、中文日期等
         4. 按发布时间排序，优先最近7天内容
 
-        # 必须返回格式：
+        # 返回数据格式（严格遵守）：
         {{
             "timestamp": time.time(),
             "topic": "{topic}",
@@ -321,7 +321,7 @@ class AIPySearchTool(BaseTool):
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
                     "pub_time": "发布时间"
                 }}
             ],
@@ -372,7 +372,7 @@ class AIPySearchTool(BaseTool):
         - 备选方案：time标签、日期相关class、页面文本匹配
         - 支持多种日期格式：YYYY-MM-DD、中文日期等
 
-        # 返回格式（严格遵守）：
+        # 返回数据格式（严格遵守）：
         {{
             "timestamp": time.time(),
             "topic": "{topic}",
@@ -380,7 +380,7 @@ class AIPySearchTool(BaseTool):
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要（至少100字）",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
                     "pub_time": "发布时间"
                 }}
             ],

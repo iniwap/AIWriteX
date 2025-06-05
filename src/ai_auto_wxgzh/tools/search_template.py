@@ -339,8 +339,9 @@ def enhance_abstract(abstract, page_soup):
     增强摘要内容。
     如果原始摘要过短，尝试从页面内容中提取前几段作为补充。
     """
-    # 定义一个最小摘要长度，例如100个字符，如果摘要小于这个长度则尝试增强
-    MIN_ABSTRACT_LENGTH = 100
+    # 定义一个最小摘要长度，例如MIN_ABSTRACT_LENGTH个字符，如果摘要小于这个长度则尝试增强
+    MIN_ABSTRACT_LENGTH = 300
+    MAX_ABSTRACT_LENGTH = 500
 
     # 检查原始摘要是否过短或不存在，并且 page_soup 存在
     if (not abstract or len(abstract.strip()) < MIN_ABSTRACT_LENGTH) and page_soup:
@@ -356,15 +357,19 @@ def enhance_abstract(abstract, page_soup):
             if len(text) > 30:  # 过滤掉长度小于30的段落
                 content_parts.append(text)
             # 可以在这里添加一个条件，如果已经提取了足够的文本，就停止
-            # 尝试凑够200字符，考虑到原始摘要可能已经占据一部分长度
-            if sum(len(part) for part in content_parts) >= (200 - len(abstract.strip())):
+            # 尝试凑够MAX_ABSTRACT_LENGTH字符，考虑到原始摘要可能已经占据一部分长度
+            if sum(len(part) for part in content_parts) >= (
+                MAX_ABSTRACT_LENGTH - len(abstract.strip())
+            ):
                 break
 
         if content_parts:
             # 将提取到的内容拼接起来，并限制总长度
             # 将原始摘要放在前面，然后追加增强内容
             enhanced_text = abstract.strip() + " " + " ".join(content_parts)
-            return enhanced_text[:200].strip()  # 限制总长度为200字符，并移除首尾空白
+            return enhanced_text[
+                :MAX_ABSTRACT_LENGTH
+            ].strip()  # 限制总长度为MAX_ABSTRACT_LENGTH字符，并移除首尾空白
 
     return abstract  # 如果不满足增强条件，返回原始摘要
 

@@ -354,7 +354,7 @@ class SearchService:
         搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
 
         # 重要处理逻辑：
-        1. 按优先级依次尝试四个搜索引擎，直到获得有效结果
+        1. 按优先级依次尝试四个搜索引擎，直到获取到有效结果（至少有一条摘要不为空），停止尝试生成
         2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
         3. 从页面提取发布时间，遵从以下策略：
             - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
@@ -362,7 +362,7 @@ class SearchService:
             - 支持多种日期格式：YYYY-MM-DD、中文日期等
         4. 按发布时间排序，优先最近7天内容
 
-        # 必须返回格式：
+        # 返回数据格式（严格遵守）：
         {{
             "timestamp": time.time(),
             "topic": "搜索主题",
@@ -370,7 +370,7 @@ class SearchService:
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
                     "pub_time": "发布时间"
                 }}
             ],
@@ -391,7 +391,7 @@ class SearchService:
         请创新性地生成搜索函数，获取最新相关信息：
 
         # 可选搜索策略：
-        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）,直到获得有效结果，获得结果后停止尝试
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）,直到获取到有效结果（至少有一条摘要不为空），停止尝试生成
         2. 使用新闻聚合API（如NewsAPI、RSS源）
         3. 尝试社交媒体平台搜索
         4. 使用学术搜索引擎
@@ -410,7 +410,7 @@ class SearchService:
         - 备选方案：time标签、日期相关class、页面文本匹配
         - 支持多种日期格式：YYYY-MM-DD、中文日期等
 
-        # 返回格式（严格遵守）：
+        # 返回数据格式（严格遵守）：
         {{
             "timestamp": time.time(),
             "topic": "搜索主题",
@@ -418,7 +418,7 @@ class SearchService:
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要（至少100字）",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
                     "pub_time": "发布时间"
                 }}
             ],
