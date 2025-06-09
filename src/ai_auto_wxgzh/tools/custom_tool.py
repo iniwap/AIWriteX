@@ -279,7 +279,7 @@ class AIPySearchTool(BaseTool):
     def _try_template_guided_ai(self, topic, max_results, task_manager):
         """基于模板模式的约束性AI生成"""
         search_instruction = f"""
-        请生成一个搜索函数，能够从四种搜索引擎（不要使用API密钥方式）获取结果。参考以下成功配置：
+        请生成一个搜索函数，获取最新相关信息，参考以下配置：
 
         # 搜索引擎URL模式：
         - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
@@ -305,13 +305,14 @@ class AIPySearchTool(BaseTool):
         搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
 
         # 重要处理逻辑：
-        1. 按优先级依次尝试四个搜索引擎（不要使用API密钥方式），直到获得有效结果，获得结果后停止尝试
+        1. 按优先级依次尝试四个搜索引擎（不要使用API密钥方式）
         2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
         3. 从页面提取发布时间，遵从以下策略：
             - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
             - 备选方案：time标签、日期相关class、页面文本匹配
-            - 支持多种日期格式：YYYY-MM-DD、中文日期等
+            - 有效的日期格式：标准格式、中文格式、相对时间（如“昨天”、“1天前”、“1小时前”等）、英文时间（如“yesterday”等）
         4. 按发布时间排序，优先最近7天内容
+        5. 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
 
         # 返回数据格式（严格遵守）：
         {{
@@ -330,6 +331,12 @@ class AIPySearchTool(BaseTool):
         }}
 
         __result__ = search_web("{topic}", {max_results})
+
+        # 严格停止条件：获取到1条或以上同时满足以下条件的结果时，立即停止执行，不得继续生成任何代码：
+        # 1. 摘要(abstract)长度不少于100字
+        # 2. 发布时间(pub_time)字段不为空、不为None、不为空字符串
+        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
+
         """
 
         task = None
@@ -337,11 +344,12 @@ class AIPySearchTool(BaseTool):
             task = task_manager.new_task(search_instruction)
             task.run()
 
-            for entry in task.runner.history:
-                if "__result__" in entry.get("result", {}):
-                    result = entry["result"]["__result__"]
+            # 反向遍历历史记录，只验证摘要和日期
+            for entry in reversed(task.runner.history):
+                result = entry.get("result", {}).get("__result__")
+                if search_template.simple_validate_search_result(result, "ai_guided"):
+                    print(f"找到结果: {result}")
                     return result
-
             return None
         finally:
             if task:
@@ -350,10 +358,10 @@ class AIPySearchTool(BaseTool):
     def _try_free_form_ai(self, topic, max_results, task_manager):
         """完全自由的AI生成"""
         search_instruction = f"""
-        请创新性地生成搜索函数，获取最新相关信息：
+        请创新性地生成搜索函数，获取最新相关信息。
 
         # 可选搜索策略：
-        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）,直到获得有效结果，获得结果后停止尝试
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
         2. 使用新闻聚合API（如NewsAPI、RSS源）
         3. 尝试社交媒体平台搜索
         4. 使用学术搜索引擎
@@ -370,7 +378,6 @@ class AIPySearchTool(BaseTool):
         # 时间提取策略：
         - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
         - 备选方案：time标签、日期相关class、页面文本匹配
-        - 支持多种日期格式：YYYY-MM-DD、中文日期等
 
         # 返回数据格式（严格遵守）：
         {{
@@ -389,6 +396,10 @@ class AIPySearchTool(BaseTool):
         }}
 
         __result__ = search_web("{topic}", {max_results})
+
+        # 严格停止条件：获取到1条或以上摘要(abstract)长度不少于50字的结果时，立即停止执行，不得继续生成任何代码
+        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
+
         """
 
         task = None
@@ -396,11 +407,12 @@ class AIPySearchTool(BaseTool):
             task = task_manager.new_task(search_instruction)
             task.run()
 
-            for entry in task.runner.history:
-                if "__result__" in entry.get("result", {}):
-                    result = entry["result"]["__result__"]
+            # 反向遍历历史记录，只验证摘要和日期
+            for entry in reversed(task.runner.history):
+                result = entry.get("result", {}).get("__result__")
+                if search_template.simple_validate_search_result(result, "ai_free"):
+                    print(f"找到结果: {result}")
                     return result
-
             return None
         finally:
             if task:

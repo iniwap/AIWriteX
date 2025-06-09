@@ -15,7 +15,7 @@
 - 自动获取各大平台热门话题
 - 自动根据话题生成文章、排版（CrewAI多个角色共同完成）
 - 自动发图文消息到公众号
-- **生成实时性文章，拒绝文章数据过时（利用AIPy搜索）**
+- **生成实时性文章，拒绝文章数据过时（多重搜索策略）**
 - UI可视化，界面操作，方便配置编辑
 - **支持开发模式和软件模式**
     - 开发模式：有定制开发需求，更灵活的改动（适用于技术自开发用户）
@@ -110,7 +110,7 @@ pip  install crewai
 
 2. 全自动发文（使用AIPy解决时效性）文章预览:
 - **未使用模板**：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
-- **使用模板template7**：https://mp.weixin.qq.com/s/zKN-FtKIvQEpKtBgov6F4A
+- **使用模板template9**：https://mp.weixin.qq.com/s/1XPMUPR09Ipuzm_yXgAvKw
 
 *有兴趣的可以继续微调（如边距等），上面的模板可以比较好的显示在微信公众号上了。执行代码时，自动随机选择模板，生成的文章会自动选取填充上面的模板发布文章。*
 

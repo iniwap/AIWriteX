@@ -14,4 +14,4 @@ from src.ai_auto_wxgzh.tools.search_template import search_web, SearchEngine  # 
 
 if __name__ == "__main__":
 
-    print(search_web("王毅签署国际调解院公约", 10, SearchEngine.BAIDU))
+    print(search_web("央视曝光不防晒的防晒衣", 10, SearchEngine.COMBINED))

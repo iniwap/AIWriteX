@@ -354,7 +354,7 @@ class SearchService:
         搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
 
         # 重要处理逻辑：
-        1. 按优先级依次尝试四个搜索引擎，直到获取到有效结果（至少有一条摘要不为空），停止尝试生成
+        1. 按优先级依次尝试四个搜索引擎，直到获取到有效结果（至少有一条摘要和发布时间不为空/None），停止尝试生成
         2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
         3. 从页面提取发布时间，遵从以下策略：
             - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等

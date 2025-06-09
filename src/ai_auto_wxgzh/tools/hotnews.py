@@ -147,7 +147,7 @@ def get_platform_news(platform: str, cnt: int = 10) -> List[str]:
 
     # 2. 回退到 tophub.today
     if platform_info["tophub_id"] in TOPHUB_PLATFORMS:
-        hotnews = get_tophub_hotnews(platform, platform_info["tophub_id"], cnt)
+        hotnews = get_tophub_hotnews(platform, cnt)
         if hotnews:
             return [item.get("name", "") for item in hotnews[:cnt] if item.get("name")]
 
