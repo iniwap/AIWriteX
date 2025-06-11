@@ -331,8 +331,12 @@ class ConfigEditor:
                 )
             ],
             [
-                sg.Text("AIPy搜索数量:", size=(15, 1)),
+                sg.Text("最大搜索数量:", size=(15, 1)),
                 sg.InputText(self.config.aipy_search_max_results, key="-AIPY_SEARCH_MAX_RESULTS-"),
+            ],
+            [
+                sg.Text("最小搜索数量:", size=(15, 1)),
+                sg.InputText(self.config.aipy_search_min_results, key="-AIPY_SEARCH_MIN_RESULTS-"),
             ],
             [
                 sg.Text(
@@ -351,8 +355,9 @@ class ConfigEditor:
                     "4、AIPy搜索缓存：\n"
                     "    - 使用：优先使用本地缓存，降低后续执行搜索任务的token消耗\n"
                     "    - 不使用：可能更精准，但token消耗较高，总体执行成功率降低\n"
-                    "5、AIPy搜索数量：返回的最大搜索结果数量（1 ~ 20）",
-                    size=(70, 16),
+                    "5、最大搜索数量：返回的最大搜索结果数量（1 ~ 20）\n"
+                    "6、最小搜索数量：返回的最小搜索结果数量（1 ~ 10），越大失败率越高",
+                    size=(70, 17),
                     text_color="gray",
                 ),
             ],
@@ -812,6 +817,28 @@ class ConfigEditor:
                         value=self.config.default_config["aipy_search_max_results"]
                     )
 
+                if str(values["-AIPY_SEARCH_MIN_RESULTS-"]).isdigit():
+                    input_value = int(values["-AIPY_SEARCH_MIN_RESULTS-"])
+                    config["aipy_search_min_results"] = (
+                        input_value
+                        if 1 < input_value <= self.config.default_config["aipy_search_max_results"]
+                        and input_value
+                        < config["aipy_search_max_results"]  # 最大为10且不能比最大值大
+                        else self.config.default_config["aipy_search_min_results"]
+                    )
+                    if not (
+                        1 < input_value <= self.config.default_config["aipy_search_max_results"]
+                    ):
+                        self.window["-AIPY_SEARCH_MIN_RESULTS-"].update(
+                            value=self.config.default_config["aipy_search_min_results"]
+                        )
+                else:
+                    config["aipy_search_min_results"] = self.config.default_config[
+                        "aipy_search_min_results"
+                    ]
+                    self.window["-AIPY_SEARCH_MIN_RESULTS-"].update(
+                        value=self.config.default_config["aipy_search_min_results"]
+                    )
                 # 处理 template 保存逻辑
                 template_value = values["-TEMPLATE-"]
                 config["template"] = "" if template_value == "随机模板" else template_value
@@ -908,6 +935,9 @@ class ConfigEditor:
                 config["use_search_service"] = self.config.default_config["use_search_service"]
                 config["aipy_search_max_results"] = self.config.default_config[
                     "aipy_search_max_results"
+                ]
+                config["aipy_search_min_results"] = self.config.default_config[
+                    "aipy_search_min_results"
                 ]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):

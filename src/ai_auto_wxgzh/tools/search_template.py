@@ -18,6 +18,120 @@ from dateutil.relativedelta import relativedelta
 import html
 
 
+def get_template_guided_search_instruction(topic, max_results, min_results):
+    search_instruction = f"""
+        请生成一个搜索函数，获取最新相关信息，参考以下配置：
+
+        # 搜索引擎URL模式：
+        - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
+        - Bing: https://www.bing.com/search?q={{quote(topic)}}&count={{max_results}}
+        - 360: https://www.so.com/s?q={{quote(topic)}}&rn={{max_results}}
+        - 搜狗: https://www.sogou.com/web?query={{quote(topic)}}
+
+        # 关键CSS选择器：
+        百度结果容器: ["div.result", "div.c-container", "div[class*='result']"]
+        百度标题: ["h3", "h3 a", ".t", ".c-title"]
+        百度摘要: ["div.c-abstract", ".c-span9", "[class*='abstract']"]
+
+        Bing结果容器: ["li.b_algo", "div.b_algo", "li[class*='algo']"]
+        Bing标题: ["h2", "h3", "h2 a", ".b_title"]
+        Bing摘要: ["p.b_lineclamp4", "div.b_caption", ".b_snippet"]
+
+        360结果容器: ["li.res-list", "div.result", "li[class*='res']"]
+        360标题: ["h3.res-title", "h3", ".res-title"]
+        360摘要: ["p.res-desc", "div.res-desc", ".res-summary"]
+
+        搜狗结果容器: ["div.vrwrap", "div.results", "div.result"]
+        搜狗标题: ["h3.vr-title", "h3.vrTitle", "a.title", "h3"]
+        搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
+
+        # 重要处理逻辑：
+        1. 按优先级依次尝试四个搜索引擎（不要使用API密钥方式）
+        2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
+        3. 从页面提取发布时间，遵从以下策略：
+            - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
+            - 备选方案：time标签、日期相关class、页面文本匹配
+            - 有效的日期格式：标准格式、中文格式、相对时间（如“昨天”、“1天前”、“1小时前”等）、英文时间（如“yesterday”等）
+        4. 按发布时间排序，优先最近7天内容
+        5. 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
+
+        # 返回数据格式（严格遵守）：
+        {{
+            "timestamp": time.time(),
+            "topic": "{topic}",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+
+         __result__ = search_web("{topic}", {max_results})
+
+        # 严格停止条件：获取到{min_results}条或以上同时满足以下条件的结果时，立即停止执行，不得继续生成任何代码：
+        # 1. 摘要(abstract)长度不少于100字
+        # 2. 发布时间(pub_time)字段不为空、不为None、不为空字符串
+        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
+
+        """
+
+    return search_instruction
+
+
+def get_free_form_ai_search_instruction(topic, max_results, min_results):
+    search_instruction = f"""
+        请创新性地生成搜索函数，获取最新相关信息。
+
+        # 可选搜索策略：
+        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
+        2. 使用新闻聚合API（如NewsAPI、RSS源）
+        3. 尝试社交媒体平台搜索
+        4. 使用学术搜索引擎
+
+        # 核心要求：
+        - 函数名为search_web，参数topic和max_results
+        - 实现多重容错机制，至少尝试2-3种不同方法
+        - 对每个结果访问原始页面提取完整信息
+        - 优先获取最近7天内的新鲜内容，按发布时间排序
+        - 摘要长度至少100字，包含关键信息
+        - 不能使用需要API密钥的方式
+        - 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
+
+        # 时间提取策略：
+        - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
+        - 备选方案：time标签、日期相关class、页面文本匹配
+
+        # 返回数据格式（严格遵守）：
+        {{
+            "timestamp": time.time(),
+            "topic": "{topic}",
+            "results": [
+                {{
+                    "title": "标题",
+                    "url": "链接",
+                    "abstract": "详细摘要（去除空格换行，至少200字）",
+                    "pub_time": "发布时间"
+                }}
+            ],
+            "success": True/False,
+            "error": 错误信息或None
+        }}
+
+        __result__ = search_web("{topic}", {max_results})
+
+        # 严格停止条件：获取到{min_results}条或以上摘要(abstract)长度不少于50字的结果时，立即停止执行，不得继续生成任何代码
+        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
+
+        """
+
+    return search_instruction
+
+
 class SearchEngine(Enum):
     BAIDU = "baidu"
     BING = "bing"
@@ -26,7 +140,12 @@ class SearchEngine(Enum):
     COMBINED = "combined"
 
 
-def search_web(topic, max_results=10, module_type: SearchEngine = SearchEngine.COMBINED):
+def search_web(
+    topic,
+    max_results=10,
+    min_results=1,
+    module_type: SearchEngine = SearchEngine.COMBINED,
+):
     """根据模块类型返回对应的搜索模板，尝试所有搜索引擎直到找到有效结果"""
     if module_type == SearchEngine.COMBINED:
         # 按优先级尝试所有搜索引擎（排除COMBINED）
@@ -44,7 +163,7 @@ def search_web(topic, max_results=10, module_type: SearchEngine = SearchEngine.C
                     continue
 
                 # 验证搜索结果质量
-                if validate_search_result(search_result):
+                if validate_search_result(search_result, min_results):
                     return search_result
             except Exception as e:  # noqa 841
                 continue
@@ -54,23 +173,23 @@ def search_web(topic, max_results=10, module_type: SearchEngine = SearchEngine.C
 
     elif module_type == SearchEngine.BAIDU:
         result = template_baidu_specific(topic, max_results)
-        return result if validate_search_result(result) else None
+        return result if validate_search_result(result, min_results) else None
     elif module_type == SearchEngine.BING:
         result = template_bing_specific(topic, max_results)
-        return result if validate_search_result(result) else None
+        return result if validate_search_result(result, min_results) else None
     elif module_type == SearchEngine.SO_360:
         result = template_360_specific(topic, max_results)
-        return result if validate_search_result(result) else None
+        return result if validate_search_result(result, min_results) else None
     elif module_type == SearchEngine.SOUGOU:
         result = template_sougou_specific(topic, max_results)
-        return result if validate_search_result(result) else None
+        return result if validate_search_result(result, min_results) else None
     else:
         return None
 
 
-def simple_validate_search_result(result, search_type="ai_guided"):
+def simple_validate_search_result(result, min_results, search_type="ai_guided"):
     """
-    验证搜索结果质量，确保至少一条结果满足指定搜索类型的完整性条件
+    验证搜索结果质量，确保至少min_results条结果满足指定搜索类型的完整性条件
 
     Args:
         result: 搜索结果字典
@@ -87,7 +206,7 @@ def simple_validate_search_result(result, search_type="ai_guided"):
         return False
 
     results = result.get("results", [])
-    if not results:
+    if not results or len(results) < min_results:
         return False
 
     # 定义验证规则
@@ -120,13 +239,13 @@ def simple_validate_search_result(result, search_type="ai_guided"):
     return False
 
 
-def validate_search_result(result, search_type="local"):
-    """验证搜索结果质量，确保至少一条结果满足指定搜索类型的完整性条件，并返回转换后的日期格式"""
+def validate_search_result(result, min_results=1, search_type="local"):
+    """验证搜索结果质量，确保至少min_results条结果满足指定搜索类型的完整性条件，并返回转换后的日期格式"""
     if not isinstance(result, dict) or not result.get("success", False):
         return False
 
     results = result.get("results", [])
-    if not results:
+    if not results or len(results) < min_results:
         return False
 
     timestamp = result.get("timestamp", time.time())

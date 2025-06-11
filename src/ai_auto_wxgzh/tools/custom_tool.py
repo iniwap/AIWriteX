@@ -221,9 +221,13 @@ class AIPySearchTool(BaseTool):
         original_cwd = os.getcwd()
         log.print_log("开始执行搜索，请耐心等待...")
         if config.use_search_service:
-            results = self._use_search_service(topic, config.aipy_search_max_results)
+            results = self._use_search_service(
+                topic, config.aipy_search_max_results, config.aipy_search_min_results
+            )
         else:
-            results = self._nouse_search_service(topic, config.aipy_search_max_results)
+            results = self._nouse_search_service(
+                topic, config.aipy_search_max_results, config.aipy_search_min_results
+            )
 
         # 恢复原始工作目录
         os.chdir(original_cwd)
@@ -239,18 +243,18 @@ class AIPySearchTool(BaseTool):
         else:
             return f"未能找到关于'{topic}'的搜索结果。"
 
-    def _use_search_service(self, topic, max_results):
+    def _use_search_service(self, topic, max_results, min_results):
         try:
             # 执行搜索
-            return SearchService().search(topic, max_results, use_fix_results_parallel=True)
+            return SearchService().aipy_search(topic, max_results, min_results)
         except Exception as e:
             log.print_traceback("搜索过程中发生错误：", e)
             return None
 
-    def _nouse_search_service(self, topic, max_results):
+    def _nouse_search_service(self, topic, max_results, min_results):
         try:
             # 第一步：尝试使用本地模板代码
-            template_result = search_template.search_web(topic, max_results)
+            template_result = search_template.search_web(topic, max_results, min_results)
             if template_result:
                 return template_result.get("results")
 
@@ -260,14 +264,16 @@ class AIPySearchTool(BaseTool):
             task_manager = TaskManager(Config.get_instance().get_aipy_settings(), console=console)
 
             # 先尝试基于模板的约束性生成
-            constrained_result = self._try_template_guided_ai(topic, max_results, task_manager)
-            if search_template.validate_search_result(constrained_result, "ai_guided"):
+            constrained_result = self._try_template_guided_ai(
+                topic, max_results, min_results, task_manager
+            )
+            if search_template.validate_search_result(constrained_result, min_results, "ai_guided"):
                 return constrained_result.get("results")
 
             console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
             # 最后尝试完全自由的AI生成
-            free_result = self._try_free_form_ai(topic, max_results, task_manager)
-            if search_template.validate_search_result(free_result, "ai_free"):
+            free_result = self._try_free_form_ai(topic, max_results, min_results, task_manager)
+            if search_template.validate_search_result(free_result, min_results, "ai_free"):
                 return free_result.get("results")
 
             return None
@@ -276,68 +282,11 @@ class AIPySearchTool(BaseTool):
             log.print_traceback("搜索过程中发生错误：", e)
             return None
 
-    def _try_template_guided_ai(self, topic, max_results, task_manager):
+    def _try_template_guided_ai(self, topic, max_results, min_results, task_manager):
         """基于模板模式的约束性AI生成"""
-        search_instruction = f"""
-        请生成一个搜索函数，获取最新相关信息，参考以下配置：
-
-        # 搜索引擎URL模式：
-        - 百度: https://www.baidu.com/s?wd={{quote(topic)}}&rn={{max_results}}
-        - Bing: https://www.bing.com/search?q={{quote(topic)}}&count={{max_results}}
-        - 360: https://www.so.com/s?q={{quote(topic)}}&rn={{max_results}}
-        - 搜狗: https://www.sogou.com/web?query={{quote(topic)}}
-
-        # 关键CSS选择器：
-        百度结果容器: ["div.result", "div.c-container", "div[class*='result']"]
-        百度标题: ["h3", "h3 a", ".t", ".c-title"]
-        百度摘要: ["div.c-abstract", ".c-span9", "[class*='abstract']"]
-
-        Bing结果容器: ["li.b_algo", "div.b_algo", "li[class*='algo']"]
-        Bing标题: ["h2", "h3", "h2 a", ".b_title"]
-        Bing摘要: ["p.b_lineclamp4", "div.b_caption", ".b_snippet"]
-
-        360结果容器: ["li.res-list", "div.result", "li[class*='res']"]
-        360标题: ["h3.res-title", "h3", ".res-title"]
-        360摘要: ["p.res-desc", "div.res-desc", ".res-summary"]
-
-        搜狗结果容器: ["div.vrwrap", "div.results", "div.result"]
-        搜狗标题: ["h3.vr-title", "h3.vrTitle", "a.title", "h3"]
-        搜狗摘要: ["div.str-info", "div.str_info", "p.str-info"]
-
-        # 重要处理逻辑：
-        1. 按优先级依次尝试四个搜索引擎（不要使用API密钥方式）
-        2. 使用 concurrent.futures.ThreadPoolExecutor 并行访问页面提取详细内容
-        3. 从页面提取发布时间，遵从以下策略：
-            - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
-            - 备选方案：time标签、日期相关class、页面文本匹配
-            - 有效的日期格式：标准格式、中文格式、相对时间（如“昨天”、“1天前”、“1小时前”等）、英文时间（如“yesterday”等）
-        4. 按发布时间排序，优先最近7天内容
-        5. 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
-
-        # 返回数据格式（严格遵守）：
-        {{
-            "timestamp": time.time(),
-            "topic": "{topic}",
-            "results": [
-                {{
-                    "title": "标题",
-                    "url": "链接",
-                    "abstract": "详细摘要（去除空格换行，至少200字）",
-                    "pub_time": "发布时间"
-                }}
-            ],
-            "success": True/False,
-            "error": 错误信息或None
-        }}
-
-        __result__ = search_web("{topic}", {max_results})
-
-        # 严格停止条件：获取到1条或以上同时满足以下条件的结果时，立即停止执行，不得继续生成任何代码：
-        # 1. 摘要(abstract)长度不少于100字
-        # 2. 发布时间(pub_time)字段不为空、不为None、不为空字符串
-        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
-
-        """
+        search_instruction = search_template.get_template_guided_search_instruction(
+            topic, max_results, min_results
+        )
 
         task = None
         try:
@@ -347,60 +296,18 @@ class AIPySearchTool(BaseTool):
             # 反向遍历历史记录，只验证摘要和日期
             for entry in reversed(task.runner.history):
                 result = entry.get("result", {}).get("__result__")
-                if search_template.simple_validate_search_result(result, "ai_guided"):
-                    print(f"找到结果: {result}")
+                if search_template.simple_validate_search_result(result, min_results, "ai_guided"):
                     return result
             return None
         finally:
             if task:
                 task.done()
 
-    def _try_free_form_ai(self, topic, max_results, task_manager):
+    def _try_free_form_ai(self, topic, max_results, min_results, task_manager):
         """完全自由的AI生成"""
-        search_instruction = f"""
-        请创新性地生成搜索函数，获取最新相关信息。
-
-        # 可选搜索策略：
-        1. 依次尝试不同搜索引擎（百度、Bing、360、搜狗）
-        2. 使用新闻聚合API（如NewsAPI、RSS源）
-        3. 尝试社交媒体平台搜索
-        4. 使用学术搜索引擎
-
-        # 核心要求：
-        - 函数名为search_web，参数topic和max_results
-        - 实现多重容错机制，至少尝试2-3种不同方法
-        - 对每个结果访问原始页面提取完整信息
-        - 优先获取最近7天内的新鲜内容，按发布时间排序
-        - 摘要长度至少100字，包含关键信息
-        - 不能使用需要API密钥的方式
-        - 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
-
-        # 时间提取策略：
-        - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
-        - 备选方案：time标签、日期相关class、页面文本匹配
-
-        # 返回数据格式（严格遵守）：
-        {{
-            "timestamp": time.time(),
-            "topic": "{topic}",
-            "results": [
-                {{
-                    "title": "标题",
-                    "url": "链接",
-                    "abstract": "详细摘要（去除空格换行，至少200字）",
-                    "pub_time": "发布时间"
-                }}
-            ],
-            "success": True/False,
-            "error": 错误信息或None
-        }}
-
-        __result__ = search_web("{topic}", {max_results})
-
-        # 严格停止条件：获取到1条或以上摘要(abstract)长度不少于50字的结果时，立即停止执行，不得继续生成任何代码
-        # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
-
-        """
+        search_instruction = search_template.get_free_form_ai_search_instruction(
+            topic, max_results, min_results
+        )
 
         task = None
         try:
@@ -410,8 +317,7 @@ class AIPySearchTool(BaseTool):
             # 反向遍历历史记录，只验证摘要和日期
             for entry in reversed(task.runner.history):
                 result = entry.get("result", {}).get("__result__")
-                if search_template.simple_validate_search_result(result, "ai_free"):
-                    print(f"找到结果: {result}")
+                if search_template.simple_validate_search_result(result, min_results, "ai_free"):
                     return result
             return None
         finally:

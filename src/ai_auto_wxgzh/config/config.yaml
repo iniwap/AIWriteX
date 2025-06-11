@@ -129,3 +129,4 @@ need_auditor: false
 use_compress: true
 use_search_service: false
 aipy_search_max_results: 10
+aipy_search_min_results: 1
