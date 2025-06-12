@@ -78,7 +78,12 @@ def autowx_gzh(stop_event=None, ui_mode=False):
 
         platform = utils.get_random_platform(config.platforms)
         topic = hotnews.select_platform_topic(platform, 5)  # 前五个热门话题根据一定权重选一个
-        inputs = {"platform": platform, "topic": topic}
+        inputs = {
+            "platform": platform,
+            "topic": topic,
+            "min_article_len": config.min_article_len,
+            "max_article_len": config.max_article_len,
+        }
 
         log.print_log("CrewAI开始工作...")
         if ui_mode:

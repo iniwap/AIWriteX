@@ -332,11 +332,23 @@ class ConfigEditor:
             ],
             [
                 sg.Text("最大搜索数量:", size=(15, 1)),
-                sg.InputText(self.config.aipy_search_max_results, key="-AIPY_SEARCH_MAX_RESULTS-"),
+                sg.InputText(
+                    self.config.aipy_search_max_results,
+                    key="-AIPY_SEARCH_MAX_RESULTS-",
+                    size=(10, 1),
+                ),
+                sg.Text("最小搜索数量:", size=(15, 1)),
+                sg.InputText(
+                    self.config.aipy_search_min_results,
+                    key="-AIPY_SEARCH_MIN_RESULTS-",
+                    size=(10, 1),
+                ),
             ],
             [
-                sg.Text("最小搜索数量:", size=(15, 1)),
-                sg.InputText(self.config.aipy_search_min_results, key="-AIPY_SEARCH_MIN_RESULTS-"),
+                sg.Text("最小文章字数:", size=(15, 1)),
+                sg.InputText(self.config.min_article_len, key="-MIN_ARTICLE_LEN-", size=(10, 1)),
+                sg.Text("最大文章字数:", size=(15, 1)),
+                sg.InputText(self.config.max_article_len, key="-MAX_ARTICLE_LEN-", size=(10, 1)),
             ],
             [
                 sg.Text(
@@ -355,8 +367,8 @@ class ConfigEditor:
                     "4、AIPy搜索缓存：\n"
                     "    - 使用：优先使用本地缓存，降低后续执行搜索任务的token消耗\n"
                     "    - 不使用：可能更精准，但token消耗较高，总体执行成功率降低\n"
-                    "5、最大搜索数量：返回的最大搜索结果数量（1 ~ 20）\n"
-                    "6、最小搜索数量：返回的最小搜索结果数量（1 ~ 10），越大失败率越高",
+                    "5、最大/最小搜索数量：返回的最大（1~20）/最小（1~10）搜索结果数\n"
+                    "6、最大/最小文章字数：生成的最大（5000）/最小文章字数（500）",
                     size=(70, 17),
                     text_color="gray",
                 ),
@@ -839,6 +851,40 @@ class ConfigEditor:
                     self.window["-AIPY_SEARCH_MIN_RESULTS-"].update(
                         value=self.config.default_config["aipy_search_min_results"]
                     )
+
+                # 文章字数控制
+                min_len_input = values["-MIN_ARTICLE_LEN-"]
+                max_len_input = values["-MAX_ARTICLE_LEN-"]
+                parsed_min_len = None
+                parsed_max_len = None
+
+                try:
+                    if isinstance(min_len_input, str) and min_len_input.isdigit():
+                        parsed_min_len = int(min_len_input)
+                    if isinstance(max_len_input, str) and max_len_input.isdigit():
+                        parsed_max_len = int(max_len_input)
+                except ValueError:
+                    pass
+
+                if (
+                    parsed_min_len is not None
+                    and parsed_max_len is not None
+                    and parsed_min_len >= 500
+                    and parsed_max_len <= 5000
+                    and parsed_min_len <= parsed_max_len
+                ):
+                    config["min_article_len"] = parsed_min_len
+                    config["max_article_len"] = parsed_max_len
+                else:
+                    config["min_article_len"] = self.config.default_config["min_article_len"]
+                    config["max_article_len"] = self.config.default_config["max_article_len"]
+                    self.window["-MIN_ARTICLE_LEN-"].update(
+                        value=self.config.default_config["min_article_len"]
+                    )
+                    self.window["-MAX_ARTICLE_LEN-"].update(
+                        value=self.config.default_config["max_article_len"]
+                    )
+
                 # 处理 template 保存逻辑
                 template_value = values["-TEMPLATE-"]
                 config["template"] = "" if template_value == "随机模板" else template_value
@@ -939,6 +985,8 @@ class ConfigEditor:
                 config["aipy_search_min_results"] = self.config.default_config[
                     "aipy_search_min_results"
                 ]
+                config["min_article_len"] = self.config.default_config["min_article_len"]
+                config["max_article_len"] = self.config.default_config["max_article_len"]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
                     self.update_tab("-TAB_OTHER-", self.create_other_tab())

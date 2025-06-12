@@ -171,7 +171,7 @@ class SearchService:
 
     def _auto_cleanup(self):
         """自动清理：结合失败率和年龄策略"""
-        self.console.print("[blue]开始自动清理模块...[/blue]")
+        self.console.print("[blue]开始自动清理本地失败过多或无效模块...[/blue]")
 
         # 加载清理配置
         config = self._load_cleanup_config()
@@ -185,8 +185,6 @@ class SearchService:
         self._clean_old_modules(
             max_age_days=config["max_age_days"], max_modules=config["max_modules"]
         )
-
-        self.console.print("[blue]模块清理完成[/blue]")
 
     def _get_best_module(self):
         """根据历史成功率选择最佳模块"""
@@ -218,7 +216,24 @@ class SearchService:
             spec.loader.exec_module(module)
             return module
         except Exception as e:
+            error_msg = str(e)
             self.console.print(f"[red]导入模块失败: {e}[/red]")
+
+            # 检查 AIPy 环境依赖错误
+            aipy_errors = [
+                "name 'runtime' is not defined",
+                "name '__session__' is not defined",
+                "name '__history__' is not defined",
+                "name '__code_blocks__' is not defined",
+                "name '__result__' is not defined",
+            ]
+
+            if any(error in error_msg for error in aipy_errors):
+                self.console.print(
+                    f"[red]检测到 AIPy 环境依赖错误，立即清理模块: {module_id}[/red]"
+                )
+                self._remove_module(module_id)
+
             return None
 
     def _generate_with_ai(self, topic, max_results, min_results, generation_mode):
@@ -264,9 +279,47 @@ class SearchService:
             if task:
                 task.done()
 
+    def _validate_code_before_save(self, code):
+        """在保存前验证代码的可执行性"""
+        try:
+            aipy_globals = [
+                "runtime",
+                "__session__",
+                "__history__",
+                "__code_blocks__",
+                "__result__",
+            ]
+
+            for global_var in aipy_globals:
+                if global_var in code:
+                    self.console.print(
+                        f"[yellow]检测到 AIPy 全局变量 {global_var}，代码可能无法独立运行[/yellow]"
+                    )
+                    return False
+
+            # 尝试编译代码检查语法
+            compile(code, "<string>", "exec")
+
+            # 检查必要的函数是否存在
+            if "def search_web" not in code:
+                return False
+
+            return True
+        except SyntaxError as e:
+            self.console.print(f"[red]代码语法错误: {e}[/red]")
+            return False
+        except Exception as e:
+            self.console.print(f"[red]代码验证失败: {e}[/red]")
+            return False
+
     def _save_module_code(self, code, source):
         """保存模块代码"""
         try:
+            # 在保存前验证代码
+            if not self._validate_code_before_save(code):
+                self.console.print("[red]代码验证失败，跳过保存[/red]")
+                return None
+
             module_id = f"search_{source}_{int(time.time())}"
             module_path = self.search_modules_dir / f"{module_id}.py"
 
@@ -323,7 +376,24 @@ class SearchService:
                         self._save_modules_info()
 
                 except Exception as e:
+                    error_msg = str(e)
                     self.console.print(f"[yellow]模块执行失败: {e}[/yellow]")
+
+                    # 只处理非 AIPy 的 ImportError（AIPy 错误已在 _import_module 中处理）
+                    if "ImportError" in str(type(e)) and not any(
+                        aipy_error in error_msg
+                        for aipy_error in [
+                            "name 'runtime' is not defined",
+                            "name '__session__' is not defined",
+                            "name '__history__' is not defined",
+                            "name '__code_blocks__' is not defined",
+                            "name '__result__' is not defined",
+                        ]
+                    ):
+                        self.console.print(f"[red]检测到导入错误，立即清理模块: {module_id}[/red]")
+                        self._remove_module(module_id)
+                        continue
+
                     self.modules_info["success_rate"][module_id]["failures"] += 1
                     self._save_modules_info()
 
