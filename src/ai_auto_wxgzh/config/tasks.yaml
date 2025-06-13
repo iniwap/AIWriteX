@@ -18,31 +18,35 @@ analyze_topic:
 write_content:
   name: "write_content"
   description: |
-    基于生成的文章大纲和搜索工具获取的最新信息，撰写一篇高质量的微信公众号文章。
-    确保文章内容准确、逻辑清晰、语言流畅，并具有独到的见解，文章标题为：{platform}|{topic}。
+    基于生成的文章大纲和搜索工具获取的最新信息，撰写一篇高质量的微信公众号文章。  
+    确保文章内容准确、逻辑清晰、语言流畅，并具有独到的见解。 
     工具 aipy_search_tool 使用以下参数：
-      topic={topic}。
+      topic={topic}
+      urls={urls}
+      reference_ratio={reference_ratio}。
 
-    执行步骤：
-    1. 使用 aipy_search_tool 搜索关于'{topic}'的最新信息
-    2. 融合生成的文章大纲和与'{topic}'相关的搜索结果
+    执行步骤：  
+    1. 使用 aipy_search_tool 获取关于'{topic}'的最新信息
+    2. 根据获取的结果的类型和内容深度调整写作策略：
+       - 如果结果包含"参考比例"，融合生成的文章大纲与参考文章结果的内容，并根据比例调整借鉴程度
+       - 如果结果不包含"参考比例"，融合生成的文章大纲和与'{topic}'相关的搜索结果进行原创写作
     3. 用搜索结果中的真实时间替换大纲中的占位符：
        - 如果搜索结果有具体日期，直接替换"20xx年"等占位符
        - 如果搜索结果无具体日期，使用"近期"、"最近"、"据最新数据显示"等表述
        - 确保最终文章无任何日期占位符
 
-    文章内容要求：
-    - 最终文章字数控制在{min_article_len}~{max_article_len}字之间（纯文本内容，不包括Markdown语法、空格）
-    - 融合多个相关搜索结果的观点
-    - 保持信息时效性和准确性
-    - 仅输出最终文章内容，禁止包含思考过程、分析说明等
+    生成的文章要求：  
+    - 标题：当{platform}不为空时为"{platform}|{topic}"，否则为"{topic}"  
+    - 总字数：{min_article_len}~{max_article_len}字（纯文本，不含Markdown语法、空格）  
+    - 内容：仅输出最终文章内容，禁止包含思考过程、分析说明等
+
   agent: writer
   expected_output: 文章标题 + 文章正文（标准Markdown格式）
 
 audit_content:
   name: "audit_content"
   description: |
-    对生成的文章进行全面质量审核，包括标题（格式为{platform}|{topic}）、内容、语法等方面。
+    对生成的文章进行全面质量审核，包括内容、语法等方面。
     请检查文章是否与热门话题紧密相关，并具有独到的见解，发现文章中的错误和不足之处，生成修改后的文章。
   agent: auditor
   expected_output: 修改后的文章（标准Markdown格式）

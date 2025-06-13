@@ -38,6 +38,7 @@ import html  # noqa 841
 
 
 from crewai.tools import BaseTool  # noqa 841
+from crewai_tools import SeleniumScrapingTool  # noqa 841
 from typing import Type  # noqa 841
 from pydantic import BaseModel, Field  # noqa 841
 import glob  # noqa 841

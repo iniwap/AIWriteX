@@ -220,13 +220,7 @@ class SearchService:
             self.console.print(f"[red]导入模块失败: {e}[/red]")
 
             # 检查 AIPy 环境依赖错误
-            aipy_errors = [
-                "name 'runtime' is not defined",
-                "name '__session__' is not defined",
-                "name '__history__' is not defined",
-                "name '__code_blocks__' is not defined",
-                "name '__result__' is not defined",
-            ]
+            aipy_errors = ["name 'runtime' is not defined"]
 
             if any(error in error_msg for error in aipy_errors):
                 self.console.print(
@@ -282,13 +276,7 @@ class SearchService:
     def _validate_code_before_save(self, code):
         """在保存前验证代码的可执行性"""
         try:
-            aipy_globals = [
-                "runtime",
-                "__session__",
-                "__history__",
-                "__code_blocks__",
-                "__result__",
-            ]
+            aipy_globals = ["runtime"]
 
             for global_var in aipy_globals:
                 if global_var in code:
@@ -381,14 +369,7 @@ class SearchService:
 
                     # 只处理非 AIPy 的 ImportError（AIPy 错误已在 _import_module 中处理）
                     if "ImportError" in str(type(e)) and not any(
-                        aipy_error in error_msg
-                        for aipy_error in [
-                            "name 'runtime' is not defined",
-                            "name '__session__' is not defined",
-                            "name '__history__' is not defined",
-                            "name '__code_blocks__' is not defined",
-                            "name '__result__' is not defined",
-                        ]
+                        aipy_error in error_msg for aipy_error in ["name 'runtime' is not defined"]
                     ):
                         self.console.print(f"[red]检测到导入错误，立即清理模块: {module_id}[/red]")
                         self._remove_module(module_id)

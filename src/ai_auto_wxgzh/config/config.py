@@ -216,6 +216,11 @@ class Config:
         # 全局变量
         self._ui_mode = False
 
+        # 自定义话题和文章参考链接，根据是否为空判断是否自定义
+        self.custom_topic = ""  # 自定义话题（字符串）
+        self.urls = []  # 参考链接（列表）
+        self.reference_ratio = 0  # 文章借鉴比例[0-1]
+
     @classmethod
     def get_instance(cls):
         with cls._lock:

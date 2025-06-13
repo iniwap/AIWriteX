@@ -8,6 +8,8 @@ import time
 import sys
 import shutil
 import webbrowser
+from urllib.parse import urlparse
+
 from src.ai_auto_wxgzh.utils import log
 
 
@@ -277,3 +279,11 @@ def open_url(file_url):
         return ""
     except Exception as e:
         return str(e)
+
+
+def is_valid_url(url):
+    try:
+        result = urlparse(url)
+        return all([result.scheme in ["http", "https"], result.netloc])
+    except Exception as e:  # noqa 841
+        return False

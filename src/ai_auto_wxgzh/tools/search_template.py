@@ -16,6 +16,8 @@ from enum import Enum
 import concurrent.futures
 from dateutil.relativedelta import relativedelta
 import html
+from typing import List, Dict, Any
+from crewai_tools import SeleniumScrapingTool
 
 
 def get_template_guided_search_instruction(topic, max_results, min_results):
@@ -105,6 +107,7 @@ def get_free_form_ai_search_instruction(topic, max_results, min_results):
         # 时间提取策略：
         - 优先meta标签：article:published_time、datePublished、pubdate、publishdate等
         - 备选方案：time标签、日期相关class、页面文本匹配
+        - 有效的日期格式：标准格式、中文格式、相对时间（如“昨天”、“1天前”、“1小时前”等）、英文时间（如“yesterday”等）
 
         # 返回数据格式（严格遵守）：
         {{
@@ -115,7 +118,7 @@ def get_free_form_ai_search_instruction(topic, max_results, min_results):
                     "title": "标题",
                     "url": "链接",
                     "abstract": "详细摘要（去除空格换行，至少200字）",
-                    "pub_time": "发布时间"
+                    "pub_time": "发布时间"（可以为""）
                 }}
             ],
             "success": True/False,
@@ -306,12 +309,14 @@ def validate_search_result(result, min_results=1, search_type="local"):
         "local": ["title", "url", "abstract", "pub_time"],
         "ai_guided": ["title", "url", "abstract"],
         "ai_free": ["title", "abstract"],
+        "reference_article": ["title", "url", "content", "pub_time"],
     }
 
     quality_rules = {
         "local": {"abstract_min_length": 200, "require_valid_date": True},
         "ai_guided": {"abstract_min_length": 100, "require_valid_date": True},
         "ai_free": {"abstract_min_length": 50, "require_valid_date": False},
+        "reference_article": {"content_min_length": 200, "require_valid_date": True},
     }
 
     required_fields = validation_rules.get(search_type, validation_rules["local"])
@@ -321,9 +326,16 @@ def validate_search_result(result, min_results=1, search_type="local"):
         if not all(item.get(field, "").strip() for field in required_fields):
             continue
 
-        abstract = item.get("abstract", "")
-        if len(abstract.strip()) < quality_req["abstract_min_length"]:
-            continue
+        # 针对 reference_article 类型的特殊处理
+        if search_type == "reference_article":
+            content = item.get("content", "")
+            if len(content.strip()) < quality_req["content_min_length"]:
+                continue
+        else:
+            # 其他类型检查 abstract
+            abstract = item.get("abstract", "")
+            if len(abstract.strip()) < quality_req.get("abstract_min_length", 0):
+                continue
 
         if quality_req["require_valid_date"] and search_type != "ai_guided":
             pub_time = item.get("pub_time", "")
@@ -383,8 +395,14 @@ def calculate_actual_date(pub_time, timestamp):
         return None
 
     try:
-        pub_time = clean_date_text(str(pub_time))
+        pub_time_cleaned = clean_date_text(str(pub_time))
         reference_date = datetime.fromtimestamp(timestamp)
+
+        # 优先处理 Unix 时间戳 (修正后的位置)
+        if re.match(r"^\d{10}$", pub_time_cleaned):
+            return datetime.fromtimestamp(int(pub_time_cleaned))
+        if re.match(r"^\d{13}$", pub_time_cleaned):
+            return datetime.fromtimestamp(int(pub_time_cleaned) / 1000)
 
         # 1. 相对时间
         relative_patterns = [
@@ -398,7 +416,7 @@ def calculate_actual_date(pub_time, timestamp):
         ]
 
         for pattern, calc_func in relative_patterns:
-            match = re.search(pattern, pub_time, re.IGNORECASE)
+            match = re.search(pattern, pub_time_cleaned, re.IGNORECASE)
             if match:
                 num = int(match.group(1))
                 return calc_func(num)
@@ -417,7 +435,7 @@ def calculate_actual_date(pub_time, timestamp):
         }
 
         for key, calc_date in special_relative.items():
-            if key in pub_time:
+            if key in pub_time_cleaned:
                 return calc_date
 
         # 3. 英文相对时间
@@ -437,7 +455,7 @@ def calculate_actual_date(pub_time, timestamp):
         ]
 
         for pattern, calc_func in english_relative:
-            match = re.search(pattern, pub_time, re.IGNORECASE)
+            match = re.search(pattern, pub_time_cleaned, re.IGNORECASE)
             if match:
                 if match.groups():
                     num = int(match.group(1))
@@ -450,7 +468,7 @@ def calculate_actual_date(pub_time, timestamp):
         ]
 
         for pattern in incomplete_patterns:
-            match = re.search(pattern, pub_time)
+            match = re.search(pattern, pub_time_cleaned)
             if match:
                 month, day = map(int, match.groups())
                 if 1 <= month <= 12 and 1 <= day <= 31:
@@ -476,16 +494,10 @@ def calculate_actual_date(pub_time, timestamp):
         ]
 
         for pattern, date_format in complete_patterns:
-            match = re.search(pattern, pub_time)
+            match = re.search(pattern, pub_time_cleaned)
             if match:
                 date_str = match.group(0)
                 return datetime.strptime(date_str, date_format)
-
-        # 6. Unix 时间戳
-        if re.match(r"^\d{10}$", pub_time):
-            return datetime.fromtimestamp(int(pub_time))
-        if re.match(r"^\d{13}$", pub_time):
-            return datetime.fromtimestamp(int(pub_time) / 1000)
 
     except Exception:
         return None
@@ -512,6 +524,12 @@ def clean_date_text(text):
     if not text:
         return ""
     try:
+        # 如果是纯数字字符串，直接返回，避免不必要的清理
+        if isinstance(text, (int, float)):
+            return str(text)
+        if isinstance(text, str) and text.isdigit():
+            return text
+
         if isinstance(text, bytes):
             text = text.decode("utf-8", errors="ignore")
         text = html.unescape(text)
@@ -629,6 +647,119 @@ def parse_date_to_timestamp(date_str):
     return 0
 
 
+def _extract_publish_time(page_soup):
+    """统一的发布时间提取函数"""
+    # Meta 标签提取 - 优先处理标准的发布时间标签
+    meta_selectors = [
+        "meta[property='article:published_time']",
+        "meta[property='sitemap:news:publication_date']",
+        "meta[itemprop='datePublished']",
+        "meta[name='publishdate']",
+        "meta[name='pubdate']",
+        "meta[name='original-publish-date']",
+        "meta[name='weibo:article:create_at']",
+        "meta[name='baidu_ssp:publishdate']",
+    ]
+
+    for selector in meta_selectors:
+        meta_tag = page_soup.select_one(selector)
+        if meta_tag:
+            datetime_str = meta_tag.get("content")
+            if datetime_str:
+                try:
+                    # 处理 UTC 时间 (以Z结尾)
+                    if datetime_str.endswith("Z"):
+                        dt = datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
+                        # 转换为东八区时间
+                        dt_local = dt + timedelta(hours=8)
+                        return dt_local.strftime("%Y-%m-%d")
+                    # 处理带时区的 ISO 8601 格式
+                    elif "T" in datetime_str and ("+" in datetime_str or "-" in datetime_str[-6:]):
+                        dt = datetime.fromisoformat(datetime_str)
+                        return dt.strftime("%Y-%m-%d")
+                    # 处理简单的日期格式
+                    elif "T" in datetime_str:
+                        return datetime_str.split("T")[0]
+                except Exception:
+                    pass
+
+    # Time 标签提取
+    time_tags = page_soup.select("time")
+    for time_tag in time_tags:
+        datetime_attr = time_tag.get("datetime")
+        if datetime_attr:
+            try:
+                # 处理 UTC 时间 (以Z结尾)
+                if datetime_attr.endswith("Z"):
+                    dt = datetime.fromisoformat(datetime_attr.replace("Z", "+00:00"))
+                    # 转换为东八区时间
+                    dt_local = dt + timedelta(hours=8)
+                    return dt_local.strftime("%Y-%m-%d")
+                # 处理带时区的 ISO 8601 格式
+                elif "T" in datetime_attr and ("+" in datetime_attr or "-" in datetime_attr[-6:]):
+                    dt = datetime.fromisoformat(datetime_attr)
+                    return dt.strftime("%Y-%m-%d")
+                # 处理简单的日期格式
+                elif "T" in datetime_attr:
+                    return datetime_attr.split("T")[0]
+            except Exception:
+                pass
+
+        # 如果 datetime 属性解析失败，尝试文本内容
+        text_content = clean_date_text(time_tag.get_text())
+        if text_content and is_valid_date(text_content):
+            time_date = calculate_actual_date(text_content, time.time())
+            if time_date:
+                return time_date.strftime("%Y-%m-%d")
+
+    # HTML 元素提取
+    date_selectors = [
+        "textarea.article-time",
+        "[class*='date']",
+        "[class*='time']",
+        "[class*='publish']",
+        "[class*='post-date']",
+        "[id*='date']",
+        "[id*='time']",
+        ".byline",
+        ".info",
+        ".article-meta",
+        ".source",
+        ".entry-date",
+        "div.date",
+        "p.date",
+        "p.time",
+    ]
+
+    for selector in date_selectors:
+        elements = page_soup.select(selector)
+        for elem in elements:
+            text = clean_date_text(elem.get_text())
+            if text and is_valid_date(text):
+                elem_date = calculate_actual_date(text, time.time())
+                if elem_date:
+                    return elem_date.strftime("%Y-%m-%d")
+
+    # 兜底：全文搜索
+    text = clean_date_text(page_soup.get_text())
+    for pattern in [
+        r"\d{4}\s*[-/年\.]?\s*\d{1,2}\s*[-/月\.]?\s*\d{1,2}\s*(?:日)?(?:\s+\d{1,2}:\d{1,2}(?::\d{1,2})?)?",  # noqa 501
+        r"\d{1,2}[-/]\d{1,2}[-/]\d{4}",
+        r"\d{1,2}\s*[月]\s*\d{1,2}\s*[日]?",
+        r"(?:\d+\s*(?:秒|分钟|分|小时|个小时|天|日|周|星期|个月|月|年)前|刚刚|今天|昨天|前天|上周|上星期|上个月|上月|去年)",
+        r"\d{4}年\d{1,2}月\d{1,2}日",
+    ]:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            pub_time = match.group(0)
+            if is_valid_date(pub_time):
+                pub_time_date = calculate_actual_date(pub_time, time.time())
+                if pub_time_date:
+                    return pub_time_date.strftime("%Y-%m-%d")
+
+    return ""
+
+
 def extract_page_content(url, headers=None):
     """从 URL 提取页面内容和发布日期"""
     try:
@@ -639,92 +770,13 @@ def extract_page_content(url, headers=None):
 
         page_soup = BeautifulSoup(content, "html.parser")
 
-        pub_time = None
+        # 直接调用统一的时间提取函数
+        pub_time = _extract_publish_time(page_soup)
 
-        # Meta 标签
-        meta_selectors = [
-            "meta[property='article:published_time']",
-            "meta[itemprop='datePublished']",
-            "meta[name='publishdate']",
-            "meta[name='pubdate']",
-            "meta[name='original-publish-date']",
-            "meta[name='weibo:article:create_at']",
-            "meta[name='baidu_ssp:publishdate']",
-        ]
-        for selector in meta_selectors:
-            meta_tag = page_soup.select_one(selector)
-            if meta_tag:
-                pub_time = clean_date_text(meta_tag.get("content"))
-                if pub_time and is_valid_date(pub_time):
-                    meta_date = calculate_actual_date(pub_time, time.time())
-                    if meta_date:
-                        pub_time = meta_date.strftime("%Y-%m-%d")
-                        break
-
-        # Time 标签
-        if not pub_time:
-            time_tags = page_soup.select("time")
-            for time_tag in time_tags:
-                pub_time = clean_date_text(time_tag.get("datetime") or time_tag.get_text())
-                if pub_time and is_valid_date(pub_time):
-                    time_date = calculate_actual_date(pub_time, time.time())
-                    if time_date:
-                        pub_time = time_date.strftime("%Y-%m-%d")
-                        break
-
-        # HTML 元素
-        date_selectors = [
-            "[class*='date']",
-            "[class*='time']",
-            "[class*='publish']",
-            "[class*='post-date']",
-            "[id*='date']",
-            "[id*='time']",
-            ".byline",
-            ".info",
-            ".article-meta",
-            ".source",
-            ".entry-date",
-            "div.date",
-            "p.date",
-            "p.time",
-        ]
-        if not pub_time:
-            for selector in date_selectors:
-                elements = page_soup.select(selector)
-                for elem in elements:
-                    text = clean_date_text(elem.get_text())
-                    if text and is_valid_date(text):
-                        elem_date = calculate_actual_date(text, time.time())
-                        if elem_date:
-                            pub_time = elem_date.strftime("%Y-%m-%d")
-                            break
-                if pub_time:
-                    break
-
-        # 兜底：全文搜索（增强正则）
-        if not pub_time:
-            text = clean_date_text(page_soup.get_text())
-            for pattern in [
-                r"\d{4}\s*[-/年\.]?\s*\d{1,2}\s*[-/月\.]?\s*\d{1,2}\s*(?:日)?(?:\s+\d{1,2}:\d{1,2}(?::\d{1,2})?)?",  # noqa 501
-                r"\d{1,2}[-/]\d{1,2}[-/]\d{4}",
-                r"\d{1,2}\s*[月]\s*\d{1,2}\s*[日]?",
-                r"(?:\d+\s*(?:秒|分钟|分|小时|个小时|天|日|周|星期|个月|月|年)前|刚刚|今天|昨天|前天|上周|上星期|上个月|上月|去年)",
-                r"\d{4}年\d{1,2}月\d{1,2}日",
-            ]:
-                match = re.search(pattern, text, re.IGNORECASE)
-                if match:
-                    pub_time = match.group(0)
-                    if is_valid_date(pub_time):
-                        pub_time_date = calculate_actual_date(pub_time, time.time())
-                        if pub_time_date:
-                            pub_time = pub_time_date.strftime("%Y-%m-%d")
-                            break
-
-        return page_soup, pub_time, content
+        return page_soup, pub_time
 
     except Exception:
-        return None, None, None
+        return None, None
 
 
 def enhance_abstract(abstract, page_soup):
@@ -870,7 +922,7 @@ def _search_template(topic, max_results, engine_config):
             for future in concurrent.futures.as_completed(future_to_url):
                 url = future_to_url[future]
                 try:
-                    page_soup, pub_time, _ = future.result()
+                    page_soup, pub_time = future.result()
                     for res in parsed_results:
                         if res["url"] == url:
                             res["pub_time"] = pub_time
@@ -1245,3 +1297,182 @@ def template_360_specific(topic, max_results=10):
 
 def template_sougou_specific(topic, max_results=10):
     return _search_template(topic, max_results, ENGINE_CONFIGS["sogou"])
+
+
+# ---------- 以下为通过链接提取文章信息----------------
+def extract_urls_content(topic, urls: List[str]) -> Dict[str, Any]:
+    """提取URL内容，自动检测并处理动态网站，并返回标准格式"""
+    extracted_results = []
+    overall_success = True
+    overall_error_message = None
+
+    for url in urls:
+        try:
+            # 首先尝试普通方法
+            page_soup, pub_time = extract_page_content(url, get_common_headers())
+
+            # 如果普通方法无法获取有效内容，使用Selenium
+            if not page_soup or not _has_meaningful_content(page_soup):
+                selenium_tool = SeleniumScrapingTool(
+                    website_url=url, wait_time=15, return_html=True
+                )
+                page_content = selenium_tool._run(website_url=url, css_element="body")
+                if page_content:
+                    page_soup = BeautifulSoup(page_content, "html.parser")
+                    pub_time = _extract_publish_time(page_soup)
+
+            if page_soup:
+                title = _extract_title_from_page(page_soup)
+                full_content = _extract_full_article_content(page_soup)
+                extracted_results.append(
+                    {
+                        "title": title or "",
+                        "pub_time": pub_time or "",
+                        "abstract": "",
+                        "content": full_content,
+                        "url": url,
+                    }
+                )
+            else:
+                # 页面加载失败，记录为提取失败，但不影响整体success
+                extracted_results.append(
+                    {
+                        "title": "",
+                        "pub_time": "",
+                        "abstract": "",
+                        "content": "无法提取内容: 页面加载失败",
+                        "url": url,
+                    }
+                )
+
+        except Exception as e:
+            # 捕获到异常，记录错误信息，但不影响整体success
+            overall_success = False
+            overall_error_message = f"提取过程中发生部分错误: {str(e)}"
+            extracted_results.append(
+                {
+                    "title": "",
+                    "pub_time": "",
+                    "abstract": "",
+                    "content": f"无法提取内容: {str(e)}",
+                    "url": url,
+                }
+            )
+
+    # 构建标准返回格式
+    # success只关注函数执行过程中是否发生未捕获的异常，这里已经通过try-except处理了单个URL的异常
+    # 如果所有URL都尝试了，即使结果列表为空，也认为是成功执行了
+    return {
+        "timestamp": time.time(),
+        "topic": topic,
+        "results": extracted_results,
+        "success": overall_success,
+        "error": overall_error_message,
+    }
+
+
+def _has_meaningful_content(page_soup):
+    """检查页面是否包含有意义的内容，避免误判动态页面"""
+    if not page_soup:
+        return False
+    if page_soup.select_one("#js_content") or page_soup.select_one("meta[property='og:title']"):
+        return True
+    content_selectors = [
+        "article",
+        ".content",
+        ".article-content",
+        "main",
+        ".post-content",
+        ".entry-content",
+        "[class*='article']",
+        "[class*='content']",
+    ]
+    for selector in content_selectors:
+        if page_soup.select_one(selector):
+            return True
+    text = page_soup.get_text().strip()
+    if len(text) > 200:
+        return True
+    return False
+
+
+def _extract_title_from_page(page_soup):
+    """从页面提取标题"""
+    title_selectors = [
+        "title",
+        "h1",
+        ".title",
+        "[class*='title']",
+        "meta[property='og:title']",
+        "meta[name='title']",
+        ".article-title",
+        ".post-title",
+        ".content-title",
+        ".content__title",
+        ".article__title",  # 针对华尔街见闻
+    ]
+    for selector in title_selectors:
+        if selector.startswith("meta"):
+            elem = page_soup.select_one(selector)
+            if elem:
+                title = elem.get("content", "").strip()
+                if title:
+                    return clean_text(title)
+        else:
+            elem = page_soup.select_one(selector)
+            if elem:
+                title = elem.get_text().strip()
+                if title and len(title) > 5:
+                    return clean_text(title)
+    return ""
+
+
+def _extract_full_article_content(page_soup):
+    """提取完整文章内容"""
+    for elem in page_soup.select(
+        "script, style, nav, header, footer, aside, .ad, .advertisement, .sidebar, .menu, .navigation"  # noqa 501
+    ):
+        elem.decompose()
+    content_selectors = [
+        "article",
+        ".article-content",
+        ".content",
+        ".post-content",
+        ".entry-content",
+        "main",
+        ".main-content",
+        "[class*='article']",
+        "[class*='content']",
+        ".article-body",
+        ".post-body",
+        ".content-body",
+        ".content__article-body",  # 针对华尔街见闻
+    ]
+    for selector in content_selectors:
+        content_elem = page_soup.select_one(selector)
+        if content_elem:
+            text_parts = []
+            for elem in content_elem.find_all(
+                ["p", "h1", "h2", "h3", "h4", "h5", "h6", "div", "span"]
+            ):
+                text = clean_text(elem.get_text().strip())
+                if text:
+                    text_parts.append(text)
+            if text_parts:
+                # 保留段落结构，但清理多余换行符
+                full_text = "\n\n".join(text_parts)
+                # 清理连续的多个换行符
+                full_text = re.sub(r"\n{3,}", "\n\n", full_text)
+                # 清理首尾空白
+                full_text = full_text.strip()
+
+                if len(full_text) > 100:
+                    return full_text
+    body = page_soup.select_one("body")
+    if body:
+        for elem in body.select("nav, header, footer, aside, .ad, .advertisement, .sidebar, .menu"):
+            elem.decompose()
+        text = clean_text(body.get_text())
+        if text and len(text) > 100:
+            return text
+    return ""

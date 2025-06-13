@@ -70,45 +70,129 @@ class MainGUI(object):
             [sg.Menu(menu_list, key="-MENU-")],
             [
                 sg.Image(
-                    s=(640, 200),
+                    s=(640, 160),
                     filename=utils.get_res_path("UI\\bg.png", os.path.dirname(__file__)),
                     key="-BG-IMG-",
                     expand_x=True,
                 )
             ],
             [
-                sg.Push(),  # 左侧占位
-                sg.Button(button_text="开始执行", size=(12, 2), key="-START_BTN-"),
+                sg.Column(
+                    [
+                        [
+                            sg.Text(
+                                "自定义文章话题：",
+                                size=(12, 1),
+                                pad=((10, 5), (5, 2)),
+                            ),
+                            sg.InputText(
+                                "",
+                                key="-TOPIC_INPUT-",
+                                disabled=True,
+                                size=(30, 1),
+                                pad=((5, 5), (5, 2)),
+                                tooltip="输入自定义话题，或留空以获取热搜作为文章标题",
+                            ),
+                            sg.Checkbox(
+                                "",
+                                key="-CUSTOM_TOPIC-",
+                                enable_events=True,
+                                tooltip="勾选以启用自定义话题，否则自动获取热搜作为文章标题",
+                                size=(2, 1),
+                                pad=((5, 10), (5, 2)),
+                            ),
+                        ],
+                        [
+                            sg.Text(
+                                "AI参考文章链接：",
+                                size=(12, 1),
+                                pad=((10, 5), (2, 5)),
+                                tooltip="输入链接，生成文章将参考其内容",
+                            ),
+                            sg.InputText(
+                                "",
+                                key="-URLS_INPUT-",
+                                disabled=True,
+                                size=(30, 1),
+                                tooltip="多个链接请用竖线(|)分隔，例如：http://site1.com|https://site2.com",
+                                pad=((5, 5), (2, 5)),
+                            ),
+                            sg.Combo(
+                                ["10%", "20%", "30%", "50%", "75%"],
+                                default_value="30%",
+                                key="-REFERENCE_RATIO-",
+                                disabled=True,
+                                size=(6, 1),
+                                pad=((5, 10), (2, 5)),
+                                tooltip="选择参考链接文章内容的借鉴比例",
+                            ),
+                        ],
+                    ],
+                    justification="center",
+                    element_justification="left",
+                    pad=(0, 0),
+                )
+            ],
+            [
+                sg.Push(),
+                sg.Button(
+                    button_text="开始执行",
+                    size=(12, 2),
+                    key="-START_BTN-",
+                    pad=((10, 5), (5, 5)),
+                ),
                 sg.Button(
                     button_text="结束执行",
                     size=(12, 2),
                     key="-STOP_BTN-",
                     disabled=not self._is_running,
+                    pad=((5, 10), (5, 5)),
                 ),
-                sg.Push(),  # 右侧占位
+                sg.Push(),
             ],
             [
                 sg.Text("——" * 20, size=(60, 1), text_color="gray"),
                 sg.Push(),
             ],
             [
-                sg.Text("日志:", size=(6, 1)),
-                sg.Spin([10, 20, 50, 100, 200, 500, 1000], initial_value=100, key="-LOG_LIMIT-"),
-                sg.Button("设置显示条数", key="-SET_LOG_LIMIT-"),
-                sg.Button("清空日志", key="-CLEAR_LOG-"),
+                sg.Text("日志:", size=(6, 1), pad=((10, 5), (5, 5))),
+                sg.Spin(
+                    [10, 20, 50, 100, 200, 500, 1000],
+                    initial_value=100,
+                    key="-LOG_LIMIT-",
+                    size=(6, 1),
+                    pad=((5, 5), (5, 5)),
+                ),
+                sg.Button(
+                    "设置显示条数",
+                    key="-SET_LOG_LIMIT-",
+                    size=(12, 1),
+                    pad=((5, 5), (5, 5)),
+                ),
+                sg.Button(
+                    "清空日志",
+                    key="-CLEAR_LOG-",
+                    size=(12, 1),
+                    pad=((5, 10), (5, 5)),
+                ),
             ],
             [
-                sg.Push(),  # 左侧占位
-                sg.Multiline(size=(100, 18), key="-STATUS-", disabled=True, autoscroll=True),
-                sg.Push(),  # 右侧占位
+                sg.Push(),
+                sg.Multiline(
+                    size=(100, 18),
+                    key="-STATUS-",
+                    autoscroll=True,
+                    pad=((10, 10), (5, 10)),
+                ),
+                sg.Push(),
             ],
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v1.2",
+            "微信公众号AI工具 v1.5",
             layout,
             default_element_size=(12, 1),
-            size=(640, 640),  # 展开650
+            size=(640, 640),
             icon=self.__get_icon(),
             finalize=True,
         )
@@ -308,6 +392,11 @@ class MainGUI(object):
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
+            elif event == "-CUSTOM_TOPIC-":
+                # 根据复选框状态启用/禁用输入框和下拉框
+                self._window["-TOPIC_INPUT-"].update(disabled=not values["-CUSTOM_TOPIC-"])
+                self._window["-URLS_INPUT-"].update(disabled=not values["-CUSTOM_TOPIC-"])
+                self._window["-REFERENCE_RATIO-"].update(disabled=not values["-CUSTOM_TOPIC-"])
             elif event == "-START_BTN-":
                 config = Config.get_instance()
                 if not config.validate_config():
@@ -317,7 +406,41 @@ class MainGUI(object):
                         icon=self.__get_icon(),
                         non_blocking=True,
                     )
+                    continue
                 elif not self._is_running:
+                    # 处理自定义话题、链接和借鉴比例
+                    if values["-CUSTOM_TOPIC-"]:
+                        topic = values["-TOPIC_INPUT-"].strip()
+                        if not topic:
+                            sg.popup_error(
+                                "自定义话题不能为空",
+                                title="系统提示",
+                                icon=self.__get_icon(),
+                                non_blocking=True,
+                            )
+                            continue
+                        config.custom_topic = topic
+                        urls_input = values["-URLS_INPUT-"].strip()
+                        if urls_input:
+                            urls = [url.strip() for url in urls_input.split("|") if url.strip()]
+                            valid_urls = [url for url in urls if utils.is_valid_url(url)]
+                            if len(valid_urls) != len(urls):
+                                sg.popup_error(
+                                    "存在无效的URL，请检查输入（确保使用http://或https://）",
+                                    title="系统提示",
+                                    icon=self.__get_icon(),
+                                    non_blocking=True,
+                                )
+                                continue
+                            config.urls = valid_urls
+                        else:
+                            config.urls = []
+                        # 将比例转换为浮点数
+                        config.reference_ratio = float(values["-REFERENCE_RATIO-"].strip("%")) / 100
+                    else:
+                        config.custom_topic = ""
+                        config.urls = []
+                        config.reference_ratio = 0.0  # 重置为0
                     sg.popup(
                         "更多界面功能开发中，敬请期待 :)\n" "点击OK开始执行",
                         title="系统提示",
@@ -333,6 +456,15 @@ class MainGUI(object):
                         daemon=True,
                     )
                     self._crew_thread.start()
+                    # 记录任务开始日志
+                    log.print_log(
+                        f"开始任务，话题：{config.custom_topic or '热门话题'}"
+                        + (
+                            f"，链接：{config.urls}，借鉴比例：{config.reference_ratio*100:.0f}%"
+                            if config.custom_topic
+                            else ""
+                        )
+                    )
             elif event == "-STOP_BTN-":
                 if self._is_running and self._crew_thread and self._crew_thread.is_alive():
                     self._stop_event.set()
@@ -376,7 +508,8 @@ class MainGUI(object):
                     "1、文件->日志：查看日志文件\n"
                     "2、文件->模板：查看内置模板文件\n"
                     "3、文件->文章：查看生成的文章\n"
-                    "4、配置->CrewAI/AIPy：直接查看或编辑配置文件",
+                    "4、配置->CrewAI/AIPy：直接查看或编辑配置文件\n"
+                    "5、部分界面内容，悬停会有提示",
                     title="使用帮助",
                     icon=self.__get_icon(),
                 )

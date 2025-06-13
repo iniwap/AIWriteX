@@ -2,7 +2,7 @@ import os
 import glob
 import random
 import sys
-from typing import Type
+from typing import List, Type
 
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -125,6 +125,7 @@ class PublisherTool:
         log.print_log(result)
 
     def pub2wx(self, article, appid, appsecret, author):
+        return "测试不发布，完成", article
         try:
             title, digest = utils.extract_html(article)
         except Exception as e:
@@ -203,6 +204,8 @@ class AIPySearchToolInput(BaseModel):
     """输入参数模型"""
 
     topic: str = Field(..., description="要搜索的话题")
+    urls: List[str] = Field(default=[], description="参考文章链接数组")
+    reference_ratio: float = Field(..., description="参考文章借鉴比例")
 
 
 class AIPySearchTool(BaseTool):
@@ -213,35 +216,79 @@ class AIPySearchTool(BaseTool):
 
     args_schema: type[BaseModel] = AIPySearchToolInput
 
-    def _run(self, topic: str) -> str:
+    def _run(self, topic: str, urls: List[str], reference_ratio: float) -> str:
         """执行AIPy搜索"""
+        results = None
         config = Config.get_instance()
-
-        # 保存当前工作目录
         original_cwd = os.getcwd()
-        log.print_log("开始执行搜索，请耐心等待...")
-        if config.use_search_service:
-            results = self._use_search_service(
-                topic, config.aipy_search_max_results, config.aipy_search_min_results
-            )
-        else:
-            results = self._nouse_search_service(
-                topic, config.aipy_search_max_results, config.aipy_search_min_results
-            )
 
-        # 恢复原始工作目录
-        os.chdir(original_cwd)
-        if results:
-            # 结构化文本输出
-            formatted = f"关于'{topic}'的搜索结果：\n\n"
-            for i, result in enumerate(results, 1):
-                formatted += f"## 结果 {i}\n"
-                formatted += f"**标题**: {result.get('title', '无标题')}\n"
-                formatted += f"**发布时间**: {result.get('pub_time', '未知时间')}\n"
-                formatted += f"**摘要**: {result.get('abstract', '无摘要')}\n\n"
-            return formatted
+        if len(urls) == 0:
+            log.print_log("开始执行搜索，请耐心等待...")
+            if config.use_search_service:
+                results = self._use_search_service(
+                    topic, config.aipy_search_max_results, config.aipy_search_min_results
+                )
+            else:
+                results = self._nouse_search_service(
+                    topic, config.aipy_search_max_results, config.aipy_search_min_results
+                )
+            source_type = "搜索"
         else:
-            return f"未能找到关于'{topic}'的搜索结果。"
+            log.print_log("开始提取参考链接中的文章信息，请耐心等待...")
+            extract_results = search_template.extract_urls_content(topic, urls)
+            # 这里只要参考文章获取到一条有效结果，就认为通过， 当然也可以len(urls)条结果
+            if search_template.validate_search_result(
+                extract_results, min_results=1, search_type="reference_article"
+            ):
+                results = extract_results.get("results")
+
+            source_type = "参考文章"
+
+        os.chdir(original_cwd)
+
+        return self._formatted_result(topic, urls, reference_ratio, source_type, results)
+
+    def _formatted_result(self, topic, urls, reference_ratio, source_type, results):
+        if results:
+            # 根据模式过滤掉相应字段为空的条目
+            filtered_results = []
+            for result in results:
+                title = result.get("title", "").strip()
+
+                # 根据模式判断不同的内容字段
+                if len(urls) > 0:
+                    # 借鉴模式：检查content字段
+                    content_field = result.get("content", "").strip()
+                else:
+                    # 搜索模式：检查abstract字段
+                    content_field = result.get("abstract", "").strip()
+
+                # 如果标题和对应的内容字段都不为空，则保留该条目
+                if title and content_field:
+                    filtered_results.append(result)
+
+            if filtered_results:
+                if len(urls) > 0:
+                    formatted = (
+                        f"关于'{topic}'的{source_type}结果（参考比例：{reference_ratio}）：\n\n"
+                    )
+                else:
+                    formatted = f"关于'{topic}'的{source_type}结果：\n\n"
+
+                for i, result in enumerate(filtered_results, 1):
+                    formatted += f"## 结果 {i}\n"
+                    formatted += f"**标题**: {result.get('title', '无标题')}\n"
+                    formatted += f"**发布时间**: {result.get('pub_time', '未知时间')}\n"
+                    formatted += f"**摘要**: {result.get('abstract', '无摘要')}\n"
+                    # 如果是URL提取，添加更多内容信息
+                    if len(urls) > 0 and "content" in result:
+                        formatted += f"**内容**: {result.get('content', '')}...\n"
+                    formatted += "\n"
+                return formatted
+            else:
+                return f"未能找到关于'{topic}'的有效{source_type}结果。"
+        else:
+            return f"未能找到关于'{topic}'的{source_type}结果。"
 
     def _use_search_service(self, topic, max_results, min_results):
         try:
