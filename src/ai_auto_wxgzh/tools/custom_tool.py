@@ -125,7 +125,6 @@ class PublisherTool:
         log.print_log(result)
 
     def pub2wx(self, article, appid, appsecret, author):
-        return "测试不发布，完成", article
         try:
             title, digest = utils.extract_html(article)
         except Exception as e:
