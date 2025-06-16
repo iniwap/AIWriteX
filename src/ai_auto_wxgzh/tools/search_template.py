@@ -1409,7 +1409,7 @@ def _extract_title_from_page(page_soup):
         ".post-title",
         ".content-title",
         ".content__title",
-        ".article__title",  # 针对华尔街见闻
+        ".article__title",
     ]
     for selector in title_selectors:
         if selector.startswith("meta"):
@@ -1428,12 +1428,66 @@ def _extract_title_from_page(page_soup):
 
 
 def _extract_full_article_content(page_soup):
-    """提取完整文章内容"""
+    """提取完整文章内容，过滤无关信息"""
+    # 定义噪声关键词，针对微信公众号和常见无关内容
+    noise_keywords = [
+        "微信扫一扫",
+        "扫描二维码",
+        "分享留言收藏",
+        "轻点两下取消",
+        "继续滑动看下一个",
+        "使用小程序",
+        "知道了",
+        "赞，轻点两下取消赞",
+        "在看，轻点两下取消在看",
+        "意见反馈",
+        "关于我们",
+        "联系我们",
+        "版权所有",
+        "All Rights Reserved",
+        "APP专享",
+        "VIP课程",
+        "海量资讯",
+        "热门推荐",
+        "24小时滚动播报",
+        "粉丝福利",
+        "sinafinance",
+        "预览时标签不可点",
+        "向上滑动看下一个",
+        "阅读原文",
+        "视频小程序",
+        "关注",
+        "粉丝",
+        "分享",
+        "搜索",
+        "关键词",
+        "Copyright",
+        "上一页",
+        "下一页",
+        "回复",
+        "评论",
+        "相关推荐",
+        "相关搜索",
+        "评论区",
+        "发表评论",
+        "查看更多评论",
+    ]
+
+    # 第一步：移除无关元素
     for elem in page_soup.select(
-        "script, style, nav, header, footer, aside, .ad, .advertisement, .sidebar, .menu, .navigation"  # noqa 501
+        "script, style, nav, header, footer, aside, .ad, .advertisement, .sidebar, .menu, "
+        ".promo, .recommend, .social-share, .footer-links, [class*='banner'], [class*='promo'], "
+        "[class*='newsletter'], [class*='signup'], [class*='feedback'], [class*='copyright'], "
+        "[id*='footer'], [id*='bottom'], .live-room, .stock-info, .finance-nav, .related-links, "
+        ".seo_data_list, .right-side-ad, ins.sinaads, .cj-r-block, [id*='7x24'], .navigation,"
+        "[class*='advert'], [class*='social'], .comment, [class*='share'], commentModule"
     ):
         elem.decompose()
+
+    # 第二步：定义正文选择器
     content_selectors = [
+        "#js_content",
+        ".rich_media_content",
         "article",
         ".article-content",
         ".content",
@@ -1446,33 +1500,57 @@ def _extract_full_article_content(page_soup):
         ".article-body",
         ".post-body",
         ".content-body",
-        ".content__article-body",  # 针对华尔街见闻
+        ".content__article-body",
     ]
+
+    # 第三步：尝试找到正文容器
     for selector in content_selectors:
         content_elem = page_soup.select_one(selector)
         if content_elem:
+            # 提取原始标签，添加去重和噪声过滤
             text_parts = []
+            seen_texts = set()  # 用于去重
             for elem in content_elem.find_all(
                 ["p", "h1", "h2", "h3", "h4", "h5", "h6", "div", "span"]
             ):
                 text = clean_text(elem.get_text().strip())
-                if text:
-                    text_parts.append(text)
-            if text_parts:
-                # 保留段落结构，但清理多余换行符
-                full_text = "\n\n".join(text_parts)
-                # 清理连续的多个换行符
-                full_text = re.sub(r"\n{3,}", "\n\n", full_text)
-                # 清理首尾空白
-                full_text = full_text.strip()
+                if text and len(text) > 10 and text not in seen_texts:  # 过滤过短文本并去重
+                    # 过滤噪声关键词
+                    if not any(keyword in text.lower() for keyword in noise_keywords):
+                        text_parts.append(text)
+                        seen_texts.add(text)
 
+            if text_parts:
+                # 保留段落结构，清理多余换行符
+                full_text = "\n\n".join(text_parts)
+                full_text = re.sub(r"\n{3,}", "\n\n", full_text).strip()
                 if len(full_text) > 100:
                     return full_text
+
+    # 第四步：回退到 body
     body = page_soup.select_one("body")
     if body:
         for elem in body.select("nav, header, footer, aside, .ad, .advertisement, .sidebar, .menu"):
             elem.decompose()
+
+        text_parts = []
+        seen_texts = set()
+        for elem in body.find_all(["p", "h1", "h2", "h3", "h4", "h5", "h6", "div", "span"]):
+            text = clean_text(elem.get_text().strip())
+            if text and len(text) > 10 and text not in seen_texts:
+                if not any(keyword in text.lower() for keyword in noise_keywords):
+                    text_parts.append(text)
+                    seen_texts.add(text)
+
+        if text_parts:
+            full_text = "\n\n".join(text_parts)
+            full_text = re.sub(r"\n{3,}", "\n\n", full_text).strip()
+            if len(full_text) > 100:
+                return full_text
+
+        # 第五步：极宽松回退，模仿原始版本
         text = clean_text(body.get_text())
         if text and len(text) > 100:
             return text
+
     return ""
