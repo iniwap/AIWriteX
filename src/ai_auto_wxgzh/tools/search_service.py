@@ -170,7 +170,7 @@ class SearchService:
             self.console.print(f"[green]已清理 {len(modules_to_remove)} 个过旧模块[/green]")
 
     def _auto_cleanup(self):
-        """自动清理：结合失败率和年龄策略"""
+        """自动清理：结合失败率和过期策略"""
         self.console.print("[blue]开始自动清理本地失败过多或无效模块...[/blue]")
 
         # 加载清理配置
@@ -408,7 +408,7 @@ class SearchService:
         return None
 
     def aipy_search(self, topic, max_results=10, min_results=1):
-        """主搜索方法 - 移除了结果缓存，专注于模块缓存"""
+        """主搜索方法"""
 
         # 加载清理配置
         config = self._load_cleanup_config()

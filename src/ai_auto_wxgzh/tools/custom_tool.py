@@ -234,7 +234,7 @@ class AIPySearchTool(BaseTool):
             source_type = "搜索"
         else:
             log.print_log("开始提取参考链接中的文章信息，请耐心等待...")
-            extract_results = search_template.extract_urls_content(topic, urls)
+            extract_results = search_template.extract_urls_content(urls, topic)
             # 这里只要参考文章获取到一条有效结果，就认为通过， 当然也可以len(urls)条结果
             if search_template.validate_search_result(
                 extract_results, min_results=1, search_type="reference_article"

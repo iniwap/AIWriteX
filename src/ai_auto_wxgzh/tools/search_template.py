@@ -65,7 +65,7 @@ def get_template_guided_search_instruction(topic, max_results, min_results):
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要（去除空格换行，至少200字）",
+                    "abstract": "详细摘要（去除空格换行，至少{ENGINE_CONFIGS['MIN_ABSTRACT_LENGTH']/2}字）",
                     "pub_time": "发布时间"
                 }}
             ],
@@ -76,7 +76,7 @@ def get_template_guided_search_instruction(topic, max_results, min_results):
          __result__ = search_web("{topic}", {max_results})
 
         # 严格停止条件：获取到{min_results}条或以上同时满足以下条件的结果时，立即停止执行，不得继续生成任何代码：
-        # 1. 摘要(abstract)长度不少于100字
+        # 1. 摘要(abstract)长度不少于{ENGINE_CONFIGS['MIN_ABSTRACT_LENGTH']/2}字
         # 2. 发布时间(pub_time)字段不为空、不为None、不为空字符串
         # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
 
@@ -100,7 +100,7 @@ def get_free_form_ai_search_instruction(topic, max_results, min_results):
         - 实现多重容错机制，至少尝试2-3种不同方法
         - 对每个结果访问原始页面提取完整信息
         - 优先获取最近7天内的新鲜内容，按发布时间排序
-        - 摘要长度至少100字，包含关键信息
+        - 摘要长度至少{ENGINE_CONFIGS['MIN_ABSTRACT_LENGTH']/4}字，包含关键信息
         - 不能使用需要API密钥的方式
         - 过滤掉验证页面和无效内容，正确处理编码，结果不能包含乱码
 
@@ -117,7 +117,7 @@ def get_free_form_ai_search_instruction(topic, max_results, min_results):
                 {{
                     "title": "标题",
                     "url": "链接",
-                    "abstract": "详细摘要（去除空格换行，至少200字）",
+                    "abstract": "详细摘要（去除空格换行，至少{ENGINE_CONFIGS['MIN_ABSTRACT_LENGTH']/4}字）",
                     "pub_time": "发布时间"（可以为""）
                 }}
             ],
@@ -127,7 +127,7 @@ def get_free_form_ai_search_instruction(topic, max_results, min_results):
 
         __result__ = search_web("{topic}", {max_results})
 
-        # 严格停止条件：获取到{min_results}条或以上摘要(abstract)长度不少于50字的结果时，立即停止执行，不得继续生成任何代码
+        # 严格停止条件：获取到{min_results}条或以上摘要(abstract)长度不少于{ENGINE_CONFIGS['MIN_ABSTRACT_LENGTH']/4}字的结果时，立即停止执行，不得继续生成任何代码
         # 重要：满足上述条件后，必须立即设置__result__并结束，禁止任何形式的代码优化、重构或改进
 
         """
@@ -214,8 +214,14 @@ def simple_validate_search_result(result, min_results, search_type="ai_guided"):
 
     # 定义验证规则
     validation_rules = {
-        "ai_guided": {"abstract_min_length": 100, "require_date": True},
-        "ai_free": {"abstract_min_length": 50, "require_date": False},
+        "ai_guided": {
+            "abstract_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"] / 2,
+            "require_date": True,
+        },
+        "ai_free": {
+            "abstract_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"] / 4,
+            "require_date": False,
+        },
     }
 
     # 获取当前搜索类型的规则
@@ -313,10 +319,22 @@ def validate_search_result(result, min_results=1, search_type="local"):
     }
 
     quality_rules = {
-        "local": {"abstract_min_length": 200, "require_valid_date": True},
-        "ai_guided": {"abstract_min_length": 100, "require_valid_date": True},
-        "ai_free": {"abstract_min_length": 50, "require_valid_date": False},
-        "reference_article": {"content_min_length": 200, "require_valid_date": True},
+        "local": {
+            "abstract_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"],
+            "require_valid_date": True,
+        },
+        "ai_guided": {
+            "abstract_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"] / 2,
+            "require_valid_date": True,
+        },
+        "ai_free": {
+            "abstract_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"] / 4,
+            "require_valid_date": False,
+        },
+        "reference_article": {
+            "content_min_length": ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"],
+            "require_valid_date": True,
+        },
     }
 
     required_fields = validation_rules.get(search_type, validation_rules["local"])
@@ -781,42 +799,27 @@ def extract_page_content(url, headers=None):
 
 def enhance_abstract(abstract, page_soup):
     """
-    增强摘要内容。
-    如果原始摘要过短，尝试从页面内容中提取前几段作为补充。
+    增强摘要内容，从原文提取。
+    如果 _extract_full_article_content 的内容长度 >= MIN_ABSTRACT_LENGTH，直接返回；
+    否则，结合原始摘要，确保总长度不超过 MAX_ABSTRACT_LENGTH。
     """
-    # 定义一个最小摘要长度，例如MIN_ABSTRACT_LENGTH个字符，如果摘要小于这个长度则尝试增强
-    MIN_ABSTRACT_LENGTH = 300
-    MAX_ABSTRACT_LENGTH = 500
+    if not page_soup:
+        return abstract
 
-    # 检查原始摘要是否过短或不存在，并且 page_soup 存在
-    if (not abstract or len(abstract.strip()) < MIN_ABSTRACT_LENGTH) and page_soup:
-        content_parts = []
-        # 查找所有段落标签，例如 <p>
-        paragraphs = page_soup.find_all("p")
+    # 提取正文（已由 _extract_full_article_content 清理）
+    article = _extract_full_article_content(page_soup)
 
-        # 遍历前几段，尝试提取有意义的文本
-        # 限制遍历的段落数量，避免处理整个页面导致效率低下
-        for p in paragraphs[:5]:  # 尝试前5个段落
-            text = clean_text(p.get_text().strip())
-            # 确保提取的文本有足够的长度，避免加入过短或无意义的段落
-            if len(text) > 30:  # 过滤掉长度小于30的段落
-                content_parts.append(text)
-            # 可以在这里添加一个条件，如果已经提取了足够的文本，就停止
-            # 尝试凑够MAX_ABSTRACT_LENGTH字符，考虑到原始摘要可能已经占据一部分长度
-            if sum(len(part) for part in content_parts) >= (
-                MAX_ABSTRACT_LENGTH - len(abstract.strip())
-            ):
-                break
+    if article:
+        # 检查正文长度是否满足 MIN_ABSTRACT_LENGTH
+        if len(article) >= ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"]:
+            # 直接返回正文，截取至 MAX_ABSTRACT_LENGTH
+            return article[: ENGINE_CONFIGS["MAX_ABSTRACT_LENGTH"]].strip()
+        else:
+            # 清理原始摘要，结合正文
+            return (abstract + " " + article)[: ENGINE_CONFIGS["MAX_ABSTRACT_LENGTH"]].strip()
 
-        if content_parts:
-            # 将提取到的内容拼接起来，并限制总长度
-            # 将原始摘要放在前面，然后追加增强内容
-            enhanced_text = abstract.strip() + " " + " ".join(content_parts)
-            return enhanced_text[
-                :MAX_ABSTRACT_LENGTH
-            ].strip()  # 限制总长度为MAX_ABSTRACT_LENGTH字符，并移除首尾空白
-
-    return abstract  # 如果不满足增强条件，返回原始摘要
+    # 回退到原始摘要
+    return abstract
 
 
 def sort_and_filter_results(results):
@@ -837,6 +840,7 @@ def _search_template(topic, max_results, engine_config):
         search_url = engine_config["url"].format(topic=quote(topic), max_results=max_results)
 
         response = requests.get(search_url, headers=headers, timeout=10)
+        response.encoding = response.apparent_encoding or "utf-8"
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -905,7 +909,11 @@ def _search_template(topic, max_results, engine_config):
                             break
                 if not abstract and engine_config.get("fallback_abstract"):
                     abstract_elem = result.find(text=True, recursive=True)
-                    abstract = clean_text(abstract_elem.strip())[:200] if abstract_elem else ""
+                    abstract = (
+                        clean_text(abstract_elem.strip())[: ENGINE_CONFIGS["MAX_ABSTRACT_LENGTH"]]
+                        if abstract_elem
+                        else ""
+                    )
 
                 parsed_results.append({"title": title, "url": url, "abstract": abstract})
                 if url and url.startswith("http"):
@@ -966,6 +974,8 @@ def _search_template(topic, max_results, engine_config):
 
 # 搜索引擎配置
 ENGINE_CONFIGS = {
+    "MIN_ABSTRACT_LENGTH": 300,
+    "MAX_ABSTRACT_LENGTH": 500,
     "baidu": {
         "url": "https://www.baidu.com/s?wd={topic}&rn={max_results}",
         "redirect_pattern": "baidu.com/link?url=",
@@ -1300,7 +1310,7 @@ def template_sougou_specific(topic, max_results=10):
 
 
 # ---------- 以下为通过链接提取文章信息----------------
-def extract_urls_content(topic, urls: List[str]) -> Dict[str, Any]:
+def extract_urls_content(urls: List[str], topic="") -> Dict[str, Any]:
     """提取URL内容，自动检测并处理动态网站，并返回标准格式"""
     extracted_results = []
     overall_success = True
@@ -1391,7 +1401,7 @@ def _has_meaningful_content(page_soup):
         if page_soup.select_one(selector):
             return True
     text = page_soup.get_text().strip()
-    if len(text) > 200:
+    if len(text) > ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"]:
         return True
     return False
 
@@ -1524,7 +1534,7 @@ def _extract_full_article_content(page_soup):
                 # 保留段落结构，清理多余换行符
                 full_text = "\n\n".join(text_parts)
                 full_text = re.sub(r"\n{3,}", "\n\n", full_text).strip()
-                if len(full_text) > 100:
+                if len(full_text) > ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"]:
                     return full_text
 
     # 第四步：回退到 body
@@ -1545,12 +1555,12 @@ def _extract_full_article_content(page_soup):
         if text_parts:
             full_text = "\n\n".join(text_parts)
             full_text = re.sub(r"\n{3,}", "\n\n", full_text).strip()
-            if len(full_text) > 100:
+            if len(full_text) > ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"]:
                 return full_text
 
         # 第五步：极宽松回退，模仿原始版本
         text = clean_text(body.get_text())
-        if text and len(text) > 100:
+        if text and len(text) > ENGINE_CONFIGS["MIN_ABSTRACT_LENGTH"]:
             return text
 
     return ""

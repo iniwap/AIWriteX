@@ -458,7 +458,7 @@ class MainGUI(object):
                     self._crew_thread.start()
                     # 记录任务开始日志
                     log.print_log(
-                        f"开始任务，话题：{config.custom_topic or '热门话题'}"
+                        f"开始任务，话题：{config.custom_topic or '采用热门话题'}"
                         + (
                             f"，链接：{config.urls}，借鉴比例：{config.reference_ratio*100:.0f}%"
                             if config.custom_topic
