@@ -61,7 +61,7 @@
     - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main`
 
 ### 软件模式
-1. **请从网盘下载`微信公众号AI工具_Setup.exe`**👇，并安装
+1. **请从网盘下载`微信公众号AI工具_云盘版_Setup.exe`** 👇，并安装
     - [移动云盘 提取码:1sgp](https://caiyun.139.com/w/i/2nQQRmAhg7Ffl)
     - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/Eaip7dg-hKBNqJRWQ_suJwgBh5naslCIumQy-2sC2D8KYQ?e=N4Oi5Z)
     - [Google Drive](https://drive.google.com/file/d/1NlY5jV8adIbpFv5_eWyk40kvzhku_eL0/view?usp=sharing)
