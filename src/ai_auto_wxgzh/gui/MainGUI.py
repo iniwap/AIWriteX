@@ -189,7 +189,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v1.5",
+            "微信公众号AI工具 v1.6",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),
@@ -486,7 +486,7 @@ class MainGUI(object):
             elif event == "关于":
                 sg.popup(
                     "关于软件",
-                    "当前Version 1.1",
+                    "当前Version 1.6",
                     "Copyright (C) 2025 iniwap,All Rights Reserved",
                     title="系统提示",
                     icon=self.__get_icon(),
