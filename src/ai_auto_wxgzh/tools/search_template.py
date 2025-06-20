@@ -1481,6 +1481,8 @@ def _extract_full_article_content(page_soup):
         "评论区",
         "发表评论",
         "查看更多评论",
+        "举报",
+        "热搜",
     ]
 
     # 第一步：移除无关元素
@@ -1490,7 +1492,7 @@ def _extract_full_article_content(page_soup):
         "[class*='newsletter'], [class*='signup'], [class*='feedback'], [class*='copyright'], "
         "[id*='footer'], [id*='bottom'], .live-room, .stock-info, .finance-nav, .related-links, "
         ".seo_data_list, .right-side-ad, ins.sinaads, .cj-r-block, [id*='7x24'], .navigation,"
-        "[class*='advert'], [class*='social'], .comment, [class*='share'], commentModule"
+        "[class*='advert'], [class*='social'], .comment, [class*='share'], #commentModule"
     ):
         elem.decompose()
 
