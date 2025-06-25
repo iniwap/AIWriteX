@@ -84,7 +84,6 @@ class AutowxGzh:
     def design_content(self) -> Task:
         return Task(
             config=self.tasks_config["design_content"],
-            # output_file="tmp_article.html", # 执行顺序受限，需要手动保存
             callback=self.publisher_tool_cb(self.appid, self.appsecret, self.author),
         )
 
@@ -92,7 +91,6 @@ class AutowxGzh:
     def template_content(self) -> Task:
         return Task(
             config=self.tasks_config["template_content"],
-            # output_file="tmp_article.html", # 执行顺序受限，需要手动保存
             callback=self.publisher_tool_cb(self.appid, self.appsecret, self.author),
         )
 

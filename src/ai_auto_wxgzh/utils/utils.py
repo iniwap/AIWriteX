@@ -34,6 +34,8 @@ def mkdir(path, clean=False):
     else:
         os.makedirs(path)
 
+    return path
+
 
 def get_is_release_ver():
     if getattr(sys, "frozen", None):
@@ -47,6 +49,10 @@ def get_res_path(file_name, basedir=""):
         return os.path.join(sys._MEIPASS, file_name)
 
     return os.path.join(basedir, file_name)
+
+
+def get_article_dir():
+    return os.path.join(get_current_dir(), "output/article")
 
 
 def get_current_dir(dir_name="", need_create_dir=True):
@@ -287,3 +293,14 @@ def is_valid_url(url):
         return all([result.scheme in ["http", "https"], result.netloc])
     except Exception as e:  # noqa 841
         return False
+
+
+def sanitize_filename(filename):
+    # 定义非法字符的正则表达式
+    illegal_chars = r'[<>:"/\\|?*\x00-\x1F]'
+    # 将非法字符替换为下划线
+    sanitized = re.sub(illegal_chars, "_", filename)
+    # 去除首尾的空格和点号（Windows 文件名不能以点号或空格开头/结尾）
+    sanitized = sanitized.strip().strip(".")
+    # 如果文件名为空，设置一个默认值
+    return sanitized or "default_filename"

@@ -137,12 +137,13 @@ class Config:
             "use_template": True,
             "template": "",
             "need_auditor": False,
-            "use_compress": False,
+            "use_compress": True,
             "use_search_service": False,
             "aipy_search_max_results": 10,
             "aipy_search_min_results": 1,
             "min_article_len": 1000,
             "max_article_len": 2000,
+            "auto_publish": True,
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",
@@ -376,6 +377,13 @@ class Config:
             return self.config["max_article_len"]
 
     @property
+    def auto_publish(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["auto_publish"]
+
+    @property
     def api_list(self):
         with self._lock:
             if self.config is None:
@@ -472,12 +480,14 @@ class Config:
                     )
                     return False
 
-            valid_cred = any(
-                cred["appid"] and cred["appsecret"] for cred in self.wechat_credentials
-            )
-            if not valid_cred:
-                self.error_message = "未配置有效的微信公众号appid和appsecret，请打开配置填写"
-                return False
+            # 只有自动发布才需要检验公众号配置
+            if self.auto_publish:
+                valid_cred = any(
+                    cred["appid"] and cred["appsecret"] for cred in self.wechat_credentials
+                )
+                if not valid_cred:
+                    self.error_message = "未配置有效的微信公众号appid和appsecret，请打开配置填写"
+                    return False
 
             # 检查是否配置了aipy api_key
             if not self.aipy_api_key:

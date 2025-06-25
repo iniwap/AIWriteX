@@ -368,3 +368,68 @@ class WeixinPublisher:
             ret = f"群发消息失败：{e}"
 
         return ret
+
+
+def pub2wx(title, digest, article, appid, appsecret, author):
+
+    publisher = WeixinPublisher(appid, appsecret, author)
+
+    image_url = publisher.generate_img(
+        "主题：" + title.split("|")[-1] + "，内容：" + digest,
+        "900*384",
+    )
+
+    if image_url is None:
+        log.print_log("生成图片出错，使用默认图片")
+        # 这里使用默认的好像会出错，采用默认背景图
+        image_url = utils.get_res_path("UI\\bg.png", os.path.dirname(__file__) + "/../gui/")
+
+    # 封面图片
+    media_id, _, err_msg = publisher.upload_image(image_url)
+    if media_id is None:
+        return f"封面{err_msg}，无法发布文章", article, False
+
+    # 这里需要将文章中的图片url替换为上传到微信返回的图片url
+    try:
+        image_urls = utils.extract_image_urls(article)
+        for image_url in image_urls:
+            local_filename = utils.download_and_save_image(
+                image_url,
+                utils.get_current_dir("image"),
+            )
+            if local_filename:
+                _, url, _ = publisher.upload_image(local_filename)
+                article = article.replace(image_url, url)
+    except Exception as e:
+        log.print_log(f"上传配图出错，影响阅读，可继续发布文章:{e}")
+
+    add_draft_result, err_msg = publisher.add_draft(article, title, digest, media_id)
+    if add_draft_result is None:
+        # 添加草稿失败，不再继续执行
+        return f"{err_msg}，无法发布文章", article, False
+
+    publish_result, err_msg = publisher.publish(add_draft_result.publishId)
+    if publish_result is None:
+        return f"{err_msg}，无法继续发布文章", article, False
+
+    article_url = publisher.poll_article_url(publish_result.publishId)
+    if article_url is not None:
+        # 该接口需要认证，将文章添加到菜单中去，用户可以通过菜单“最新文章”获取到
+        ret = publisher.create_menu(article_url)
+        if not ret:
+            log.print_log(f"{ret}（公众号未认证，发布已成功）")
+    else:
+        log.print_log("无法获取到文章URL，无法创建菜单（可忽略，发布已成功）")
+
+    # 最近好像会有个消息提示，但不会显示到列表，用户可以收到文章发布的消息
+    # 只有下面执行成功，文章才会显示到公众号列表，否则只能通过后台复制链接分享访问
+    # 通过群发使得文章显示到公众号列表 ——> 该接口需要认证
+    ret, media_id = publisher.media_uploadnews(article, title, digest, media_id)
+    if media_id is None:
+        return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+
+    ret = publisher.message_mass_sendall(media_id)
+    if ret is not None:
+        return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+
+    return "成功发布文章到微信公众号", article, True

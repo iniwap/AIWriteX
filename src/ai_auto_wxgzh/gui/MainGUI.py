@@ -25,6 +25,7 @@ from src.ai_auto_wxgzh.utils import log
 from src.ai_auto_wxgzh.config.config import Config
 
 from src.ai_auto_wxgzh.gui import ConfigEditor
+from src.ai_auto_wxgzh.gui import ArticleManager
 
 
 __author__ = "iniwaper@gmail.com"
@@ -59,9 +60,10 @@ class MainGUI(object):
 
         menu_list = [
             ["配置", ["管理界面", "CrewAI文件", "AIPy文件"]],
+            ["发布", ["文章管理"]],
             [
                 "文件",
-                ["日志", self._log_list, "模板", self._template_list, "文章"],
+                ["日志", self._log_list, "模板", self._template_list],
             ],
             ["帮助", ["帮助", "关于", "官网"]],
         ]
@@ -200,9 +202,6 @@ class MainGUI(object):
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
-
-    def __gui_config_start(self):
-        ConfigEditor.gui_start()
 
     def __save_ui_log(self, log_entry):
         # 如果日志不存在，则更新日志列表
@@ -373,7 +372,7 @@ class MainGUI(object):
                         log.print_log("CrewAI 任务被终止（程序退出）")
                 break
             elif event == "管理界面":
-                self.__gui_config_start()
+                ConfigEditor.gui_start()
             elif event == "CrewAI文件":
                 try:
                     os.system("start /B  notepad " + Config.get_instance().get_config_path())
@@ -583,15 +582,8 @@ class MainGUI(object):
                             icon=self.__get_icon(),
                         )
 
-            elif event == "文章":
-                # 生成的最终文章
-                final_article = os.path.join(utils.get_current_dir(), "final_article.html")
-                if ret := utils.open_url(final_article):
-                    sg.popup(
-                        "无法查看，请先执行并生成文章！:( \n错误信息：" + ret,
-                        title="系统提示",
-                        icon=self.__get_icon(),
-                    )
+            elif event == "文章管理":
+                ArticleManager.gui_start()
 
             # 处理队列更新（非阻塞）
             if self._is_running:

@@ -289,8 +289,8 @@ class ConfigEditor:
         # 使用 sg.Column 包裹布局，设置 pad=(0, 0) 确保顶部无额外边距
         return [[sg.Column(layout, scrollable=False, vertical_scroll_only=False, pad=(0, 0))]]
 
-    def create_other_tab(self):
-        """创建其他 TAB 布局"""
+    def create_base_tab(self):
+        """创建基础 TAB 布局"""
         # 获取模板文件列表（仅文件名，不含扩展名）
         template_files = self.__get_templates()
         template_options = ["随机模板"] + template_files
@@ -298,84 +298,123 @@ class ConfigEditor:
         current_template = self.config.template if self.config.template else "随机模板"
         # 检查模板列表是否为空
         is_template_empty = len(template_files) == 0
+
+        # Define tooltips for each relevant element
+        tips = {
+            "auto_publish": "自动发布文章：\n- 自动：生成文章后，自动发布到配置的微信公众号\n"
+            "- 不自动：生成文章后，需要手动选择发布",
+            "use_template": "- 使用：\n  随机模板：程序随机选取一个并将生成的文章填充到模板里\n  "
+            "选定模板：使用指定的模板\n- 不使用：AI根据要求生成模板，并填充文章",
+            "template": "选择模板：随机模板或指定模板文件",
+            "need_auditor": "需要审核者：\n- 需要：生成文章后执行审核，文章可能更好，但token消耗更高\n"
+            "- 不需要：生成文章后直接填充模板，消耗低，文章可能略差",
+            "use_compress": "压缩模板：\n- 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
+            "- 不压缩：token消耗，AI可能理解更精确",
+            "use_search_service": "AIPy搜索缓存：\n- 使用：使用本地缓存的代码进行搜索，初次执行耗时，后续更快\n"
+            "- 不使用：本地模板搜索+AIPy搜索，无代码缓存，每次耗时相当",
+            "aipy_search_max_results": "最大搜索数量：返回的最大搜索结果数（1~20）",
+            "aipy_search_min_results": "最小搜索数量：返回的最小搜索结果数（1~10）",
+            "min_article_len": "最小文章字数：生成文章的最小字数（500）",
+            "max_article_len": "最大文章字数：生成文章的最大字数（5000）",
+        }
+
         layout = [
             [
+                sg.Text("文章发布：", size=(15, 1), tooltip=tips["auto_publish"]),
                 sg.Checkbox(
-                    "使用模板",
-                    default=self.config.use_template
-                    and not is_template_empty,  # 仅当模板非空且配置启用时默认选中
-                    key="-USE_TEMPLATE-",
-                    enable_events=True,
-                    disabled=is_template_empty,  # 模板为空时禁用
-                )
+                    "自动发布",
+                    default=self.config.auto_publish,
+                    key="-AUTO_PUBLISH-",
+                    tooltip=tips["auto_publish"],
+                ),
             ],
             [
-                sg.Text("模板:", size=(15, 1)),
+                sg.Checkbox(
+                    "使用模板：",
+                    default=self.config.use_template and not is_template_empty,
+                    key="-USE_TEMPLATE-",
+                    enable_events=True,
+                    disabled=is_template_empty,
+                    tooltip=tips["use_template"],
+                    size=(12, 1),
+                ),
                 sg.Combo(
                     template_options,
                     default_value=current_template,
                     key="-TEMPLATE-",
                     size=(30, 1),
-                    disabled=not self.config.use_template
-                    or is_template_empty,  # 模板为空或未启用时禁用
+                    disabled=not self.config.use_template or is_template_empty,
                     readonly=True,
+                    tooltip=tips["template"],
                 ),
             ],
-            [sg.Checkbox("需要审核者", default=self.config.need_auditor, key="-NEED_AUDITOR-")],
-            [sg.Checkbox("压缩模板", default=self.config.use_compress, key="-USE_COMPRESS-")],
+            [
+                sg.Text("模板压缩：", size=(15, 1), tooltip=tips["use_compress"]),
+                sg.Checkbox(
+                    "压缩模板",
+                    default=self.config.use_compress,
+                    key="-USE_COMPRESS-",
+                    tooltip=tips["use_compress"],
+                ),
+            ],
+            [
+                sg.Text("审核设置：", size=(15, 1), tooltip=tips["need_auditor"]),
+                sg.Checkbox(
+                    "需要审核者",
+                    default=self.config.need_auditor,
+                    key="-NEED_AUDITOR-",
+                    tooltip=tips["need_auditor"],
+                ),
+            ],
             [
                 sg.Checkbox(
-                    "AIPy搜索缓存",
+                    "搜索代码缓存",
                     default=self.config.use_search_service,
                     key="-USE_SEARCH_SERVICE-",
+                    tooltip=tips["use_search_service"],
                 )
             ],
             [
-                sg.Text("最大搜索数量:", size=(15, 1)),
+                sg.Text("最大搜索数量：", size=(15, 1), tooltip=tips["aipy_search_max_results"]),
                 sg.InputText(
                     self.config.aipy_search_max_results,
                     key="-AIPY_SEARCH_MAX_RESULTS-",
                     size=(10, 1),
+                    tooltip=tips["aipy_search_max_results"],
                 ),
-                sg.Text("最小搜索数量:", size=(15, 1)),
+                sg.Text("最小搜索数量：", size=(15, 1), tooltip=tips["aipy_search_min_results"]),
                 sg.InputText(
                     self.config.aipy_search_min_results,
                     key="-AIPY_SEARCH_MIN_RESULTS-",
                     size=(10, 1),
+                    tooltip=tips["aipy_search_min_results"],
                 ),
             ],
             [
-                sg.Text("最小文章字数:", size=(15, 1)),
-                sg.InputText(self.config.min_article_len, key="-MIN_ARTICLE_LEN-", size=(10, 1)),
-                sg.Text("最大文章字数:", size=(15, 1)),
-                sg.InputText(self.config.max_article_len, key="-MAX_ARTICLE_LEN-", size=(10, 1)),
+                sg.Text("最小文章字数：", size=(15, 1), tooltip=tips["min_article_len"]),
+                sg.InputText(
+                    self.config.min_article_len,
+                    key="-MIN_ARTICLE_LEN-",
+                    size=(10, 1),
+                    tooltip=tips["min_article_len"],
+                ),
+                sg.Text("最大文章字数：", size=(15, 1), tooltip=tips["max_article_len"]),
+                sg.InputText(
+                    self.config.max_article_len,
+                    key="-MAX_ARTICLE_LEN-",
+                    size=(10, 1),
+                    tooltip=tips["max_article_len"],
+                ),
             ],
             [
                 sg.Text(
-                    "Tips：\n"
-                    "1、使用模板：\n"
-                    "    - 使用：\n"
-                    "           随机模板：程序随机选取一个并将生成的文章填充到模板里\n"
-                    "           选定模板：使用指定的模板\n"
-                    "    - 不使用：AI根据要求生成模板，并填充文章\n"
-                    "2、需要审核者：\n"
-                    "    - 需要：生成文章后执行审核，文章可能更好，但token消耗更高\n"
-                    "    - 不需要：生成文章后直接填充模板，消耗低，文章可能略差\n"
-                    "3、压缩模板：\n"
-                    "    - 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
-                    "    - 不压缩：token消耗，AI可能理解更精确\n"
-                    "4、AIPy搜索缓存：\n"
-                    "    - 使用：使用本地缓存的代码进行搜索，初次执行耗时，后续更快\n"
-                    "    - 不使用：本地模板搜索+AIPy搜索，无代码缓存，每次耗时相当\n"
-                    "5、最大/最小搜索数量：返回的最大（1~20）/最小（1~10）搜索结果数\n"
-                    "6、最大/最小文章字数：生成的最大（5000）/最小文章字数（500）",
-                    size=(70, 17),
+                    "Tips：鼠标悬停标签/输入框，可查看该条目的详细说明。",
+                    size=(70, 1),
                     text_color="gray",
                 ),
             ],
-            [sg.Button("保存配置", key="-SAVE_OTHER-"), sg.Button("恢复默认", key="-RESET_OTHER-")],
+            [sg.Button("保存配置", key="-SAVE_BASE-"), sg.Button("恢复默认", key="-RESET_BASE-")],
         ]
-        # 使用 sg.Column 包裹布局，设置 pad=(0, 0) 确保顶部无额外边距
         return [[sg.Column(layout, scrollable=False, vertical_scroll_only=False, pad=(0, 0))]]
 
     def create_aipy_tab(self):
@@ -513,11 +552,11 @@ class ConfigEditor:
             [
                 sg.TabGroup(
                     [
+                        [sg.Tab("基础", self.create_base_tab(), key="-TAB_BASE-")],
                         [sg.Tab("热搜平台", self.create_platforms_tab(), key="-TAB_PLATFORM-")],
                         [sg.Tab("微信公众号*", self.create_wechat_tab(), key="-TAB_WECHAT-")],
                         [sg.Tab("大模型API*", self.create_api_tab(), key="-TAB_API-")],
                         [sg.Tab("图片生成API", self.create_img_api_tab(), key="-TAB_IMG_API-")],
-                        [sg.Tab("其他", self.create_other_tab(), key="-TAB_OTHER-")],
                         [sg.Tab("AIPy*", self.create_aipy_tab(), key="-TAB_AIPY-")],
                     ],
                     key="-TAB_GROUP-",
@@ -803,9 +842,10 @@ class ConfigEditor:
                         icon=self.__get_icon(),
                     )
 
-            # 保存其他配置
-            elif event.startswith("-SAVE_OTHER-"):
+            # 保存基础配置
+            elif event.startswith("-SAVE_BASE-"):
                 config = self.config.get_config().copy()
+                config["auto_publish"] = values["-AUTO_PUBLISH-"]
                 config["use_template"] = values["-USE_TEMPLATE-"]
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
                 config["use_compress"] = values["-USE_COMPRESS-"]
@@ -890,7 +930,7 @@ class ConfigEditor:
                 config["template"] = "" if template_value == "随机模板" else template_value
                 if self.config.save_config(config):
                     sg.popup(
-                        "其他配置已保存",
+                        "基础配置已保存",
                         icon=self.__get_icon(),
                     )
                 else:
@@ -972,9 +1012,10 @@ class ConfigEditor:
                         icon=self.__get_icon(),
                     )
 
-            # 恢复默认配置 - 其他
-            elif event.startswith("-RESET_OTHER-"):
+            # 恢复默认配置 - 基础
+            elif event.startswith("-RESET_BASE-"):
                 config = self.config.get_config().copy()
+                config["auto_publish"] = self.config.default_config["auto_publish"]
                 config["use_template"] = self.config.default_config["use_template"]
                 config["need_auditor"] = self.config.default_config["need_auditor"]
                 config["use_compress"] = self.config.default_config["use_compress"]
@@ -989,9 +1030,9 @@ class ConfigEditor:
                 config["max_article_len"] = self.config.default_config["max_article_len"]
                 config["template"] = self.config.default_config["template"]
                 if self.config.save_config(config):
-                    self.update_tab("-TAB_OTHER-", self.create_other_tab())
+                    self.update_tab("-TAB_BASE-", self.create_base_tab())
                     sg.popup(
-                        "已恢复默认其他配置",
+                        "已恢复默认基础配置",
                         icon=self.__get_icon(),
                     )
                 else:
