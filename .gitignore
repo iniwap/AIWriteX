@@ -6,7 +6,7 @@ logs/*.log
 make_exe/
 user_config.toml
 image/*
-!image/preview.jpeg
+!image/preview.jpg
 aipy_work/*
 !aipy_work/.gitkeep
 config.bk
