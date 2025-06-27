@@ -9,6 +9,21 @@ from aipyapp.main import get_default_config
 from src.ai_auto_wxgzh.utils import comm
 from src.ai_auto_wxgzh.utils import utils
 
+# 默认分类配置
+DEFAULT_TEMPLATE_CATEGORIES = {
+    "TechDigital": "科技数码",
+    "FinanceInvestment": "财经投资",
+    "EducationLearning": "教育学习",
+    "HealthWellness": "健康养生",
+    "FoodTravel": "美食旅行",
+    "FashionLifestyle": "时尚生活",
+    "CareerDevelopment": "职场发展",
+    "EmotionPsychology": "情感心理",
+    "EntertainmentGossip": "娱乐八卦",
+    "NewsCurrentAffairs": "新闻时事",
+    "Others": "其他",
+}
+
 
 # 自定义 Dumper，仅调整数组子元素缩进
 class IndentedDumper(yaml.SafeDumper):
@@ -135,6 +150,7 @@ class Config:
                 "picsum": {"api_key": "", "model": ""},
             },
             "use_template": True,
+            "template_category": "",
             "template": "",
             "need_auditor": False,
             "use_compress": True,
@@ -221,6 +237,8 @@ class Config:
         self.custom_topic = ""  # 自定义话题（字符串）
         self.urls = []  # 参考链接（列表）
         self.reference_ratio = 0  # 文章借鉴比例[0-1]
+        self.custom_template_category = ""  # 自定义话题时，模板分类
+        self.custom_template = ""  # 自定义话题时，模板
 
     @classmethod
     def get_instance(cls):
@@ -319,6 +337,13 @@ class Config:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["use_template"]
+
+    @property
+    def template_category(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["template_category"]
 
     @property
     def template(self):

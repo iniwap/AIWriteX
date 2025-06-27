@@ -180,10 +180,10 @@ class ArticleManager:
                 subprocess.run(
                     f'{editor_cmd} "{path}"',
                     shell=True,
-                    capture_output=True,
-                    text=True,
                     check=True,
+                    stderr=subprocess.DEVNULL,
                 )
+
                 return
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
@@ -465,9 +465,18 @@ class ArticleManager:
                 self._view_article(article["path"], article["title"])
             elif event == "-SEARCH_BTN-":
                 search_term = values["-SEARCH-"].strip().lower()
-                filtered_articles = [a for a in self._articles if search_term in a["title"].lower()]
-                filtered_data = self._build_table_data(filtered_articles)
-                self._window["-TABLE-"].update(values=filtered_data)
+                if not search_term:
+                    sg.popup(
+                        "请输入文章标题（支持模糊搜索）",
+                        title="系统提示",
+                        icon=self.__get_icon(),
+                    )
+                else:
+                    filtered_articles = [
+                        a for a in self._articles if search_term in a["title"].lower()
+                    ]
+                    filtered_data = self._build_table_data(filtered_articles)
+                    self._window["-TABLE-"].update(values=filtered_data)
             elif event == "-REFRESH-":
                 self._articles = self._get_articles()
                 data = self._build_table_data()

@@ -1,10 +1,9 @@
 import PySimpleGUI as sg
 import re
 import os
-import copy  # noqa 841
-import glob
+import copy
 
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_auto_wxgzh.config.config import Config, DEFAULT_TEMPLATE_CATEGORIES
 from src.ai_auto_wxgzh.utils import utils
 
 
@@ -30,30 +29,6 @@ class ConfigEditor:
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
-
-    def __get_templates(self):
-        try:
-            template_files_abs = glob.glob(
-                os.path.join(
-                    utils.get_res_path(
-                        "templates",
-                        os.path.join(utils.get_current_dir("knowledge", False)),
-                    ),
-                    "*.html",
-                )
-            )
-
-            if not template_files_abs:
-                return []
-
-            # 提取文件名（不含路径），限制数量
-            template_filenames = sorted(
-                [os.path.splitext(os.path.basename(path))[0] for path in template_files_abs]
-            )
-
-            return template_filenames
-        except Exception as e:  # noqa 841
-            return []
 
     def create_platforms_tab(self):
         """创建平台 TAB 布局"""
@@ -291,13 +266,18 @@ class ConfigEditor:
 
     def create_base_tab(self):
         """创建基础 TAB 布局"""
-        # 获取模板文件列表（仅文件名，不含扩展名）
-        template_files = self.__get_templates()
-        template_options = ["随机模板"] + template_files
-        # 获取当前配置中的 template 值
-        current_template = self.config.template if self.config.template else "随机模板"
-        # 检查模板列表是否为空
-        is_template_empty = len(template_files) == 0
+        # 获取所有分类
+        categories = utils.get_all_categories(DEFAULT_TEMPLATE_CATEGORIES)
+
+        # 获取当前配置的模板信息
+        current_category = self.config.template_category
+        current_template = self.config.template
+
+        # 获取当前分类下的模板
+        current_templates = utils.get_templates_by_category(current_category)
+
+        # 检查是否有模板
+        is_template_empty = len(categories) == 0
 
         # Define tooltips for each relevant element
         tips = {
@@ -305,12 +285,15 @@ class ConfigEditor:
             "- 不自动：生成文章后，需要手动选择发布",
             "use_template": "- 使用：\n  随机模板：程序随机选取一个并将生成的文章填充到模板里\n  "
             "选定模板：使用指定的模板\n- 不使用：AI根据要求生成模板，并填充文章",
-            "template": "选择模板：随机模板或指定模板文件",
+            "template_category": "选择分类：\n- 随机分类：程序随机选取一个分类下的模板\n"
+            "- 指定分类：选择特定分类，然后从该分类下选择模板",
+            "template": "选择模板：\n- 随机模板：从选定分类中随机选取模板\n"
+            "- 指定模板：使用选定分类下的特定模板文件",
             "need_auditor": "需要审核者：\n- 需要：生成文章后执行审核，文章可能更好，但token消耗更高\n"
             "- 不需要：生成文章后直接填充模板，消耗低，文章可能略差",
             "use_compress": "压缩模板：\n- 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
             "- 不压缩：token消耗，AI可能理解更精确",
-            "use_search_service": "AIPy搜索缓存：\n- 使用：使用本地缓存的代码进行搜索，初次执行耗时，后续更快\n"
+            "use_search_service": "AIPy搜索代码缓存：\n- 使用：使用本地缓存的代码进行搜索，初次执行耗时，后续更快\n"
             "- 不使用：本地模板搜索+AIPy搜索，无代码缓存，每次耗时相当",
             "aipy_search_max_results": "最大搜索数量：返回的最大搜索结果数（1~20）",
             "aipy_search_min_results": "最小搜索数量：返回的最小搜索结果数（1~10）",
@@ -339,10 +322,29 @@ class ConfigEditor:
                     size=(12, 1),
                 ),
                 sg.Combo(
-                    template_options,
-                    default_value=current_template,
+                    ["随机分类"] + categories,
+                    default_value=(
+                        current_category
+                        if current_category and self.config.use_template
+                        else "随机分类"
+                    ),
+                    key="-TEMPLATE_CATEGORY-",
+                    size=(18, 1),
+                    disabled=not self.config.use_template or is_template_empty,
+                    readonly=True,
+                    enable_events=True,
+                    tooltip=tips["template_category"],
+                ),
+                sg.Combo(
+                    ["随机模板"]
+                    + (current_templates if self.config.use_template and current_category else []),
+                    default_value=(
+                        current_template
+                        if current_template and self.config.use_template
+                        else "随机模板"
+                    ),
                     key="-TEMPLATE-",
-                    size=(30, 1),
+                    size=(18, 1),
                     disabled=not self.config.use_template or is_template_empty,
                     readonly=True,
                     tooltip=tips["template"],
@@ -368,7 +370,7 @@ class ConfigEditor:
             ],
             [
                 sg.Checkbox(
-                    "搜索代码缓存",
+                    "启用搜索代码缓存",
                     default=self.config.use_search_service,
                     key="-USE_SEARCH_SERVICE-",
                     tooltip=tips["use_search_service"],
@@ -612,9 +614,43 @@ class ConfigEditor:
             if event in (sg.WIN_CLOSED, "-EXIT-"):
                 break
 
-            # 动态启用/禁用 template 下拉列表
+            # 动态启用/禁用下拉列表
             elif event == "-USE_TEMPLATE-":
-                self.window["-TEMPLATE-"].update(disabled=not values["-USE_TEMPLATE-"])
+                is_enabled = values["-USE_TEMPLATE-"]
+                self.window["-TEMPLATE_CATEGORY-"].update(disabled=not is_enabled)
+                self.window["-TEMPLATE-"].update(disabled=not is_enabled)
+                if not is_enabled:
+                    self.window["-TEMPLATE_CATEGORY-"].update(value="随机分类")
+                    self.window["-TEMPLATE-"].update(value="随机模板")
+                self.window.refresh()
+
+            elif event == "-TEMPLATE_CATEGORY-":
+                selected_category = values["-TEMPLATE_CATEGORY-"]
+
+                if selected_category == "随机分类":
+                    templates = ["随机模板"]
+                    self.window["-TEMPLATE-"].update(
+                        values=templates, value="随机模板", disabled=False
+                    )
+                else:
+                    templates = utils.get_templates_by_category(selected_category)
+
+                    if not templates:
+                        sg.popup_error(
+                            f"分类 『{selected_category}』 的模板数量为0，不可选择",
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                        self.window["-TEMPLATE_CATEGORY-"].update(value="随机分类")
+                        self.window["-TEMPLATE-"].update(
+                            values=["随机模板"], value="随机模板", disabled=False
+                        )
+                    else:
+                        template_options = ["随机模板"] + templates
+                        self.window["-TEMPLATE-"].update(
+                            values=template_options, value="随机模板", disabled=False
+                        )
+
                 self.window.refresh()
 
             # 切换API TAB
@@ -926,8 +962,18 @@ class ConfigEditor:
                     )
 
                 # 处理 template 保存逻辑
-                template_value = values["-TEMPLATE-"]
-                config["template"] = "" if template_value == "随机模板" else template_value
+                if values["-USE_TEMPLATE-"]:
+                    category_value = values["-TEMPLATE_CATEGORY-"]
+                    template_value = values["-TEMPLATE-"]
+
+                    config["template_category"] = (
+                        category_value if category_value != "随机分类" else ""
+                    )
+                    config["template"] = template_value if template_value != "随机模板" else ""
+                else:
+                    config["template_category"] = ""
+                    config["template"] = ""
+
                 if self.config.save_config(config):
                     sg.popup(
                         "基础配置已保存",

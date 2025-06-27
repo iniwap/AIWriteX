@@ -26,6 +26,8 @@ from src.ai_auto_wxgzh.config.config import Config
 
 from src.ai_auto_wxgzh.gui import ConfigEditor
 from src.ai_auto_wxgzh.gui import ArticleManager
+from src.ai_auto_wxgzh.gui import TemplateManager
+from src.ai_auto_wxgzh.config.config import DEFAULT_TEMPLATE_CATEGORIES
 
 
 __author__ = "iniwaper@gmail.com"
@@ -36,13 +38,11 @@ __copyright__ = "Copyright (C) 2025 iniwap"
 class MainGUI(object):
     def __init__(self):
         self._log_list = []
-        self._template_list = []
         self._is_running = False  # 跟踪任务状态
         self._update_queue = comm.get_update_queue()
         self._log_buffer = deque(maxlen=100)
         self._ui_log_path = log.get_log_path("UI")
         self._log_list = self.__get_logs()
-        self._template_list = self.__get_templates()
         # 配置 CrewAI 日志处理器
         log.setup_logging("crewai", self._update_queue)
         # 终止信号和线程
@@ -55,16 +55,22 @@ class MainGUI(object):
             # 配置信息未填写，仅作提示，用户点击开始任务时才禁止操作并提示错误
             log.print_log(config.error_message, "error")
 
+        # 获取模板分类和当前配置
+        categories = utils.get_all_categories(DEFAULT_TEMPLATE_CATEGORIES)
+        current_category = config.custom_template_category
+        current_template = config.custom_template
+        current_templates = (
+            utils.get_templates_by_category(current_category) if current_category else []
+        )
+
         # 设置主题
         sg.theme("systemdefault")
 
         menu_list = [
-            ["配置", ["管理界面", "CrewAI文件", "AIPy文件"]],
+            ["配置", ["配置管理", "CrewAI文件", "AIPy文件"]],
             ["发布", ["文章管理"]],
-            [
-                "文件",
-                ["日志", self._log_list, "模板", self._template_list],
-            ],
+            ["模板", ["模板管理"]],
+            ["日志", self._log_list],
             ["帮助", ["帮助", "关于", "官网"]],
         ]
 
@@ -91,9 +97,9 @@ class MainGUI(object):
                                 "",
                                 key="-TOPIC_INPUT-",
                                 disabled=True,
-                                size=(30, 1),
+                                size=(32, 1),  # Increased from 30 to 32
                                 pad=((5, 5), (5, 2)),
-                                tooltip="输入自定义话题，或留空以获取热搜作为文章标题",
+                                tooltip="输入自定义话题，或留空以自动获取热搜作为文章标题",
                             ),
                             sg.Checkbox(
                                 "",
@@ -102,6 +108,39 @@ class MainGUI(object):
                                 tooltip="勾选以启用自定义话题，否则自动获取热搜作为文章标题",
                                 size=(2, 1),
                                 pad=((5, 10), (5, 2)),
+                            ),
+                        ],
+                        [
+                            sg.Text(
+                                "模板分类及模板：",
+                                size=(12, 1),  # Consistent with other labels
+                                pad=((10, 5), (5, 2)),
+                                tooltip="指定分类及模板：\n- 优先级高于配置，优先采用此设置\n- 仅限本次运行使用，不会保存到配置",
+                            ),
+                            sg.Combo(
+                                ["随机分类"] + categories,
+                                default_value=(
+                                    current_category if current_category else "随机分类"
+                                ),
+                                key="-TEMPLATE_CATEGORY-",
+                                disabled=True,
+                                size=(15, 1),  # Adjusted for better alignment
+                                readonly=True,
+                                enable_events=True,
+                                pad=((5, 5), (5, 2)),
+                                tooltip="选择分类：\n- 随机分类：程序随机选取一个分类\n- 指定分类：选择特定分类，然后从该分类下选择模板",
+                            ),
+                            sg.Combo(
+                                ["随机模板"] + current_templates,
+                                default_value=(
+                                    current_template if current_template else "随机模板"
+                                ),
+                                key="-TEMPLATE-",
+                                disabled=True,
+                                size=(15, 1),  # Adjusted for better alignment
+                                readonly=True,
+                                pad=((5, 10), (5, 2)),
+                                tooltip="选择模板：\n- 随机模板：从选定分类中随机选取模板\n- 指定模板：使用选定分类下的特定模板文件",
                             ),
                         ],
                         [
@@ -115,7 +154,7 @@ class MainGUI(object):
                                 "",
                                 key="-URLS_INPUT-",
                                 disabled=True,
-                                size=(30, 1),
+                                size=(26, 1),  # Reduced from 30 to 24
                                 tooltip="多个链接请用竖线(|)分隔，例如：http://site1.com|https://site2.com",
                                 pad=((5, 5), (2, 5)),
                             ),
@@ -141,20 +180,19 @@ class MainGUI(object):
                     button_text="开始执行",
                     size=(12, 2),
                     key="-START_BTN-",
-                    pad=((10, 5), (5, 5)),
+                    pad=((10, 15), (5, 5)),
                 ),
                 sg.Button(
                     button_text="结束执行",
                     size=(12, 2),
                     key="-STOP_BTN-",
                     disabled=not self._is_running,
-                    pad=((5, 10), (5, 5)),
+                    pad=((15, 10), (5, 5)),
                 ),
                 sg.Push(),
             ],
             [
-                sg.Text("——" * 20, size=(60, 1), text_color="gray"),
-                sg.Push(),
+                sg.HSeparator(pad=((10, 10), (5, 5))),
             ],
             [
                 sg.Text("日志:", size=(6, 1), pad=((10, 5), (5, 5))),
@@ -191,7 +229,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v1.6",
+            "微信公众号AI工具 v2.0",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),
@@ -218,35 +256,6 @@ class MainGUI(object):
 
         return need_update
 
-    def __get_templates(self, max_files=10):
-        try:
-            template_files_abs = glob.glob(
-                os.path.join(
-                    utils.get_res_path(
-                        "templates",
-                        os.path.join(utils.get_current_dir("knowledge", False)),
-                    ),
-                    "*.html",
-                )
-            )
-
-            if not template_files_abs:
-                return ["更多..."]
-
-            # 提取文件名（不含路径），限制数量
-            template_filenames = sorted(
-                [
-                    os.path.splitext(os.path.basename(path))[0]
-                    for path in template_files_abs[:max_files]
-                ]
-            )
-            if len(template_files_abs) > max_files:
-                template_filenames.append("更多...")
-
-            return template_filenames
-        except Exception as e:  # noqa 841
-            return ["更多..."]
-
     def __get_logs(self, max_files=5):
         try:
             # 获取所有 .log 文件
@@ -267,51 +276,40 @@ class MainGUI(object):
             return ["更多..."]
 
     def __update_menu(self):
-        # 找到 "文件" 菜单的索引
-        file_menu_index = None
-        for i in range(self._menu.index(tk.END) + 1):
-            if self._menu.entrycget(i, "label") == "文件":
-                file_menu_index = i
-                break
+        try:
+            # 缓存“日志”菜单引用，初始化时查找一次
+            if not hasattr(self, "_log_menu"):
+                for i in range(self._menu.index(tk.END) + 1):
+                    if self._menu.entrycget(i, "label") == "日志":
+                        self._log_menu = self._menu.nametowidget(self._menu.entrycget(i, "menu"))
+                        break
+                else:
+                    return
 
-        if file_menu_index is None:
-            return
-
-        # 获取 "文件" 子菜单
-        file_menu = self._menu.entrycget(file_menu_index, "menu")
-        file_menu = self._menu.nametowidget(file_menu)
-
-        # 找到 "日志" 子菜单的索引
-        log_menu_index = None
-        for i in range(file_menu.index(tk.END) + 1):
-            if file_menu.entrycget(i, "label") == "日志":
-                log_menu_index = i
-                break
-
-        if log_menu_index is None:
-            return
-
-        # 获取 "日志" 子菜单
-        log_menu = file_menu.entrycget(log_menu_index, "menu")
-        log_menu = file_menu.nametowidget(log_menu)
-
-        # 清空 "日志" 子菜单
-        log_menu.delete(0, tk.END)
-
-        # 添加新的日志文件名
-        for log_item in self._log_list:
-            log_menu.add_command(
-                label=log_item,
-                command=lambda item=log_item: self._window.write_event_value(item, None),
-            )
+            # 清空“日志”菜单并更新
+            self._log_menu.delete(0, tk.END)
+            for log_item in self._log_list:
+                self._log_menu.add_command(
+                    label=log_item,
+                    command=lambda item=log_item: self._window.write_event_value(item, None),
+                )
+        except Exception:
+            pass
 
     # 处理消息队列
     def process_queue(self):
         try:
             msg = self._update_queue.get_nowait()
             if msg["type"] == "progress":
-                self._window["-PROGRESS-"].update(f"{msg['value']}%")
-                self._window["-PROGRESS_BAR-"].update(msg["value"])
+                # 暂时不支持 进度显示
+                """[
+                    sg.Text("进度:", size=(6, 1), pad=((10, 5), (5, 5))),
+                    sg.Text("0%", size=(4, 1), key="-PROGRESS-", pad=((5, 5), (5, 5))),
+                    sg.ProgressBar(100, orientation='h', size=(20, 20), key="-PROGRESS_BAR-")
+                ],"""
+                # self._window["-PROGRESS-"].update(f"{msg['value']}%")
+                # self._window["-PROGRESS_BAR-"].update(msg["value"])
+                pass
             elif msg["type"] in ["status", "warning", "error"]:
                 # 追加日志到缓冲区
                 if msg["value"].startswith("PRINT:"):
@@ -360,234 +358,263 @@ class MainGUI(object):
             pass
 
     def run(self):
-        while True:
-            event, values = self._window.read(timeout=100)
-            if event == sg.WIN_CLOSED:  # always,  always give a way out!
-                if self._is_running and self._crew_thread and self._crew_thread.is_alive():
-                    self._stop_event.set()
-                    self._crew_thread.join(timeout=2.0)
-                    if self._crew_thread.is_alive():
-                        log.print_log("警告：任务终止超时，可能未完全停止")
+        try:
+            while True:
+                event, values = self._window.read(timeout=100)
+                if event == sg.WIN_CLOSED:  # always,  always give a way out!
+                    if self._is_running and self._crew_thread and self._crew_thread.is_alive():
+                        self._stop_event.set()
+                        self._crew_thread.join(timeout=2.0)
+                        if self._crew_thread.is_alive():
+                            log.print_log("警告：任务终止超时，可能未完全停止")
+
+                    break
+                elif event == "配置管理":
+                    ConfigEditor.gui_start()
+                elif event == "CrewAI文件":
+                    try:
+                        os.system("start /B  notepad " + Config.get_instance().get_config_path())
+                    except Exception as e:
+                        sg.popup(
+                            "无法打开CrewAI配置文件 :( \n错误信息：" + str(e),
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                elif event == "AIPy文件":
+                    try:
+                        os.system(
+                            "start /B  notepad " + Config.get_instance().get_aipy_config_path()
+                        )
+                    except Exception as e:
+                        sg.popup(
+                            "无法打开AIPy配置文件 :( \n错误信息：" + str(e),
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                elif event == "-CUSTOM_TOPIC-":
+                    # 根据复选框状态启用/禁用输入框和下拉框
+                    is_enabled = values["-CUSTOM_TOPIC-"]
+                    self._window["-TOPIC_INPUT-"].update(disabled=not is_enabled)
+                    self._window["-URLS_INPUT-"].update(disabled=not is_enabled)
+                    self._window["-REFERENCE_RATIO-"].update(disabled=not is_enabled)
+                    self._window["-TEMPLATE_CATEGORY-"].update(disabled=not is_enabled)
+                    self._window["-TEMPLATE-"].update(disabled=not is_enabled)
+                elif event == "-TEMPLATE_CATEGORY-":
+                    selected_category = values["-TEMPLATE_CATEGORY-"]
+
+                    if selected_category == "随机分类":
+                        templates = ["随机模板"]
+                        self._window["-TEMPLATE-"].update(
+                            values=templates, value="随机模板", disabled=False
+                        )
                     else:
-                        log.print_log("CrewAI 任务被终止（程序退出）")
-                break
-            elif event == "管理界面":
-                ConfigEditor.gui_start()
-            elif event == "CrewAI文件":
-                try:
-                    os.system("start /B  notepad " + Config.get_instance().get_config_path())
-                except Exception as e:
-                    sg.popup(
-                        "无法打开CrewAI配置文件 :( \n错误信息：" + str(e),
-                        title="系统提示",
-                        icon=self.__get_icon(),
-                    )
-            elif event == "AIPy文件":
-                try:
-                    os.system("start /B  notepad " + Config.get_instance().get_aipy_config_path())
-                except Exception as e:
-                    sg.popup(
-                        "无法打开AIPy配置文件 :( \n错误信息：" + str(e),
-                        title="系统提示",
-                        icon=self.__get_icon(),
-                    )
-            elif event == "-CUSTOM_TOPIC-":
-                # 根据复选框状态启用/禁用输入框和下拉框
-                self._window["-TOPIC_INPUT-"].update(disabled=not values["-CUSTOM_TOPIC-"])
-                self._window["-URLS_INPUT-"].update(disabled=not values["-CUSTOM_TOPIC-"])
-                self._window["-REFERENCE_RATIO-"].update(disabled=not values["-CUSTOM_TOPIC-"])
-            elif event == "-START_BTN-":
-                config = Config.get_instance()
-                if not config.validate_config():
-                    sg.popup_error(
-                        f"无法执行，配置错误：{config.error_message}",
-                        title="系统提示",
-                        icon=self.__get_icon(),
-                        non_blocking=True,
-                    )
-                    continue
-                elif not self._is_running:
-                    # 处理自定义话题、链接和借鉴比例
-                    if values["-CUSTOM_TOPIC-"]:
-                        topic = values["-TOPIC_INPUT-"].strip()
-                        if not topic:
+                        templates = utils.get_templates_by_category(selected_category)
+
+                        if not templates:
                             sg.popup_error(
-                                "自定义话题不能为空",
+                                f"分类 『{selected_category}』 的模板数量为0，不可选择",
                                 title="系统提示",
                                 icon=self.__get_icon(),
-                                non_blocking=True,
                             )
-                            continue
-                        config.custom_topic = topic
-                        urls_input = values["-URLS_INPUT-"].strip()
-                        if urls_input:
-                            urls = [url.strip() for url in urls_input.split("|") if url.strip()]
-                            valid_urls = [url for url in urls if utils.is_valid_url(url)]
-                            if len(valid_urls) != len(urls):
+                            self._window["-TEMPLATE_CATEGORY-"].update(value="随机分类")
+                            self._window["-TEMPLATE-"].update(
+                                values=["随机模板"], value="随机模板", disabled=False
+                            )
+                        else:
+                            template_options = ["随机模板"] + templates
+                            self._window["-TEMPLATE-"].update(
+                                values=template_options, value="随机模板", disabled=False
+                            )
+
+                    self._window.refresh()
+                elif event == "-START_BTN-":
+                    config = Config.get_instance()
+                    if not config.validate_config():
+                        sg.popup_error(
+                            f"无法执行，配置错误：{config.error_message}",
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                            non_blocking=True,
+                        )
+                        continue
+                    elif not self._is_running:
+                        # 处理自定义话题、链接和借鉴比例
+                        if values["-CUSTOM_TOPIC-"]:
+                            topic = values["-TOPIC_INPUT-"].strip()
+                            if not topic:
                                 sg.popup_error(
-                                    "存在无效的URL，请检查输入（确保使用http://或https://）",
+                                    "自定义话题不能为空",
                                     title="系统提示",
                                     icon=self.__get_icon(),
                                     non_blocking=True,
                                 )
                                 continue
-                            config.urls = valid_urls
+                            config.custom_topic = topic
+                            urls_input = values["-URLS_INPUT-"].strip()
+                            if urls_input:
+                                urls = [url.strip() for url in urls_input.split("|") if url.strip()]
+                                valid_urls = [url for url in urls if utils.is_valid_url(url)]
+                                if len(valid_urls) != len(urls):
+                                    sg.popup_error(
+                                        "存在无效的URL，请检查输入（确保使用http://或https://）",
+                                        title="系统提示",
+                                        icon=self.__get_icon(),
+                                        non_blocking=True,
+                                    )
+                                    continue
+                                config.urls = valid_urls
+                            else:
+                                config.urls = []
+                            # 将比例转换为浮点数
+                            config.reference_ratio = (
+                                float(values["-REFERENCE_RATIO-"].strip("%")) / 100
+                            )
+                            config.custom_template_category = (
+                                values["-TEMPLATE_CATEGORY-"]
+                                if values["-TEMPLATE_CATEGORY-"] != "随机分类"
+                                else ""
+                            )
+                            config.custom_template = (
+                                values["-TEMPLATE-"] if values["-TEMPLATE-"] != "随机模板" else ""
+                            )
+
                         else:
+                            config.custom_topic = ""
                             config.urls = []
-                        # 将比例转换为浮点数
-                        config.reference_ratio = float(values["-REFERENCE_RATIO-"].strip("%")) / 100
-                    else:
-                        config.custom_topic = ""
-                        config.urls = []
-                        config.reference_ratio = 0.0  # 重置为0
+                            config.reference_ratio = 0.0  # 重置为0
+                            config.custom_template_category = ""  # 自定义话题时，模板分类
+                            config.custom_template = ""  # 自定义话题时，模板
+
+                        # -----这里分类模板适配完成后删除适配提醒-------------
+                        sg.popup(
+                            "注意：目前仅『其他』分类模板已适配，非『其他』分类模板效果欠佳\n"
+                            "分类模板逐步适配中，请关注项目；更多界面功能开发中，敬请期待 :)\n"
+                            "点击OK开始执行",
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                        self._window["-START_BTN-"].update(disabled=True)
+                        self._window["-STOP_BTN-"].update(disabled=False)
+                        self._is_running = True
+                        self._stop_event.clear()
+                        self._crew_thread = threading.Thread(
+                            target=autowx_gzh,
+                            args=(self._stop_event, True),
+                            daemon=True,
+                        )
+                        self._crew_thread.start()
+                        # 记录任务开始日志
+                        log.print_log(
+                            f"开始任务，话题：{config.custom_topic or '采用热门话题'}"
+                            + (
+                                f"，链接：{config.urls}，借鉴比例：{config.reference_ratio*100:.0f}%"
+                                if config.custom_topic
+                                else ""
+                            )
+                        )
+                elif event == "-STOP_BTN-":
+                    if self._is_running and self._crew_thread and self._crew_thread.is_alive():
+                        self._stop_event.set()
+                        self._crew_thread.join(timeout=2.0)
+                        if self._crew_thread.is_alive():
+                            log.print_log("警告：任务终止超时，可能未完全停止")
+                        else:
+                            log.print_log("CrewAI 任务被终止")
+                        self._crew_thread = None
+                        self._window["-START_BTN-"].update(disabled=False)
+                        self._window["-STOP_BTN-"].update(disabled=True)
+                        self._is_running = False
+                        sg.popup(
+                            "任务已终止",
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                            non_blocking=True,
+                        )
+                elif event == "关于":
                     sg.popup(
-                        "更多界面功能开发中，敬请期待 :)\n" "点击OK开始执行",
+                        "关于软件",
+                        "当前Version 2.0",
+                        "Copyright (C) 2025 iniwap,All Rights Reserved",
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
-                    self._window["-START_BTN-"].update(disabled=True)
-                    self._window["-STOP_BTN-"].update(disabled=False)
-                    self._is_running = True
-                    self._stop_event.clear()
-                    self._crew_thread = threading.Thread(
-                        target=autowx_gzh,
-                        args=(self._stop_event, True),
-                        daemon=True,
-                    )
-                    self._crew_thread.start()
-                    # 记录任务开始日志
-                    log.print_log(
-                        f"开始任务，话题：{config.custom_topic or '采用热门话题'}"
-                        + (
-                            f"，链接：{config.urls}，借鉴比例：{config.reference_ratio*100:.0f}%"
-                            if config.custom_topic
-                            else ""
-                        )
-                    )
-            elif event == "-STOP_BTN-":
-                if self._is_running and self._crew_thread and self._crew_thread.is_alive():
-                    self._stop_event.set()
-                    self._crew_thread.join(timeout=2.0)
-                    if self._crew_thread.is_alive():
-                        log.print_log("警告：任务终止超时，可能未完全停止")
-                    else:
-                        log.print_log("CrewAI 任务被终止")
-                    self._crew_thread = None
-                    self._window["-START_BTN-"].update(disabled=False)
-                    self._window["-STOP_BTN-"].update(disabled=True)
-                    self._is_running = False
+                elif event == "官网":
+                    utils.open_url("https://github.com/iniwap")
+                elif event == "帮助":
                     sg.popup(
-                        "任务已终止",
-                        title="系统提示",
+                        "———————————配置说明———————————\n"
+                        "1、微信公众号AppID，AppSecrect必填（至少一个）\n"
+                        "2、CrewAI使用的API的API KEY必填（使用的）\n"
+                        "3、AIPy的模型提供商的API KEY必填（使用的）\n"
+                        "4、其他使用默认即可，根据需求填写\n"
+                        "———————————操作说明———————————\n"
+                        "1、打开配置界面，首先进行必要的配置\n"
+                        "2、点击开始执行，AI自动开始工作\n"
+                        "3、陆续加入更多操作中...\n"
+                        "———————————功能说明———————————\n"
+                        "1、配置->配置管理：打开配置编辑界面\n"
+                        "2、发布->发布管理：打开文章管理界面\n"
+                        "3、模板->模板管理：打开模板管理界面\n"
+                        "4、日志->日志文件：查看日志\n"
+                        "5、配置->CrewAI/AIPy：直接查看或编辑配置文件\n"
+                        "6、部分界面内容，悬停会有提示",
+                        title="使用帮助",
                         icon=self.__get_icon(),
-                        non_blocking=True,
                     )
-            elif event == "关于":
-                sg.popup(
-                    "关于软件",
-                    "当前Version 1.6",
-                    "Copyright (C) 2025 iniwap,All Rights Reserved",
-                    title="系统提示",
-                    icon=self.__get_icon(),
-                )
-            elif event == "官网":
-                utils.open_url("https://github.com/iniwap")
-            elif event == "帮助":
-                sg.popup(
-                    "———————————配置说明———————————\n"
-                    "1、微信公众号AppID，AppSecrect必填（至少一个）\n"
-                    "2、CrewAI使用的API的API KEY必填（使用的）\n"
-                    "3、AIPy的模型提供商的API KEY必填（使用的）\n"
-                    "4、其他使用默认即可，根据需求填写\n"
-                    "———————————操作说明———————————\n"
-                    "1、打开配置界面，首先进行必要的配置\n"
-                    "2、点击开始执行，AI自动开始工作\n"
-                    "3、陆续加入更多操作中...\n"
-                    "———————————功能说明———————————\n"
-                    "1、文件->日志：查看日志文件\n"
-                    "2、文件->模板：查看内置模板文件\n"
-                    "3、文件->文章：查看生成的文章\n"
-                    "4、配置->CrewAI/AIPy：直接查看或编辑配置文件\n"
-                    "5、部分界面内容，悬停会有提示",
-                    title="使用帮助",
-                    icon=self.__get_icon(),
-                )
-            elif event == "-SET_LOG_LIMIT-":
-                self._log_buffer = deque(self._log_buffer, maxlen=values["-LOG_LIMIT-"])
-                self._window["-STATUS-"].update("\n".join(self._log_buffer))
-            elif event == "-CLEAR_LOG-":
-                self._log_buffer.clear()
-                self._window["-STATUS-"].update("")
-            elif event in self._log_list:
-                if event == "更多...":
-                    logs_path = utils.get_current_dir("logs")
-
-                    filename = sg.popup_get_file(
-                        "打开文件",
-                        default_path=logs_path,
-                        file_types=(("log文件", "*.log"),),
-                        no_window=True,
-                    )
-
-                    if len(filename) == 0:
-                        continue
-
-                    try:
-                        os.system("start /B  notepad " + filename)
-                    except Exception as e:
-                        sg.popup(
-                            "无法打开日志文件 :( \n错误信息：" + str(e),
-                            title="系统提示",
-                            icon=self.__get_icon(),
+                elif event == "-SET_LOG_LIMIT-":
+                    self._log_buffer = deque(self._log_buffer, maxlen=values["-LOG_LIMIT-"])
+                    self._window["-STATUS-"].update("\n".join(self._log_buffer))
+                elif event == "-CLEAR_LOG-":
+                    self._log_buffer.clear()
+                    self._window["-STATUS-"].update("")
+                elif event in self._log_list:
+                    if event == "更多...":
+                        logs_path = os.path.abspath(utils.get_current_dir("logs"))
+                        logs_path = logs_path.replace("/", "\\")
+                        filename = sg.popup_get_file(
+                            "打开文件",
+                            default_path=logs_path,
+                            file_types=(("log文件", "*.log"),),
+                            initial_folder=logs_path,
+                            no_window=True,
                         )
-                else:
-                    try:
-                        os.system(
-                            "start /B  notepad "
-                            + os.path.join(utils.get_current_dir("logs"), event)
-                        )
-                    except Exception as e:
-                        sg.popup(
-                            "无法打开日志文件 :( \n错误信息：" + str(e),
-                            title="系统提示",
-                            icon=self.__get_icon(),
-                        )
-            elif event in self._template_list:
-                template_dir_abs = utils.get_res_path(
-                    "templates",
-                    os.path.join(utils.get_current_dir("knowledge", False)),
-                )
-                if event == "更多...":
-                    filename = sg.popup_get_file(
-                        "打开文件",
-                        default_path=template_dir_abs,
-                        file_types=(("模板文件", "*.html"),),
-                        no_window=True,
-                    )
+                        if not filename:
+                            continue
 
-                    if len(filename) == 0:
-                        continue
+                        try:
+                            os.system("start /B  notepad " + filename)
+                        except Exception as e:
+                            sg.popup(
+                                "无法打开日志文件 :( \n错误信息：" + str(e),
+                                title="系统提示",
+                                icon=self.__get_icon(),
+                            )
+                    else:
+                        try:
+                            os.system(
+                                "start /B  notepad "
+                                + os.path.join(utils.get_current_dir("logs"), event)
+                            )
+                        except Exception as e:
+                            sg.popup(
+                                "无法打开日志文件 :( \n错误信息：" + str(e),
+                                title="系统提示",
+                                icon=self.__get_icon(),
+                            )
 
-                    if ret := utils.open_url(filename):
-                        sg.popup(
-                            "无法打开模板 :( \n错误信息：" + ret,
-                            title="系统提示",
-                            icon=self.__get_icon(),
-                        )
-                else:
-                    if ret := utils.open_url(os.path.join(template_dir_abs, f"{event}.html")):
-                        sg.popup(
-                            "无法打开模板 :( \n错误信息：" + ret,
-                            title="系统提示",
-                            icon=self.__get_icon(),
-                        )
+                elif event == "文章管理":
+                    ArticleManager.gui_start()
+                elif event == "模板管理":
+                    TemplateManager.gui_start()
 
-            elif event == "文章管理":
-                ArticleManager.gui_start()
-
-            # 处理队列更新（非阻塞）
-            if self._is_running:
-                self.process_queue()
+                # 处理队列更新（非阻塞）
+                if self._is_running:
+                    self.process_queue()
+        finally:
+            if self._is_running and self._crew_thread and self._crew_thread.is_alive():
+                self._stop_event.set()
+                self._crew_thread.join(timeout=2.0)
+            self._window.close()
 
 
 def gui_start():

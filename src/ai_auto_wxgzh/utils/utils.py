@@ -9,6 +9,8 @@ import sys
 import shutil
 import webbrowser
 from urllib.parse import urlparse
+import glob
+
 
 from src.ai_auto_wxgzh.utils import log
 
@@ -304,3 +306,42 @@ def sanitize_filename(filename):
     sanitized = sanitized.strip().strip(".")
     # 如果文件名为空，设置一个默认值
     return sanitized or "default_filename"
+
+
+def get_template_dir():
+    return get_res_path("", os.path.join(get_current_dir("knowledge", False)))
+
+
+def get_all_categories(default_template_categories):
+    """动态获取所有分类文件夹名称"""
+    template_dir = get_template_dir()
+    categories = []
+
+    # 添加默认分类（确保存在）
+    default_categories = list(default_template_categories.values())  # 使用中文名
+    categories.extend(default_categories)
+
+    # 扫描实际存在的文件夹
+    if os.path.exists(template_dir):
+        for item in os.listdir(template_dir):
+            item_path = os.path.join(template_dir, item)
+            if os.path.isdir(item_path) and item not in categories:
+                categories.append(item)
+
+    return sorted(categories)
+
+
+def get_templates_by_category(category):
+    """获取指定分类下的模板列表"""
+    if not category or category == "随机分类":
+        return []
+
+    template_dir = get_template_dir()
+    category_path = os.path.join(template_dir, category)
+
+    if not os.path.exists(category_path):
+        return []
+
+    template_files = glob.glob(os.path.join(category_path, "*.html"))
+    template_names = [os.path.splitext(os.path.basename(f))[0] for f in template_files]
+    return sorted(template_names)

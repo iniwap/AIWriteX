@@ -34,34 +34,47 @@ class ReadTemplateTool(BaseTool):
         config = Config.get_instance()
 
         # 获取模板文件的绝对路径
-        template_dir_abs = utils.get_res_path(
-            "templates",
-            os.path.join(utils.get_current_dir("knowledge", False)),
-        )
+        template_dir_abs = utils.get_template_dir()
+
+        # 根据custom_topic是否为空选择配置源
+        if config.custom_topic:
+            # 使用自定义话题的模板配置
+            template_category = config.custom_template_category
+            template = config.custom_template
+        else:
+            # 使用应用配置
+            template_category = config.template_category
+            template = config.template
 
         random_template = True
-        if config.template:  # 如果指定模板，且必须存在才能不随机
-            template_filename = (
-                config.template if config.template.endswith(".html") else f"{config.template}.html"
-            )
-            selected_template_file = os.path.join(template_dir_abs, template_filename)
-            if os.path.exists(selected_template_file):  #
+        selected_template_file = None
+
+        # 如果指定了具体模板且存在，则不随机
+        if template and template != "":  # 随机模板的条件是""
+            template_filename = template if template.endswith(".html") else f"{template}.html"
+
+            # 如果指定了分类，在分类目录下查找
+            if template_category and template_category != "":  # 实际上选则了模板，也一定选择了分类
+                category_dir = os.path.join(template_dir_abs, template_category)
+                selected_template_file = os.path.join(category_dir, template_filename)
+
+            if os.path.exists(selected_template_file):
                 random_template = False
 
-        # 需要随机
+        # 需要随机选择模板
         if random_template:
-            template_dir_abs = utils.get_res_path(
-                "templates",
-                os.path.join(utils.get_current_dir("knowledge", False)),
-            )
-
-            template_files_abs = glob.glob(os.path.join(template_dir_abs, "*.html"))
+            # 如果指定了分类且不是随机分类
+            if template_category and template_category != "":
+                category_dir = os.path.join(template_dir_abs, template_category)
+                template_files_abs = glob.glob(os.path.join(category_dir, "*.html"))
+            else:
+                # 随机分类或未指定分类，从所有分类的模板中选择
+                template_files_abs = glob.glob(os.path.join(template_dir_abs, "*", "*.html"))
 
             if not template_files_abs:
                 log.print_log(
                     f"在目录 '{template_dir_abs}' 中未找到任何模板文件。如果没有模板请将config.yaml中的use_template设置为false"
                 )
-                # 出现这种错误无法继续，立即终止程序，防止继续消耗Tokens（不终止CrewAI可能会重试）
                 sys.exit(1)
 
             selected_template_file = random.choice(template_files_abs)
@@ -72,7 +85,7 @@ class ReadTemplateTool(BaseTool):
         template_content = utils.compress_html(
             selected_template_content,
             config.use_compress,
-        )  # 压缩html，降低token消耗
+        )
 
         return f"""
         【HTML模板 - 必须作为最终输出的基础】

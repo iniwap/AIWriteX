@@ -124,6 +124,7 @@ img_api:
     api_key: ""
     model: ""
 use_template: true
+template_category: "其他"
 template: ""
 need_auditor: false
 use_compress: true
