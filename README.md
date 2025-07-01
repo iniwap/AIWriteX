@@ -101,6 +101,12 @@ pip  install crewai
 
 ## 🔮模板发布效果预览
 1. 经过反复的微调，已经完成发布到微信公众号的模板效果如下：
+- **健康养生/t1**：https://mp.weixin.qq.com/s/ZG6SFUYSZlrxyRw6_GH9yg
+- **娱乐八卦/t1**：https://mp.weixin.qq.com/s/3YeEH2Nvhsw8JqHIV0tftQ
+- **情感心理/t1**：https://mp.weixin.qq.com/s/2j-C1tBWkpYIQhhR6tOwSg
+- **教育学习/t1**：https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g
+- **科技数码/t1**：https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ
+
 - **其他/template1**: https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ
 - **其他/template2**: https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg
 - **其他/template3**: https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA
@@ -111,6 +117,7 @@ pip  install crewai
 - **其他/template8**: https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw
 - **其他/template9**: https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA
 - **其他/template10**: https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw
+
 
 2. 全自动发文（使用本地搜索+AIPy解决时效性）文章预览:
 - **未使用模板**：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
@@ -138,6 +145,7 @@ pip  install crewai
 - 会自动移除 background: url
 - `<linearGradient id="catGradient">`，此类动画，id会被自动移除，动画会失效
 - 最近发现发布的文章不会显示到公众号文章列表，但是有时会收到消息通知（关注者），之前完全没通知（每天大概3-5篇的，后续不会有通知）
+-**【噩耗】：注：2025年7月起，个人主体账号、企业主体未认证账号及不支持认证的账号将被回收发布草稿的调用权限，这就意味着非认证公众号没法自动发文了。（垄断真该死啊！）**
 - **微信API访问IP白名单问题，这个有点恶心，只能使用的时候把当前IP添加进去；如果有代理直接开代理吧，使用那个固定IP即可（如果是固定的话）**
 - **如果有云服务器，做个转发就行了；还可以使用阿里云函数计算代理微信API请求，免费的，但需要注册阿里云**
 ### 关于软件模式

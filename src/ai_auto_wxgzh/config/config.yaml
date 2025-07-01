@@ -109,11 +109,11 @@ api:
       - ""
     model_index: 0
     model:
-      - openai/deepseek-v3
-      - openai/deepseek-r1
-      - openai/deepseek-chat
-      - openai/deepseek-v3-0324
-      - openai/deepseek-chat-v3-0324
+      - deepseek/deepseek-v3
+      - deepseek/deepseek-r1
+      - deepseek/deepseek-chat
+      - deepseek/deepseek-v3-0324
+      - deepseek/deepseek-chat-v3-0324
     api_base: https://api.deepseek.com/v1
 img_api:
   api_type: picsum
