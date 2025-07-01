@@ -14,4 +14,4 @@ from src.ai_auto_wxgzh.tools.search_template import search_web, extract_urls_con
 
 if __name__ == "__main__":
 
-    print(search_web("竹节虫"))  # 网易的页面提取有问题，待解决
+    print(search_web("竹节虫"))

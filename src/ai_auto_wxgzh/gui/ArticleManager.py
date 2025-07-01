@@ -88,7 +88,7 @@ class ArticleManager:
             articles = []
             for path in article_files:
                 basename = os.path.basename(path)
-                title = os.path.splitext(basename)[0]
+                title = os.path.splitext(basename)[0].replace("_", "|")
                 stats = os.stat(path)
                 create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stats.st_ctime))
                 size = f"{stats.st_size / 1024:.2f} KB"

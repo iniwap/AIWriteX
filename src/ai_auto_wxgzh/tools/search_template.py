@@ -806,7 +806,7 @@ def enhance_abstract(abstract, page_soup):
     if not page_soup:
         return abstract
 
-    # 提取正文（已由 _extract_full_article_content 清理）
+    # 提取正文
     article = _extract_full_article_content(page_soup)
 
     if article:
@@ -1498,21 +1498,179 @@ def _extract_full_article_content(page_soup):
 
     # 第二步：定义正文选择器
     content_selectors = [
-        "#js_content",
-        ".rich_media_content",
-        "article",
-        ".article-content",
-        ".content",
-        ".post-content",
-        ".entry-content",
-        "main",
-        ".main-content",
-        "[class*='article']",
-        "[class*='content']",
-        ".article-body",
-        ".post-body",
-        ".content-body",
-        ".content__article-body",
+        # === 微信公众号 ===
+        "#js_content",  # 微信公众号主要正文容器
+        ".rich_media_content",  # 微信公众号富文本内容
+        ".rich_media_area_primary",  # 微信公众号主要内容区域
+        ".rich_media_wrp",  # 微信公众号包装器
+        # === 主流新闻网站 ===
+        ".post_body",  # 网易新闻、搜狐新闻
+        ".content_area",  # 新浪新闻
+        ".article-content",  # 腾讯新闻、凤凰网
+        ".art_context",  # 环球网
+        ".content",  # 人民网
+        ".article_content",  # 中新网
+        ".cont",  # 光明网
+        ".article-body",  # CNN、NYTimes、BBC等
+        ".story-body",  # BBC新闻
+        ".story-content",  # The Guardian
+        ".entry-content",  # The Washington Post
+        ".content__article-body",  # Guardian、Telegraph
+        ".js-entry-text",  # Wall Street Journal
+        ".story__body",  # Vox、The Verge
+        ".ArticleBody",  # Bloomberg
+        ".caas-body",  # Yahoo News
+        ".RichTextStoryBody",  # Reuters
+        ".InlineVideo-container",  # Associated Press
+        # === 中文新闻门户 ===
+        ".content_box",  # 今日头条
+        ".article-detail",  # 百度新闻
+        ".news_txt",  # 网易新闻详情
+        ".article_txt",  # 搜狐新闻
+        ".content_detail",  # 新浪新闻详情
+        ".detail-content",  # 澎湃新闻
+        ".m-article-content",  # 界面新闻
+        ".article-info",  # 财经网
+        ".news-content",  # 东方财富
+        ".art_con",  # 金融界
+        # === 博客平台 ===
+        ".post-content",  # WordPress默认
+        ".entry-content",  # WordPress主题
+        ".post-body",  # Blogger
+        ".entry-body",  # Movable Type
+        ".post__content",  # Ghost
+        ".article__content",  # Medium（部分主题）
+        ".post-full-content",  # Ghost主题
+        ".kg-card-markdown",  # Ghost Markdown卡片
+        ".content-body",  # Drupal
+        ".field-name-body",  # Drupal字段
+        ".node-content",  # Drupal节点
+        # === 技术博客和文档 ===
+        ".markdown-body",  # GitHub、GitBook
+        ".content",  # GitBook、Read the Docs
+        ".document",  # Sphinx文档
+        ".main-content",  # Jekyll、Hugo主题
+        ".post-content",  # Jekyll默认
+        ".content-wrap",  # Hexo主题
+        ".article-entry",  # Hexo默认
+        ".md-content",  # VuePress
+        ".theme-default-content",  # VuePress默认主题
+        ".docstring",  # 技术文档
+        ".rst-content",  # reStructuredText
+        # === 社交媒体和论坛 ===
+        ".usertext-body",  # Reddit
+        ".md",  # Reddit Markdown
+        ".timeline-item",  # GitHub
+        ".commit-message",  # GitHub提交信息
+        ".blob-wrapper",  # GitHub文件内容
+        ".answer",  # Stack Overflow
+        ".post-text",  # Stack Overflow问题/答案
+        ".question-summary",  # Stack Overflow
+        ".js-post-body",  # Stack Overflow
+        ".feed-item-content",  # LinkedIn
+        ".tweet-text",  # Twitter（旧版）
+        ".tweet-content",  # Twitter
+        # === 知识问答平台 ===
+        ".RichText",  # 知乎
+        ".content",  # 知乎回答内容
+        ".QuestionRichText",  # 知乎问题描述
+        ".AnswerItem",  # 知乎答案
+        ".Post-RichText",  # 知乎专栏
+        ".ArticleItem-content",  # 知乎文章
+        ".answer-content",  # 百度知道
+        ".best-text",  # 百度知道最佳答案
+        ".wgt-answers",  # 百度知道答案
+        # === 电商平台 ===
+        ".detail-content",  # 淘宝商品详情
+        ".rich-text",  # 京东商品描述
+        ".product-detail",  # 亚马逊商品详情
+        ".product-description",  # 通用商品描述
+        ".item-description",  # eBay商品描述
+        # === CMS系统 ===
+        ".node-content",  # Drupal
+        ".entry-content",  # WordPress
+        ".content-area",  # WordPress主题
+        ".single-content",  # WordPress单页
+        ".page-content",  # WordPress页面
+        ".post-entry",  # WordPress主题
+        ".article-content",  # Joomla
+        ".item-page",  # Joomla文章页
+        ".content-inner",  # Joomla内容
+        ".story-content",  # ExpressionEngine
+        ".channel-entry",  # ExpressionEngine
+        # === 企业网站 ===
+        ".main-content",  # 通用主内容
+        ".content-wrapper",  # 内容包装器
+        ".page-content",  # 页面内容
+        ".text-content",  # 文本内容
+        ".body-content",  # 主体内容
+        ".primary-content",  # 主要内容
+        ".content-main",  # 主内容区
+        ".content-primary",  # 主要内容
+        ".main-article",  # 主文章
+        ".article-main",  # 文章主体
+        # === 学术和教育网站 ===
+        ".abstract",  # 学术论文摘要
+        ".full-text",  # 全文内容
+        ".article-fulltext",  # 学术文章全文
+        ".article-body",  # 学术文章主体
+        ".paper-content",  # 论文内容
+        ".journal-content",  # 期刊内容
+        ".course-content",  # 课程内容
+        ".lesson-content",  # 课程内容
+        ".lecture-notes",  # 讲义笔记
+        # === 政府和机构网站 ===
+        ".gov-content",  # 政府网站内容
+        ".official-content",  # 官方内容
+        ".policy-content",  # 政策内容
+        ".announcement",  # 公告内容
+        ".notice-content",  # 通知内容
+        ".regulation-text",  # 法规文本
+        # === 多媒体和娱乐 ===
+        ".video-description",  # 视频描述
+        ".episode-description",  # 剧集描述
+        ".movie-synopsis",  # 电影简介
+        ".album-description",  # 专辑描述
+        ".track-description",  # 音轨描述
+        ".game-description",  # 游戏描述
+        # === HTML5语义化标签 ===
+        "article",  # HTML5文章标签
+        "main",  # HTML5主内容标签
+        "section",  # HTML5节段标签
+        # === 通用类名（模糊匹配） ===
+        "[class*='article']",  # 包含"article"的类名
+        "[class*='content']",  # 包含"content"的类名
+        "[class*='post']",  # 包含"post"的类名
+        "[class*='story']",  # 包含"story"的类名
+        "[class*='body']",  # 包含"body"的类名
+        "[class*='text']",  # 包含"text"的类名
+        "[class*='main']",  # 包含"main"的类名
+        "[class*='primary']",  # 包含"primary"的类名
+        "[class*='detail']",  # 包含"detail"的类名
+        # === ID选择器 ===
+        "#content",  # 通用内容ID
+        "#main-content",  # 主内容ID
+        "#article-content",  # 文章内容ID
+        "#post-content",  # 文章内容ID
+        "#story-content",  # 故事内容ID
+        "#main",  # 主要区域ID
+        "#primary",  # 主要内容ID
+        "#article-body",  # 文章主体ID
+        "#content-area",  # 内容区域ID
+        "#page-content",  # 页面内容ID
+        # === 特殊网站 ===
+        ".ztext",  # 知乎（旧版）
+        ".RichText-inner",  # 知乎富文本
+        ".highlight",  # 代码高亮（GitHub等）
+        ".gist-file",  # GitHub Gist
+        ".readme",  # GitHub README
+        ".wiki-content",  # Wiki页面
+        ".mw-parser-output",  # MediaWiki（维基百科）
+        ".printfriendly",  # 打印友好版本
+        ".reader-content",  # 阅读模式内容
+        # === 回退选择器 ===
+        ".main",  # 通用主内容类
+        "body",  # 最后的回退选择器
     ]
 
     # 第三步：尝试找到正文容器

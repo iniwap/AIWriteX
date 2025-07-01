@@ -101,25 +101,25 @@ pip  install crewai
 
 ## 🔮模板发布效果预览
 1. 经过反复的微调，已经完成发布到微信公众号的模板效果如下：
-- **template1**: https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ
-- **template2**: https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg
-- **template3**: https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA
-- **template4**: https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA
-- **template5**: https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q
-- **template6**: https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ
-- **template7**: https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw
-- **template8**: https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw
-- **template9**: https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA
-- **template10**: https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw
+- **其他/template1**: https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ
+- **其他/template2**: https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg
+- **其他/template3**: https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA
+- **其他/template4**: https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA
+- **其他/template5**: https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q
+- **其他/template6**: https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ
+- **其他/template7**: https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw
+- **其他/template8**: https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw
+- **其他/template9**: https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA
+- **其他/template10**: https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw
 
-2. 全自动发文（使用AIPy解决时效性）文章预览:
+2. 全自动发文（使用本地搜索+AIPy解决时效性）文章预览:
 - **未使用模板**：https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA
 - **使用模板template9**：https://mp.weixin.qq.com/s/1XPMUPR09Ipuzm_yXgAvKw
 
 *有兴趣的可以继续微调（如边距等），上面的模板可以比较好的显示在微信公众号上了。执行代码时，自动随机选择模板，生成的文章会自动选取填充上面的模板发布文章。*
 
  ## 📢后续计划
- - **适配分类模板，增加分类模板**
+ - **适配分类模板**
 - 增加功能，使输出效果更好
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）
