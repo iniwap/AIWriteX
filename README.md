@@ -12,8 +12,6 @@
 为了学习CrewAI，特开发了这个小项目。最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。
 
 ## 💎基本功能
-系统提供以下核心功能，支持自动化、个性化文章生成与发布，适合技术与非技术用户：
-
 - **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题/内容紧跟潮流。
 - **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版。
 - **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程。
@@ -26,7 +24,7 @@
 
 ### 个性化功能（配置）
 
-通过 `config.yaml` 和 `aipyapp.toml` 配置文件，系统支持高度个性化的功能定制，推荐使用界面/软件模式编辑配置，操作更友好。以下是关键配置项说明：
+通过 `config.yaml` 和 `aipyapp.toml` 配置文件，实现高度个性化的功能，推荐使用界面/软件模式编辑配置，操作更友好。以下是关键配置项说明：
 
 - **`config.yaml` 配置项**
 
@@ -63,9 +61,9 @@
 | **api_key**                | 模型提供商的 API Key，必填。                                          |
 | **其他选填**               | 根据需要配置其他参数，具体参考 UI 界面说明。                          |
 
-*1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*
-*2、Claude 3.7 生成的模板可免费通过 Poe 平台生成，放置到 `knowledge/` 对应分类文件夹*
-*3、微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY是必填项，其他可默认*
+- *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*
+- *2、Claude 3.7 生成的模板可免费通过 Poe 平台生成，放置到 `knowledge/` 对应分类文件夹*
+- *3、微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY是必填项，其他可默认*
 
 ## 🚀 快速开始
 ### 开发模式
@@ -118,7 +116,7 @@ pip  install crewai
 
 ## 🔮微信公众号模板效果预览
 
-以下是精心微调并发布的微信公众号模板，涵盖多个主题，欢迎体验！
+以下是精心微调并发布的微信公众号模板，涵盖多个主题，欢迎预览！
 
 ### 内置本地模板列表
 
@@ -134,18 +132,18 @@ pip  install crewai
 
 - 其他模板
 
-| 模板名称   | 预览链接                     | 描述                     |
-|------------|------------------------------|--------------------------|
-| template1  | [预览](https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ) | 通用模板，无风格限定     |
-| template2  | [预览](https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg) | 通用模板，无风格限定     |
-| template3  | [预览](https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA) | 通用模板，无风格限定     |
-| template4  | [预览](https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA) | 通用模板，无风格限定     |
-| template5  | [预览](https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q) | 通用模板，无风格限定     |
-| template6  | [预览](https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ) | 通用模板，无风格限定     |
-| template7  | [预览](https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw) | 通用模板，无风格限定     |
-| template8  | [预览](https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw) | 通用模板，无风格限定     |
-| template9  | [预览](https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA) | 通用模板，无风格限定     |
-| template10 | [预览](https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw) | 通用模板，无风格限定     |
+| 类别       | 模板名称   | 预览链接                     | 描述                     |
+|------------|------------|------------------------------|--------------------------|
+|其他        | template1  | [预览](https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ) | 通用模板，无风格限定     |
+|其他        | template2  | [预览](https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg) | 通用模板，无风格限定     |
+|其他        | template3  | [预览](https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA) | 通用模板，无风格限定     |
+|其他        | template4  | [预览](https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA) | 通用模板，无风格限定     |
+|其他        | template5  | [预览](https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q) | 通用模板，无风格限定     |
+|其他        | template6  | [预览](https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ) | 通用模板，无风格限定     |
+|其他        | template7  | [预览](https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw) | 通用模板，无风格限定     |
+|其他        | template8  | [预览](https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw) | 通用模板，无风格限定     |
+|其他        | template9  | [预览](https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA) | 通用模板，无风格限定     |
+|其他        | template10 | [预览](https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw) | 通用模板，无风格限定     |
 
 ### 全自动发文效果预览
 
