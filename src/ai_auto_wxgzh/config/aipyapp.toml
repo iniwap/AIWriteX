@@ -54,8 +54,8 @@ timeout = 30
 max_tokens = 8192
 
 [llm.deepseek]
-type = "openai"
-model = "openai/deepseek-chat-v3-0324"
+type = "deepseek"
+model = "deepseek-v3" #"deepseek-v3-0324"
 api_key = ""
 base_url = "https://api.deepseek.com"
 enable = true

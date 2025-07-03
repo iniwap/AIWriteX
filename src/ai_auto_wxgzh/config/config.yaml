@@ -54,7 +54,7 @@ api:
     model:
       - openai/deepseek-v3
       - openai/deepseek-r1
-      - qwen-max-latest
+      - openai/qwen-max-latest
       - openai/qwen-max
       - openai/qwen-vl-plus
       - openai/qwen-plus
@@ -109,11 +109,11 @@ api:
       - ""
     model_index: 0
     model:
-      - deepseek/deepseek-v3
-      - deepseek/deepseek-r1
-      - deepseek/deepseek-chat
-      - deepseek/deepseek-v3-0324
-      - deepseek/deepseek-chat-v3-0324
+      - deepseek-v3
+      - deepseek-r1
+      - deepseek-chat
+      - deepseek-v3-0324
+      - deepseek-chat-v3-0324
     api_base: https://api.deepseek.com/v1
 img_api:
   api_type: picsum
@@ -124,7 +124,7 @@ img_api:
     api_key: ""
     model: ""
 use_template: true
-template_category: "其他"
+template_category: ""
 template: ""
 need_auditor: false
 use_compress: true
