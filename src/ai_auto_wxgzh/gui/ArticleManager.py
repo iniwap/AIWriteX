@@ -673,8 +673,6 @@ class ArticleManager:
         sg.popup_non_blocking(
             "正在后台发布文章，请稍后...\n可关闭界面，但不再收到完成通知 :)",
             title="系统提示",
-            auto_close=True,
-            auto_close_duration=2,
             icon=self.__get_icon(),
         )
 

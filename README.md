@@ -12,15 +12,18 @@
 为了学习CrewAI，特开发了这个小项目。最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。
 
 ## 💎基本功能
-- **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题/内容紧跟潮流。
-- **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版。
-- **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程。
-- **💡 实时文章生成**：采用多重搜索策略（本地缓存+在线搜索），拒绝过时内容，确保文章时效性。
-- **💡 支持指定话题与参考文章**：允许用户自定义文章话题或提供参考文章，结合 AI 生成高质量内容。
-- **UI 可视化管理**：提供直观界面，方便配置管理、文章发布管理和模板管理，操作简单高效。
+- **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题/内容紧跟潮流
+- **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版
+- **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程
+- **💡 实时文章生成**：采用多重搜索策略（本地+AIPy），拒绝过时内容，确保文章时效性
+- **💡 指定话题及参考文章**：允许用户自定义文章话题或提供参考文章，结合 AI 生成高质量内容
+- **UI 可视化管理**：提供软件界面，操作简单高效
+- **💡 配置管理**：配置项编辑更加清晰，简单易用
+- **💡 模板管理**：支持模板的各种操作，增删查改等
+- **💡 文章发布管理**：支持文章管理的各种操作、批处理、发布记录以及公众号配置等
 - **支持两种运行模式**：
-  - **开发模式**：适合技术用户，支持灵活定制开发，适配复杂需求。
-  - **软件模式**：无需开发环境，安装软件并填写配置即可，适合非技术用户快速上手。
+  - **开发模式**：适合技术用户，支持灵活定制开发，适配复杂需求
+  - **软件模式**：无需开发环境，安装软件并填写配置即可，适合非技术用户快速体验
 
 ### 个性化功能（配置）
 
@@ -35,35 +38,35 @@
 | **api**                    | 支持多种大模型平台，**必填**`api_key`                                         |
 | **api.api_type**           | 支持多个大模型平台，修改 `api_type` 切换平台，如OpenRouter                     |
 | **api.OpenRouter.model_index** | 修改 `model_index` 选择平台内具体模型                                     |
-| **api.OpenRouter.model**      | 支持多种模型（如openrouter/deepseek/deepseek-chat-v3-0324:free）           |
-| **api.OpenRouter.key_index** | 修改 `key_index` 切换账号（利用免费额度）                                   |
+| **api.OpenRouter.model**      | 支持多种模型（如openrouter/deepseek/deepseek-chat-v3-0324:free）          |
+| **api.OpenRouter.key_index** | 修改 `key_index` 切换账号（充分利用OpenRouter免费额度，其他付费的无意义）     |
 | **api.OpenRouter.api_key** | 支持多个 OpenRouter `api_key`                                               |
 | **img_api**                | 图片生成模型，用于公众号封面图                                                |
-| **img_api.api_type**       | `ali`（需要填写`api_key`）或`picsum`（随机图片）                             |
-| **img_api.picsum**         | 随机图片生成方式，降低生成图片消耗                                            |
-| **use_template**           | 是否使用内置模板 ，不使用则AI根据要求直接生成文章HTML                          |
-| **template**               | 指定模板文件名（如 `template1`），为空或不存在时随机选择                        |
-| **template_category**      | 模板分类，精确匹配话题类型（如健康养生），需分类下存在指定模板                   |
-| **need_auditor**           | 是否启用质量审核 agent/task，关闭可降低 token 消耗（默认关闭）                |
-| **use_compress**           | 是否压缩模板上传，降低 token 消耗                                            |
-| **use_search_service**     | 启用本地缓存代码优先的搜索扩展，首次成功率较低，后续效率高（默认关闭）           |
-| **aipy_search_max_results**| AIPy 最大返回搜索结果条数，控制搜索广度                                      |
-| **aipy_search_min_results**| AIPy 最小返回搜索结果条数，越大内容越丰富，但失败率越高                       |
-| **min_article_len**        | 生成文章最小字数（默认 1000）                                               |
-| **max_article_len**        | 生成文章最大字数（默认 2000）                                               |
-| **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                   |
+| **img_api.api_type**       | `ali`（需要填写`api_key`）或`picsum`（随机图片）                              |
+| **img_api.picsum**         | 随机图片生成方式，降低生成图片消耗                                             |
+| **use_template**           | 是否使用内置模板 ，不使用则AI根据要求直接生成文章HTML                           |
+| **template**               | 指定模板文件名（如 `template1`），为空或不存在时随机选择                         |
+| **template_category**      | 模板分类，精确匹配话题类型（如健康养生），需分类下存在指定模板                    |
+| **need_auditor**           | 是否启用质量审核 agent/task，关闭可降低 token 消耗（默认关闭）                  |
+| **use_compress**           | 是否压缩模板上传，降低 token 消耗                                             |
+| **use_search_service**     | 启用本地缓存代码优先的搜索扩展，首次成功率较低，后续效率高（默认关闭）            |
+| **aipy_search_max_results**| AIPy 最大返回搜索结果条数，控制搜索广度                                        |
+| **aipy_search_min_results**| AIPy 最小返回搜索结果条数，越大内容越丰富，但失败率越高                         |
+| **min_article_len**        | 生成文章最小字数（默认 1000）                                                 |
+| **max_article_len**        | 生成文章最大字数（默认 2000）                                                 |
+| **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                     |
 
 - **`aipyapp.toml` 配置项**
 
-| 配置项                     | 说明                                                                 |
+| 配置项                     | 说明                                                                  |
 |----------------------------|----------------------------------------------------------------------|
-| **default_llm_provider**   | 使用模型提供商（默认 openrouter），可与 CrewAI 使用的模型不同。         |
-| **api_key**                | 模型提供商的 API Key，必填。                                          |
-| **其他选填**               | 根据需要配置其他参数，具体参考 UI 界面说明。                          |
+| **default_llm_provider**   | 使用模型提供商（默认 openrouter），可与 CrewAI 使用的模型不同。           |
+| **api_key**                | 模型提供商的 API Key，必填。                                           |
+| **其他选填**               | 根据需要配置其他参数，具体参考 UI 界面说明。                             |
 
-- *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*
-- *2、Claude 3.7 生成的模板可免费通过 Poe 平台生成，放置到 `knowledge/` 对应分类文件夹*
-- *3、微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY是必填项，其他可默认*
+> *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*
+> *2、模板可通过 Poe免费的Claude 3.7 生成，放置到 `knowledge/` 对应分类文件夹*
+> *3、⚠️ 微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY是必填项，其他可默认*
 
 ## 🚀 快速开始
 ### 开发模式
@@ -86,37 +89,52 @@
 3. 点击`开始执行`
 
 ## 🔍问题定位
+
+遇到问题时，请根据运行模式查看日志并提交 Issue。以下是针对 **开发模式**、**软件模式** 和 **AIPy 相关问题** 的定位指南：
+
 ### 开发模式
-1. 界面模式执行：**查看logs目录下的文件**，如`UI_2025-05-20.log`，提交issue
-2. 无UI界面模式：**查看命令行输出**，复制提交issue
-- 不同的CrewAI版本日志输出差别比较大，可临时更换下CrewAI版本：
-```shell
-pip  uninstall crewai
-pip  install crewai==0.102.0
-```
-*此版本会输出过程日志，仍看不出问题的，可将日志提交Issue*  
-- 恢复到最新版本：
-```shell
-pip  uninstall crewai
-pip  install crewai
-```
+- **界面模式**：
+  - 检查 `logs/` 目录下的日志文件，如 `UI_2025-05-20.log`。
+  - 复制相关日志内容，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+- **无界面模式**：
+  - 查看命令行输出日志，复制相关错误信息，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+- **CrewAI 版本问题**：
+  - 不同 CrewAI 版本日志输出差异较大，建议临时切换到稳定版本查看详细过程日志：
+    ```shell
+    pip uninstall crewai
+    pip install crewai==0.102.0
+    ```
+  - 如果问题仍未解决，提交日志至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+  - 恢复最新版本：
+    ```shell
+    pip uninstall crewai
+    pip install crewai
+    ```
+
 ### 软件模式
-请选择`文件->日志->UI_2025-05-20.log（选择当天的日志）`，点击打开、复制、提交Issue
+- 打开软件界面，选择 `文件 -> 日志 -> UI_2025-05-20.log`（选择当天日志）。
+- 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
 
-### AIPy相关问题
-1. 搜索分两种模式：缓存和非缓存模式，前者仅使用AIPy（缓存成功搜索代码，初次缓慢），后者同时使用本地搜索+AIPy（成功率更高）
-2. 不是所有话题搜索引擎都能搜索到，如果失败属于正常现象，任务会继续执行的；
-3. 搜索代码生成过程中可能会有错误，请忽略（有自动纠错机制，后续运行会修复），不影响整体运行；
-4. 生成搜索代码有随机性，由于采用了缓存机制，多运行几次，搜索效果会提升；
-5. 由于搜索引擎的限制以及人工验证的存在，会出现搜索不到结果的情况，请忽略，不影响整体运行。
+### AIPy 相关问题
+- **搜索模式**：
+  - **缓存模式**：仅使用 AIPy，初次搜索较慢但依赖缓存代码，后续效率逐步提升。
+  - **非缓存模式**：结合本地搜索与 AIPy，成功率更高，每次耗时相当。
+- **正常现象**：
+  - 并非所有话题都能搜索到结果，失败属正常，任务会继续执行。
+  - 搜索代码生成可能出现错误，可忽略（系统有自动纠错机制，后续运行会修复）。
+- **搜索优化**：
+  - 搜索代码生成具有随机性，多运行几次可提升效果（得益于缓存机制）。
+- **搜索引擎限制**：
+  - 由于搜索引擎限制或人工验证，偶尔搜索无结果，属正常现象，不影响整体运行。
+- **⚠️ OpenRouter 免费服务限制**：
+  - **免费 OpenRouter 可能不稳定**，运行失败时建议等待用户较少时重试。
+  - 每个账号每日约支持 5 次运行，失败后请切换账号（修改 `config.yaml` 中的 `api.OpenRouter.key_index`）。
 
-
-⚠️**免费的OpenRouter有可能服务不正常，无法正确运行（这种情况只能等用的人少的时候再试）；一个账号首次执行成功率比较高，后续执行使用模板时候可能被截断。**
-*这应该跟其最近修改了付费策略有关系，免费的终究是没那么好用。*
+> **⚠️ 注意**：免费 OpenRouter 服务可能因高负载导致不稳定，请合理安排运行时间或切换账号以确保成功运行。
 
 ## 🔮微信公众号模板效果预览
 
-以下是精心微调并发布的微信公众号模板，涵盖多个主题，欢迎预览！
+以下是精心微调、适配并发布的微信公众号模板，涵盖多个话题分类，欢迎预览！
 
 ### 内置本地模板列表
 
@@ -124,63 +142,87 @@ pip  install crewai
 
 | 类别       | 模板名称 | 预览链接                     | 描述                     |
 |------------|----------|------------------------------|--------------------------|
-| 健康养生   | t1       | [预览](https://mp.weixin.qq.com/s/ZG6SFUYSZlrxyRw6_GH9yg) | 健康生活小贴士分享       |
-| 娱乐八卦   | t1       | [预览](https://mp.weixin.qq.com/s/3YeEH2Nvhsw8JqHIV0tftQ) | 最新娱乐圈动态速递       |
-| 情感心理   | t1       | [预览](https://mp.weixin.qq.com/s/2j-C1tBWkpYIQhhR6tOwSg) | 情感故事与心理洞察       |
-| 教育学习   | t1       | [预览](https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g) | 学习方法与教育资讯       |
-| 科技数码   | t1       | [预览](https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ) | 科技前沿与数码评测       |
+| 科技数码   | t1       | [点击预览](https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ) | 科技前沿与数码评测       |
+| 财经投资   | t1       | [点击预览](https://mp.weixin.qq.com/s/uTfYVXUG3_bjqSZ-uuJKeg) | 投资趋势与财经资讯       |
+| 教育学习   | t1       | [点击预览](https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g) | 学习方法与教育资讯       |
+| 健康养生   | t1       | [点击预览](https://mp.weixin.qq.com/s/ZG6SFUYSZlrxyRw6_GH9yg) | 健康生活小贴士分享       |
+| 美食旅行   | t1       |               尚未适配                                        | 美食推荐与旅行攻略       |
+| 时尚生活   | t1       |               尚未适配                                        | 时尚潮流与生活方式       |
+| 职场发展   | t1       |               尚未适配                                        | 职场技能与职业规划       |
+| 情感心理   | t1       | [点击预览](https://mp.weixin.qq.com/s/2j-C1tBWkpYIQhhR6tOwSg) | 情感故事与心理洞察       |
+| 娱乐八卦   | t1       | [点击预览](https://mp.weixin.qq.com/s/3YeEH2Nvhsw8JqHIV0tftQ) | 最新娱乐圈动态速递       |
+| 新闻时事   | t1       | [点击预览](https://mp.weixin.qq.com/s/M_l2LCJjiGmCWRvSm7lYvA) | 全球热点与时事分析       |
 
 - 其他模板
 
 | 类别       | 模板名称   | 预览链接                     | 描述                     |
 |------------|------------|------------------------------|--------------------------|
-|其他        | template1  | [预览](https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ) | 通用模板，无风格限定     |
-|其他        | template2  | [预览](https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg) | 通用模板，无风格限定     |
-|其他        | template3  | [预览](https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA) | 通用模板，无风格限定     |
-|其他        | template4  | [预览](https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA) | 通用模板，无风格限定     |
-|其他        | template5  | [预览](https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q) | 通用模板，无风格限定     |
-|其他        | template6  | [预览](https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ) | 通用模板，无风格限定     |
-|其他        | template7  | [预览](https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw) | 通用模板，无风格限定     |
-|其他        | template8  | [预览](https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw) | 通用模板，无风格限定     |
-|其他        | template9  | [预览](https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA) | 通用模板，无风格限定     |
-|其他        | template10 | [预览](https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw) | 通用模板，无风格限定     |
+|其他        | template1  | [点击预览](https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ) | 通用模板，无风格限定     |
+|其他        | template2  | [点击预览](https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg) | 通用模板，无风格限定     |
+|其他        | template3  | [点击预览](https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA) | 通用模板，无风格限定     |
+|其他        | template4  | [点击预览](https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA) | 通用模板，无风格限定     |
+|其他        | template5  | [点击预览](https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q) | 通用模板，无风格限定     |
+|其他        | template6  | [点击预览](https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ) | 通用模板，无风格限定     |
+|其他        | template7  | [点击预览](https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw) | 通用模板，无风格限定     |
+|其他        | template8  | [点击预览](https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw) | 通用模板，无风格限定     |
+|其他        | template9  | [点击预览](https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA) | 通用模板，无风格限定     |
+|其他        | template10 | [点击预览](https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw) | 通用模板，无风格限定     |
 
 ### 全自动发文效果预览
 
-全自动发文系统利用本地搜索与 AIPy 技术生成时效性强的文章内容，并随机选择上述模板进行填充和发布。
+利用本地搜索与 AIPy 搜索生成时效性强的微信公众号文章效果预览：
 
 | 类型           | 模板使用情况 | 预览链接                     | 描述                           |
 |----------------|--------------|------------------------------|--------------------------------|
-| 自动发文       | 未使用模板   | [预览](https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA) | AI根据要求生成文章，未使用本地模板        |
-| 自动发文       | 使用 template9 | [预览](https://mp.weixin.qq.com/s/1XPMUPR09Ipuzm_yXgAvKw) | 使用本地模板 template9，视觉效果优化   |
+| 自动发文       | 未使用模板   | [点击预览](https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA) | AI根据要求生成文章，未使用本地模板        |
+| 自动发文       | 使用 template9 | [点击预览](https://mp.weixin.qq.com/s/1XPMUPR09Ipuzm_yXgAvKw) | 使用本地模板 template9，视觉效果优化   |
 
-*有兴趣的可以继续微调（如边距等），上面的模板可以比较好的显示在微信公众号上了。执行代码时，自动随机选择模板，生成的文章会自动选取填充上面的模板发布文章。*
+>*⚠️ 已适配模板可以比较好的显示在微信公众号上，有兴趣的可以继续微调内置模板（如边距等）；未适配的显示效果可能会有问题，需要适配才能完美显示（配置完全随机可能会随机到未适配模板）。*
 
  ## 📢后续计划
- - **适配分类模板**
+ - **适配所有分类模板**
 - 增加功能，使输出效果更好
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）
 - 增加容错，提升成功率（持续）
 
-## 📌其他说明
-### 关于微信公众号
-~~由于不熟悉微信公众号开发，哪位知道如何正确的使用“position: absolute;”，麻烦提一个issue 或者PR给我。
-这个很必要，因为生成的模板都使用了，浏览器显示正常，但是发布到微信公众号，就变成了垂直排列，无法作为背景。整体效果差太多了。~~
+## 其他说明 📌
 
-经过分析，发现以下问题：
-- 发布文章后，微信会自动移除position: absolute（position: relative好像不会移除） ，必须通过其他方式实现
-- 微信公众号支持animateMotion，不支持animate（经测试只支持透明度变化动画，也不全是模板1的动画没问题，这个需要继续测试）
-- 调整好的模板，效果虽然不能完全和原来的相比，但是总体还不错（有背景装饰、有动画）
-- 不支持button，会被自动移除
-- 会自动移除 background: url
-- `<linearGradient id="catGradient">`，此类动画，id会被自动移除，动画会失效
-- 最近发现发布的文章不会显示到公众号文章列表，但是有时会收到消息通知（关注者），之前完全没通知（每天大概3-5篇的，后续不会有通知）
--**【噩耗】：注：2025年7月起，个人主体账号、企业主体未认证账号及不支持认证的账号将被回收发布草稿的调用权限，这就意味着非认证公众号没法自动发文了。（垄断真该死啊！）**
-- **微信API访问IP白名单问题，这个有点恶心，只能使用的时候把当前IP添加进去；如果有代理直接开代理吧，使用那个固定IP即可（如果是固定的话）**
-- **如果有云服务器，做个转发就行了；还可以使用阿里云函数计算代理微信API请求，免费的，但需要注册阿里云**
+### 关于微信公众号
+
+以下是微信公众号开发及自动发文的注意事项与问题说明：
+
+- **CSS 限制**：
+  - 微信发布文章时会移除 `position: absolute`（但保留 `position: relative`），需使用替代布局实现类似效果
+  - 动画支持有限：`animateMotion` 可用，但 `animate` 仅支持透明度变化，需进一步测试（例如，template1 动画部分支持）
+  - `<button>` 和 `background: url` 会被自动移除
+  - `<linearGradient id="catGradient">` 的 `id` 会被移除，导致动画失效
+  - `background: linear-gradient(90deg, #4b6cb7 0%, #ff9a9e 100%); -webkit-background-clip: text; color: transparent;`，手机/电脑主题暗色模式不支持渐变，浅色模式支持
+- **模板效果**：调整后的模板虽无法完全复现Claude 3.7生成的HTML效果，但整体表现尚可
+- **文章显示问题**：发布的文章（未认证公众号）不会显示在公众号文章列表，但关注者可能收到通知（每日约3篇）。
+- **⚠️ 权限回收**：自 2025 年 7 月起，个人主体账号、未认证企业账号及不支持认证的账号将失去发布草稿权限，非认证公众号可能无法自动发文。
+- **⚠️ 微信公众号 IP 白名单问题**：
+  - 微信 API 需将当前 IP 添加至后台白名单。
+  - 动态 IP 需手动更新白名单，或使用固定 IP 的代理。
+  - 解决方案：使用云服务器转发请求，或通过阿里云函数计算（免费，需注册阿里云）代理微信 API 请求。
+
+> **⚠️ 注意**：2025 年 7 月后，非认证账号将面临自动化发布限制。建议使用认证账号或代理方案确保 API 访问稳定。
+
 ### 关于软件模式
-- 为了支持软件模式，让大家更简单的体验项目，调试花费了很长时间(CrewAI使用大量资源，一个个试探出来的)，给个star支持下吧~
-- 家庭网络IP可能不固定，通过API发微信公众号，需要将IP添加进微信公众号后台白名单（没有固定IP只能变化时添加，有代理的使用代理的固定IP即可）
-- **不需要软件模式（UI）代码（运行于服务器），删除gui以及main代码，直接无UI模式运行即可**
-- 抓紧体验吧~更多功能开发中...
+
+软件模式为非技术用户提供快速体验：
+
+- **安装软件**：为支持软件模式，进行了大量调试。请在 GitHub 上给个 ⭐ 支持！
+- **IP 白名单**：
+  - 家庭网络动态 IP 需在微信后台手动更新白名单。
+  - 使用固定 IP 的代理可提升稳定性。
+- **无 UI 运行**：在服务器上运行无需 UI 时，可删除 `gui` 和 `main` 代码，直接以非 UI 模式运行。
+
+> **⚠️ 注意**：运行软件模式前，需确保 IP 已添加至微信后台白名单，否则 API 访问将失败。
+
+## 🤝贡献
+- 提交新的模板设计或配置优化建议。
+- 分享自动发文功能的新场景或改进点。
+
+## 📩联系我们
+如需了解配置详情或扩展、定制功能，请联系我！
