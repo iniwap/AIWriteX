@@ -4,14 +4,14 @@
 
 基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#微信公众号模板效果预览)
 
-**喜欢项目？点个 Star 支持一下吧！🌟**
+**喜欢项目？点个 Star 支持一下吧！⭐**
 
 ![界面预览 / Interface Preview](image/preview.jpg)
 
-## 🎯项目背景
+## 🎯 项目背景
 为了学习CrewAI，特开发了这个小项目，最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。随着研究学习的深入，项目功能日趋完善，赶紧体验吧~更多功能开发中，敬请关注项目 ：）
 
-## 💎基本功能
+## 💎 基本功能
 - **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题/内容紧跟潮流
 - **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版
 - **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程
@@ -82,13 +82,13 @@
 
 ### 软件模式
 1. 请从网盘下载`微信公众号AI工具_云盘版_Setup.exe` 👇，并安装
-    - [移动云盘 提取码:1sgp](https://caiyun.139.com/w/i/2nQQRmAhg7Ffl)
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/Eaip7dg-hKBNqJRWQ_suJwgBh5naslCIumQy-2sC2D8KYQ?e=N4Oi5Z)
-    - [Google Drive](https://drive.google.com/file/d/1NlY5jV8adIbpFv5_eWyk40kvzhku_eL0/view?usp=sharing)
+    - [移动云盘 提取码:ziug](https://caiyun.139.com/w/i/2nQQSzFEy8k9r)
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh)
+    - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
 3. 点击`开始执行`
 
-## 🔍问题定位
+## 🔍 问题定位
 
 遇到问题时，请根据运行模式查看日志并提交 Issue。
 
@@ -147,8 +147,8 @@
 | 教育学习   | t1       | [点击预览](https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g) | 学习方法与教育资讯       |
 | 健康养生   | t1       | [点击预览](https://mp.weixin.qq.com/s/ZG6SFUYSZlrxyRw6_GH9yg) | 健康生活小贴士分享       |
 | 美食旅行   | t1       | [点击预览](https://mp.weixin.qq.com/s/Lw29haJDk4uKODh7rlBOrw) | 美食推荐与旅行攻略       |
-| 时尚生活   | t1       |               尚未适配                                        | 时尚潮流与生活方式       |
-| 职场发展   | t1       |               尚未适配                                        | 职场技能与职业规划       |
+| 时尚生活   | t1       | [点击预览](https://mp.weixin.qq.com/s/ZgeIbl7l0KC1ex9ybrZBRg) | 时尚潮流与生活方式       |
+| 职场发展   | t1       | [点击预览](https://mp.weixin.qq.com/s/-jJ-OxCr7BMaaYY68vSecQ) | 职场技能与职业规划       |
 | 情感心理   | t1       | [点击预览](https://mp.weixin.qq.com/s/2j-C1tBWkpYIQhhR6tOwSg) | 情感故事与心理洞察       |
 | 娱乐八卦   | t1       | [点击预览](https://mp.weixin.qq.com/s/3YeEH2Nvhsw8JqHIV0tftQ) | 最新娱乐圈动态速递       |
 | 新闻时事   | t1       | [点击预览](https://mp.weixin.qq.com/s/M_l2LCJjiGmCWRvSm7lYvA) | 全球热点与时事分析       |
@@ -176,16 +176,18 @@
 |----------------|--------------|------------------------------|--------------------------------|
 | 自动发文       | 未使用模板   | [点击预览](https://mp.weixin.qq.com/s/KI4yHYrjAt8hd_nUEZP8kA) | AI根据要求生成文章，未使用本地模板        |
 | 自动发文       | 使用 template9 | [点击预览](https://mp.weixin.qq.com/s/1XPMUPR09Ipuzm_yXgAvKw) | 使用本地模板 template9，视觉效果优化   |
+| 自动发文       | 使用 分类模板 | [点击预览](https://mp.weixin.qq.com/s/Dys7eszxP33k6tonXMO1VA) | 指定分类`健康养生`，完美呈现   |
 
->*⚠️ 已适配模板可以比较好的显示在微信公众号上，有兴趣的可以继续微调内置模板（如边距等）；未适配的显示效果可能会有问题，需要适配才能完美显示（配置完全随机可能会随机到未适配模板）。*
+> *1、已适配模板可以比较好的显示在微信公众号上，有兴趣的可以继续微调内置模板（如边距等）*  
+> *2、目前仅**尚未适配**下的模板未适配，需要适配才能完美显示（配置**分类随机**可能会随机到未适配模板）*  
 
- ## 📢后续计划
+ ## 📢 后续计划
 - 增加功能，使输出效果更好
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）
 - 增加容错，提升成功率（持续）
 
-## 其他说明 📌
+## 📌 其他说明
 
 ### 关于微信公众号
 
@@ -196,8 +198,8 @@
   - 动画支持有限：`animateMotion` 可用，但 `animate` 仅支持透明度变化，需进一步测试（例如，template1 动画部分支持）
   - `<button>` 和 `background: url` 会被自动移除
   - `<linearGradient id="catGradient">` 的 `id` 会被移除，导致动画失效
-  - `background: linear-gradient(90deg, #4b6cb7 0%, #ff9a9e 100%); -webkit-background-clip: text; color: transparent;`，手机/电脑主题暗色模式不支持渐变，浅色模式支持
-- **模板效果**：调整后的模板虽无法完全复现Claude 3.7生成的HTML效果，但整体表现尚可
+  - `background: linear-gradient(90deg, #4b6cb7 0%, #ff9a9e 100%); -webkit-background-clip: text; color: transparent;` 手机/电脑主题暗色模式不支持渐变，浅色模式支持
+- **暗色/浅色模式**：目前生成更倾向于适用微信浅色模式，暗色模式效果稍差，后续需要找到二者更好的平衡点
 - **文章显示问题**：发布的文章（未认证公众号）不会显示在公众号文章列表，但关注者会收到通知（每日3篇）。
 - **⚠️ 权限回收**：自 2025 年 7 月起，个人主体账号、未认证企业账号及不支持认证的账号将失去发布草稿权限，非认证公众号可能无法自动发文。
 - **⚠️ 微信公众号 IP 白名单问题**：
@@ -219,9 +221,9 @@
 
 > **⚠️ 注意**：运行软件模式前，需确保 IP 已添加至微信后台白名单，否则 API 访问将失败。
 
-## 🤝贡献
+## 🤝 贡献
 - 提交新的模板设计或配置优化建议。
 - 分享自动发文功能的新场景或改进点。
 
-## 📩联系我们
+## 📩 联系我们
 如需了解配置详情或扩展、定制功能，请联系我！

@@ -309,7 +309,7 @@ def sanitize_filename(filename):
 
 
 def get_template_dir():
-    return get_res_path("", os.path.join(get_current_dir("knowledge", False)))
+    return get_res_path("templates", os.path.join(get_current_dir("knowledge", False)))
 
 
 def get_all_categories(default_template_categories):
