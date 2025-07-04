@@ -2,7 +2,20 @@
 # Author: iniwap
 # Date: 2025-06-03
 # Description: 用于热搜话题获取，关注项目 https://github.com/iniwap/ai_auto_wxgzh
-# Copyright (c) 2025 iniwap. All rights reserved.
+
+# Copyright (c) 2025 iniwaper@gmail.com
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 本文件受 Apache 2.0 许可证保护，禁止删除版权声明。
 
 
 import requests
