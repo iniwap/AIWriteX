@@ -2,10 +2,13 @@ beautifulsoup4==4.13.4
 crewai==0.102.0
 Cython==3.0.0
 dashscope==1.22.1
-pydantic==2.11.3
+pydantic==2.10.5
 PyYAML==6.0.1
 Requests==2.32.3
 setuptools==65.5.0
 PySimpleGUI==4.60.5
 tomlkit==0.13.2
 aipyapp==0.1.28
+crewai_tools==0.25.8
+rich==14.0.0
+python_dateutil==2.8.2
