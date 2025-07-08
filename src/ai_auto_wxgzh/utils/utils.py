@@ -345,3 +345,24 @@ def get_templates_by_category(category):
     template_files = glob.glob(os.path.join(category_path, "*.html"))
     template_names = [os.path.splitext(os.path.basename(f))[0] for f in template_files]
     return sorted(template_names)
+
+
+def is_llm_supported(llm, key_name, env_vars):
+    """
+    检查CrewAI是否完整支持LLM配置
+    排除通过显式配置工作的提供商（如openrouter）
+    """
+    # OpenRouter 等提供商通过显式配置工作，不依赖ENV_VARS
+    if llm.lower() == "openrouter":
+        return True
+
+    if llm.lower() not in env_vars:
+        return False
+
+    # 检查是否有正确的API密钥配置
+    llm_config = env_vars[llm.lower()]
+    for config in llm_config:
+        if config.get("key_name") == key_name.upper():
+            return True
+
+    return False

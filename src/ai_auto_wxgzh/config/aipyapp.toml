@@ -55,7 +55,7 @@ max_tokens = 8192
 
 [llm.deepseek]
 type = "deepseek"
-model = "deepseek-v3" #"deepseek-v3-0324"
+model = "deepseek-chat"
 api_key = ""
 base_url = "https://api.deepseek.com"
 enable = true

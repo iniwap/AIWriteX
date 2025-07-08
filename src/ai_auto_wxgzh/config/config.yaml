@@ -95,25 +95,20 @@ api:
     key_index: 0
     api_key:
       - tmp-key
-      - ""
     model_index: 0
     model:
       - ollama/deepseek-r1:14b
       - ollama/deepseek-r1:7b
     api_base: http://localhost:11434
   Deepseek:
-    key: OPENAI_API_KEY
+    key: DEEPSEEK_API_KEY
     key_index: 0
     api_key:
       - ""
-      - ""
     model_index: 0
     model:
-      - deepseek-v3
-      - deepseek-r1
-      - deepseek-chat
-      - deepseek-v3-0324
-      - deepseek-chat-v3-0324
+      - deepseek/deepseek-chat
+      - deepseek/deepseek-reasoner
     api_base: https://api.deepseek.com/v1
 img_api:
   api_type: picsum
