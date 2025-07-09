@@ -36,6 +36,7 @@ from urllib.parse import quote  # noqa 841
 from dateutil.relativedelta import relativedelta  # noqa 841
 import html  # noqa 841
 import concurrent.futures  # noqa 841
+import markdown  # noqa 841
 
 
 from crewai.tools import BaseTool  # noqa 841

@@ -160,6 +160,8 @@ class Config:
             "min_article_len": 1000,
             "max_article_len": 2000,
             "auto_publish": True,
+            "article_format": "html",
+            "format_publish": True,
         }
         self.default_aipy_config = {
             "workdir": "aipy_work",
@@ -402,11 +404,25 @@ class Config:
             return self.config["max_article_len"]
 
     @property
+    def article_format(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["article_format"]
+
+    @property
     def auto_publish(self):
         with self._lock:
             if self.config is None:
                 raise ValueError("配置未加载")
             return self.config["auto_publish"]
+
+    @property
+    def format_publish(self):
+        with self._lock:
+            if self.config is None:
+                raise ValueError("配置未加载")
+            return self.config["format_publish"]
 
     @property
     def api_list(self):

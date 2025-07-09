@@ -10,6 +10,7 @@ import shutil
 import webbrowser
 from urllib.parse import urlparse
 import glob
+import markdown
 
 
 from src.ai_auto_wxgzh.utils import log
@@ -366,3 +367,150 @@ def is_llm_supported(llm, key_name, env_vars):
             return True
 
     return False
+
+
+def remove_markdown_code_blocks(content):
+    """
+    移除所有Markdown代码块标识但保留内容
+    处理以下格式：
+      ```markdown 内容 ```
+      ``` 内容 ```
+      `内容`
+    """
+    # 移除多行代码块标识（带markdown标签）
+    content = re.sub(r"```markdown\s*", "", content, flags=re.IGNORECASE)
+
+    # 移除通用多行代码块标识
+    content = re.sub(r"```\s*", "", content)
+
+    # 移除单行内联代码块标识
+    content = re.sub(r"`([^`]*)`", r"\1", content)
+
+    # AI这里不受控，总是带字数注释，这里强行去除
+    pattern = r"""
+    [(\[【]            # 起始括号（全角/半角）
+    \s*               # 可选空白
+    (全文\s*)?        # 可选"全文"前缀
+    (约|共|总计|合计)? # 量词
+    \s*\d+\s*字       # 核心匹配：数字+"字"
+    \s*[)\]】]        # 结束括号
+    \s*$              # 确保在行末
+    """
+    return re.sub(pattern, "", content, flags=re.VERBOSE | re.MULTILINE).strip()
+
+
+def extract_main_title(md_content):
+    """提取Markdown文档主标题（增强版）
+    参数:
+        md_content: Markdown文本内容
+    返回:
+        匹配到的一级标题文本，若无则返回首行非空内容
+    """
+    # 优先匹配标准一级标题（如# Title）
+    title_match = re.search(
+        r"^#\s+(.+?)(?:\s+#+)?\s*$",  # 兼容标题尾部的#符号
+        md_content,
+        flags=re.MULTILINE,
+    )
+
+    if title_match:
+        return title_match.group(1).strip()
+
+    # 次优匹配首行非空内容（跳过YAML front matter等）
+    first_line = next((line.strip() for line in md_content.splitlines() if line.strip()), None)
+
+    return first_line if first_line else None
+
+
+def markdown_to_plaintext(md_text):
+    """提取文章文本内容"""
+    # 分步处理不同标记类型
+    # 1. 处理标题标记（保留标题文本）
+    text = re.sub(r"^#{1,6}\s+", "", md_text, flags=re.MULTILINE)
+
+    # 2. 处理加粗/斜体/删除线标记（保留内容）
+    text = re.sub(r"(\*\*|\*|~~|__)(.*?)\1", r"\2", text)
+
+    # 3. 处理代码块（保留代码内容）
+    text = re.sub(r"`{1,3}(.*?)`{1,3}", r"\1", text)
+
+    # 4. 处理链接和图片（保留描述文字）
+    text = re.sub(r"!?$(.*?)$$[^)]*$", r"\1", text)
+
+    # 5. 处理列表符号（保留数字索引和内容）
+    text = re.sub(r"^\s*([-*+]|\d+\.)\s+", r"\1 ", text, flags=re.MULTILINE)
+
+    # 6. 处理引用块标记（保留引用内容）
+    text = re.sub(r"^>\s*", "", text, flags=re.MULTILINE)
+
+    return text.strip()
+
+
+def extract_markdown_content(content):
+    """从Markdown内容中提取标题和摘要"""
+    lines = content.strip().split("\n")
+    title = None
+    digest = ""
+
+    # 查找第一个标题（# 开头）
+    for line in lines:
+        line = line.strip()
+        if line.startswith("# "):
+            title = line[2:].strip()
+            break
+
+    # 提取前几行作为摘要，跳过标题行和空行
+    content_lines = []
+    for line in lines:
+        line = line.strip()
+        if line and not line.startswith("#"):
+            content_lines.append(line)
+        if len(content_lines) >= 3:  # 取前3行非标题内容
+            break
+
+    digest = " ".join(content_lines)[:100] + "..." if content_lines else "无摘要"
+
+    return title, digest
+
+
+def extract_text_content(content):
+    """从文本内容中提取标题和摘要"""
+    lines = content.strip().split("\n")
+
+    # 第一行作为标题
+    title = lines[0].strip() if lines else None
+
+    # 后续几行作为摘要
+    content_lines = [line.strip() for line in lines[1:] if line.strip()]
+    digest = " ".join(content_lines[:3])[:100] + "..." if content_lines else "无摘要"
+
+    return title, digest
+
+
+def text_to_html(text_content):
+    """将纯文本转换为HTML"""
+    lines = text_content.split("\n")
+    html_lines = []
+
+    for line in lines:
+        line = line.strip()
+        if line:
+            html_lines.append(f"<p>{line}</p>")
+        else:
+            html_lines.append("<br>")
+
+    return "\n".join(html_lines)
+
+
+def get_format_article(ext, article):
+    """将不同格式的文章转换为HTML"""
+    if ext == ".md" or ext == ".markdown":
+        # 使用 markdown 库转换 Markdown 到 HTML
+        md = markdown.Markdown(extensions=["extra", "codehilite"])
+        return md.convert(article)
+    elif ext == ".txt":
+        # txt内容（已经是从markdown提取的纯文本）直接转HTML
+        return text_to_html(article)
+    else:
+        # 不支持的格式，返回原内容
+        return article

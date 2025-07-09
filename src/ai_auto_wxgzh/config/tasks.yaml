@@ -45,7 +45,7 @@ write_content:
     生成的文章要求：  
     - 标题：当{platform}不为空时为"{platform}|{topic}"，否则为"{topic}"  
     - 总字数：{min_article_len}~{max_article_len}字（纯文本字数，不包括Markdown语法、空格）  
-    - 内容：仅输出最终文章内容，禁止包含思考过程、分析说明等
+    - 文章内容：仅输出最终纯文章内容，禁止包含思考过程、分析说明、字数统计等额外注释、说明
 
   agent: writer
   expected_output: 文章标题 + 文章正文（标准Markdown格式）
@@ -57,6 +57,14 @@ audit_content:
     请检查文章是否与热门话题紧密相关，并具有独到的见解，发现文章中的错误和不足之处，生成修改后的文章。
   agent: auditor
   expected_output: 修改后的文章（标准Markdown格式）
+
+save_article:
+  name: "save_article"
+  description: |
+    使用工具 save_article_tool 将前置任务生成的文章保存成指定的格式。
+  agent: saver
+  context: ["write_content", "audit_content"]
+  expected_output: 最终文章
 
 design_content:
   name: "design_content"

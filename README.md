@@ -56,6 +56,8 @@
 | **min_article_len**        | 生成文章最小字数（默认 1000）                                                 |
 | **max_article_len**        | 生成文章最大字数（默认 2000）                                                 |
 | **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                     |
+| **article_format**         | 生成文章的格式（HTML、Markdown、txt）,非HTML时，只生成文章，不用模板            |
+| **format_publish**         | 当文章格式为Markdown、txt时（微信不支持，直接发布混乱），格式化发布               |
 
 - **`aipyapp.toml` 配置项**
 

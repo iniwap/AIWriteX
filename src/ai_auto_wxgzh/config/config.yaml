@@ -129,3 +129,5 @@ aipy_search_min_results: 1
 min_article_len: 1000
 max_article_len: 2000
 auto_publish: true
+article_format: html # 仅支持：html、markdown、txt
+format_publish: true

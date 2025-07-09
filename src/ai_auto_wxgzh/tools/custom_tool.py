@@ -329,3 +329,58 @@ class AIPySearchTool(BaseTool):
         finally:
             if task:
                 task.done()
+
+
+# 3. Save article tool
+class SaveArticleTool:
+    def run(self, content, appid, appsecret, author):
+        config = Config.get_instance()
+        msg_type = "status"
+        content = utils.remove_markdown_code_blocks(content)
+        title = utils.extract_main_title(content)
+        if title is None:
+            result = "无法提取文章标题，请检查文章是否成功生成？"
+        else:
+            if config.auto_publish:
+                fmt = config.article_format.lower()
+
+                # HTML格式不会走到这里来
+                if fmt == "markdown":
+                    # Markdown格式提取
+                    _, digest = utils.extract_markdown_content(content)
+                elif fmt == "txt":
+                    # 文本格式提取
+                    _, digest = utils.extract_text_content(content)
+                    content = utils.markdown_to_plaintext(content)
+                else:
+                    # 未知格式，跳过
+                    result = "不支持的文件格式，仅支持[html、markdown、txt]"
+                    msg_type = "error"
+                    log.print_log(result, msg_type)
+                    return
+
+                # 自动发布，不保存最终文章
+                if config.format_publish:
+                    content = utils.get_format_article(f".{fmt}", content)
+
+                result, _, _ = pub2wx(title, digest, content, appid, appsecret, author)
+            else:
+                msg_type = "info"
+                result = "文章生成完成，请手动发布（点击上方发布菜单按钮）。"
+                dir_path = utils.mkdir(utils.get_article_dir())
+
+                # 如果是纯文本需要提取，其他直接保存原始内容，不再处理
+                fmt = config.article_format.lower()
+                if fmt == "txt":
+                    content = utils.markdown_to_plaintext(content)
+                elif fmt == "markdown":
+                    fmt = "md"  # 使用标准后缀
+
+                with open(
+                    os.path.join(dir_path, f"{utils.sanitize_filename(title)}.{fmt}"),
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    f.write(content)
+
+        log.print_log(result, msg_type)

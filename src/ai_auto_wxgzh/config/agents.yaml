@@ -19,6 +19,15 @@ writer:
   memory: True
   max_rpm: 100
 
+saver:
+  role: 文章保存专家
+  goal: 将文章保存为指定的格式
+  backstory: |
+    你特别擅长将文章保存为各种格式。
+  allow_delegation: False
+  memory: False
+  max_rpm: 100
+
 auditor:
   role: 质量审核专家
   goal: 对生成的文章进行全面审核，确保文章质量达到最高标准

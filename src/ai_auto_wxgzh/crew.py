@@ -3,7 +3,12 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.cli.constants import ENV_VARS  # 需要根据此判断是否支持设置的LLM
 
 
-from src.ai_auto_wxgzh.tools.custom_tool import PublisherTool, ReadTemplateTool, AIPySearchTool
+from src.ai_auto_wxgzh.tools.custom_tool import (
+    PublisherTool,
+    ReadTemplateTool,
+    AIPySearchTool,
+    SaveArticleTool,
+)
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.config.config import Config
 
@@ -33,6 +38,12 @@ class AutowxGzh:
 
         return callback_function
 
+    def saver_tool_cb(self, appid, appsecret, author):
+        def callback_function(output):
+            SaveArticleTool().run(output.raw, appid, appsecret, author)
+
+        return callback_function
+
     @agent
     def researcher(self) -> Agent:
         return Agent(
@@ -54,6 +65,14 @@ class AutowxGzh:
     def auditor(self) -> Agent:
         return Agent(
             config=self.agents_config["auditor"],
+            verbose=True,
+            llm=self.llm,
+        )
+
+    @agent
+    def saver(self) -> Agent:
+        return Agent(
+            config=self.agents_config["saver"],
             verbose=True,
             llm=self.llm,
         )
@@ -94,6 +113,13 @@ class AutowxGzh:
         )
 
     @task
+    def save_article(self) -> Task:
+        return Task(
+            config=self.tasks_config["save_article"],
+            callback=self.saver_tool_cb(self.appid, self.appsecret, self.author),
+        )
+
+    @task
     def design_content(self) -> Task:
         return Task(
             config=self.tasks_config["design_content"],
@@ -114,17 +140,28 @@ class AutowxGzh:
         config = Config.get_instance()
         no_use_agent = []
         no_use_task = []
-        if config.use_template:
-            no_use_agent.append("微信排版专家")
-            no_use_task.append("design_content")
-        else:
-            no_use_agent.append("模板调整与内容填充专家")
-            no_use_task.append("template_content")
 
         # 不开启质量审核
         if not config.need_auditor:
             no_use_agent.append("质量审核专家")
             no_use_task.append("audit_content")
+
+        # 只有HTML格式才走模板任务
+        if config.article_format.upper() == "HTML":
+            if config.use_template:
+                no_use_agent.append("微信排版专家")
+                no_use_task.append("design_content")
+            else:
+                no_use_agent.append("模板调整与内容填充专家")
+                no_use_task.append("template_content")
+            no_use_agent.append("文章保存专家")
+            no_use_task.append("save_article")
+        else:
+            # 其他格式一律直接保存文章
+            no_use_agent.append("微信排版专家")
+            no_use_task.append("design_content")
+            no_use_agent.append("模板调整与内容填充专家")
+            no_use_task.append("template_content")
 
         # 过滤不使用的
         self.agents = [agent for agent in self.agents if agent.role not in no_use_agent]

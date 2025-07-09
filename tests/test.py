@@ -47,4 +47,6 @@ article = """"""
 # log.print_log(utils.extract_html(article))
 
 # 检查支持的模型
-test_llm_support()
+# test_llm_support()
+
+print(utils.markdown_to_plaintext(article))

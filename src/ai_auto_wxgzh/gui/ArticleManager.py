@@ -82,13 +82,25 @@ class ArticleManager:
             pass
 
     def _get_articles(self):
-        """获取所有文章文件，返回标题、路径、创建时间、文件大小、发布状态"""
+        """获取所有文章文件，返回标题、路径、创建时间、文件大小、发布状态、格式"""
         try:
-            article_files = glob.glob(os.path.join(utils.get_article_dir(), "*.html"))
+            # 支持多种文件格式
+            patterns = ["*.html", "*.md", "*.txt"]
+            article_files = []
+            for pattern in patterns:
+                article_files.extend(glob.glob(os.path.join(utils.get_article_dir(), pattern)))
+
             articles = []
             for path in article_files:
                 basename = os.path.basename(path)
                 title = os.path.splitext(basename)[0].replace("_", "|")
+                ext = os.path.splitext(basename)[1].lower()
+
+                # 根据文件扩展名确定格式显示
+                format_display = {".html": "HTML", ".md": "Markdown", ".txt": "Text"}.get(
+                    ext, "Unknown"
+                )
+
                 stats = os.stat(path)
                 create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stats.st_ctime))
                 size = f"{stats.st_size / 1024:.2f} KB"
@@ -107,6 +119,7 @@ class ArticleManager:
                         "path": path,
                         "create_time": create_time,
                         "size": size,
+                        "format": format_display,
                         "status": publish_status["status"],
                         "status_text": status_text,
                         "publish_records": publish_status["records"],
@@ -204,13 +217,17 @@ class ArticleManager:
                 icon=self.__get_icon(),
             )
 
-    def _publish_article(self, article, title, digest, credentials):
+    def _publish_article(self, article, title, digest, credentials, ext, format_publish):
         """发布文章到指定微信公众号"""
         results = []
         for credential in credentials:
             appid = credential["appid"]
             author = credential["author"]
             appsecret = credential["appsecret"]
+
+            # 如果非HTML格式，且格式化发布，需要处理文章
+            if ext != ".html" and format_publish:
+                article = utils.get_format_article(ext, article)
 
             # 不保存最终发布到微信的文章
             result, _, success = pub2wx(title, digest, article, appid, appsecret, author)
@@ -254,7 +271,7 @@ class ArticleManager:
 
     def _create_layout(self):
         """创建文章管理窗口布局"""
-        headings = ["序号", "标题", "创建时间", "文件大小", "发布状态"]
+        headings = ["序号", "标题", "创建时间", "文件大小", "格式", "发布状态"]
         data = self._build_table_data()
         right_click_menu = ["", ["编辑", "预览", "发布", "删除"]]
 
@@ -343,11 +360,12 @@ class ArticleManager:
                                 max_col_width=50,
                                 auto_size_columns=False,  # 禁用自动调整列宽
                                 col_widths=[
-                                    5,
-                                    30,
-                                    18,
-                                    10,
-                                    8,
+                                    5,  # 序号
+                                    30,  # 标题
+                                    15,  # 创建时间
+                                    8,  # 文件大小
+                                    8,  # 格式
+                                    8,  # 发布状态
                                 ],
                                 justification="center",
                                 key="-TABLE-",
@@ -429,6 +447,7 @@ class ArticleManager:
                 a["title"],
                 a["create_time"],
                 a["size"],
+                a["format"],
                 a["status_text"],
             ]
             for i, a in enumerate(articles)
@@ -603,21 +622,57 @@ class ArticleManager:
 
     def _publish_articles_background(self, articles, credentials):
         """后台执行发布操作"""
-
-        # 传递所有选中的文章和配置
         all_results = []
+        format_publish = Config.get_instance().format_publish
         for article in articles:
             if not os.path.exists(article["path"]):
                 continue
 
             with open(article["path"], "r", encoding="utf-8") as file:
                 article_content = file.read()
+
             try:
-                title, digest = utils.extract_html(article_content)
+                # 根据文件扩展名选择不同的提取方法
+                ext = os.path.splitext(article["path"])[1].lower()
+
+                if ext == ".html":
+                    # HTML格式保持原代码
+                    title, digest = utils.extract_html(article_content)
+                elif ext == ".md":
+                    # Markdown格式提取
+                    title, digest = utils.extract_markdown_content(article_content)
+                elif ext == ".txt":
+                    # 文本格式提取
+                    title, digest = utils.extract_text_content(article_content)
+                else:
+                    # 未知格式，跳过
+                    continue
+
             except Exception:
                 continue
 
-            article_results = self._publish_article(article_content, title, digest, credentials)
+            if title is None:
+                # 为每个配置创建失败记录
+                for credential in credentials:
+                    all_results.append(
+                        {
+                            "title": "无标题",  # 或者使用文件名作为标题
+                            "appid": credential["appid"],
+                            "author": credential["author"],
+                            "success": False,
+                            "result": "标题提取失败，无法发布",
+                        }
+                    )
+                continue
+
+            article_results = self._publish_article(
+                article_content,
+                title,
+                digest,
+                credentials,
+                ext,
+                format_publish,
+            )
             all_results.extend(article_results)
 
         return all_results

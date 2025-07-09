@@ -299,6 +299,8 @@ class ConfigEditor:
             "aipy_search_min_results": "最小搜索数量：返回的最小搜索结果数（1~10）",
             "min_article_len": "最小文章字数：生成文章的最小字数（500）",
             "max_article_len": "最大文章字数：生成文章的最大字数（5000）",
+            "article_format": "生成文章的格式：非HTML时，只生成文章，不用模板（不执行模板适配任务）",
+            "format_publish": "格式化发布文章：非HTML格式，直接发布效果混乱，建议格式化发布",
         }
 
         layout = [
@@ -406,6 +408,26 @@ class ConfigEditor:
                     key="-MAX_ARTICLE_LEN-",
                     size=(10, 1),
                     tooltip=tips["max_article_len"],
+                ),
+            ],
+            [
+                sg.Text("文章格式：", size=(15, 1), tooltip=tips["article_format"]),
+                sg.Combo(
+                    ["html", "markdown", "txt"],
+                    default_value=self.config.article_format,
+                    key="-ARTICLE_FORMAT-",
+                    size=(10, 1),
+                    readonly=True,
+                    tooltip=tips["article_format"],
+                    enable_events=True,
+                ),
+                sg.Text("格式化发布：", size=(13, 1), tooltip=tips["format_publish"]),
+                sg.Checkbox(
+                    "格式化",
+                    default=self.config.format_publish,
+                    key="-FORMAT_PUBLISH-",
+                    tooltip=tips["format_publish"],
+                    disabled=self.config.article_format.lower() == "html",
                 ),
             ],
             [
@@ -613,6 +635,13 @@ class ConfigEditor:
             event, values = self.window.read()
             if event in (sg.WIN_CLOSED, "-EXIT-"):
                 break
+            elif event == "-ARTICLE_FORMAT-":
+                if values["-ARTICLE_FORMAT-"] == "html":
+                    # HTML格式禁用格式化勾选框
+                    self.window["-FORMAT_PUBLISH-"].update(disabled=True)
+                else:
+                    # 其他格式（markdown, txt）启用格式化勾选框
+                    self.window["-FORMAT_PUBLISH-"].update(disabled=False)
 
             # 动态启用/禁用下拉列表
             elif event == "-USE_TEMPLATE-":
@@ -882,9 +911,11 @@ class ConfigEditor:
             elif event.startswith("-SAVE_BASE-"):
                 config = self.config.get_config().copy()
                 config["auto_publish"] = values["-AUTO_PUBLISH-"]
+                config["format_publish"] = values["-FORMAT_PUBLISH-"]
                 config["use_template"] = values["-USE_TEMPLATE-"]
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
                 config["use_compress"] = values["-USE_COMPRESS-"]
+                config["article_format"] = values["-ARTICLE_FORMAT-"]
                 config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
                 if str(values["-AIPY_SEARCH_MAX_RESULTS-"]).isdigit():
                     input_value = int(values["-AIPY_SEARCH_MAX_RESULTS-"])
@@ -1062,9 +1093,11 @@ class ConfigEditor:
             elif event.startswith("-RESET_BASE-"):
                 config = self.config.get_config().copy()
                 config["auto_publish"] = self.config.default_config["auto_publish"]
+                config["format_publish"] = self.config.default_config["format_publish"]
                 config["use_template"] = self.config.default_config["use_template"]
                 config["need_auditor"] = self.config.default_config["need_auditor"]
                 config["use_compress"] = self.config.default_config["use_compress"]
+                config["article_format"] = self.config.default_config["article_format"]
                 config["use_search_service"] = self.config.default_config["use_search_service"]
                 config["aipy_search_max_results"] = self.config.default_config[
                     "aipy_search_max_results"
