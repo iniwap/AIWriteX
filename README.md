@@ -56,7 +56,7 @@
 | **min_article_len**        | 生成文章最小字数（默认 1000）                                                 |
 | **max_article_len**        | 生成文章最大字数（默认 2000）                                                 |
 | **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                     |
-| **article_format**         | 生成文章的格式（HTML、Markdown、txt）,非HTML时，只生成文章，不用模板            |
+| **article_format**         | 生成文章格式（HTML、Markdown、txt）,非HTML时，只生成文章，不用模板              |
 | **format_publish**         | 当文章格式为Markdown、txt时（微信不支持，直接发布混乱），格式化发布               |
 
 - **`aipyapp.toml` 配置项**
@@ -194,6 +194,7 @@
 > *3、目前模板无法很好的应对暗色模式，这和微信僵硬的处理有关，只能继续找思路，有点无解*  
 
  ## 📢 后续计划
+- **文章管理增加配图编辑功能**
 - 增加功能，使输出效果更好
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）

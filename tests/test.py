@@ -49,4 +49,6 @@ article = """"""
 # 检查支持的模型
 # test_llm_support()
 
-print(utils.markdown_to_plaintext(article))
+# print(utils.markdown_to_plaintext(article))
+
+print(utils.extract_modified_article(article))

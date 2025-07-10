@@ -93,16 +93,25 @@ def get_random_platform(platforms):
             return platform["name"]
 
 
-def extract_modified_article(content):
-    match = re.search(r"```(?:html)?\s*([\s\S]*?)```", content, re.DOTALL)
+def extract_modified_article(raw_text):
+    # 预处理：去除开头单独的html单词（包括大小写变体）
+    raw_text = re.sub(r"^\s*html\b\s*", "", raw_text, flags=re.IGNORECASE)
 
-    if match:
-        return match.group(1).strip()
+    # 处理带html标记的代码块（允许未闭合）
+    html_pattern = r"```html\s*([\s\S]*?)(?:\s*```|$)"
+    # 处理无标记代码块（允许未闭合且匹配最后一个）
+    code_pattern = r"```\s*([\s\S]*?)(?:\s*```|$)(?=[\s\S]*$)"
+
+    html_match = re.search(html_pattern, raw_text)
+    code_match = re.search(code_pattern, raw_text)
+
+    if html_match:
+        return html_match.group(1).strip()
+    elif code_match:
+        return code_match.group(1).strip()
     else:
-        # 分别去除开头和结尾的反引号（保留其他字符）
-        stripped = content.strip()
-        stripped = stripped.lstrip("`").rstrip("`")
-        return stripped.strip()  # 最后再去除可能的空白
+        # 兜底逻辑：去除首尾反引号（包括连续多个反引号）
+        return re.sub(r"^`+|`+$", "", raw_text).strip()
 
 
 def extract_html(html, max_length=64):
