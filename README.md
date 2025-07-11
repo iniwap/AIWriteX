@@ -6,10 +6,8 @@
 
 **喜欢项目？点个 Star 支持一下吧！⭐**
 
-<div style="display: flex; justify-content: center; gap: 10px;">
-  <img src="image/preview.jpg" alt="预览1" style="max-width: 48%;">
-  <img src="image/preview_2.jpg" alt="预览2" style="max-width: 48%;">
-</div>
+![界面预览 / Interface Preview](image/preview.jpg)
+![界面预览 / Interface Preview](image/preview_2.jpg)
 
 
 ## 🎯 项目背景
