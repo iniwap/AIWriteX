@@ -39,6 +39,8 @@ import concurrent.futures  # noqa 841
 import markdown  # noqa 841
 from PIL import Image  # noqa 841
 import tempfile  # noqa 841
+import subprocess  # noqa 841
+
 
 from crewai.tools import BaseTool  # noqa 841
 from crewai_tools import SeleniumScrapingTool  # noqa 841

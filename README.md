@@ -6,7 +6,11 @@
 
 **喜欢项目？点个 Star 支持一下吧！⭐**
 
-![界面预览 / Interface Preview](image/preview.jpg)
+<div style="display: flex; justify-content: center; gap: 10px;">
+  <img src="image/preview.jpg" alt="预览1" style="max-width: 48%;">
+  <img src="image/preview_2.jpg" alt="预览2" style="max-width: 48%;">
+</div>
+
 
 ## 🎯 项目背景
 为了学习CrewAI，特开发了这个小项目，最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。随着研究、开发的深入，项目功能日趋完善，👉[赶紧体验吧~](#-快速开始)  
@@ -82,13 +86,13 @@
 4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
 5. 运行：
     - 有UI界面：`python .\main.py -d` (**推荐**)
-    - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main` （**不支持文章、模板管理**）
+    - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main` （**不支持文章、模板、配图管理**）
 
 ### 软件模式
-1. 请从网盘下载`微信公众号AI工具_云盘版_Setup.exe` 👇，并安装
-    - [移动云盘 提取码:ziug](https://caiyun.139.com/w/i/2nQQSzFEy8k9r)
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh)
-    - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)
+1. 请从网盘下载`微信公众号AI工具_云盘版_Setup_V2.1.exe` 👇，并安装
+    - [移动云盘 提取码:ca31](https://caiyun.139.com/w/i/2oxwEF7ZuLoof) （已更新）
+    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh) （未更新）
+    - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)（未更新）
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
 3. 点击`开始执行`
 
