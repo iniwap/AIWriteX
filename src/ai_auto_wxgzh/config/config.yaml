@@ -42,7 +42,7 @@ api:
       - ""
     model_index: 0
     model:
-      - xai/grok-2-latest
+      - xai/grok-3
     api_base: https://api.x.ai/v1/chat/completions
   Qwen:
     key: OPENAI_API_KEY
@@ -50,13 +50,8 @@ api:
     api_key:
       - ""
       - ""
-    model_index: 3
+    model_index: 0
     model:
-      - openai/deepseek-v3
-      - openai/deepseek-r1
-      - openai/qwen-max-latest
-      - openai/qwen-max
-      - openai/qwen-vl-plus
       - openai/qwen-plus
     api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
   Gemini:
@@ -67,11 +62,10 @@ api:
       - ""
     model_index: 0
     model:
-      - gemini-1.5-flash
-      - gemini-1.5-pro
-      - gemini-2.0-flash-lite-preview-02-05
-      - gemini-2.0-flash
-    api_base: https://generativelanguage.googleapis.com
+      - gemini/gemini-1.5-flash
+      - gemini/gemini-1.5-pro
+      - gemini/gemini-2.0-flash
+    api_base: https://generativelanguage.googleapis.com/v1beta/openai/
   OpenRouter:
     key: OPENROUTER_API_KEY
     key_index: 0
