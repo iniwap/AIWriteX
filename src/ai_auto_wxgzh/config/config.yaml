@@ -110,6 +110,18 @@ api:
       - deepseek/deepseek-chat
       - deepseek/deepseek-reasoner
     api_base: https://api.deepseek.com/v1
+  SiliconFlow:
+    key: OPENAI_API_KEY
+    key_index: 0
+    api_key:
+      - ""
+    model_index: 0
+    model:
+      - openai/deepseek-ai/DeepSeek-V3
+      - openai/deepseek-ai/DeepSeek-R1
+      - openai/Qwen/QwQ-32B
+      - openai/Qwen/Qwen3-32B
+    api_base: https://api.siliconflow.cn/v1
 img_api:
   api_type: picsum
   ali:

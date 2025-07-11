@@ -207,6 +207,12 @@ class ConfigEditor:
                                 self.create_api_sub_tab("Deepseek", api_data["Deepseek"]),
                             )
                         ],
+                        [
+                            sg.Tab(
+                                "硅基流动",
+                                self.create_api_sub_tab("SiliconFlow", api_data["SiliconFlow"]),
+                            )
+                        ],
                     ],
                     key="-API_TAB_GROUP-",
                 )
