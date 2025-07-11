@@ -26,12 +26,15 @@ wechat:
     - appid: ""
       appsecret: ""
       author: ""
+      sendall: false
     - appid: ""
       appsecret: ""
       author: ""
+      sendall: false
     - appid: ""
       appsecret: ""
       author: ""
+      sendall: false
 api:
   api_type: OpenRouter
   Grok:

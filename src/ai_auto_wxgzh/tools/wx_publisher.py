@@ -199,7 +199,10 @@ class WeixinPublisher:
                 file_name = os.path.basename(image_url)
 
             token = self._ensure_access_token()
-            url = f"{self.BASE_URL}/material/add_material?access_token={token}&type=image"
+            if self.is_verified():
+                url = f"{self.BASE_URL}/media/upload?access_token={token}&type=image"
+            else:
+                url = f"{self.BASE_URL}/material/add_material?access_token={token}&type=image"
 
             files = {"media": (file_name, image_buffer, mime_type)}
             response = requests.post(url, files=files)
@@ -317,33 +320,39 @@ class WeixinPublisher:
 
     # 上传图文消息素材【订阅号与服务号认证后均可用】
     def media_uploadnews(self, article, title, digest, media_id):
-        ret = None, None
-        data = {
-            "articles": [
-                {
-                    "thumb_media_id": media_id,
-                    "author": self.author,
-                    "title": title[:64],
-                    "content": article,
-                    "digest": digest[:120],
-                    "show_cover_pic": 1,
-                    "need_open_comment": 1,
-                    "only_fans_can_comment": 0,
-                },
-            ]
-        }
-        url = f"{self.BASE_URL}/media/uploadnews?access_token={self._ensure_access_token()}"
+        token = self._ensure_access_token()
+        url = f"{self.BASE_URL}/media/uploadnews?access_token={token}"
 
+        articles = [
+            {
+                "thumb_media_id": media_id,
+                "author": self.author,
+                "title": title[:64],
+                "content": article,
+                "digest": digest[:120],
+                "show_cover_pic": 1,
+                "need_open_comment": 1,
+                "only_fans_can_comment": 0,
+            }
+        ]
+
+        ret = None, None
         try:
-            result = requests.post(url, json=data).json()
+            data = {"articles": articles}
+            headers = {"Content-Type": "application/json"}
+            json_data = json.dumps(data, ensure_ascii=False).encode("utf-8")
+            response = requests.post(url, data=json_data, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+
             if "errcode" in result and result.get("errcode") != 0:
-                ret = f"上传图文消息素材失败: {result.get('errmsg')}", None
+                ret = None, f"上传图文素材失败: {result.get('errmsg')}"
             elif "media_id" not in result:
-                ret = "上传图文消息素材失败: 响应中缺少 media_id", None
+                ret = None, "上传图文素材失败: 响应中缺少 media_id"
             else:
-                ret = "", result.get("media_id")
-        except Exception as e:
-            ret = f"上传图文素材失败：{e}", None
+                ret = result.get("media_id"), None
+        except requests.exceptions.RequestException as e:
+            ret = None, f"上传微信图文素材失败: {e}"
 
         return ret
 
@@ -369,23 +378,58 @@ class WeixinPublisher:
 
         return ret
 
+    def is_verified(self):
+        url = f"{self.BASE_URL}/account/getaccountbasicinfo?access_token={self._ensure_access_token()}"  # noqa 501
+        response = requests.get(url, timeout=5)  # 增加超时控制
+
+        try:
+            response.raise_for_status()  # 自动处理HTTP错误
+            data = response.json()
+
+            # 正确获取嵌套字段
+            wx_verify = data.get("wx_verify_info", {})
+            return bool(wx_verify.get("qualification_verify", False))
+        except (requests.RequestException, ValueError, KeyError):
+            return False
+
 
 def pub2wx(title, digest, article, appid, appsecret, author):
 
     publisher = WeixinPublisher(appid, appsecret, author)
 
-    image_url = publisher.generate_img(
-        "主题：" + title.split("|")[-1] + "，内容：" + digest,
-        "900*384",
-    )
+    config = Config.get_instance()
+    if config.current_preview_cover:
+        # 裁剪封面图片
+        cropped_image_path = utils.crop_cover_image(config.current_preview_cover, (900, 384))
+        if cropped_image_path:
+            image_url = cropped_image_path
+        else:
+            # 裁剪失败，直接使用原图
+            image_url = config.current_preview_cover
+    else:
+        image_url = publisher.generate_img(
+            "主题：" + title.split("|")[-1] + "，内容：" + digest,
+            "900*384",
+        )
 
     if image_url is None:
         log.print_log("生成图片出错，使用默认图片")
-        # 这里使用默认的好像会出错，采用默认背景图
         image_url = utils.get_res_path("UI\\bg.png", os.path.dirname(__file__) + "/../gui/")
 
     # 封面图片
     media_id, _, err_msg = publisher.upload_image(image_url)
+
+    # 如果使用了临时裁剪文件，上传后删除
+    if (
+        config.current_preview_cover
+        and cropped_image_path
+        and cropped_image_path != config.current_preview_cover
+    ):
+        try:
+            os.remove(cropped_image_path)
+        except Exception:
+            pass
+
     if media_id is None:
         return f"封面{err_msg}，无法发布文章", article, False
 
@@ -393,43 +437,56 @@ def pub2wx(title, digest, article, appid, appsecret, author):
     try:
         image_urls = utils.extract_image_urls(article)
         for image_url in image_urls:
-            local_filename = utils.download_and_save_image(
-                image_url,
-                utils.get_current_dir("image"),
-            )
-            if local_filename:
-                _, url, _ = publisher.upload_image(local_filename)
-                article = article.replace(image_url, url)
+            if utils.is_local_path(image_url):
+                # 本地路径，检查文件是否存在
+                if os.path.exists(image_url):
+                    _, url, _ = publisher.upload_image(image_url)
+                    article = article.replace(image_url, url)
+                else:
+                    log.print_log(f"本地图片文件不存在: {image_url}")
+            else:
+                # 网络URL，先下载再上传
+                local_filename = utils.download_and_save_image(
+                    image_url,
+                    utils.get_current_dir("image"),
+                )
+                if local_filename:
+                    _, url, _ = publisher.upload_image(local_filename)
+                    article = article.replace(image_url, url)
     except Exception as e:
         log.print_log(f"上传配图出错，影响阅读，可继续发布文章:{e}")
 
-    add_draft_result, err_msg = publisher.add_draft(article, title, digest, media_id)
-    if add_draft_result is None:
-        # 添加草稿失败，不再继续执行
-        return f"{err_msg}，无法发布文章", article, False
+    # 账号是否认证
+    if not publisher.is_verified():
+        add_draft_result, err_msg = publisher.add_draft(article, title, digest, media_id)
+        if add_draft_result is None:
+            # 添加草稿失败，不再继续执行
+            return f"{err_msg}，无法发布文章", article, False
 
-    publish_result, err_msg = publisher.publish(add_draft_result.publishId)
-    if publish_result is None:
-        return f"{err_msg}，无法继续发布文章", article, False
-
-    article_url = publisher.poll_article_url(publish_result.publishId)
-    if article_url is not None:
-        # 该接口需要认证，将文章添加到菜单中去，用户可以通过菜单“最新文章”获取到
-        ret = publisher.create_menu(article_url)
-        if not ret:
-            log.print_log(f"{ret}（公众号未认证，发布已成功）")
+        publish_result, err_msg = publisher.publish(add_draft_result.publishId)
+        if publish_result is None:
+            return f"{err_msg}，无法继续发布文章", article, False
     else:
-        log.print_log("无法获取到文章URL，无法创建菜单（可忽略，发布已成功）")
+        # 显示到列表
+        media_id, ret = publisher.media_uploadnews(article, title, digest, media_id)
+        if media_id is None:
+            return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
 
-    # 最近好像会有个消息提示，但不会显示到列表，用户可以收到文章发布的消息
-    # 只有下面执行成功，文章才会显示到公众号列表，否则只能通过后台复制链接分享访问
-    # 通过群发使得文章显示到公众号列表 ——> 该接口需要认证
-    ret, media_id = publisher.media_uploadnews(article, title, digest, media_id)
-    if media_id is None:
-        return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+        """
+        article_url = publisher.poll_article_url(publish_result.publishId)
+        if article_url is not None:
+            # 该接口需要认证,将文章添加到菜单中去，用户可以通过菜单“最新文章”获取到
+            ret = publisher.create_menu(article_url)
+            if not ret:
+                log.print_log(f"{ret}（公众号未认证，发布已成功）")
+        else:
+            log.print_log("无法获取到文章URL，无法创建菜单（可忽略，发布已成功）")
+        """
 
-    ret = publisher.message_mass_sendall(media_id)
-    if ret is not None:
-        return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+        # 是否设置为群发
+        if Config.get_instance().get_sendall_by_appid(appid):
+            ret = publisher.message_mass_sendall(media_id)
+            if ret is not None:
+                return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
 
     return "成功发布文章到微信公众号", article, True

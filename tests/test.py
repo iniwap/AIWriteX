@@ -17,7 +17,7 @@ sys.path.append(project_root)
 
 from src.ai_auto_wxgzh.utils import log  # noqa 402
 from src.ai_auto_wxgzh.utils import utils  # noqa 402
-from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx  # noqa 402
+from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx, WeixinPublisher  # noqa 402
 from src.ai_auto_wxgzh.config.config import Config  # noqa 402
 
 
@@ -47,8 +47,19 @@ article = """"""
 # log.print_log(utils.extract_html(article))
 
 # 检查支持的模型
-# test_llm_support()
+test_llm_support()
 
 # print(utils.markdown_to_plaintext(article))
 
-print(utils.extract_modified_article(article))
+# print(utils.extract_modified_article(article))
+
+config = Config.get_instance()
+config.load_config()
+publisher = WeixinPublisher(
+    config.wechat_credentials[0]["appid"],
+    config.wechat_credentials[0]["appsecret"],
+    config.wechat_credentials[0]["author"],
+)
+
+print(publisher.is_verified())
+print(config.get_sendall_by_appid(config.wechat_credentials[0]["appid"]))

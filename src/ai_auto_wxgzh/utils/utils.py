@@ -11,6 +11,8 @@ import webbrowser
 from urllib.parse import urlparse
 import glob
 import markdown
+from PIL import Image
+import tempfile
 
 
 from src.ai_auto_wxgzh.utils import log
@@ -160,7 +162,7 @@ def get_latest_file_os(dir_path):
     return latest_file
 
 
-def extract_image_urls(html_content):
+def extract_image_urls(html_content, no_repeate=True):
     patterns = [
         r'<img[^>]*?src=["\'](.*?)["\']',  # 匹配 src
         r'<img[^>]*?srcset=["\'](.*?)["\']',  # 匹配 srcset
@@ -173,7 +175,10 @@ def extract_image_urls(html_content):
         urls.extend(
             [url for match in matches for url in (match.split(",") if "," in match else [match])]
         )
-    return list(set(urls))
+    if no_repeate:
+        return list(set(urls))
+    else:
+        return urls
 
 
 def download_and_save_image(image_url, local_image_folder):
@@ -523,3 +528,63 @@ def get_format_article(ext, article):
     else:
         # 不支持的格式，返回原内容
         return article
+
+
+def is_local_path(url):
+    """判断URL是否为本地路径"""
+    # 检查是否为绝对路径
+    if os.path.isabs(url):
+        return True
+
+    # 检查是否为相对路径
+    if url.startswith("./") or url.startswith("../"):
+        return True
+
+    # 检查是否为网络URL
+    parsed = urlparse(url)
+    if parsed.scheme in ("http", "https", "ftp"):
+        return False
+
+    # 其他情况视为本地路径
+    return True
+
+
+def crop_cover_image(image_path, target_size=(900, 384)):
+    """
+    将封面图片裁剪为指定尺寸
+    先缩放至填满目标尺寸，然后居中裁剪
+    """
+
+    try:
+        # 打开原图
+        img = Image.open(image_path)
+        original_width, original_height = img.size
+        target_width, target_height = target_size
+
+        # 计算缩放比例，确保能填满目标尺寸
+        scale_x = target_width / original_width
+        scale_y = target_height / original_height
+        scale = max(scale_x, scale_y)  # 使用较大的缩放比例确保填满
+
+        # 缩放图片
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+        img = img.resize((new_width, new_height), Image.LANCZOS)
+
+        # 居中裁剪
+        left = (new_width - target_width) // 2
+        top = (new_height - target_height) // 2
+        right = left + target_width
+        bottom = top + target_height
+
+        img = img.crop((left, top, right, bottom))
+
+        # 生成临时文件
+        temp_file = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+        img.save(temp_file.name, "JPEG", quality=95)
+        temp_file.close()
+
+        return temp_file.name
+
+    except Exception:
+        return None

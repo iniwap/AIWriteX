@@ -63,9 +63,9 @@ class Config:
             ],
             "wechat": {
                 "credentials": [
-                    {"appid": "", "appsecret": "", "author": ""},
-                    {"appid": "", "appsecret": "", "author": ""},
-                    {"appid": "", "appsecret": "", "author": ""},
+                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
+                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
+                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
                 ]
             },
             "api": {
@@ -75,22 +75,15 @@ class Config:
                     "key_index": 0,
                     "api_key": ["", ""],
                     "model_index": 0,
-                    "model": ["xai/grok-2-latest"],
+                    "model": ["xai/grok-3"],
                     "api_base": "https://api.x.ai/v1/chat/completions",
                 },
                 "Qwen": {
                     "key": "OPENAI_API_KEY",
                     "key_index": 0,
                     "api_key": ["", ""],
-                    "model_index": 3,
-                    "model": [
-                        "openai/deepseek-v3",
-                        "openai/deepseek-r1",
-                        "qwen-max-latest",
-                        "openai/qwen-max",
-                        "openai/qwen-vl-plus",
-                        "openai/qwen-plus",
-                    ],
+                    "model_index": 0,
+                    "model": ["openai/qwen-plus"],
                     "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
                 },
                 "Gemini": {
@@ -99,12 +92,11 @@ class Config:
                     "api_key": ["", ""],
                     "model_index": 0,
                     "model": [
-                        "gemini-1.5-flash",
-                        "gemini-1.5-pro",
-                        "gemini-2.0-flash-lite-preview-02-05",
-                        "gemini-2.0-flash",
+                        "gemini/gemini-1.5-flash",
+                        "gemini/gemini-1.5-pro",
+                        "gemini/gemini-2.0-flash",
                     ],
-                    "api_base": "https://generativelanguage.googleapis.com",
+                    "api_base": "https://generativelanguage.googleapis.com/v1beta/openai/",
                 },
                 "OpenRouter": {
                     "key": "OPENROUTER_API_KEY",
@@ -130,18 +122,28 @@ class Config:
                     "api_base": "http://localhost:11434",
                 },
                 "Deepseek": {
-                    "key": "OPENAI_API_KEY",
+                    "key": "DEEPSEEK_API_KEY",
+                    "key_index": 0,
+                    "api_key": [""],
+                    "model_index": 0,
+                    "model": [
+                        "deepseek/deepseek-chat",
+                        "deepseek/deepseek-reasoner",
+                    ],
+                    "api_base": "https://api.deepseek.com/v1",
+                },
+                "SiliconFlow": {
+                    "key": "SILICONFLOW_API_KEY",
                     "key_index": 0,
                     "api_key": ["", ""],
                     "model_index": 0,
                     "model": [
-                        "openai/deepseek-v3",
-                        "openai/deepseek-r1",
-                        "openai/deepseek-chat",
-                        "openai/deepseek-v3-0324",
-                        "openai/deepseek-chat-v3-0324",
+                        "siliconflow/deepseek-chat",
+                        "siliconflow/qwen-turbo",
+                        "siliconflow/glm-4-chat",
+                        "siliconflow/yi-lightning",
                     ],
-                    "api_base": "https://api.deepseek.com/v1",
+                    "api_base": "https://api.siliconflow.cn/v1",
                 },
             },
             "img_api": {
@@ -241,6 +243,7 @@ class Config:
         self.reference_ratio = 0  # 文章借鉴比例[0-1]
         self.custom_template_category = ""  # 自定义话题时，模板分类
         self.custom_template = ""  # 自定义话题时，模板
+        self.current_preview_cover = ""  # 当前设置的封面
 
     @classmethod
     def get_instance(cls):
@@ -463,6 +466,12 @@ class Config:
             utils.copy_file(res_config_path, config_path)
 
         return config_path
+
+    def get_sendall_by_appid(self, target_appid):
+        for cred in self.config["wechat"]["credentials"]:
+            if cred["appid"] == target_appid:
+                return cred["sendall"]
+        return False
 
     def load_config(self):
         """加载配置，从 config.yaml 或默认配置，不验证"""

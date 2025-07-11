@@ -15,6 +15,7 @@ import json
 from src.ai_auto_wxgzh.utils import utils
 from src.ai_auto_wxgzh.config.config import Config
 from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx
+from src.ai_auto_wxgzh.gui import ImageConfig
 
 __author__ = "iniwaper@gmail.com"
 __copyright__ = "Copyright (C) 2025 iniwap"
@@ -273,7 +274,7 @@ class ArticleManager:
         """创建文章管理窗口布局"""
         headings = ["序号", "标题", "创建时间", "文件大小", "格式", "发布状态"]
         data = self._build_table_data()
-        right_click_menu = ["", ["编辑", "预览", "发布", "删除"]]
+        right_click_menu = ["", ["配图", "编辑", "预览", "发布", "删除"]]
 
         # 区分固定和临时配置，临时配置加 [临时] 标记
         credential_options = (
@@ -500,7 +501,7 @@ class ArticleManager:
                 self._articles = self._get_articles()
                 data = self._build_table_data()
                 self._window["-TABLE-"].update(values=data)
-            elif event in ["编辑", "预览", "发布", "删除"] and values["-TABLE-"]:
+            elif event in ["配图", "编辑", "预览", "发布", "删除"] and values["-TABLE-"]:
                 # 检查是否正在发布中
                 if self._publishing and (event == "发布" or event == "删除"):
                     sg.popup(
@@ -532,6 +533,18 @@ class ArticleManager:
                             self._delete_article(article["path"], article["title"])
                             self._articles = self._get_articles()
                             self._window["-TABLE-"].update(values=self._build_table_data())
+                    elif event == "配图":
+                        # 检查文件格式，只有HTML文件支持配图
+                        ext = os.path.splitext(article["path"])[1].lower()
+                        if ext != ".html":
+                            sg.popup_error(
+                                "目前仅支持HTML格式文章配图设置",
+                                title="系统提示",
+                                icon=self.__get_icon(),
+                            )
+                            continue
+
+                        ImageConfig.gui_start({"title": article["title"], "path": article["path"]})
             elif event == "-PUBLISH_SELECTED-":
                 if values["-TABLE-"]:
                     selected_articles = [self._articles[i] for i in values["-TABLE-"]]

@@ -89,7 +89,13 @@ class ConfigEditor:
             wechat_rows.append(
                 [
                     sg.Text("作者:", size=(label_width, 1)),
-                    sg.InputText(cred["author"], key=f"-WECHAT_AUTHOR_{i}-", size=(45, 1)),
+                    sg.InputText(cred["author"], key=f"-WECHAT_AUTHOR_{i}-", size=(35, 1)),
+                    sg.Checkbox(
+                        "群发",
+                        default=cred.get("sendall", False),
+                        key=f"-WECHAT_SENDALL_{i}-",
+                        tooltip="1. 认证号群发数量有限，群发可控\n2. 非认证号，此选项无效（不支持群发）",
+                    ),
                 ]
             )
             wechat_rows.append([sg.Button("删除", key=f"-DELETE_WECHAT_{i}-", disabled=i == 0)])
@@ -702,7 +708,7 @@ class ConfigEditor:
             # 添加微信凭证
             elif event == "-ADD_WECHAT-":
                 credentials = self.config.wechat_credentials  # 直接使用内存中的 credentials
-                credentials.append({"appid": "", "appsecret": "", "author": ""})
+                credentials.append({"appid": "", "appsecret": "", "author": "", "sendall": False})
                 self.wechat_count = len(credentials)
                 try:
                     self.update_tab("-TAB_WECHAT-", self.create_wechat_tab())
@@ -812,11 +818,12 @@ class ConfigEditor:
                     appid_key = f"-WECHAT_APPID_{i}-"
                     secret_key = f"-WECHAT_SECRET_{i}-"
                     author_key = f"-WECHAT_AUTHOR_{i}-"
-                    # 检查键是否存在且元素可见
+                    sendall_key = f"-WECHAT_SENDALL_{i}-"
                     if (
                         appid_key in self.window.AllKeysDict
                         and secret_key in self.window.AllKeysDict
                         and author_key in self.window.AllKeysDict
+                        and sendall_key in self.window.AllKeysDict
                         and self.window[appid_key].visible
                     ):
                         credentials.append(
@@ -824,6 +831,7 @@ class ConfigEditor:
                                 "appid": values.get(appid_key, ""),
                                 "appsecret": values.get(secret_key, ""),
                                 "author": values.get(author_key, ""),
+                                "sendall": values.get(sendall_key, False),
                             }
                         )
                     i += 1
