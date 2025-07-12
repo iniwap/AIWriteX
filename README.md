@@ -70,7 +70,7 @@
 | **其他选填**               | 根据需要配置其他参数（选填），具体参考 UI 界面说明               |
 
 > *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*  
-> *2、⚠️ 微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY是必填项，其他均可默认*  
+> *2、⚠️ 微信公众号AppID/AppSecret、大模型提供商的API KEY是必填项，其他均可默认*  
 
 ## 🚀 快速开始
 ### 开发模式
@@ -79,7 +79,7 @@
 2. 安装依赖：
    - `pip install -r requirements.txt`
    - `pip install PySimpleGUI-4.60.5-py3-none-any.whl`
-4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY*）
+4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
 5. 运行：
     - 有UI界面：`python .\main.py -d` (**推荐**)
     - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main` （**不支持文章、模板、配图管理**）
@@ -89,7 +89,7 @@
     - [移动云盘 提取码:ca31](https://caiyun.139.com/w/i/2oxwEF7ZuLoof) （已更新）
     - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh) （未更新）
     - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)（未更新）
-2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY*）
+2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
 3. 点击`开始执行`
 
 ## 🔍 问题定位
@@ -258,4 +258,4 @@
 
 ## 📜 许可证 / License
 非商业用户可自由使用、修改和分发软件，但必须保留版权声明；任何商业用途（例如开发产品、提供服务或其他盈利活动）需获得版权所有人的书面授权。  
-详情请参阅 [LICENSE](LICENSE-CN) 文件。
+详情请参阅 [LICENSE](LICENSE-CN.md) 文件。
