@@ -2,21 +2,21 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
 
-基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版酷炫的文章并发布到微信公众号。👉[高大上文章排版预览](#微信公众号模板效果预览)
+基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版酷炫的文章并发布到微信公众号。  
 
-**喜欢项目？点个 Star 支持一下吧！⭐**
+> **迫不及待想看看效果？** 👉 [排版预览](#-微信公众号模板效果预览)
+> **心动不如行动？** 👉 [马上体验](#-快速开始)
+> **喜欢项目？** ⭐ 点个 Star 支持一下吧！
 
-![界面预览 / Interface Preview](image/preview.jpg)
-![界面预览 / Interface Preview](image/preview_2.jpg)
-
-
-## 🎯 项目背景
-为了学习CrewAI，特开发了这个小项目，最后才发现公众号（未认证）限制巨多，有认证微信公众号的可以更好的发挥这个项目的作用。随着研究、开发的深入，项目功能日趋完善，更多功能开发中，敬请关注项目！👉[赶紧体验吧~](#-快速开始)  
+<div style="display: flex; justify-content: space-between;">
+  <img src="image/preview.jpg" width="46.3%">
+  <img src="image/preview_2.jpg" width="53.7%">
+</div>
 
 ## 💎 基本功能
 - **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题/内容紧跟潮流
 - **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版
-  - **💡 实时文章生成**：采用多重搜索策略（本地+AIPy），拒绝过时内容，确保文章时效性
+  - **💡 实时性文章生成**：采用多重搜索策略（本地+AIPy），拒绝过时内容，确保文章时效性
   - **💡 指定话题及参考文章**：允许用户自定义文章话题、提供参考文章，结合 AI 生成高质量内容
 - **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程
 - **UI 可视化管理**：提供软件界面，操作简单高效
@@ -244,10 +244,10 @@
 
 为了大家能用上DeepSeek，我怒冲10元进行适配调试，给个Star吧~🙏
 
-- CrewAI框架默认不支持DeepSeek，需要手动创建（LiteLLM是支持的）
+- CrewAI框架默认不支持DeepSeek，需要手动创建（LiteLLM支持）
 - DeepSeek在`模板填充阶段`速度较慢，请耐心等待（速度似乎不如OpenRouter的DeepSeek）
 - 使用DeepSeek请注意**费用**消耗（说实话没有薅OpenRouter羊毛踏实）
-- 内置模型提供商基本都已经适配，grok、gemini仍需进一步测试
+
 
 ## 🤝 贡献
 - 提交代码以及优化建议，新功能等等
@@ -257,5 +257,6 @@
 如需了解配置详情或扩展、定制功能，请联系我 QQ 522765228
 
 ## 📜 许可证 / License
-本项目采用 Apache 2.0 许可证授权。用户在分发或修改本软件时，必须保留所有版权声明和许可证条款。  
-详情请参阅 [LICENSE](LICENSE) 文件。
+非商业用户可自由使用、修改和分发软件，但必须保留版权声明。任何商业用途（例如开发产品、提供服务或其他盈利活动）需获得版权所有人的书面授权（可能涉及付费）。详情请参阅 [LICENSE](LICENSE) 文件。
+联系方式：iniwaper@gmail.com 或 522765228@qq.com
+

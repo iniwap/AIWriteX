@@ -3,19 +3,16 @@
 # Date: 2025-06-03
 # Description: 用于热搜话题获取，关注项目 https://github.com/iniwap/ai_auto_wxgzh
 
-# Copyright (c) 2025 iniwaper@gmail.com
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Copyright (c) 2025 iniwap
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# This software is licensed under the [Your Project Name] License.
+# You may use, modify, and distribute this software freely for non-commercial purposes.
+# Commercial use requires prior written authorization.
+# See the LICENSE file in the project root for full details.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# 本文件受 Apache 2.0 许可证保护，禁止删除版权声明。
+# 本软件受 CrewAI微信公众号全自动生成排版发布工具 许可证保护。
+# 非商业用途可自由使用、修改和分发。商业用途需获得书面授权。
+# 详情请参阅 LICENSE 文件。
 
 
 import requests
