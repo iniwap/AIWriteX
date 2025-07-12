@@ -4,13 +4,13 @@
 
 基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版酷炫的文章并发布到微信公众号。  
 
-> **迫不及待想看看效果？** 👉 [排版预览](#-微信公众号模板效果预览)
-> **心动不如行动？** 👉 [马上体验](#-快速开始)
-> **喜欢项目？** ⭐ 点个 Star 支持一下吧！
+> **迫不及待想看看效果？** 👉 [排版预览](#-微信公众号模板效果预览)  
+> **心动不如行动？** 👉 [马上体验](#-快速开始)  
+> **喜欢项目？** ⭐ 点个 Star 支持一下吧！  
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="image/preview.jpg" width="46.3%">
-  <img src="image/preview_2.jpg" width="53.7%">
+  <img src="image/preview.jpg" width="46%">
+  <img src="image/preview_2.jpg" width="53%">
 </div>
 
 ## 💎 基本功能
