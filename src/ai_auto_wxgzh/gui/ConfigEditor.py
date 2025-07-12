@@ -593,7 +593,7 @@ class ConfigEditor:
                         [sg.Tab("微信公众号*", self.create_wechat_tab(), key="-TAB_WECHAT-")],
                         [sg.Tab("大模型API*", self.create_api_tab(), key="-TAB_API-")],
                         [sg.Tab("图片生成API", self.create_img_api_tab(), key="-TAB_IMG_API-")],
-                        [sg.Tab("AIPy*", self.create_aipy_tab(), key="-TAB_AIPY-")],
+                        [sg.Tab("AIPy", self.create_aipy_tab(), key="-TAB_AIPY-")],
                     ],
                     key="-TAB_GROUP-",
                 )

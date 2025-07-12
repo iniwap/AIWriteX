@@ -264,23 +264,29 @@ class AIPySearchTool(BaseTool):
             if template_result:
                 return template_result.get("results")
 
-            # 第二步：渐进式AI生成
-            console = Console()
-            console.print("[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]")
-            task_manager = TaskManager(Config.get_instance().get_aipy_settings(), console=console)
+            # 只有配置了key才能使用aipy搜索，否则只能用本地搜索
+            if Config.get_instance().aipy_api_key:
+                # 第二步：渐进式AI生成
+                console = Console()
+                console.print("[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]")
+                task_manager = TaskManager(
+                    Config.get_instance().get_aipy_settings(), console=console
+                )
 
-            # 先尝试基于模板的约束性生成
-            constrained_result = self._try_template_guided_ai(
-                topic, max_results, min_results, task_manager
-            )
-            if search_template.validate_search_result(constrained_result, min_results, "ai_guided"):
-                return constrained_result.get("results")
+                # 先尝试基于模板的约束性生成
+                constrained_result = self._try_template_guided_ai(
+                    topic, max_results, min_results, task_manager
+                )
+                if search_template.validate_search_result(
+                    constrained_result, min_results, "ai_guided"
+                ):
+                    return constrained_result.get("results")
 
-            console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
-            # 最后尝试完全自由的AI生成
-            free_result = self._try_free_form_ai(topic, max_results, min_results, task_manager)
-            if search_template.validate_search_result(free_result, min_results, "ai_free"):
-                return free_result.get("results")
+                console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
+                # 最后尝试完全自由的AI生成
+                free_result = self._try_free_form_ai(topic, max_results, min_results, task_manager)
+                if search_template.validate_search_result(free_result, min_results, "ai_free"):
+                    return free_result.get("results")
 
             return None
 

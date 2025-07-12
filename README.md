@@ -30,7 +30,7 @@
 
 ### 个性化功能（配置）
 
-通过 `config.yaml` 和 `aipyapp.toml` 配置文件，实现高度个性化的功能，推荐使用界面/软件模式编辑配置，操作更友好。以下是关键配置项说明：
+通过 `config.yaml` 和 `aipyapp.toml` 配置文件，实现高度个性化的功能，推荐使用界面/软件模式编辑配置，以下是关键配置项说明：
 
 - **`config.yaml` 配置项**
 
@@ -70,7 +70,7 @@
 | **其他选填**               | 根据需要配置其他参数（选填），具体参考 UI 界面说明               |
 
 > *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*  
-> *2、⚠️ 微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY是必填项，其他均可默认*  
+> *2、⚠️ 微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY是必填项，其他均可默认*  
 
 ## 🚀 快速开始
 ### 开发模式
@@ -79,7 +79,7 @@
 2. 安装依赖：
    - `pip install -r requirements.txt`
    - `pip install PySimpleGUI-4.60.5-py3-none-any.whl`
-4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
+4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY*）
 5. 运行：
     - 有UI界面：`python .\main.py -d` (**推荐**)
     - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main` （**不支持文章、模板、配图管理**）
@@ -89,7 +89,7 @@
     - [移动云盘 提取码:ca31](https://caiyun.139.com/w/i/2oxwEF7ZuLoof) （已更新）
     - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh) （未更新）
     - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)（未更新）
-2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI和AIPy使用的大模型提供商的API KEY*）
+2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、CrewAI使用的大模型提供商的API KEY*）
 3. 点击`开始执行`
 
 ## 🔍 问题定位
@@ -254,9 +254,8 @@
 - 分享自动发文功能的新场景或改进点
 
 ## 📩 联系我们
-如需了解配置详情或扩展、定制功能，请联系我 QQ 522765228
+如需了解配置详情或扩展、定制功能、授权，请联系我 QQ 522765228
 
 ## 📜 许可证 / License
-非商业用户可自由使用、修改和分发软件，但必须保留版权声明。任何商业用途（例如开发产品、提供服务或其他盈利活动）需获得版权所有人的书面授权（可能涉及付费）。详情请参阅 [LICENSE](LICENSE) 文件。
-联系方式：iniwaper@gmail.com 或 522765228@qq.com
-
+非商业用户可自由使用、修改和分发软件，但必须保留版权声明。任何商业用途（例如开发产品、提供服务或其他盈利活动）需获得版权所有人的书面授权。  
+详情请参阅 [LICENSE](LICENSE) 文件。

@@ -540,7 +540,7 @@ class Config:
                     return False
 
             # 检查是否配置了aipy api_key
-            if not self.aipy_api_key:
+            if not self.aipy_api_key and self.use_search_service:
                 self.error_message = "AIPy未配置有效的llm提供商的api_key"
                 return False
 
