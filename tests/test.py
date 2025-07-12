@@ -61,5 +61,5 @@ publisher = WeixinPublisher(
     config.wechat_credentials[0]["author"],
 )
 
-print(publisher.is_verified())
+print(publisher.is_verified)
 print(config.get_sendall_by_appid(config.wechat_credentials[0]["appid"]))

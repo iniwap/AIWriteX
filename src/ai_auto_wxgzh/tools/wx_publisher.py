@@ -50,6 +50,22 @@ class WeixinPublisher:
         self.img_api_key = config.img_api_key
         self.img_api_model = config.img_api_model
 
+    @property
+    def is_verified(self):
+        if not hasattr(self, '_is_verified'):
+            url = f"{self.BASE_URL}/account/getaccountbasicinfo?access_token={self._ensure_access_token()}"  # noqa 501
+            response = requests.get(url, timeout=5)
+
+            try:
+                response.raise_for_status()
+                data = response.json()
+                wx_verify = data.get("wx_verify_info", {})
+                self._is_verified = bool(wx_verify.get("qualification_verify", False))
+            except (requests.RequestException, ValueError, KeyError):
+                self._is_verified = False
+
+        return self._is_verified
+
     def _ensure_access_token(self):
         # 检查现有token是否有效
         if self.access_token_data and self.access_token_data[
@@ -199,7 +215,7 @@ class WeixinPublisher:
                 file_name = os.path.basename(image_url)
 
             token = self._ensure_access_token()
-            if self.is_verified():
+            if self.is_verified:
                 url = f"{self.BASE_URL}/media/upload?access_token={token}&type=image"
             else:
                 url = f"{self.BASE_URL}/material/add_material?access_token={token}&type=image"
@@ -378,20 +394,6 @@ class WeixinPublisher:
 
         return ret
 
-    def is_verified(self):
-        url = f"{self.BASE_URL}/account/getaccountbasicinfo?access_token={self._ensure_access_token()}"  # noqa 501
-        response = requests.get(url, timeout=5)  # 增加超时控制
-
-        try:
-            response.raise_for_status()  # 自动处理HTTP错误
-            data = response.json()
-
-            # 正确获取嵌套字段
-            wx_verify = data.get("wx_verify_info", {})
-            return bool(wx_verify.get("qualification_verify", False))
-        except (requests.RequestException, ValueError, KeyError):
-            return False
-
 
 def pub2wx(title, digest, article, appid, appsecret, author):
 
@@ -457,7 +459,7 @@ def pub2wx(title, digest, article, appid, appsecret, author):
         log.print_log(f"上传配图出错，影响阅读，可继续发布文章:{e}")
 
     # 账号是否认证
-    if not publisher.is_verified():
+    if not publisher.is_verified:
         add_draft_result, err_msg = publisher.add_draft(article, title, digest, media_id)
         if add_draft_result is None:
             # 添加草稿失败，不再继续执行
