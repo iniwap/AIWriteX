@@ -1,6 +1,6 @@
 # AIWriteX - CrewAI微信公众号全自动生成排版发布工具
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/ai_auto_wxgzh?label=收藏)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
 
 **AIWriteX**是一款基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版高大上的文章并发布到微信公众号。  
 
@@ -75,7 +75,7 @@
 ## 🚀 快速开始
 ### 开发模式
 1. 克隆仓库：
-    - `git clone https://github.com/iniwap/ai_auto_wxgzh.git`
+    - `git clone https://github.com/iniwap/AIWriteX.git`
 2. 安装依赖：
    - `pip install -r requirements.txt`
    - `pip install PySimpleGUI-4.60.5-py3-none-any.whl`
@@ -99,16 +99,16 @@
 ### 开发模式
 - **界面模式**：
   - 检查 `logs/` 目录下的日志文件，如 `UI_2025-05-20.log`
-  - 复制相关日志内容，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+  - 复制相关日志内容，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 - **无界面模式**：
-  - 查看命令行输出日志，复制相关错误信息，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+  - 查看命令行输出日志，复制相关错误信息，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 - **CrewAI 版本问题**：
   - 不同 CrewAI 版本日志输出差异较大，建议临时切换到稳定版本查看详细过程日志：
     ```shell
     pip uninstall crewai
     pip install crewai==0.102.0
     ```
-  - 如果问题仍未解决，提交日志至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+  - 如果问题仍未解决，提交日志至 [Issues](https://github.com/iniwap/AIWriteX/issues)
   - 恢复最新版本：
     ```shell
     pip uninstall crewai
@@ -117,7 +117,7 @@
 
 ### 软件模式
 - 打开软件界面，选择 `文件 -> 日志 -> UI_2025-05-20.log`（选择当天日志）
-- 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)
+- 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 
 ### AIPy 相关问题
 - **搜索模式**：
@@ -137,7 +137,7 @@
 > **⚠️ 注意**：免费 OpenRouter 服务可能因高负载导致不稳定，请合理安排运行时间或切换账号以确保成功运行。
 
 ### 常见问题
-请查看`close`(已关闭)的[Issues](https://github.com/iniwap/ai_auto_wxgzh/issues)，以便了解大家常遇到且已经解决的问题。
+请查看`close`(已关闭)的[Issues](https://github.com/iniwap/AIWriteX/issues?q=is%3Aissue%20state%3Aclosed)，以便了解大家常遇到且已经解决的问题。
 
 ## 🔮 微信公众号模板效果预览
 
@@ -209,7 +209,7 @@
 
 ### 关于微信公众号
 
-以下是微信公众号开发及自动发文的注意事项与问题说明：
+以下是微信公众号开发及自动发文的问题说明：
 
 - **CSS 限制**：
   - 微信发布文章时会移除 `position: absolute`（但保留 `position: relative`），需使用替代布局实现类似效果
@@ -257,5 +257,5 @@
 如需了解配置详情或扩展、定制功能、商业授权，请联系我 QQ 522765228
 
 ## 📜 许可证 / License
-非商业用户、个人盈利用户、衍生开发（非盈利分发）及服务提供（非盈利）可自由使用、修改软件，但必须在软件的所有副本或实质部分中包含AIWriteX许可证和版权声明；**盈利性销售衍生产品或服务提供**需获得版权所有人的书面授权。  
+非商业用户、个人盈利用户、衍生开发（非盈利分发）及服务提供（非盈利）可自由使用、修改软件，但必须在软件的所有副本或实质部分中包含AIWriteX许可证和版权声明；**盈利性销售衍生产品或服务提供**的需获得版权所有人的书面授权。  
 详情请参阅 [LICENSE](LICENSE-CN.md) 文件。
