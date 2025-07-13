@@ -5,14 +5,13 @@
 
 # Copyright (c) 2025 iniwap
 #
-# This software is licensed under the [Your Project Name] License.
-# You may use, modify, and distribute this software freely for non-commercial purposes.
-# Commercial use requires prior written authorization.
-# See the LICENSE file in the project root for full details.
+# This software is licensed under the AIWriteX License.
+# Non-commercial, personal profit, non-profit derivative distribution, and non-profit service provision are allowed; profit-making sales and services require authorization.
+# See the LICENSE.md file in the project root for full details.
 #
-# 本软件受 CrewAI微信公众号全自动生成排版发布工具 许可证保护。
-# 非商业用途可自由使用、修改和分发。商业用途需获得书面授权。
-# 详情请参阅 LICENSE 文件。
+# 本软件受 AIWriteX 许可证保护。
+# 允许非商业、个人盈利、非盈利衍生分发和非盈利服务；盈利性销售和服务需授权。
+# 详情请参阅 LICENSE.md 文件。
 
 
 import requests
