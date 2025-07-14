@@ -9,8 +9,8 @@
 > **喜欢这个项目？** ⭐ 点个 Star 支持一下吧！  
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="image/preview/left.jpg" width="51.4%">
-  <img src="image/preview/right.jpg" width="49.6%">
+  <img src="image/preview/left.jpg" width="51%">
+  <img src="image/preview/right.jpg" width="49%">
 </div>
 
 ## 💎 基本功能
