@@ -63,9 +63,30 @@ class Config:
             ],
             "wechat": {
                 "credentials": [
-                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
-                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
-                    {"appid": "", "appsecret": "", "author": "", "sendall": False},
+                    {
+                        "appid": "",
+                        "appsecret": "",
+                        "author": "",
+                        "call_sendall": False,
+                        "sendall": True,
+                        "tag_id": 0,
+                    },
+                    {
+                        "appid": "",
+                        "appsecret": "",
+                        "author": "",
+                        "call_sendall": False,
+                        "sendall": True,
+                        "tag_id": 0,
+                    },
+                    {
+                        "appid": "",
+                        "appsecret": "",
+                        "author": "",
+                        "call_sendall": False,
+                        "sendall": True,
+                        "tag_id": 0,
+                    },
                 ]
             },
             "api": {
@@ -471,6 +492,18 @@ class Config:
         for cred in self.config["wechat"]["credentials"]:
             if cred["appid"] == target_appid:
                 return cred["sendall"]
+        return False
+
+    def get_call_sendall_by_appid(self, target_appid):
+        for cred in self.config["wechat"]["credentials"]:
+            if cred["appid"] == target_appid:
+                return cred["call_sendall"]
+        return False
+
+    def get_tagid_by_appid(self, target_appid):
+        for cred in self.config["wechat"]["credentials"]:
+            if cred["appid"] == target_appid:
+                return cred["tag_id"]
         return False
 
     def load_config(self):

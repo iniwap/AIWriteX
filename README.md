@@ -1,6 +1,6 @@
 # AIWriteX - CrewAI微信公众号全自动生成排版发布工具
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink)  ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIPy](https://img.shields.io/badge/aipyapp-0.1.27+-pink) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
 
 **AIWriteX**是一款基于 CrewAI 、AIPy 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版高大上的文章并发布到微信公众号。  
 
@@ -37,7 +37,8 @@
 | 配置项                     | 说明                                                                         |
 |----------------------------|-----------------------------------------------------------------------------|
 | **platforms**              | 设置各平台热搜话题随机选取权重，控制选用优先级                                  |
-| **wechat**                 | 支持配置多个微信公众号（自动发布时，**必填**`appid`、`appsecret`、`author`）   |
+| **wechat**                 | 支持配置多个微信公众号（自动发布时，**必填**`appid`、`appsecret`、`author`）    |
+| **wechat.credentials**     | `call_sendall`、`sendall`、`tag_id`用来控制群发情况（仅适用于认证号）          |
 | **api**                    | 支持多种大模型平台，**必填**`api_key`                                         |
 | **api.api_type**           | 支持多个大模型平台，修改 `api_type` 切换平台，如OpenRouter                     |
 | **api.OpenRouter.model_index** | 修改 `model_index` 选择平台内具体模型                                     |
@@ -202,8 +203,7 @@
 > *3、目前模板无法很好的应对暗色模式，这和微信僵硬的处理有关*  
 
  ## 📢 后续计划
-- **软件模式逐步产品化，包括名称、图标等等**
-- 优化配图管理相关功能
+- **优化配图管理相关功能**
 - 增加功能，使输出效果更好（持续）
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）
@@ -229,6 +229,11 @@
   - 微信 API 需将当前 IP 添加至后台白名单
   - 动态 IP 需手动更新白名单，或使用固定 IP 的代理
   - 解决方案：使用云服务器转发请求，或通过阿里云函数计算（免费，需注册阿里云）代理微信 API 请求
+- **公众号文章列表显示问题**：
+  - 未认证账号：API无法实现显示到公众号列表，只能通过后台操作
+  - 认证账号：必须调用群发接口，才能显示到列表。is_to_all（True/False）以及不调用sendAll接口具体情况，请各位自行测试，支持配置这三种情况
+  - is_to_all=False,且调用接口时，tag_id（用户标签群组ID）好像是必须填写
+  - [官方解释](https://developers.weixin.qq.com/doc/service/guide/product/message/Batch_Sends.html)（愣是看的云里雾里，WDNMD，为什么会有这么逆天的产品）
 
 > **⚠️ 注意**：2025 年 7 月后，非认证账号将面临自动化发布限制（目前仍可使用）。
 

@@ -68,33 +68,54 @@ class ConfigEditor:
         """创建微信 TAB 布局 (垂直排列，标签固定宽度对齐，支持滚动)"""
         credentials = self.config.wechat_credentials
         self.wechat_count = len(credentials)
-        label_width = 12
+        label_width = 8
         wechat_rows = []
         for i, cred in enumerate(credentials):
+            call_sendall = cred.get("call_sendall", False)
+            sendall = cred.get("sendall", False)
+
             wechat_rows.append(
                 [sg.Text(f"凭证 {i+1}:", size=(label_width, 1), key=f"-WECHAT_TITLE_{i}-")]
             )
             wechat_rows.append(
                 [
                     sg.Text("AppID*:", size=(label_width, 1)),
-                    sg.InputText(cred["appid"], key=f"-WECHAT_APPID_{i}-", size=(45, 1)),
+                    sg.InputText(cred["appid"], key=f"-WECHAT_APPID_{i}-", size=(20, 1)),
+                    sg.Text("作者:", size=(4, 1)),
+                    sg.InputText(cred["author"], key=f"-WECHAT_AUTHOR_{i}-", size=(20, 1)),
                 ]
             )
             wechat_rows.append(
                 [
                     sg.Text("AppSecret*:", size=(label_width, 1)),
-                    sg.InputText(cred["appsecret"], key=f"-WECHAT_SECRET_{i}-", size=(45, 1)),
+                    sg.InputText(cred["appsecret"], key=f"-WECHAT_SECRET_{i}-", size=(49, 1)),
                 ]
             )
             wechat_rows.append(
                 [
-                    sg.Text("作者:", size=(label_width, 1)),
-                    sg.InputText(cred["author"], key=f"-WECHAT_AUTHOR_{i}-", size=(35, 1)),
+                    sg.Text("群发选项:", size=(label_width, 1), tooltip="仅对【已认证公众号】有效"),
+                    sg.Checkbox(
+                        "启用群发",
+                        default=call_sendall,
+                        enable_events=True,
+                        key=f"-WECHAT_CALL_SENDALL_{i}-",
+                        tooltip="1. 启用群发，群发才有效\n2. 否则不启用，需要网页后台群发",
+                    ),
                     sg.Checkbox(
                         "群发",
-                        default=cred.get("sendall", False),
+                        enable_events=True,
+                        default=sendall,
+                        disabled=not call_sendall,
                         key=f"-WECHAT_SENDALL_{i}-",
                         tooltip="1. 认证号群发数量有限，群发可控\n2. 非认证号，此选项无效（不支持群发）",
+                    ),
+                    sg.Text("标签组ID:", size=(label_width, 1)),
+                    sg.InputText(
+                        cred.get("tag_id", 0),
+                        key=f"-WECHAT_TAG_ID_{i}-",
+                        size=(15, 1),
+                        disabled=not call_sendall or sendall,
+                        tooltip="1. 群发时不用填写（填写无效）\n2. 不群发时，必须填写标签组ID",
                     ),
                 ]
             )
@@ -699,7 +720,7 @@ class ConfigEditor:
                 tab_group = self.window["-API_TAB_GROUP-"]
                 # 遍历 TabGroup 的子 TAB，找到匹配的标题
                 for tab in tab_group.Widget.tabs():
-                    tab_text = tab_group.Widget.tab(tab, "text")  # 直接在 Notebook 上调用 tab()
+                    tab_text = tab_group.Widget.tab(tab, "text")
                     if tab_text == values["-API_TYPE-"]:
                         tab_group.Widget.select(tab)
                         break
@@ -708,7 +729,16 @@ class ConfigEditor:
             # 添加微信凭证
             elif event == "-ADD_WECHAT-":
                 credentials = self.config.wechat_credentials  # 直接使用内存中的 credentials
-                credentials.append({"appid": "", "appsecret": "", "author": "", "sendall": False})
+                credentials.append(
+                    {
+                        "appid": "",
+                        "appsecret": "",
+                        "author": "",
+                        "call_sendall": False,
+                        "sendall": True,
+                        "tag_id": 0,
+                    }
+                )
                 self.wechat_count = len(credentials)
                 try:
                     self.update_tab("-TAB_WECHAT-", self.create_wechat_tab())
@@ -720,7 +750,7 @@ class ConfigEditor:
                     self.window["-TAB_WECHAT-"].Widget.update()
                     self.window["-WECHAT_CREDENTIALS_COLUMN-"].Widget.update()
                 except Exception as e:
-                    sg.popup_error(f"添加凭证失败: {e}", icon=self.__get_icon())
+                    sg.popup_error(f"添加凭证失败: {e}", title="系统提示", icon=self.__get_icon())
             # 删除微信凭证
             elif event.startswith("-DELETE_WECHAT_"):
                 match = re.search(r"-DELETE_WECHAT_(\d+)", event)
@@ -738,9 +768,13 @@ class ConfigEditor:
                             self.window["-TAB_WECHAT-"].Widget.update()
                             self.window["-WECHAT_CREDENTIALS_COLUMN-"].Widget.update()
                         except Exception as e:
-                            sg.popup_error(f"删除凭证失败: {e}", icon=self.__get_icon())
+                            sg.popup_error(
+                                f"删除凭证失败: {e}", title="系统提示", icon=self.__get_icon()
+                            )
                     else:
-                        sg.popup_error(f"无效的凭证索引: {index}", icon=self.__get_icon())
+                        sg.popup_error(
+                            f"无效的凭证索引: {index}", title="系统提示", icon=self.__get_icon()
+                        )
 
             # 保存平台配置
             elif event.startswith("-SAVE_PLATFORMS-"):
@@ -757,6 +791,7 @@ class ConfigEditor:
                             weight = 0
                             sg.popup_error(
                                 f"平台 {values[f'-PLATFORM_NAME_{i}-']} 权重小于0，将被设为0",
+                                title="系统提示",
                                 icon=self.__get_icon(),
                             )
                             # 更新界面上的权重值
@@ -765,6 +800,7 @@ class ConfigEditor:
                             weight = 1
                             sg.popup_error(
                                 f"平台 {values[f'-PLATFORM_NAME_{i}-']} 权重大于1，将被设为1",
+                                title="系统提示",
                                 icon=self.__get_icon(),
                             )
                             # 更新界面上的权重值
@@ -775,6 +811,7 @@ class ConfigEditor:
                     except ValueError:
                         sg.popup_error(
                             f"平台 {values[f'-PLATFORM_NAME_{i}-']} 权重必须是数字",
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
                         break
@@ -783,6 +820,7 @@ class ConfigEditor:
                     if total_weight > 1.0:
                         sg.popup(
                             "平台权重之和超过1，将默认选取微博热搜。",
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
                     config["platforms"] = platforms
@@ -790,11 +828,13 @@ class ConfigEditor:
                         self.platform_count = len(platforms)  # 同步更新计数器
                         sg.popup(
                             "平台配置已保存",
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
                     else:
                         sg.popup_error(
                             self.config.error_message,
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
 
@@ -818,20 +858,53 @@ class ConfigEditor:
                     appid_key = f"-WECHAT_APPID_{i}-"
                     secret_key = f"-WECHAT_SECRET_{i}-"
                     author_key = f"-WECHAT_AUTHOR_{i}-"
+                    call_sendall_key = f"-WECHAT_CALL_SENDALL_{i}-"
                     sendall_key = f"-WECHAT_SENDALL_{i}-"
+                    tag_id_key = f"-WECHAT_TAG_ID_{i}-"
                     if (
                         appid_key in self.window.AllKeysDict
                         and secret_key in self.window.AllKeysDict
                         and author_key in self.window.AllKeysDict
+                        and call_sendall_key in self.window.AllKeysDict
                         and sendall_key in self.window.AllKeysDict
+                        and tag_id_key in self.window.AllKeysDict
                         and self.window[appid_key].visible
                     ):
+                        tag_id_value = values.get(tag_id_key, 0)
+                        appid = values.get(appid_key, "")
+                        appsecret = values.get(secret_key, "")
+                        call_sendall = values.get(call_sendall_key, False)
+                        sendall = values.get(sendall_key, False)
+
+                        # 只有真正使用tag_id，才校验
+                        if appid and appsecret and call_sendall and not sendall:
+                            try:
+                                tag_id = int(tag_id_value) if str(tag_id_value).isdigit() else 0
+                                if tag_id < 1:
+                                    tag_id = 0
+                                    sg.popup_error(
+                                        f"【凭证 {i+1} 】标签组ID必须 ≥ 1，已设为0（即无效，如果未勾选群发将发布失败）",
+                                        title="系统提示",
+                                        icon=self.__get_icon(),
+                                    )
+                                    self.window[tag_id_key].update(value=str(tag_id))
+                            except ValueError:
+                                tag_id = 0
+                                sg.popup_error(
+                                    f"【凭证 {i+1} 】标签组ID必须为数字，已设为0（即无效，如果未勾选群发将发布失败）",
+                                    title="系统提示",
+                                    icon=self.__get_icon(),
+                                )
+                                self.window[tag_id_key].update(value=str(tag_id))
+
                         credentials.append(
                             {
                                 "appid": values.get(appid_key, ""),
                                 "appsecret": values.get(secret_key, ""),
                                 "author": values.get(author_key, ""),
+                                "call_sendall": values.get(call_sendall_key, False),
                                 "sendall": values.get(sendall_key, False),
+                                "tag_id": tag_id,
                             }
                         )
                     i += 1
@@ -845,9 +918,11 @@ class ConfigEditor:
                     self.window.refresh()
                     self.window["-TAB_WECHAT-"].Widget.update()
                     self.window["-WECHAT_CREDENTIALS_COLUMN-"].Widget.update()
-                    sg.popup("微信配置已保存", icon=self.__get_icon())
+                    sg.popup("微信配置已保存", title="系统提示", icon=self.__get_icon())
                 else:
-                    sg.popup_error(self.config.error_message, icon=self.__get_icon())
+                    sg.popup_error(
+                        self.config.error_message, title="系统提示", icon=self.__get_icon()
+                    )
 
             # 保存 API 配置
             elif event.startswith("-SAVE_API-"):
@@ -885,6 +960,7 @@ class ConfigEditor:
                     except ValueError as e:
                         sg.popup_error(
                             f"{api_name} 配置错误: {e}",
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
                         break
@@ -892,11 +968,13 @@ class ConfigEditor:
                     if self.config.save_config(config):
                         sg.popup(
                             "API 配置已保存",
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
                     else:
                         sg.popup_error(
                             self.config.error_message,
+                            title="系统提示",
                             icon=self.__get_icon(),
                         )
 
@@ -913,11 +991,13 @@ class ConfigEditor:
                 if self.config.save_config(config):
                     sg.popup(
                         "图像 API 配置已保存",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1022,11 +1102,13 @@ class ConfigEditor:
                 if self.config.save_config(config):
                     sg.popup(
                         "基础配置已保存",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1040,11 +1122,13 @@ class ConfigEditor:
                     self.update_tab("-TAB_PLATFORM-", self.create_platforms_tab())
                     sg.popup(
                         "已恢复默认平台配置",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1060,11 +1144,13 @@ class ConfigEditor:
                     self.update_tab("-TAB_WECHAT-", self.create_wechat_tab())
                     sg.popup(
                         "已恢复默认微信配置",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1078,11 +1164,13 @@ class ConfigEditor:
                     self.__default_select_api_tab()
                     sg.popup(
                         "已恢复默认API配置",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1095,11 +1183,13 @@ class ConfigEditor:
                     self.update_tab("-TAB_IMG_API-", self.create_img_api_tab())
                     sg.popup(
                         "已恢复默认图像API配置",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1126,11 +1216,13 @@ class ConfigEditor:
                     self.update_tab("-TAB_BASE-", self.create_base_tab())
                     sg.popup(
                         "已恢复默认基础配置",
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
                 else:
                     sg.popup_error(
                         self.config.error_message,
+                        title="系统提示",
                         icon=self.__get_icon(),
                     )
 
@@ -1155,7 +1247,9 @@ class ConfigEditor:
                     )
                     self.window.refresh()
                 except Exception as e:
-                    sg.popup_error(f"更新 AIPy 提供商配置失败: {e}", icon=self.__get_icon())
+                    sg.popup_error(
+                        f"更新 AIPy 提供商配置失败: {e}", title="系统提示", icon=self.__get_icon()
+                    )
 
             # 保存 AIPy 配置
             elif event.startswith("-SAVE_AIPY-"):
@@ -1189,20 +1283,51 @@ class ConfigEditor:
                     )
 
                     if self.config.save_config(self.config.get_config(), aipy_config):
-                        sg.popup("AIPy 配置已保存", icon=self.__get_icon())
+                        sg.popup("AIPy 配置已保存", title="系统提示", icon=self.__get_icon())
                     else:
-                        sg.popup_error(self.config.error_message, icon=self.__get_icon())
+                        sg.popup_error(
+                            self.config.error_message, title="系统提示", icon=self.__get_icon()
+                        )
                 except ValueError:
-                    sg.popup_error("超时时间或最大 Tokens 必须是整数", icon=self.__get_icon())
+                    sg.popup_error(
+                        "超时时间或最大 Tokens 必须是整数", title="系统提示", icon=self.__get_icon()
+                    )
 
             # 恢复默认 AIPy 配置
             elif event.startswith("-RESET_AIPY-"):
                 aipy_config = copy.deepcopy(self.config.default_aipy_config)
                 if self.config.save_config(self.config.get_config(), aipy_config):
                     self.update_tab("-TAB_AIPY-", self.create_aipy_tab())
-                    sg.popup("已恢复默认 AIPy 配置", icon=self.__get_icon())
+                    sg.popup("已恢复默认 AIPy 配置", title="系统提示", icon=self.__get_icon())
                 else:
-                    sg.popup_error(self.config.error_message, icon=self.__get_icon())
+                    sg.popup_error(
+                        self.config.error_message, title="系统提示", icon=self.__get_icon()
+                    )
+
+            elif event.startswith("-WECHAT_CALL_SENDALL_") or event.startswith("-WECHAT_SENDALL_"):
+                match = re.search(r"_(\d+)-$", event)
+                if match:
+                    index = int(match.group(1))
+                    call_sendall_key = f"-WECHAT_CALL_SENDALL_{index}-"
+                    sendall_key = f"-WECHAT_SENDALL_{index}-"
+                    tag_id_key = f"-WECHAT_TAG_ID_{index}-"
+
+                    if all(
+                        key in self.window.AllKeysDict
+                        for key in [call_sendall_key, sendall_key, tag_id_key]
+                    ):
+                        call_sendall_enabled = values.get(call_sendall_key, False)
+                        sendall_enabled = values.get(sendall_key, False)
+
+                        if call_sendall_enabled:
+                            self.window[sendall_key].update(disabled=False)
+                            if sendall_enabled:
+                                self.window[tag_id_key].update(disabled=True)
+                            else:
+                                self.window[tag_id_key].update(disabled=False)
+                        else:
+                            self.window[sendall_key].update(disabled=True)
+                            self.window[tag_id_key].update(disabled=True)
 
         self.window.close()
 

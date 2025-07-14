@@ -373,12 +373,23 @@ class WeixinPublisher:
         return ret
 
     # 根据标签进行群发【订阅号与服务号认证后均可用】
-    def message_mass_sendall(self, media_id):
+    def message_mass_sendall(self, media_id, is_to_all=True, tag_id=0):
         ret = None
+
+        if is_to_all:
+            data_filter = {
+                "is_to_all": is_to_all,
+            }
+        else:
+            if tag_id == 0:
+                return "根据标签进行群发失败：未勾选群发，且tag_id=0无效"
+
+            data_filter = {
+                "is_to_all": is_to_all,
+                "tag_id": tag_id,
+            }
         data = {
-            "filter": {
-                "is_to_all": True,
-            },
+            "filter": data_filter,
             "mpnews": {"media_id": media_id},
             "msgtype": "mpnews",
             "send_ignore_reprint": 1,
@@ -486,8 +497,21 @@ def pub2wx(title, digest, article, appid, appsecret, author):
         """
 
         # 是否设置为群发
-        if Config.get_instance().get_sendall_by_appid(appid):
-            ret = publisher.message_mass_sendall(media_id)
+        """
+        微信官方说明：https://developers.weixin.qq.com/doc/service/guide/product/message/Batch_Sends.html
+
+        关于群发时设置 is_to_all 为 true 使其进入服务号在微信客户端的历史消息列表的说明：
+        设置 is_to_all 为 true 且成功群发，会使得此次群发进入历史消息列表。
+        为防止异常，认证服务号在一天内，只能设置 is_to_all 为 true 且成功群发一次，或者在公众平台官网群发一次。以避免一天内有2条群发进入历史消息列表。
+        类似地，服务号在一个月内，设置 is_to_all 为 true 且成功群发的次数，加上公众平台官网群发的次数，最多只能是4次。
+        服务号设置 is_to_all 为 false 时是可以多次群发的，但每个用户一个月内只会收到最多4条，且这些群发不会进入历史消息列表。
+        """
+        if config.get_call_sendall_by_appid(appid):
+            ret = publisher.message_mass_sendall(
+                media_id,
+                config.get_sendall_by_appid(appid),
+                config.get_tagid_by_appid(appid),
+            )
             if ret is not None:
                 return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
 
