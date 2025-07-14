@@ -6,8 +6,8 @@ import tomlkit
 from aipyapp.aipy.config import ConfigManager
 from aipyapp.main import get_default_config
 
-from src.ai_auto_wxgzh.utils import comm
-from src.ai_auto_wxgzh.utils import utils
+from src.ai_write_x.utils import comm
+from src.ai_write_x.utils import utils
 
 # 默认分类配置
 DEFAULT_TEMPLATE_CATEGORIES = {

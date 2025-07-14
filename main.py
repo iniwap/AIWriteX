@@ -1,5 +1,3 @@
-# 注意： 打包安装软件时，所有用到的模块都要在此处导入
-
 import copy  # noqa 841
 import asyncio  # noqa 841
 import shutil  # noqa 841
@@ -82,7 +80,7 @@ from rich.console import Console  # noqa 841
 from aipyapp.aipy.taskmgr import TaskManager  # noqa 841
 
 
-import src.ai_auto_wxgzh.gui.MainGUI as MainGUI  # noqa 402
+import src.ai_write_x.gui.MainGUI as MainGUI  # noqa 402
 
 
 def is_admin():

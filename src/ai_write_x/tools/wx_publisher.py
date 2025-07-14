@@ -13,9 +13,9 @@ import mimetypes
 import json
 import time
 
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import Config
-from src.ai_auto_wxgzh.utils import log
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import Config
+from src.ai_write_x.utils import log
 
 
 class PublishStatus(Enum):
@@ -52,7 +52,7 @@ class WeixinPublisher:
 
     @property
     def is_verified(self):
-        if not hasattr(self, '_is_verified'):
+        if not hasattr(self, "_is_verified"):
             url = f"{self.BASE_URL}/account/getaccountbasicinfo?access_token={self._ensure_access_token()}"  # noqa 501
             response = requests.get(url, timeout=5)
 

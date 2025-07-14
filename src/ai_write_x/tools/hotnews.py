@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: iniwap
 # Date: 2025-06-03
-# Description: 用于热搜话题获取，关注项目 https://github.com/iniwap/ai_auto_wxgzh
+# Description: 用于热搜话题获取，关注项目 https://github.com/iniwap/ai_write_x
 
 # Copyright (c) 2025 iniwap
 #
@@ -19,7 +19,7 @@ import random
 from typing import Optional, List, Dict
 from bs4 import BeautifulSoup
 
-from src.ai_auto_wxgzh.utils import log
+from src.ai_write_x.utils import log
 
 # 平台名称映射
 PLATFORMS = [

@@ -1,2 +1,2 @@
 knowledge/**/*.html linguist-documentation
-# output/微信公众号AI工具_Setup.exe filter=lfs diff=lfs merge=lfs -text
+# output/AIWriteX_Setup.exe filter=lfs diff=lfs merge=lfs -text

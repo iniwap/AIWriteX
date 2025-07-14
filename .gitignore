@@ -6,14 +6,12 @@ logs/*.log
 make_exe/
 user_config.toml
 image/*
-!image/preview*.jpg
+!image/preview/
 aipy_work/*
 !aipy_work/.gitkeep
 config.bk
 output/*/*
 !output/article/.gitkeep
 !output/exe/.gitkeep
-微信公众号AI工具_云盘版_Setup*.exe
-微信公众号AI工具_云盘版_Setup*.zip
-commercial/*
-!commercial/.gitkeep
+AIWriteX_云盘版_Setup*.exe
+AIWriteX_云盘版_Setup*.zip

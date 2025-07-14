@@ -10,12 +10,12 @@ from pydantic import BaseModel, Field
 from rich.console import Console
 from aipyapp.aipy.taskmgr import TaskManager
 
-from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import Config
-from src.ai_auto_wxgzh.tools.search_service import SearchService
-from src.ai_auto_wxgzh.utils import log
-from src.ai_auto_wxgzh.tools import search_template
+from src.ai_write_x.tools.wx_publisher import pub2wx
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import Config
+from src.ai_write_x.tools.search_service import SearchService
+from src.ai_write_x.utils import log
+from src.ai_write_x.tools import search_template
 
 
 class ReadTemplateToolInput(BaseModel):
@@ -268,7 +268,9 @@ class AIPySearchTool(BaseTool):
             if Config.get_instance().aipy_api_key:
                 # 第二步：渐进式AI生成
                 console = Console()
-                console.print("[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]")
+                console.print(
+                    "[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]"
+                )
                 task_manager = TaskManager(
                     Config.get_instance().get_aipy_settings(), console=console
                 )
@@ -282,7 +284,9 @@ class AIPySearchTool(BaseTool):
                 ):
                     return constrained_result.get("results")
 
-                console.print("[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]")
+                console.print(
+                    "[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]"
+                )
                 # 最后尝试完全自由的AI生成
                 free_result = self._try_free_form_ai(topic, max_results, min_results, task_manager)
                 if search_template.validate_search_result(free_result, min_results, "ai_free"):

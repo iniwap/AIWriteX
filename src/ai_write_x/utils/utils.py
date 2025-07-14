@@ -15,7 +15,7 @@ from PIL import Image
 import tempfile
 
 
-from src.ai_auto_wxgzh.utils import log
+from src.ai_write_x.utils import log
 
 
 def copy_file(src_file, dest_file):

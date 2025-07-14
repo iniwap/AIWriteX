@@ -6,9 +6,9 @@ import time
 import traceback
 from datetime import datetime
 
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.utils import comm
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_write_x.utils import utils
+from src.ai_write_x.utils import comm
+from src.ai_write_x.config.config import Config
 
 
 def strip_ansi_codes(text):

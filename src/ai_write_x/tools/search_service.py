@@ -5,8 +5,8 @@ from pathlib import Path
 from aipyapp.aipy import TaskManager
 from rich.console import Console
 
-from src.ai_auto_wxgzh.config.config import Config
-from src.ai_auto_wxgzh.tools import search_template
+from src.ai_write_x.config.config import Config
+from src.ai_write_x.tools import search_template
 
 
 class SearchService:

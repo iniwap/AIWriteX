@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: iniwap
 # Date: 2025-06-03
-# Description: 用于本地搜索，关注项目 https://github.com/iniwap/ai_auto_wxgzh
+# Description: 用于本地搜索，关注项目 https://github.com/iniwap/ai_write_x
 
 # Copyright (c) 2025 iniwap
 #

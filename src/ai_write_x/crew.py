@@ -3,20 +3,18 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.cli.constants import ENV_VARS  # 需要根据此判断是否支持设置的LLM
 
 
-from src.ai_auto_wxgzh.tools.custom_tool import (
+from src.ai_write_x.tools.custom_tool import (
     PublisherTool,
     ReadTemplateTool,
     AIPySearchTool,
     SaveArticleTool,
 )
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import Config
 
 
 @CrewBase
-class AutowxGzh:
-    """AutowxGzh crew"""
-
+class AIWriteXCrew:
     agents_config = utils.get_res_path("config/agents.yaml")
     tasks_config = utils.get_res_path("config/tasks.yaml")
 
@@ -135,7 +133,7 @@ class AutowxGzh:
 
     @crew
     def crew(self) -> Crew:
-        """Creates the AutowxGzh crew"""
+        """Creates the AIWriteXCrew crew"""
 
         config = Config.get_instance()
         no_use_agent = []

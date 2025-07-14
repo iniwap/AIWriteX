@@ -9,8 +9,8 @@
 > **喜欢这个项目？** ⭐ 点个 Star 支持一下吧！  
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="image/preview.jpg" width="46%">
-  <img src="image/preview_2.jpg" width="53%">
+  <img src="image/preview/left.jpg" width="51.4%">
+  <img src="image/preview/right.jpg" width="49.6%">
 </div>
 
 ## 💎 基本功能
@@ -82,11 +82,11 @@
 4. 配置 `config.yaml`、`aipyapp.toml`（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
 5. 运行：
     - 有UI界面：`python .\main.py -d` (**推荐**)
-    - 无UI界面：`python -m src.ai_auto_wxgzh.crew_main` （**不支持文章、模板、配图管理**）
+    - 无UI界面：`python -m src.ai_write_x.crew_main` （**不支持文章、模板、配图管理**）
 
 ### 软件模式
-1. 请从网盘下载`微信公众号AI工具_云盘版_Setup_V2.1.exe` 👇，并安装
-    - [移动云盘 提取码:ca31](https://caiyun.139.com/w/i/2oxwEF7ZuLoof) （已更新）
+1. 请从网盘下载`AIWriteX_云盘版_Setup_V2.1.1.exe` 👇，并安装
+    - [移动云盘 提取码:66n6](https://caiyun.139.com/w/i/2oxwEZ9jT9tuo) （已更新）
     - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh) （未更新）
     - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)（未更新）
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
@@ -257,5 +257,7 @@
 如需了解配置详情或扩展、定制功能、商业授权，请联系我 QQ 522765228
 
 ## 📜 许可证 / License
-非商业用户、个人盈利用户、衍生开发（非盈利分发）及服务提供（非盈利）可自由使用、修改软件，但必须在软件的所有副本或实质部分中包含AIWriteX许可证和版权声明；**盈利性销售衍生产品或服务提供**的需获得版权所有人的书面授权。  
-详情请参阅 [LICENSE](LICENSE-CN.md) 文件。
+- **非商业使用**：您可自由使用和修改软件，但必须在所有副本或实质部分中保留 AIWriteX 许可证和版权声明。
+- **分发与服务提供**：分发软件或向第三方提供服务需获得版权持有人的事先书面授权。详情请联系 myproject@example.com。
+- **专属版本限制**：通过一次性付款计划或定制开发计划获得的专属版本不得分发或提供服务（无论盈利或非盈利），即使获得授权。
+- **完整条款**：请参阅 [LICENSE-CN.md](LICENSE-CN.md) 获取详细信息。

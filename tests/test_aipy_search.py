@@ -9,7 +9,7 @@ project_root = os.path.dirname(current_dir)
 # 将根目录添加到 Python 搜索路径
 sys.path.append(project_root)
 
-from src.ai_auto_wxgzh.tools.search_template import search_web, extract_urls_content  # noqa 401
+from src.ai_write_x.tools.search_template import search_web, extract_urls_content  # noqa 401
 
 
 if __name__ == "__main__":

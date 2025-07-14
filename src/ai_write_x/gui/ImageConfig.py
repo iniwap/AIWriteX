@@ -14,8 +14,8 @@ import subprocess
 import tempfile
 
 
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import Config
 
 
 __author__ = "iniwaper@gmail.com"
@@ -431,7 +431,7 @@ class ImageConfigWindow:
         layout = self._create_layout()
 
         self.window = sg.Window(
-            f'配图管理 - {self.article["title"]}',
+            f'AIWriteX - 配图管理 - {self.article["title"]}',
             layout,
             size=(700, 660),
             finalize=True,

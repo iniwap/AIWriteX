@@ -3,8 +3,8 @@ import re
 import os
 import copy
 
-from src.ai_auto_wxgzh.config.config import Config, DEFAULT_TEMPLATE_CATEGORIES
-from src.ai_auto_wxgzh.utils import utils
+from src.ai_write_x.config.config import Config, DEFAULT_TEMPLATE_CATEGORIES
+from src.ai_write_x.utils import utils
 
 
 class ConfigEditor:
@@ -16,7 +16,7 @@ class ConfigEditor:
         self.wechat_count = len(self.config.wechat_credentials)
         self.window = None
         self.window = sg.Window(
-            "配置管理",
+            "AIWriteX - 配置管理",
             self.create_layout(),
             size=(500, 600),
             resizable=False,

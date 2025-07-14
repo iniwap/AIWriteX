@@ -4,11 +4,11 @@ import os
 import warnings
 import asyncio
 
-from src.ai_auto_wxgzh.tools import hotnews
-from src.ai_auto_wxgzh.crew import AutowxGzh
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.utils import log
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_write_x.tools import hotnews
+from src.ai_write_x.crew import AIWriteXCrew
+from src.ai_write_x.utils import utils
+from src.ai_write_x.utils import log
+from src.ai_write_x.config.config import Config
 
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
@@ -32,7 +32,7 @@ async def run_crew_async(stop_event, inputs, appid, appsecret, author):
     try:
         if stop_event.is_set():
             raise StopCrewException("CrewAI 任务被终止")
-        result = await AutowxGzh(appid, appsecret, author).crew().kickoff_async(inputs=inputs)
+        result = await AIWriteXCrew(appid, appsecret, author).crew().kickoff_async(inputs=inputs)
         return result
     except StopCrewException as e:
         raise e
@@ -45,12 +45,12 @@ def run(inputs, appid, appsecret, author):
     Run the crew.
     """
     try:
-        AutowxGzh(appid, appsecret, author).crew().kickoff(inputs=inputs)
+        AIWriteXCrew(appid, appsecret, author).crew().kickoff(inputs=inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 
 
-def autowx_gzh_run(
+def ai_write_x_run(
     config,
     ui_mode,
     stop_event,
@@ -102,7 +102,7 @@ def autowx_gzh_run(
             log.print_log(f"执行出错：{str(e)}")
 
 
-def autowx_gzh(stop_event=None, ui_mode=False):
+def ai_write_x_main(stop_event=None, ui_mode=False):
     config = Config.get_instance()
     if not ui_mode:
         if not config.load_config():
@@ -129,9 +129,9 @@ def autowx_gzh(stop_event=None, ui_mode=False):
             if len(appid) == 0 or len(appsecret) == 0:
                 continue
 
-            autowx_gzh_run(config, ui_mode, stop_event, appid, appsecret, author)
+            ai_write_x_run(config, ui_mode, stop_event, appid, appsecret, author)
     else:
-        autowx_gzh_run(config, ui_mode, stop_event)
+        ai_write_x_run(config, ui_mode, stop_event)
 
 
 # ----------------由于参数原因，以下调用不可用------------------
@@ -141,7 +141,9 @@ def train():
     """
     inputs = {"topic": "AI LLMs"}
     try:
-        AutowxGzh().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
+        AIWriteXCrew().crew().train(
+            n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs
+        )
 
     except Exception as e:
         raise Exception(f"An error occurred while training the crew: {e}")
@@ -152,7 +154,7 @@ def replay():
     Replay the crew execution from a specific task.
     """
     try:
-        AutowxGzh().crew().replay(task_id=sys.argv[1])
+        AIWriteXCrew().crew().replay(task_id=sys.argv[1])
 
     except Exception as e:
         raise Exception(f"An error occurred while replaying the crew: {e}")
@@ -164,7 +166,7 @@ def test():
     """
     inputs = {"topic": "AI LLMs"}
     try:
-        AutowxGzh().crew().test(
+        AIWriteXCrew().crew().test(
             n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs
         )
 
@@ -173,4 +175,4 @@ def test():
 
 
 if __name__ == "__main__":
-    autowx_gzh()
+    ai_write_x_main()

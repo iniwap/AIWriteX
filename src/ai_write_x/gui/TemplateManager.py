@@ -13,8 +13,8 @@ import PySimpleGUI as sg
 import subprocess
 import shutil
 
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import DEFAULT_TEMPLATE_CATEGORIES
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import DEFAULT_TEMPLATE_CATEGORIES
 
 
 __author__ = "iniwaper@gmail.com"
@@ -809,7 +809,7 @@ class TemplateManager:
     def run(self):
         """运行模板管理窗口"""
         self._window = sg.Window(
-            "模板管理",
+            "AIWriteX - 模板管理",
             self._create_layout(),
             size=(850, 640),
             resizable=False,

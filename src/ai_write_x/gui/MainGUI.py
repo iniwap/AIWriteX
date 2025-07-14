@@ -17,17 +17,17 @@ from collections import deque
 import PySimpleGUI as sg
 import tkinter as tk
 
-from src.ai_auto_wxgzh.crew_main import autowx_gzh
+from src.ai_write_x.crew_main import ai_write_x_main
 
-from src.ai_auto_wxgzh.utils import comm
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.utils import log
-from src.ai_auto_wxgzh.config.config import Config
+from src.ai_write_x.utils import comm
+from src.ai_write_x.utils import utils
+from src.ai_write_x.utils import log
+from src.ai_write_x.config.config import Config
 
-from src.ai_auto_wxgzh.gui import ConfigEditor
-from src.ai_auto_wxgzh.gui import ArticleManager
-from src.ai_auto_wxgzh.gui import TemplateManager
-from src.ai_auto_wxgzh.config.config import DEFAULT_TEMPLATE_CATEGORIES
+from src.ai_write_x.gui import ConfigEditor
+from src.ai_write_x.gui import ArticleManager
+from src.ai_write_x.gui import TemplateManager
+from src.ai_write_x.config.config import DEFAULT_TEMPLATE_CATEGORIES
 
 
 __author__ = "iniwaper@gmail.com"
@@ -229,7 +229,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "微信公众号AI工具 v2.1",
+            "AIWriteX - v2.1.1",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),
@@ -496,7 +496,7 @@ class MainGUI(object):
                         self._is_running = True
                         self._stop_event.clear()
                         self._crew_thread = threading.Thread(
-                            target=autowx_gzh,
+                            target=ai_write_x_main,
                             args=(self._stop_event, True),
                             daemon=True,
                         )
@@ -530,14 +530,14 @@ class MainGUI(object):
                         )
                 elif event == "关于":
                     sg.popup(
-                        "关于软件",
-                        "当前Version 2.1",
+                        "关于软件 AIWriteX",
+                        "当前Version 2.1.1",
                         "Copyright (C) 2025 iniwap,All Rights Reserved",
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
                 elif event == "官网":
-                    utils.open_url("https://github.com/iniwap")
+                    utils.open_url("https://github.com/iniwap/AIWriteX")
                 elif event == "帮助":
                     sg.popup(
                         "———————————配置说明———————————\n"

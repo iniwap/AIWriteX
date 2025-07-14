@@ -8,8 +8,8 @@ project_root = os.path.dirname(current_dir)
 # 将根目录添加到 Python 搜索路径
 sys.path.append(project_root)
 
-from src.ai_auto_wxgzh.utils import log  # noqa 402
-from src.ai_auto_wxgzh.tools.hotnews import select_platform_topic  # noqa 402
+from src.ai_write_x.utils import log  # noqa 402
+from src.ai_write_x.tools.hotnews import select_platform_topic  # noqa 402
 
 
 selected_topic = select_platform_topic("微博")

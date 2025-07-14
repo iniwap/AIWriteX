@@ -12,10 +12,10 @@ import PySimpleGUI as sg
 import subprocess
 import json
 
-from src.ai_auto_wxgzh.utils import utils
-from src.ai_auto_wxgzh.config.config import Config
-from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx
-from src.ai_auto_wxgzh.gui import ImageConfig
+from src.ai_write_x.utils import utils
+from src.ai_write_x.config.config import Config
+from src.ai_write_x.tools.wx_publisher import pub2wx
+from src.ai_write_x.gui import ImageConfig
 
 __author__ = "iniwaper@gmail.com"
 __copyright__ = "Copyright (C) 2025 iniwap"
@@ -457,7 +457,7 @@ class ArticleManager:
     def run(self):
         """运行文章管理窗口"""
         self._window = sg.Window(
-            "文章管理",
+            "AIWriteX - 文章管理",
             self._create_layout(),
             size=(1000, 600),
             finalize=True,

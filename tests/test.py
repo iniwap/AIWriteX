@@ -15,10 +15,10 @@ project_root = os.path.dirname(current_dir)
 # 将根目录添加到 Python 搜索路径
 sys.path.append(project_root)
 
-from src.ai_auto_wxgzh.utils import log  # noqa 402
-from src.ai_auto_wxgzh.utils import utils  # noqa 402
-from src.ai_auto_wxgzh.tools.wx_publisher import pub2wx, WeixinPublisher  # noqa 402
-from src.ai_auto_wxgzh.config.config import Config  # noqa 402
+from src.ai_write_x.utils import log  # noqa 402
+from src.ai_write_x.utils import utils  # noqa 402
+from src.ai_write_x.tools.wx_publisher import pub2wx, WeixinPublisher  # noqa 402
+from src.ai_write_x.config.config import Config  # noqa 402
 
 
 def test_llm_support():

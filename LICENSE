@@ -1,27 +1,16 @@
-AIWriteX License
-Version 1.0, July 12, 2025
-Copyright (c) 2025 iniwap
+# AIWriteX License 📜
+## Version 1.1, July 13, 2025
+**Copyright (c) 2025 CodeMaster**
 
-This license governs the use of the software and associated files (collectively, the "Software") provided in this repository.
+This License applies to the software and associated files (collectively, the "Software") provided in this repository.
 
-1. Non-Commercial Use and Distribution: You are free to use, modify, and distribute the Software for non-commercial purposes without restriction, provided you include this license and the copyright notice in all copies or substantial portions of the Software.
+1. **Non-Commercial Use**: You may freely use and modify the Software for non-commercial purposes without authorization, provided that you include this License and copyright notice in all copies or substantial portions of the Software.
 
-2. Personal Profit Use: You may use the Software for personal profit-making activities (e.g., individual projects or freelance work) without prior authorization, provided such use does not involve service provision or commercial distribution to third parties. You must retain the copyright notice and this license in all instances.
+2. **Distribution and Service Provision**:
+   - You may not distribute or provide services to third parties (including but not limited to copying, sharing, or disseminating the Software, or using the Software to provide SaaS, API hosting, or other services) unless you obtain prior written authorization from the copyright holder.
+   - **Authorization Rules**:
+     - Non-profit distribution or service provision requires no payment for authorization, but you must retain this License and copyright notice.
+     - Profit-making distribution or service provision requires prior written authorization from the copyright holder, which may involve a paid license.
+   - For authorization, please contact iniwaper@gmail.com.
 
-3. Derivative Development and Distribution:
-   - You may develop derivative works or products based on the Software and distribute them without prior authorization, provided such distribution is not for profit.
-   - If you sell, distribute, or otherwise use derivative works or products for commercial gain (i.e., with a profit-making purpose), you must obtain prior written authorization from the copyright owner. Such authorization may involve a paid license. To request authorization, contact iniwaper@gmail.com.
-
-4. Service Provision:
-   - You may use the Software to provide services to third parties (e.g., SaaS, API hosting) without prior authorization, provided such services are not provided for profit.
-   - If you use the Software to provide services to third parties for commercial gain (i.e., with a profit-making purpose), you must obtain prior written authorization from the copyright owner. Such authorization may involve a paid license. To request authorization, contact iniwaper@gmail.com.
-
-5. Attribution: You must retain the copyright notice, this license, and any disclaimers in all copies or substantial portions of the Software, whether used for non-commercial, personal profit, derivative development, service provision, or authorized commercial purposes.
-
-6. No Warranty: The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the copyright owner be liable for any claim, damages, or other liability arising from the use of the Software.
-
-7. Termination: Any violation of these terms, including unauthorized sale of derivatives, unauthorized profit-making service provision, or failure to retain copyright notices, will automatically terminate your rights under this license.
-
-By using the Software, you agree to be bound by the terms of this license. This license is the entire agreement between you and the copyright owner regarding the Software.
-
-For inquiries about commercial use authorization (profit-making sale of derivatives or service provision), please contact iniwaper@gmail.com.
+3. **Personal Profit-Making Use**: You may use the Software for personal profit-making activities (e.g., individual projects or freelance work) without prior authorization, provided that such use does not involve distribution or providing services to third parties. You must retain the copyright notice and this License in all
