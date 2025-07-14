@@ -85,10 +85,14 @@
     - 无UI界面：`python -m src.ai_write_x.crew_main` （**不支持文章、模板、配图管理**）
 
 ### 软件模式
-1. 请从网盘下载`AIWriteX_云盘版_Setup_V2.1.1.exe` 👇，并安装
-    - [移动云盘 提取码:66n6](https://caiyun.139.com/w/i/2oxwEZ9jT9tuo) （已更新）
-    - [Microsoft OneDrive](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh) （未更新）
-    - [Google Drive](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)（未更新）
+1. 请从网盘下载`AIWriteX_云盘版_Setup.exe` 👇，并安装
+
+| 网盘类型                     | 下载链接                                                                                              | 提取码  | 版本    |最新版本|
+|-----------------------------|-------------------------------------------------------------------------------------------------------|--------|---------|-------|
+| **移动云盘**                 |[点击下载](https://caiyun.139.com/w/i/2oxwEZ9jT9tuo)                                                   |66n6    |V2.1.1    |✅     |
+| **Microsoft OneDrive**      |[点击下载](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh)|/      |V2.1      |❌     |
+| **Google Drive**            |[点击下载](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)          |/      |V2.1      |❌     |
+
 2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
 3. 点击`开始执行`
 
@@ -259,5 +263,4 @@
 ## 📜 许可证 / License
 - **非商业使用**：您可自由使用和修改软件，但必须在所有副本或实质部分中保留 AIWriteX 许可证和版权声明。
 - **分发与服务提供**：分发软件或向第三方提供服务需获得版权所有人的事先书面授权。
-- **专属版本限制**：“专属版本”不得分发或提供服务（无论盈利或非盈利），即使获得授权。
 - **完整条款**：请参阅 [LICENSE](LICENSE-CN.md) 获取详细信息。
