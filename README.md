@@ -10,7 +10,7 @@
 
 <div style="display: flex; justify-content: space-between;">
   <img src="image/preview/left.jpg" width="51%">
-  <img src="image/preview/right.jpg" width="49%">
+  <img src="image/preview/right.jpg" width="48%">
 </div>
 
 ## 💎 基本功能
