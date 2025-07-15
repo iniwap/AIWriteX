@@ -3,15 +3,11 @@
 # Date: 2025-06-03
 # Description: 用于本地搜索，关注项目 https://github.com/iniwap/ai_write_x
 
-# Copyright (c) 2025 iniwap
-#
-# This software is licensed under the AIWriteX License.
-# Non-commercial, personal profit, non-profit derivative distribution, and non-profit service provision are allowed; profit-making sales and services require authorization.
-# See the LICENSE.md file in the project root for full details.
-#
-# 本软件受 AIWriteX 许可证保护。
-# 允许非商业、个人盈利、非盈利衍生分发和非盈利服务；盈利性销售和服务需授权。
-# 详情请参阅 LICENSE.md 文件。
+# 版权所有 (c) 2025 iniwap
+# 本文件受 AIWriteX 附加授权条款约束，不可单独使用、传播或部署。
+# 禁止在未经作者书面授权的情况下将本文件用于商业服务、分发或嵌入产品。
+# 如需授权，请联系 iniwaper@gmail.com 或 522765228@qq.com
+# 本项目整体授权协议请见根目录下 LICENSE 和 NOTICE 文件。
 
 
 import time
