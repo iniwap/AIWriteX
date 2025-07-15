@@ -877,6 +877,7 @@ class ConfigEditor:
                         sendall = values.get(sendall_key, False)
 
                         # 只有真正使用tag_id，才校验
+                        tag_id = 0
                         if appid and appsecret and call_sendall and not sendall:
                             try:
                                 tag_id = int(tag_id_value) if str(tag_id_value).isdigit() else 0
