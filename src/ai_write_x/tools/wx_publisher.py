@@ -278,9 +278,9 @@ class WeixinPublisher:
             result = response.json()
 
             if "errcode" in result and result.get("errcode") != 0:
-                log.print_log(f"草稿发布失败: {result.get('errmsg')}")
+                ret = None, f"草稿发布失败: {result.get('errmsg')}"
             elif "publish_id" not in result:
-                log.print_log("草稿发布失败: 响应中缺少 publish_id")
+                ret = None, "草稿发布失败: 响应中缺少 publish_id"
             else:
                 ret = (
                     PublishResult(
