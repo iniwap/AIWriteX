@@ -34,6 +34,8 @@ __author__ = "iniwaper@gmail.com"
 __copyright__ = "Copyright (C) 2025 iniwap"
 # __date__ = "2025/04/17"
 
+__version___ = "v2.1.2"
+
 
 class MainGUI(object):
     def __init__(self):
@@ -97,7 +99,7 @@ class MainGUI(object):
                                 "",
                                 key="-TOPIC_INPUT-",
                                 disabled=True,
-                                size=(32, 1),  # Increased from 30 to 32
+                                size=(32, 1),
                                 pad=((5, 5), (5, 2)),
                                 tooltip="输入自定义话题，或留空以自动获取热搜作为文章标题",
                             ),
@@ -113,7 +115,7 @@ class MainGUI(object):
                         [
                             sg.Text(
                                 "模板分类及模板：",
-                                size=(12, 1),  # Consistent with other labels
+                                size=(12, 1),
                                 pad=((10, 5), (5, 2)),
                                 tooltip="指定分类及模板：\n- 优先级高于配置，优先采用此设置\n- 仅限本次运行使用，不会保存到配置",
                             ),
@@ -124,7 +126,7 @@ class MainGUI(object):
                                 ),
                                 key="-TEMPLATE_CATEGORY-",
                                 disabled=True,
-                                size=(15, 1),  # Adjusted for better alignment
+                                size=(15, 1),
                                 readonly=True,
                                 enable_events=True,
                                 pad=((5, 5), (5, 2)),
@@ -137,7 +139,7 @@ class MainGUI(object):
                                 ),
                                 key="-TEMPLATE-",
                                 disabled=True,
-                                size=(15, 1),  # Adjusted for better alignment
+                                size=(15, 1),
                                 readonly=True,
                                 pad=((5, 10), (5, 2)),
                                 tooltip="选择模板：\n- 随机模板：从选定分类中随机选取模板\n- 指定模板：使用选定分类下的特定模板文件",
@@ -148,13 +150,13 @@ class MainGUI(object):
                                 "AI参考文章链接：",
                                 size=(12, 1),
                                 pad=((10, 5), (2, 5)),
-                                tooltip="输入链接，生成文章将参考其内容",
+                                tooltip="参考文章链接：\n- 输入链接，生成文章将参考其内容\n- 可不填参考链接，采用搜索结果",
                             ),
                             sg.InputText(
                                 "",
                                 key="-URLS_INPUT-",
                                 disabled=True,
-                                size=(26, 1),  # Reduced from 30 to 24
+                                size=(26, 1),
                                 tooltip="多个链接请用竖线(|)分隔，例如：http://site1.com|https://site2.com",
                                 pad=((5, 5), (2, 5)),
                             ),
@@ -165,7 +167,7 @@ class MainGUI(object):
                                 disabled=True,
                                 size=(6, 1),
                                 pad=((5, 10), (2, 5)),
-                                tooltip="选择参考链接文章内容的借鉴比例",
+                                tooltip="参考链接文章内容的借鉴比例",
                             ),
                         ],
                     ],
@@ -229,7 +231,7 @@ class MainGUI(object):
         ]
 
         self._window = sg.Window(
-            "AIWriteX - v2.1.1",
+            f"AIWriteX - {__version___}",
             layout,
             default_element_size=(12, 1),
             size=(640, 640),
@@ -531,7 +533,7 @@ class MainGUI(object):
                 elif event == "关于":
                     sg.popup(
                         "关于软件 AIWriteX",
-                        "当前Version 2.1.1",
+                        f"当前版本 {__version___}",
                         "Copyright (C) 2025 iniwap,All Rights Reserved",
                         title="系统提示",
                         icon=self.__get_icon(),

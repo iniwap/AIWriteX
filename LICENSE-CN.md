@@ -1,3 +1,5 @@
+SPDX-License-Identifier: LicenseRef-AIWriteX-License
+
 # AIWriteX 许可证 📜
 ## 版本 1.1，2025年7月13日
 **版权所有 (c) 2025 iniwap**

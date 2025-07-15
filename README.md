@@ -88,9 +88,9 @@
 ### 软件模式
 1. 请从网盘下载`AIWriteX_云盘版_Setup.exe` 👇，并安装
 
-| 网盘类型                     | 下载链接                                                                                              | 提取码  | 版本    |最新版本|
+| 网盘类型                     | 下载链接                                                                                              | 提取码  | 版本    |是否最新|
 |-----------------------------|-------------------------------------------------------------------------------------------------------|--------|---------|-------|
-| **移动云盘**                 |[点击下载](https://caiyun.139.com/w/i/2oxwEZ9jT9tuo)                                                   |66n6    |V2.1.1    |✅     |
+| **移动云盘**                 |[点击下载](https://caiyun.139.com/w/i/2oxwF29y7XRid)                                                   |2ooa    |V2.1.2    |✅     |
 | **Microsoft OneDrive**      |[点击下载](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh)|/      |V2.1      |❌     |
 | **Google Drive**            |[点击下载](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)          |/      |V2.1      |❌     |
 
@@ -204,6 +204,7 @@
 
  ## 📢 后续计划
 - **优化配图管理相关功能**
+- 陆续新增创意性功能，使得软件更好玩、更强大
 - 增加功能，使输出效果更好（持续）
 - 优化模板，减少token消耗（持续）
 - 优化处理，减少不必要的token消耗（持续）
@@ -233,9 +234,9 @@
   - 未认证账号：API无法实现显示到公众号列表，只能通过后台操作
   - 认证账号：必须调用群发接口，才能显示到列表。is_to_all（True/False）以及不调用sendAll接口具体情况，请各位自行测试，支持配置这三种情况
   - is_to_all=False,且调用接口时，tag_id（用户标签群组ID）好像是必须填写
-  - [官方解释](https://developers.weixin.qq.com/doc/service/guide/product/message/Batch_Sends.html)（愣是看的云里雾里，WDNMD，为什么会有这么逆天的产品）
+  - 关于此的 [官方解释](https://developers.weixin.qq.com/doc/service/guide/product/message/Batch_Sends.html)（愣是看的云里雾里，WDNMD，为什么会有这么逆天的产品）
 
-> **⚠️ 注意**：2025 年 7 月后，非认证账号将面临自动化发布限制（目前仍可使用）。
+> **⚠️ 注意**：2025 年 7 月后，非认证账号可能将面临自动化发布限制（目前仍可使用）。
 
 ### 关于软件模式
 
@@ -263,7 +264,7 @@
 - 分享自动发文功能的新场景或改进点
 
 ## 📩 联系我们
-如需了解配置详情或扩展、定制功能、商业授权，请联系我 QQ 522765228
+如需了解配置详情或扩展、定制功能、商业授权，请联系QQ 522765228
 
 ## 📜 许可证 / License
 - **非商业使用**：您可自由使用和修改软件，但必须在所有副本或实质部分中保留 AIWriteX 许可证和版权声明。
