@@ -91,6 +91,7 @@
 | 网盘类型                     | 下载链接                                                                                              | 提取码  | 版本    |是否最新|
 |-----------------------------|-------------------------------------------------------------------------------------------------------|--------|---------|-------|
 | **移动云盘**                 |[点击下载](https://caiyun.139.com/w/i/2oxwF29y7XRid)                                                   |2ooa    |V2.1.2    |✅     |
+| **百度网盘**                 |[点击下载](https://pan.baidu.com/s/19G8Tmbzixfj3yaiEPNXroA)                                            |x32e    |V2.1.2    |✅     |
 | **Microsoft OneDrive**      |[点击下载](https://1drv.ms/u/c/c831e3cc9be11110/EZm8ErtLJGlDhY2xkPdc_zcBJ6ya9SaYyEsufezcJlzJEg?e=TaT0Yh)|/      |V2.1      |❌     |
 | **Google Drive**            |[点击下载](https://drive.google.com/file/d/1L3LWwxnBmkXMnu1E80aqoLEomp-fZUlR/view?usp=sharing)          |/      |V2.1      |❌     |
 
