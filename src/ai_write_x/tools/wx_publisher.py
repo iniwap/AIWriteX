@@ -478,12 +478,26 @@ def pub2wx(title, digest, article, appid, appsecret, author):
 
         publish_result, err_msg = publisher.publish(add_draft_result.publishId)
         if publish_result is None:
-            return f"{err_msg}，无法继续发布文章", article, False
+            if "api unauthorized" in err_msg:
+                return (
+                    "自动发布失败，【自2025年7月15日起，个人主体账号、未认证企业账号及不支持认证的账号的发布权限被回收，需到公众号管理后台->草稿箱->发表】",
+                    article,
+                    False,
+                )
+            else:
+                return f"{err_msg}，无法继续发布文章", article, False
     else:
         # 显示到列表
         media_id, ret = publisher.media_uploadnews(article, title, digest, media_id)
         if media_id is None:
-            return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+            if "api unauthorized" in ret:
+                return (
+                    "账号虽认证（非企业账号），但无发布权限，发布失败，无法自动发布文章",
+                    article,
+                    False,
+                )
+            else:
+                return f"{ret}，无法显示到公众号文章列表（公众号未认证）", article, False
 
         """
         article_url = publisher.poll_article_url(publish_result.publishId)
@@ -513,6 +527,17 @@ def pub2wx(title, digest, article, appid, appsecret, author):
                 config.get_tagid_by_appid(appid),
             )
             if ret is not None:
-                return f"{ret}，无法显示到公众号文章列表（公众号未认证，发布已成功）", article, True
+                if "api unauthorized" in ret:
+                    return (
+                        "没有群发权限，无法显示到公众号文章列表（发布已成功）",
+                        article,
+                        True,
+                    )
+                else:
+                    return (
+                        f"{ret}，无法显示到公众号文章列表（发布已成功）",
+                        article,
+                        True,
+                    )
 
     return "成功发布文章到微信公众号", article, True

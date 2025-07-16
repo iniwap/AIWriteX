@@ -621,7 +621,22 @@ class ArticleManager:
                 ]
             )
 
-        sg.popup_scrolled(message, title="发布结果", size=(60, 20), icon=self.__get_icon())
+        # 创建自定义弹出窗口
+        layout = [
+            [sg.Multiline(message, size=(80, 20), disabled=True, no_scrollbar=False)],
+            [sg.Button("打开公众号后台"), sg.Button("关闭")],
+        ]
+
+        window = sg.Window("发布结果", layout, icon=self.__get_icon())
+
+        while True:
+            event, _ = window.read()
+            if event in (sg.WIN_CLOSED, "关闭"):
+                break
+            elif event == "打开公众号后台":
+                utils.open_url("https://mp.weixin.qq.com/cgi-bin/appmsg")
+
+        window.close()
 
         # 重新启用发布按钮
         self._disable_publish_buttons(False)
