@@ -157,7 +157,7 @@ class PublisherTool:
         log.print_log(result, msg_type)
 
 
-# 3. AiForge Search Tool
+# 3. AIForge Search Tool
 class AIForgeSearchToolInput(BaseModel):
     """输入参数模型"""
 

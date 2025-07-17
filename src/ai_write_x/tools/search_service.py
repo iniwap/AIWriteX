@@ -207,12 +207,12 @@ class SearchService:
             error_msg = str(e)
             self.console.print(f"[red]导入模块失败: {e}[/red]")
 
-            # 检查 AiForge 环境依赖错误
+            # 检查 AIForge 环境依赖错误
             aiforge_errors = ["name 'runtime' is not defined"]
 
             if any(error in error_msg for error in aiforge_errors):
                 self.console.print(
-                    f"[red]检测到 AiForge 环境依赖错误，立即清理模块: {module_id}[/red]"
+                    f"[red]检测到 AIForge 环境依赖错误，立即清理模块: {module_id}[/red]"
                 )
                 self._remove_module(module_id)
 
@@ -232,7 +232,7 @@ class SearchService:
             return None
 
         try:
-            # 使用 AiForge 生成并执行代码，同时获取代码
+            # 使用 AIForge 生成并执行代码，同时获取代码
             result, code = self.aiforge.generate_and_execute_with_code(search_instruction)
 
             if result and code:
@@ -259,7 +259,7 @@ class SearchService:
             for global_var in aiforge_globals:
                 if global_var in code:
                     self.console.print(
-                        f"[yellow]检测到 AiForge 全局变量 {global_var}，代码可能无法独立运行[/yellow]"
+                        f"[yellow]检测到 AIForge 全局变量 {global_var}，代码可能无法独立运行[/yellow]"
                     )
                     return False
 
@@ -345,7 +345,7 @@ class SearchService:
                     error_msg = str(e)
                     self.console.print(f"[yellow]模块执行失败: {e}[/yellow]")
 
-                    # 只处理非 AiForge 的 ImportError（AiForge 错误已在 _import_module 中处理）
+                    # 只处理非 AIForge 的 ImportError（AIForge 错误已在 _import_module 中处理）
                     if "ImportError" in str(type(e)) and not any(
                         aiforge_error in error_msg
                         for aiforge_error in ["name 'runtime' is not defined"]

@@ -4,7 +4,7 @@ from rich.console import Console
 
 
 class AIForgeLLMClient:
-    """AiForge LLM客户端基类"""
+    """AIForge LLM客户端基类"""
 
     def __init__(
         self,

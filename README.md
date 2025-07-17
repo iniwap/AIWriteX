@@ -1,8 +1,8 @@
 # AIWriteX - CrewAI微信公众号全自动生成排版发布工具
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AiForge](https://img.shields.io/badge/aiforge-0.1.0+-pink) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AIForge](https://img.shields.io/badge/aiforge-0.1.0+-pink) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
 
-**AIWriteX**是一款基于 CrewAI 、AiForge 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版高大上的文章并发布到微信公众号。  
+**AIWriteX**是一款基于 CrewAI 、AIForge 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版高大上的文章并发布到微信公众号。  
 
 > **想先看看效果？** 👉 [文章预览](#-微信公众号模板效果预览)  
 > **心动不如行动？** 👉 [马上开始](#-快速开始)  
@@ -16,7 +16,7 @@
 ## 💎 基本功能
 - **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题及内容紧跟潮流
 - **自动生成与排版**：利用 CrewAI 多角色协作，自动生成文章并完成酷炫排版
-  - **💡 实时性文章生成**：采用多重搜索策略（本地+AiForge），拒绝过时内容，确保文章时效性
+  - **💡 实时性文章生成**：采用多重搜索策略（本地+AIForge），拒绝过时内容，确保文章时效性
   - **💡 指定话题及参考文章**：支持自定义文章话题、提供参考文章，结合 AI 生成高质量内容
 - **自动发布图文**：一键发布图文消息到微信公众号，简化运营流程
 - **UI 可视化管理**：提供软件界面，操作简单高效
@@ -54,8 +54,8 @@
 | **need_auditor**           | 是否启用质量审核 agent/task，关闭可降低 token 消耗（默认关闭）                  |
 | **use_compress**           | 是否压缩模板上传，降低 token 消耗                                             |
 | **use_search_service**     | 启用本地缓存代码优先的搜索扩展，首次成功率较低，后续效率高                       |
-| **aiforge_search_max_results**| AiForge 最大返回搜索结果条数，控制搜索广度                                        |
-| **aiforge_search_min_results**| AiForge 最小返回搜索结果条数，越大内容越丰富，但失败率越高                         |
+| **aiforge_search_max_results**| AIForge 最大返回搜索结果条数，控制搜索广度                                        |
+| **aiforge_search_min_results**| AIForge 最小返回搜索结果条数，越大内容越丰富，但失败率越高                         |
 | **min_article_len**        | 生成文章最小字数（默认 1000）                                                 |
 | **max_article_len**        | 生成文章最大字数（默认 2000）                                                 |
 | **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                     |
@@ -125,11 +125,11 @@
 - 打开软件界面，选择 `文件 -> 日志 -> UI_2025-05-20.log`（选择当天日志）
 - 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 
-### AiForge 相关问题
+### AIForge 相关问题
 **[AIForge](https://github.com/iniwap/AIForge)是我自研的类AIPy库，已开启单独开源项目，目前暂随本项目一起发布**
 - **搜索模式**：
-  - **缓存模式**：仅使用 AiForge，初次搜索较慢，后续执行依赖缓存代码，效率逐步提升
-  - **非缓存模式**：结合本地搜索与 AiForge，成功率更高，每次耗时相当
+  - **缓存模式**：仅使用 AIForge，初次搜索较慢，后续执行依赖缓存代码，效率逐步提升
+  - **非缓存模式**：结合本地搜索与 AIForge，成功率更高，每次耗时相当
 - **正常现象**：
   - 并非所有话题都能搜索到结果，失败属正常，任务会继续执行
   - 搜索代码生成可能出现错误，可忽略（系统有自动纠错机制，后续运行会修复）
@@ -184,7 +184,7 @@
 
 ### 全自动发文效果预览
 
-利用本地搜索与 AiForge 搜索生成时效性强的微信公众号文章效果预览：
+利用本地搜索与 AIForge 搜索生成时效性强的微信公众号文章效果预览：
 
 | 类型           | 模板使用情况 | 预览链接                     | 说明                           |
 |----------------|--------------|------------------------------|--------------------------------|

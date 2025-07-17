@@ -475,7 +475,7 @@ class ConfigEditor:
         return [[sg.Column(layout, scrollable=False, vertical_scroll_only=False, pad=(0, 0))]]
 
     def create_aiforge_tab(self):
-        """创建 AiForge 配置 TAB 布局，显示选中的 LLM 提供商的所有参数"""
+        """创建 AIForge 配置 TAB 布局，显示选中的 LLM 提供商的所有参数"""
         aiforge_config = self.config.aiforge_config
         llm_providers = list(aiforge_config["llm"].keys())
         default_provider = aiforge_config["default_llm_provider"]
@@ -616,7 +616,7 @@ class ConfigEditor:
                         [sg.Tab("微信公众号*", self.create_wechat_tab(), key="-TAB_WECHAT-")],
                         [sg.Tab("大模型API*", self.create_api_tab(), key="-TAB_API-")],
                         [sg.Tab("图片生成API", self.create_img_api_tab(), key="-TAB_IMG_API-")],
-                        [sg.Tab("AiForge", self.create_aiforge_tab(), key="-TAB_AIFORGE-")],
+                        [sg.Tab("AIForge", self.create_aiforge_tab(), key="-TAB_AIFORGE-")],
                     ],
                     key="-TAB_GROUP-",
                 )
@@ -1231,7 +1231,7 @@ class ConfigEditor:
                         icon=self.__get_icon(),
                     )
 
-            # 动态更新 AiForge 提供商的所有参数
+            # 动态更新 AIForge 提供商的所有参数
             elif event == "-AIFORGE_DEFAULT_LLM_PROVIDER-":
                 try:
                     selected_provider = values["-AIFORGE_DEFAULT_LLM_PROVIDER-"]
@@ -1261,12 +1261,12 @@ class ConfigEditor:
                     self.window.refresh()
                 except Exception as e:
                     sg.popup_error(
-                        f"更新 AiForge 提供商配置失败: {e}",
+                        f"更新 AIForge 提供商配置失败: {e}",
                         title="系统提示",
                         icon=self.__get_icon(),
                     )
 
-            # 保存 AiForge 配置
+            # 保存 AIForge 配置
             elif event.startswith("-SAVE_AIFORGE-"):
                 aiforge_config = self.config.aiforge_config.copy()
                 try:
@@ -1313,7 +1313,7 @@ class ConfigEditor:
                     )
 
                     if self.config.save_config(self.config.get_config(), aiforge_config):
-                        sg.popup("AiForge 配置已保存", title="系统提示", icon=self.__get_icon())
+                        sg.popup("AIForge 配置已保存", title="系统提示", icon=self.__get_icon())
                     else:
                         sg.popup_error(
                             self.config.error_message, title="系统提示", icon=self.__get_icon()
@@ -1323,12 +1323,12 @@ class ConfigEditor:
                         "超时时间或最大 Tokens 必须是整数", title="系统提示", icon=self.__get_icon()
                     )
 
-            # 恢复默认 AiForge 配置
+            # 恢复默认 AIForge 配置
             elif event.startswith("-RESET_AIFORGE-"):
                 aiforge_config = copy.deepcopy(self.config.default_aiforge_config)
                 if self.config.save_config(self.config.get_config(), aiforge_config):
                     self.update_tab("-TAB_AIFORGE-", self.create_aiforge_tab())
-                    sg.popup("已恢复默认 AiForge 配置", title="系统提示", icon=self.__get_icon())
+                    sg.popup("已恢复默认 AIForge 配置", title="系统提示", icon=self.__get_icon())
                 else:
                     sg.popup_error(
                         self.config.error_message, title="系统提示", icon=self.__get_icon()
