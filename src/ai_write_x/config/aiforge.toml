@@ -5,41 +5,33 @@ default_llm_provider = "openrouter"
 
 [llm.openrouter]
 type = "openai"
-model = "deepseek/deepseek-chat-v3-0324:free"                                         # deepseek/deepseek-r1-0528:free # deepseek/deepseek-chat-v3-0324:free
-api_key = ""
+model = "deepseek/deepseek-chat-v3-0324:free"
+api_key = "sk-or-v1- "
 base_url = "https://openrouter.ai/api/v1"
-enable = true
-default = true
 timeout = 30
 max_tokens = 8192
 
 [llm.grok]
-type = "openai"
-model = "grok-3-mini"
+type = "grok"
+model = "xai/grok-3"
 api_key = ""
 base_url = "https://api.x.ai/v1/"
-enable = true
-default = false
 timeout = 30
 max_tokens = 8192
 
 [llm.qwen]
 type = "openai"
-model = "openai/qwen-max"
+model = "openai/qwen-plus"
 api_key = ""
 base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-enable = true
-default = false
 timeout = 30
 max_tokens = 8192
 
 [llm.gemini]
-type = "openai"
-model = "gemini-2.5-pro-exp-03-25"
+type = "gemini"
+model = "gemini/gemini-2.0-flash"
 api_key = ""
-base_url = "https://generativelanguage.googleapis.com/v1beta/"
-enable = true
-default = false
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
 timeout = 30
 max_tokens = 8192
 
@@ -48,17 +40,20 @@ type = "ollama"
 model = "llama3"
 api_key = ""
 base_url = "http://localhost:11434"
-enable = true
-default = false
 timeout = 30
 max_tokens = 8192
 
-[llm.deepseek]
+[llm.-]
 type = "deepseek"
 model = "deepseek-chat"
 api_key = ""
 base_url = "https://api.deepseek.com"
-enable = true
-default = false
 timeout = 30
 max_tokens = 8192
+
+[cache.code]
+enabled = true
+max_modules = 20
+failure_threshold = 0.8
+max_age_days = 30
+cleanup_interval = 10

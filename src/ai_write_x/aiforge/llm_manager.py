@@ -39,7 +39,7 @@ class AIForgeLLMManager:
         client_type = config.get("type", "openai")
 
         # 根据类型创建不同的客户端
-        if client_type in ["openai", "deepseek"]:
+        if client_type in ["openai", "deepseek", "grok", "gemini"]:
             return AIForgeLLMClient(
                 name=name,
                 api_key=config.get("api_key", ""),

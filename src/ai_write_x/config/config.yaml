@@ -29,15 +29,15 @@ wechat:
       call_sendall: false
       sendall: true
       tag_id: 0
-    - appid: ""
-      appsecret: ""
-      author: ""
+    - appid: ''
+      appsecret: ''
+      author: ''
       call_sendall: false
       sendall: true
       tag_id: 0
-    - appid: ""
-      appsecret: ""
-      author: ""
+    - appid: ''
+      appsecret: ''
+      author: ''
       call_sendall: false
       sendall: true
       tag_id: 0
@@ -47,7 +47,7 @@ api:
     key: XAI_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - ''
     model_index: 0
     model:
       - xai/grok-3
@@ -56,7 +56,7 @@ api:
     key: OPENAI_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - ''
     model_index: 0
     model:
       - openai/qwen-plus
@@ -65,7 +65,7 @@ api:
     key: GEMINI_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - ''
     model_index: 0
     model:
       - gemini/gemini-1.5-flash
@@ -76,7 +76,7 @@ api:
     key: OPENROUTER_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - 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
     model_index: 0
     model:
       - openrouter/deepseek/deepseek-chat-v3-0324:free
@@ -103,7 +103,7 @@ api:
     key: DEEPSEEK_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - ''
     model_index: 0
     model:
       - deepseek/deepseek-chat
@@ -113,7 +113,7 @@ api:
     key: OPENAI_API_KEY
     key_index: 0
     api_key:
-      - ""
+      - ''
     model_index: 0
     model:
       - openai/deepseek-ai/DeepSeek-V3
@@ -124,21 +124,21 @@ api:
 img_api:
   api_type: picsum
   ali:
-    api_key: ""
+    api_key: ''
     model: wanx2.0-t2i-turbo
   picsum:
-    api_key: ""
-    model: ""
+    api_key: ''
+    model: ''
 use_template: true
-template_category: ""
-template: ""
+template_category: ''
+template: ''
 need_auditor: false
 use_compress: true
-use_search_service: false
+use_search_service: true
 aiforge_search_max_results: 10
 aiforge_search_min_results: 1
 min_article_len: 1000
 max_article_len: 2000
-auto_publish: true
-article_format: html
+auto_publish: false
+article_format: markdown
 format_publish: true

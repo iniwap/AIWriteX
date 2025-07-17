@@ -14,6 +14,8 @@ class ConfigEditor:
         self.config = Config.get_instance()
         self.platform_count = len(self.config.platforms)
         self.wechat_count = len(self.config.wechat_credentials)
+        self.fonts = sg.Text.fonts_installed_list()
+        self.global_font = sg.user_settings_get_entry("-global_font-", None)
         self.window = None
         self.window = sg.Window(
             "AIWriteX - 配置管理",
@@ -26,6 +28,12 @@ class ConfigEditor:
 
         # 设置默认选中的API类型的TAB
         self.__default_select_api_tab()
+
+    def set_global_font(self, font_name, size=10):
+        """设置全局字体"""
+        font_string = f"{font_name} {size}"
+        sg.set_options(font=font_string)
+        sg.user_settings_set_entry("-global_font-", font_string)
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
@@ -334,6 +342,7 @@ class ConfigEditor:
             "max_article_len": "最大文章字数：生成文章的最大字数（5000）",
             "article_format": "生成文章的格式：非HTML时，只生成文章，不用模板（不执行模板适配任务）",
             "format_publish": "格式化发布文章：非HTML格式，直接发布效果混乱，建议格式化发布",
+            "ui_font": "设置界面字体后保存，需要重启才能生效",
         }
 
         layout = [
@@ -464,6 +473,18 @@ class ConfigEditor:
                 ),
             ],
             [
+                sg.Text("界面字体：", size=(15, 1), tooltip=tips["ui_font"]),
+                sg.Combo(
+                    self.fonts,
+                    default_value=(
+                        self.global_font.split(" ")[0] if self.global_font else "Helvetica"
+                    ),
+                    key="-FONT_COMBO-",
+                    size=(20, 1),
+                ),
+                sg.Button("默认字体", key="-REST_FONT-"),
+            ],
+            [
                 sg.Text(
                     "Tips：鼠标悬停标签/输入框，可查看该条目的详细说明。",
                     size=(70, 1),
@@ -483,20 +504,39 @@ class ConfigEditor:
         # 获取当前提供商的配置，防止键不存在
         provider_config = aiforge_config["llm"].get(default_provider, {})
 
-        layout = [
+        # 通用配置区块
+        general_layout = [
             [
-                sg.Text("工作目录:", size=(15, 1)),
-                sg.InputText(aiforge_config["workdir"], key="-AIFORGE_WORKDIR-", size=(45, 1)),
+                sg.Text("工作目录:", size=(15, 1), tooltip="AIForge的工作输出目录"),
+                sg.InputText(
+                    aiforge_config["workdir"],
+                    key="-AIFORGE_WORKDIR-",
+                    size=(35, 1),
+                    tooltip="AIForge的工作输出目录",
+                ),
             ],
             [
                 sg.Text("最大重试次数:", size=(15, 1)),
                 sg.InputText(
                     aiforge_config["max_rounds"],
                     key="-AIFORGE_MAXROUNDS-",
-                    size=(45, 1),
+                    size=(35, 1),
                     tooltip="代码生成最大重试次数",
                 ),
             ],
+            [
+                sg.Text("默认最大Tokens:", size=(15, 1)),
+                sg.InputText(
+                    aiforge_config.get("max_tokens", 4096),
+                    key="-AIFORGE_DEFAULT_MAX_TOKENS-",
+                    size=(35, 1),
+                    tooltip="默认的最大Token数量",
+                ),
+            ],
+        ]
+
+        # LLM提供商配置区块
+        llm_layout = [
             [
                 sg.Text("模型提供商*:", size=(15, 1)),
                 sg.Combo(
@@ -505,7 +545,8 @@ class ConfigEditor:
                     key="-AIFORGE_DEFAULT_LLM_PROVIDER-",
                     size=(15, 1),
                     readonly=True,
-                    enable_events=True,  # 启用事件以动态更新
+                    enable_events=True,
+                    tooltip="AIForge使用的LLM 提供商",
                 ),
             ],
             [
@@ -513,7 +554,7 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("type", ""),
                     key="-AIFORGE_TYPE-",
-                    size=(45, 1),
+                    size=(35, 1),
                     disabled=True,  # 类型通常不可编辑
                 ),
             ],
@@ -522,7 +563,8 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("model", ""),
                     key="-AIFORGE_MODEL-",
-                    size=(45, 1),
+                    size=(35, 1),
+                    tooltip="使用的具体模型名称",
                 ),
             ],
             [
@@ -530,7 +572,9 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("api_key", ""),
                     key="-AIFORGE_API_KEY-",
-                    size=(45, 1),
+                    size=(35, 1),
+                    tooltip="模型提供商的API KEY（必填）",
+                    # password_char="*",
                 ),
             ],
             [
@@ -538,21 +582,8 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("base_url", ""),
                     key="-AIFORGE_BASE_URL-",
-                    size=(45, 1),
-                ),
-            ],
-            [
-                sg.Checkbox(
-                    "启用",
-                    default=provider_config.get("enable", True),
-                    key="-AIFORGE_ENABLE-",
-                ),
-            ],
-            [
-                sg.Checkbox(
-                    "默认提供商",
-                    default=provider_config.get("default", False),
-                    key="-AIFORGE_DEFAULT-",
+                    size=(35, 1),
+                    tooltip="API的基础地址",
                 ),
             ],
             [
@@ -560,7 +591,8 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("timeout", 30),
                     key="-AIFORGE_TIMEOUT-",
-                    size=(45, 1),
+                    size=(35, 1),
+                    tooltip="API请求的超时时间（秒）",
                 ),
             ],
             [
@@ -568,38 +600,107 @@ class ConfigEditor:
                 sg.InputText(
                     provider_config.get("max_tokens", 8192),
                     key="-AIFORGE_MAX_TOKENS-",
-                    size=(45, 1),
+                    size=(35, 1),
+                    tooltip="控制生成内容的长度，建议根据模型支持范围设置",
+                ),
+            ],
+        ]
+
+        # 缓存配置区块
+        cache_config = aiforge_config.get("cache", {}).get("code", {})
+        cache_layout = [
+            [
+                sg.Text("启用缓存:", size=(15, 1)),
+                sg.Checkbox(
+                    "",
+                    default=cache_config.get("enabled", True),
+                    key="-CACHE_ENABLED-",
+                    tooltip="是否启用代码缓存功能",
                 ),
             ],
             [
-                sg.Text(
-                    "Tips：\n"
-                    "1、工作目录：AIForge的工作输出目录；\n"
-                    "2、记录控制台输出：用于控制流式响应的记录；\n"
-                    "3、模型提供商：AIForge使用的LLM 提供商；\n"
-                    "4、模型：使用的具体模型名称；\n"
-                    "5、API KEY：模型提供商的API KEY（必填）；\n"
-                    "6、基础URL：API的基础地址；\n"
-                    "7、启用：是否启用该提供商；\n"
-                    "8、默认提供商：是否为默认选择的提供商；\n"
-                    "9、超时时间：API请求的超时时间（秒）；\n"
-                    "10、最大 Tokens：控制生成内容的长度，建议根据模型支持范围设置。",
-                    size=(70, 11),
-                    text_color="gray",
+                sg.Text("最大模块数:", size=(15, 1)),
+                sg.InputText(
+                    cache_config.get("max_modules", 20),
+                    key="-CACHE_MAX_MODULES-",
+                    size=(35, 1),
+                    tooltip="缓存中保存的最大模块数量",
                 ),
+            ],
+            [
+                sg.Text("失败阈值:", size=(15, 1)),
+                sg.InputText(
+                    cache_config.get("failure_threshold", 0.8),
+                    key="-CACHE_FAILURE_THRESHOLD-",
+                    size=(35, 1),
+                    tooltip="缓存失败率阈值（0.0-1.0）",
+                ),
+            ],
+            [
+                sg.Text("最大保存天数:", size=(15, 1)),
+                sg.InputText(
+                    cache_config.get("max_age_days", 30),
+                    key="-CACHE_MAX_AGE_DAYS-",
+                    size=(35, 1),
+                    tooltip="缓存数据的最大保存天数",
+                ),
+            ],
+            [
+                sg.Text("清理间隔 (分钟):", size=(15, 1)),
+                sg.InputText(
+                    cache_config.get("cleanup_interval", 10),
+                    key="-CACHE_CLEANUP_INTERVAL-",
+                    size=(35, 1),
+                    tooltip="自动清理缓存的时间间隔（分钟）",
+                ),
+            ],
+        ]
+
+        # 使用Frame将不同配置区块分组
+        layout = [
+            [
+                sg.Frame(
+                    "通用配置",
+                    general_layout,
+                    font=("Arial", 10, "bold"),
+                    relief=sg.RELIEF_GROOVE,
+                    border_width=2,
+                    pad=(5, 5),
+                )
+            ],
+            [
+                sg.Frame(
+                    "LLM提供商配置",
+                    llm_layout,
+                    font=("Arial", 10, "bold"),
+                    relief=sg.RELIEF_GROOVE,
+                    border_width=2,
+                    pad=(5, 5),
+                )
+            ],
+            [
+                sg.Frame(
+                    "代码缓存配置",
+                    cache_layout,
+                    font=("Arial", 10, "bold"),
+                    relief=sg.RELIEF_GROOVE,
+                    border_width=2,
+                    pad=(5, 5),
+                )
             ],
             [
                 sg.Button("保存配置", key="-SAVE_AIFORGE-"),
                 sg.Button("恢复默认", key="-RESET_AIFORGE-"),
             ],
         ]
+
         return [
             [
                 sg.Column(
                     layout,
-                    scrollable=False,
-                    vertical_scroll_only=False,
-                    size=(480, 520),
+                    scrollable=True,
+                    vertical_scroll_only=True,
+                    size=(500, 600),
                     pad=(0, 0),
                 )
             ]
@@ -1005,6 +1106,14 @@ class ConfigEditor:
                     )
 
             # 保存基础配置
+            elif event == "-REST_FONT-":
+                self.set_global_font("Helvetica")
+                self.window["-FONT_COMBO-"].update(value="Helvetica")
+                sg.popup(
+                    "软件重启，字体设置才能生效~",
+                    title="系统提示",
+                    icon=self.__get_icon(),
+                )
             elif event.startswith("-SAVE_BASE-"):
                 config = self.config.get_config().copy()
                 config["auto_publish"] = values["-AUTO_PUBLISH-"]
@@ -1014,6 +1123,9 @@ class ConfigEditor:
                 config["use_compress"] = values["-USE_COMPRESS-"]
                 config["article_format"] = values["-ARTICLE_FORMAT-"]
                 config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
+
+                self.set_global_font(values["-FONT_COMBO-"])
+
                 if str(values["-AIFORGE_SEARCH_MAX_RESULTS-"]).isdigit():
                     input_value = int(values["-AIFORGE_SEARCH_MAX_RESULTS-"])
                     config["aiforge_search_max_results"] = (
@@ -1217,6 +1329,7 @@ class ConfigEditor:
                 config["min_article_len"] = self.config.default_config["min_article_len"]
                 config["max_article_len"] = self.config.default_config["max_article_len"]
                 config["template"] = self.config.default_config["template"]
+                self.set_global_font("Helvetica")
                 if self.config.save_config(config):
                     self.update_tab("-TAB_BASE-", self.create_base_tab())
                     sg.popup(
@@ -1246,12 +1359,6 @@ class ConfigEditor:
                     self.window["-AIFORGE_BASE_URL-"].update(
                         value=provider_config.get("base_url", "")
                     )
-                    self.window["-AIFORGE_ENABLE-"].update(
-                        value=provider_config.get("enable", True)
-                    )
-                    self.window["-AIFORGE_DEFAULT-"].update(
-                        value=provider_config.get("default", False)
-                    )
                     self.window["-AIFORGE_TIMEOUT-"].update(
                         value=provider_config.get("timeout", 30)
                     )
@@ -1273,8 +1380,8 @@ class ConfigEditor:
                     selected_provider = values["-AIFORGE_DEFAULT_LLM_PROVIDER-"]
                     aiforge_config["default_llm_provider"] = selected_provider
                     aiforge_config["workdir"] = values["-AIFORGE_WORKDIR-"]
-                    aiforge_config["max_rounds"] = values["-AIFORGE_MAXROUNDS-"]
 
+                    # 处理通用配置
                     try:
                         max_rounds = int(values["-AIFORGE_MAXROUNDS-"])
                         if 1 <= max_rounds <= 16:
@@ -1285,6 +1392,13 @@ class ConfigEditor:
                     except (ValueError, TypeError):
                         aiforge_config["max_rounds"] = 5  # 默认值
                         self.window["-AIFORGE_MAXROUNDS-"].update(value=5)
+
+                    # 保存默认最大Tokens
+                    try:
+                        default_max_tokens = int(values.get("-AIFORGE_DEFAULT_MAX_TOKENS-", 4096))
+                        aiforge_config["max_tokens"] = default_max_tokens
+                    except (ValueError, TypeError):
+                        aiforge_config["max_tokens"] = 4096
 
                     # 更新选中的提供商的所有参数
                     aiforge_config["llm"][selected_provider]["type"] = values.get(
@@ -1299,30 +1413,58 @@ class ConfigEditor:
                     aiforge_config["llm"][selected_provider]["base_url"] = values.get(
                         "-AIFORGE_BASE_URL-", ""
                     )
-                    aiforge_config["llm"][selected_provider]["enable"] = values.get(
-                        "-AIFORGE_ENABLE-", True
-                    )
-                    aiforge_config["llm"][selected_provider]["default"] = values.get(
-                        "-AIFORGE_DEFAULT-", False
-                    )
-                    aiforge_config["llm"][selected_provider]["timeout"] = int(
-                        values.get("-AIFORGE_TIMEOUT-", 30)
-                    )
-                    aiforge_config["llm"][selected_provider]["max_tokens"] = int(
-                        values.get("-AIFORGE_MAX_TOKENS-", 8192)
-                    )
 
+                    try:
+                        aiforge_config["llm"][selected_provider]["timeout"] = int(
+                            values.get("-AIFORGE_TIMEOUT-", 30)
+                        )
+                        aiforge_config["llm"][selected_provider]["max_tokens"] = int(
+                            values.get("-AIFORGE_MAX_TOKENS-", 8192)
+                        )
+                    except (ValueError, TypeError):
+                        sg.popup_error(
+                            "超时时间或最大 Tokens 必须是整数",
+                            title="系统提示",
+                            icon=self.__get_icon(),
+                        )
+                        return
+
+                    # 处理缓存配置
+                    if "cache" not in aiforge_config:
+                        aiforge_config["cache"] = {}
+                    if "code" not in aiforge_config["cache"]:
+                        aiforge_config["cache"]["code"] = {}
+
+                    cache_config = aiforge_config["cache"]["code"]
+                    cache_config["enabled"] = values.get("-CACHE_ENABLED-", True)
+
+                    try:
+                        cache_config["max_modules"] = int(values.get("-CACHE_MAX_MODULES-", 20))
+                        cache_config["failure_threshold"] = float(
+                            values.get("-CACHE_FAILURE_THRESHOLD-", 0.8)
+                        )
+                        cache_config["max_age_days"] = int(values.get("-CACHE_MAX_AGE_DAYS-", 30))
+                        cache_config["cleanup_interval"] = int(
+                            values.get("-CACHE_CLEANUP_INTERVAL-", 10)
+                        )
+                    except (ValueError, TypeError):
+                        sg.popup_error(
+                            "缓存配置参数必须是有效的数值", title="系统提示", icon=self.__get_icon()
+                        )
+                        return
+
+                    # 保存配置
                     if self.config.save_config(self.config.get_config(), aiforge_config):
                         sg.popup("AIForge 配置已保存", title="系统提示", icon=self.__get_icon())
                     else:
                         sg.popup_error(
                             self.config.error_message, title="系统提示", icon=self.__get_icon()
                         )
-                except ValueError:
-                    sg.popup_error(
-                        "超时时间或最大 Tokens 必须是整数", title="系统提示", icon=self.__get_icon()
-                    )
 
+                except Exception as e:
+                    sg.popup_error(
+                        f"保存配置时发生错误: {str(e)}", title="系统提示", icon=self.__get_icon()
+                    )
             # 恢复默认 AIForge 配置
             elif event.startswith("-RESET_AIFORGE-"):
                 aiforge_config = copy.deepcopy(self.config.default_aiforge_config)

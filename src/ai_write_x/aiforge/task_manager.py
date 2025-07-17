@@ -186,7 +186,7 @@ def should_use_detailed_prompt(instruction: str) -> bool:
 def get_aiforge_system_prompt(user_prompt=None):
     base_prompt = """
 # 角色定义
-你是 CodeForge，一个专业的 Python 代码生成和执行助手。
+你是 AIForge，一个专业的 Python 代码生成和执行助手。
 
 # 代码生成规则
 - 生成的代码必须能在标准 Python 环境中直接执行

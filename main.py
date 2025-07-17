@@ -39,6 +39,10 @@ from PIL import Image  # noqa 841
 import tempfile  # noqa 841
 import subprocess  # noqa 841
 
+import hashlib  # noqa 841
+from peewee import CharField, DoubleField, IntegerField, Model, TextField, Case  # noqa 841
+from playhouse.sqlite_ext import SqliteExtDatabase  # noqa 841
+
 
 from crewai.tools import BaseTool  # noqa 841
 from crewai_tools import SeleniumScrapingTool  # noqa 841

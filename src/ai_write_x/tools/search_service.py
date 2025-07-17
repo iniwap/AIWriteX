@@ -21,7 +21,7 @@ class SearchService:
 
     def _setup_directories(self):
         """设置目录结构"""
-        work_dir = Path(Config.get_instance().get_aiforge_settings().get("workdir", "aiforge_work"))
+        work_dir = Path(Config.get_instance().aiforge_config.get("workdir", "aiforge_work"))
         if not work_dir.is_absolute():
             work_dir = Path.cwd() / work_dir
         work_dir.mkdir(parents=True, exist_ok=True)

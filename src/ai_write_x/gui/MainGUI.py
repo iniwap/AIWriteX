@@ -50,6 +50,7 @@ class MainGUI(object):
         # 终止信号和线程
         self._stop_event = threading.Event()
         self._crew_thread = None
+        self.load_saved_font()
 
         # 加载配置，不验证
         config = Config.get_instance()
@@ -239,6 +240,23 @@ class MainGUI(object):
             finalize=True,
         )
         self._menu = self._window["-MENU-"].TKMenu
+
+    def load_saved_font(self):
+        """加载保存的字体设置"""
+        # 使用与系统菜单相似的字体大小
+        saved_font = sg.user_settings_get_entry("-global_font-", "Helvetica 10")
+        # 验证字体格式
+        if saved_font and len(saved_font.split()) >= 2:
+            try:
+                sg.set_options(font=saved_font)
+            except Exception:
+                sg.set_options(font="Helvetica 10")
+                saved_font = "Helvetica 10"
+        else:
+            sg.set_options(font="Helvetica 10")
+            saved_font = "Helvetica 10"
+
+        return saved_font
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))

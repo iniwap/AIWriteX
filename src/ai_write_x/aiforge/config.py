@@ -57,3 +57,6 @@ class AIForgeConfig:
     def get_max_rounds(self):
         """获取最大尝试次数"""
         return self.config.get("max_rounds", 5)
+
+    def get_cache_config(self, cache_type):
+        return self.config.get("cache", {}).get(cache_type, {})
