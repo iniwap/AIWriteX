@@ -7,15 +7,14 @@ from typing import List, Type
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
-from rich.console import Console
-from aipyapp.aipy.taskmgr import TaskManager
-
 from src.ai_write_x.tools.wx_publisher import pub2wx
 from src.ai_write_x.utils import utils
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.tools.search_service import SearchService
 from src.ai_write_x.utils import log
 from src.ai_write_x.tools import search_template
+
+from src.ai_write_x.aiforge import AIForgeCore
 
 
 class ReadTemplateToolInput(BaseModel):
@@ -158,8 +157,8 @@ class PublisherTool:
         log.print_log(result, msg_type)
 
 
-# 3. AIPy Search Tool
-class AIPySearchToolInput(BaseModel):
+# 3. AiForge Search Tool
+class AIForgeSearchToolInput(BaseModel):
     """输入参数模型"""
 
     topic: str = Field(..., description="要搜索的话题")
@@ -167,16 +166,16 @@ class AIPySearchToolInput(BaseModel):
     reference_ratio: float = Field(..., description="参考文章借鉴比例")
 
 
-class AIPySearchTool(BaseTool):
-    """AIPy搜索工具"""
+class AIForgeSearchTool(BaseTool):
+    """AIForge搜索工具"""
 
-    name: str = "aipy_search_tool"
+    name: str = "aiforge_search_tool"
     description: str = "搜索关于特定主题的最新信息、数据和趋势。"
 
-    args_schema: type[BaseModel] = AIPySearchToolInput
+    args_schema: type[BaseModel] = AIForgeSearchToolInput
 
     def _run(self, topic: str, urls: List[str], reference_ratio: float) -> str:
-        """执行AIPy搜索"""
+        """执行AIForge搜索"""
         results = None
         config = Config.get_instance()
         original_cwd = os.getcwd()
@@ -185,11 +184,11 @@ class AIPySearchTool(BaseTool):
             log.print_log("开始执行搜索，请耐心等待...")
             if config.use_search_service:
                 results = self._use_search_service(
-                    topic, config.aipy_search_max_results, config.aipy_search_min_results
+                    topic, config.aiforge_search_max_results, config.aiforge_search_min_results
                 )
             else:
                 results = self._nouse_search_service(
-                    topic, config.aipy_search_max_results, config.aipy_search_min_results
+                    topic, config.aiforge_search_max_results, config.aiforge_search_min_results
                 )
             source_type = "搜索"
         else:
@@ -252,7 +251,7 @@ class AIPySearchTool(BaseTool):
     def _use_search_service(self, topic, max_results, min_results):
         try:
             # 执行搜索
-            return SearchService().aipy_search(topic, max_results, min_results)
+            return SearchService().aiforge_search(topic, max_results, min_results)
         except Exception as e:
             log.print_traceback("搜索过程中发生错误：", e)
             return None
@@ -264,31 +263,25 @@ class AIPySearchTool(BaseTool):
             if template_result:
                 return template_result.get("results")
 
-            # 只有配置了key才能使用aipy搜索，否则只能用本地搜索
-            if Config.get_instance().aipy_api_key:
+            # 只有配置了key才能使用aiforge搜索，否则只能用本地搜索
+            if Config.get_instance().aiforge_api_key:
                 # 第二步：渐进式AI生成
-                console = Console()
-                console.print(
-                    "[yellow]本地模板搜索失败，尝试基于模板的约束性生成搜索代码...[/yellow]"
-                )
-                task_manager = TaskManager(
-                    Config.get_instance().get_aipy_settings(), console=console
-                )
+                log.print_log("本地模板搜索失败，尝试基于模板的约束性生成搜索代码...")
+
+                aiforge = AIForgeCore(Config.get_instance().config_aiforge_path)
 
                 # 先尝试基于模板的约束性生成
                 constrained_result = self._try_template_guided_ai(
-                    topic, max_results, min_results, task_manager
+                    topic, max_results, min_results, aiforge
                 )
                 if search_template.validate_search_result(
                     constrained_result, min_results, "ai_guided"
                 ):
                     return constrained_result.get("results")
 
-                console.print(
-                    "[yellow]基于模板的约束性生成搜索失败，尝试完全自由的AI生成...[/yellow]"
-                )
+                log.print_log("基于模板的约束性生成搜索失败，尝试完全自由的AI生成...")
                 # 最后尝试完全自由的AI生成
-                free_result = self._try_free_form_ai(topic, max_results, min_results, task_manager)
+                free_result = self._try_free_form_ai(topic, max_results, min_results, aiforge)
                 if search_template.validate_search_result(free_result, min_results, "ai_free"):
                     return free_result.get("results")
 
@@ -298,47 +291,31 @@ class AIPySearchTool(BaseTool):
             log.print_traceback("搜索过程中发生错误：", e)
             return None
 
-    def _try_template_guided_ai(self, topic, max_results, min_results, task_manager):
+    def _try_template_guided_ai(self, topic, max_results, min_results, aiforge):
         """基于模板模式的约束性AI生成"""
+
         search_instruction = search_template.get_template_guided_search_instruction(
             topic, max_results, min_results
         )
 
-        task = None
-        try:
-            task = task_manager.new_task(search_instruction)
-            task.run()
+        result = aiforge.generate_and_execute(search_instruction)
+        if search_template.simple_validate_search_result(result, min_results, "ai_guided"):
+            return result
 
-            # 反向遍历历史记录，只验证摘要和日期
-            for entry in reversed(task.runner.history):
-                result = entry.get("result", {}).get("__result__")
-                if search_template.simple_validate_search_result(result, min_results, "ai_guided"):
-                    return result
-            return None
-        finally:
-            if task:
-                task.done()
+        return None
 
-    def _try_free_form_ai(self, topic, max_results, min_results, task_manager):
+    def _try_free_form_ai(self, topic, max_results, min_results, aiforge):
         """完全自由的AI生成"""
+
         search_instruction = search_template.get_free_form_ai_search_instruction(
             topic, max_results, min_results
         )
 
-        task = None
-        try:
-            task = task_manager.new_task(search_instruction)
-            task.run()
+        result = aiforge.generate_and_execute(search_instruction)
+        if search_template.simple_validate_search_result(result, min_results, "ai_free"):
+            return result
 
-            # 反向遍历历史记录，只验证摘要和日期
-            for entry in reversed(task.runner.history):
-                result = entry.get("result", {}).get("__result__")
-                if search_template.simple_validate_search_result(result, min_results, "ai_free"):
-                    return result
-            return None
-        finally:
-            if task:
-                task.done()
+        return None
 
 
 # 3. Save article tool

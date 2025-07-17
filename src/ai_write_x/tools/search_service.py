@@ -2,11 +2,11 @@ import json
 import time
 import importlib.util
 from pathlib import Path
-from aipyapp.aipy import TaskManager
 from rich.console import Console
 
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.tools import search_template
+from src.ai_write_x.aiforge import AIForgeCore
 
 
 class SearchService:
@@ -16,12 +16,12 @@ class SearchService:
         self.console = Console()
         self._setup_directories()
         self._load_data()
-        self._init_task_manager()
+        self.aiforge = AIForgeCore(Config.get_instance().config_aiforge_path)
         self._auto_cleanup()
 
     def _setup_directories(self):
         """设置目录结构"""
-        work_dir = Path(Config.get_instance().get_aipy_settings().get("workdir", "aipy_work"))
+        work_dir = Path(Config.get_instance().get_aiforge_settings().get("workdir", "aiforge_work"))
         if not work_dir.is_absolute():
             work_dir = Path.cwd() / work_dir
         work_dir.mkdir(parents=True, exist_ok=True)
@@ -65,18 +65,6 @@ class SearchService:
                 json.dump(self.modules_info, f, ensure_ascii=False, indent=2)
         except Exception as e:
             self.console.print(f"[yellow]警告: 无法保存模块信息文件: {e}[/yellow]")
-
-    def _init_task_manager(self):
-        """初始化TaskManager"""
-        try:
-            self.task_manager = TaskManager(
-                Config.get_instance().get_aipy_settings(), console=self.console
-            )
-            if not self.task_manager.llm:
-                self.console.print("[red]警告: TaskManager的LLM未正确初始化[/red]")
-        except Exception as e:
-            self.console.print(f"[red]TaskManager初始化失败: {e}[/red]")
-            raise
 
     def _clean_failed_modules(self, failure_threshold=0.7, min_attempts=5):
         """清理失败率过高的模块"""
@@ -219,12 +207,12 @@ class SearchService:
             error_msg = str(e)
             self.console.print(f"[red]导入模块失败: {e}[/red]")
 
-            # 检查 AIPy 环境依赖错误
-            aipy_errors = ["name 'runtime' is not defined"]
+            # 检查 AiForge 环境依赖错误
+            aiforge_errors = ["name 'runtime' is not defined"]
 
-            if any(error in error_msg for error in aipy_errors):
+            if any(error in error_msg for error in aiforge_errors):
                 self.console.print(
-                    f"[red]检测到 AIPy 环境依赖错误，立即清理模块: {module_id}[/red]"
+                    f"[red]检测到 AiForge 环境依赖错误，立即清理模块: {module_id}[/red]"
                 )
                 self._remove_module(module_id)
 
@@ -243,25 +231,18 @@ class SearchService:
         else:
             return None
 
-        task = None
         try:
-            task = self.task_manager.new_task(search_instruction)
-            task.run()
+            # 使用 AiForge 生成并执行代码，同时获取代码
+            result, code = self.aiforge.generate_and_execute_with_code(search_instruction)
 
-            # 直接从runner历史获取结果
-            if hasattr(task, "runner") and task.runner.history:
-                for entry in reversed(task.runner.history):
-                    if isinstance(entry, dict) and "result" in entry:
-                        result = entry["result"]
-                        if "__result__" in result and result["__result__"]:
-                            # 验证搜索结果质量
-                            search_result = result["__result__"]
-                            if search_template.simple_validate_search_result(
-                                search_result, min_results, generation_mode
-                            ):
-                                code = entry.get("code", "")
-                                if code and "def search_web" in code:
-                                    return self._save_module_code(code, generation_mode)
+            if result and code:
+                # 验证搜索结果质量
+                if search_template.simple_validate_search_result(
+                    result, min_results, generation_mode
+                ):
+                    # 检查代码中是否包含必要的函数
+                    if "def search_web" in code:
+                        return self._save_module_code(code, generation_mode)
 
             self.console.print(f"[yellow]{generation_mode}模式未生成有效的搜索代码[/yellow]")
             return None
@@ -269,19 +250,16 @@ class SearchService:
         except Exception as e:
             self.console.print(f"[red]{generation_mode}模式生成代码失败: {e}[/red]")
             return None
-        finally:
-            if task:
-                task.done()
 
     def _validate_code_before_save(self, code):
         """在保存前验证代码的可执行性"""
         try:
-            aipy_globals = ["runtime"]
+            aiforge_globals = ["runtime"]
 
-            for global_var in aipy_globals:
+            for global_var in aiforge_globals:
                 if global_var in code:
                     self.console.print(
-                        f"[yellow]检测到 AIPy 全局变量 {global_var}，代码可能无法独立运行[/yellow]"
+                        f"[yellow]检测到 AiForge 全局变量 {global_var}，代码可能无法独立运行[/yellow]"
                     )
                     return False
 
@@ -367,9 +345,10 @@ class SearchService:
                     error_msg = str(e)
                     self.console.print(f"[yellow]模块执行失败: {e}[/yellow]")
 
-                    # 只处理非 AIPy 的 ImportError（AIPy 错误已在 _import_module 中处理）
+                    # 只处理非 AiForge 的 ImportError（AiForge 错误已在 _import_module 中处理）
                     if "ImportError" in str(type(e)) and not any(
-                        aipy_error in error_msg for aipy_error in ["name 'runtime' is not defined"]
+                        aiforge_error in error_msg
+                        for aiforge_error in ["name 'runtime' is not defined"]
                     ):
                         self.console.print(f"[red]检测到导入错误，立即清理模块: {module_id}[/red]")
                         self._remove_module(module_id)
@@ -407,7 +386,7 @@ class SearchService:
                 self._save_modules_info()
         return None
 
-    def aipy_search(self, topic, max_results=10, min_results=1):
+    def aiforge_search(self, topic, max_results=10, min_results=1):
         """主搜索方法"""
 
         # 加载清理配置

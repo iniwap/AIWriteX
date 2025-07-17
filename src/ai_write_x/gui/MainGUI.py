@@ -69,7 +69,7 @@ class MainGUI(object):
         sg.theme("systemdefault")
 
         menu_list = [
-            ["配置", ["配置管理", "CrewAI文件", "AIPy文件"]],
+            ["配置", ["配置管理", "CrewAI文件", "AIForge文件"]],
             ["发布", ["文章管理"]],
             ["模板", ["模板管理"]],
             ["日志", self._log_list],
@@ -375,21 +375,19 @@ class MainGUI(object):
                     ConfigEditor.gui_start()
                 elif event == "CrewAI文件":
                     try:
-                        os.system("start /B  notepad " + Config.get_instance().get_config_path())
+                        os.system("start /B  notepad " + Config.get_instance().config_path)
                     except Exception as e:
                         sg.popup(
                             "无法打开CrewAI配置文件 :( \n错误信息：" + str(e),
                             title="系统提示",
                             icon=self.__get_icon(),
                         )
-                elif event == "AIPy文件":
+                elif event == "AIForge文件":
                     try:
-                        os.system(
-                            "start /B  notepad " + Config.get_instance().get_aipy_config_path()
-                        )
+                        os.system("start /B  notepad " + Config.get_instance().config_aiforge_path)
                     except Exception as e:
                         sg.popup(
-                            "无法打开AIPy配置文件 :( \n错误信息：" + str(e),
+                            "无法打开AIForge配置文件 :( \n错误信息：" + str(e),
                             title="系统提示",
                             icon=self.__get_icon(),
                         )
@@ -545,7 +543,7 @@ class MainGUI(object):
                         "———————————配置说明———————————\n"
                         "1、微信公众号AppID，AppSecrect必填（至少一个）\n"
                         "2、CrewAI使用的API的API KEY必填（使用的）\n"
-                        "3、AIPy的模型提供商的API KEY必填（使用的）\n"
+                        "3、AIForge的模型提供商的API KEY必填（使用的）\n"
                         "4、其他使用默认即可，根据需求填写\n"
                         "———————————操作说明———————————\n"
                         "1、打开配置界面，首先进行必要的配置\n"
@@ -556,7 +554,7 @@ class MainGUI(object):
                         "2、发布->发布管理：打开文章管理界面\n"
                         "3、模板->模板管理：打开模板管理界面\n"
                         "4、日志->日志文件：查看日志\n"
-                        "5、配置->CrewAI/AIPy：直接查看或编辑配置文件\n"
+                        "5、配置->CrewAI/AiForge：直接查看或编辑配置文件\n"
                         "6、部分界面内容，悬停会有提示",
                         title="使用帮助",
                         icon=self.__get_icon(),

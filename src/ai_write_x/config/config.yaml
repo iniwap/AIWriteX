@@ -2,7 +2,7 @@ platforms:
   - name: 微博
     weight: 0.3
   - name: 抖音
-    weight: 0.20
+    weight: 0.2
   - name: 小红书
     weight: 0.12
   - name: 今日头条
@@ -23,9 +23,9 @@ platforms:
     weight: 0.01
 wechat:
   credentials:
-    - appid: ""
-      appsecret: ""
-      author: ""
+    - appid: XXXX
+      appsecret: XXXXX
+      author: XXXXX
       call_sendall: false
       sendall: true
       tag_id: 0
@@ -48,7 +48,6 @@ api:
     key_index: 0
     api_key:
       - ""
-      - ""
     model_index: 0
     model:
       - xai/grok-3
@@ -58,7 +57,6 @@ api:
     key_index: 0
     api_key:
       - ""
-      - ""
     model_index: 0
     model:
       - openai/qwen-plus
@@ -67,7 +65,6 @@ api:
     key: GEMINI_API_KEY
     key_index: 0
     api_key:
-      - ""
       - ""
     model_index: 0
     model:
@@ -79,8 +76,7 @@ api:
     key: OPENROUTER_API_KEY
     key_index: 0
     api_key:
-      - ""
-      - ""
+      - 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
     model_index: 0
     model:
       - openrouter/deepseek/deepseek-chat-v3-0324:free
@@ -139,10 +135,10 @@ template: ""
 need_auditor: false
 use_compress: true
 use_search_service: false
-aipy_search_max_results: 10
-aipy_search_min_results: 1
+aiforge_search_max_results: 10
+aiforge_search_min_results: 1
 min_article_len: 1000
 max_article_len: 2000
 auto_publish: true
-article_format: html # 仅支持：html、markdown、txt
+article_format: html
 format_publish: true

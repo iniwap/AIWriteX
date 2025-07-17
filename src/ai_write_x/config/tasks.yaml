@@ -4,7 +4,6 @@
 # 如需授权，请联系 iniwaper@gmail.com 或 522765228@qq.com
 # 本项目整体授权协议请见根目录下 LICENSE 和 NOTICE 文件。
 
-
 analyze_topic:
   name: "analyze_topic"
   description: |
@@ -27,13 +26,13 @@ write_content:
   description: |
     基于生成的文章大纲和搜索工具获取的最新信息，撰写一篇高质量的微信公众号文章。  
     确保文章内容准确、逻辑清晰、语言流畅，并具有独到的见解。 
-    工具 aipy_search_tool 使用以下参数：
+    工具 aiforge_search_tool 使用以下参数：
       topic={topic}
       urls={urls}
       reference_ratio={reference_ratio}。
 
     执行步骤：
-    1. 使用 aipy_search_tool 获取关于'{topic}'的最新信息
+    1. 使用 aiforge_search_tool 获取关于'{topic}'的最新信息
     2. 根据获取的结果的类型和内容深度调整写作策略：
       - 如果获取到有效搜索结果：
         * 包含"参考比例"时：融合生成的文章大纲与参考文章结果的内容，并根据比例调整借鉴程度

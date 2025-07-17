@@ -8,7 +8,6 @@ Requests==2.32.3
 setuptools==65.5.0
 PySimpleGUI==4.60.5
 tomlkit==0.13.2
-aipyapp==0.1.28
 crewai_tools==0.25.8
 rich==14.0.0
 python_dateutil==2.8.2

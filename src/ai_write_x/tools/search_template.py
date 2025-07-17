@@ -155,6 +155,7 @@ def search_web(
     module_type: SearchEngine = SearchEngine.COMBINED,
 ):
     """根据模块类型返回对应的搜索模板，尝试所有搜索引擎直到找到有效结果"""
+    return None
     if module_type == SearchEngine.COMBINED:
         # 按优先级尝试所有搜索引擎（排除COMBINED）
         for engine in SearchEngine:

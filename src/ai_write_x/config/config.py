@@ -3,9 +3,6 @@ import yaml
 import threading
 import tomlkit
 
-from aipyapp.aipy.config import ConfigManager
-from aipyapp.main import get_default_config
-
 from src.ai_write_x.utils import comm
 from src.ai_write_x.utils import utils
 
@@ -42,11 +39,10 @@ class Config:
             return
         self._initialized = True
         self.config = None
-        self.aipy_config = None
-        self._aipy_settings = None  # 实际使用
+        self.aiforge_config = None
         self.error_message = None
-        self._config_path = self.__get_config_path()
-        self._config_aipy_path = self.__get_config_path("aipyapp.toml")
+        self.config_path = self.__get_config_path()
+        self.config_aiforge_path = self.__get_config_path("aiforge.toml")
         self.default_config = {
             "platforms": [
                 {"name": "微博", "weight": 0.3},
@@ -178,17 +174,17 @@ class Config:
             "need_auditor": False,
             "use_compress": True,
             "use_search_service": False,
-            "aipy_search_max_results": 10,
-            "aipy_search_min_results": 1,
+            "aiforge_search_max_results": 10,
+            "aiforge_search_min_results": 1,
             "min_article_len": 1000,
             "max_article_len": 2000,
             "auto_publish": True,
             "article_format": "html",
             "format_publish": True,
         }
-        self.default_aipy_config = {
-            "workdir": "aipy_work",
-            "record": True,
+        self.default_aiforge_config = {
+            "workdir": "aiforge_work",
+            "max_rounds": 5,
             "max_tokens": 4096,
             "default_llm_provider": "openrouter",
             "llm": {
@@ -400,18 +396,18 @@ class Config:
             return self.config["use_search_service"]
 
     @property
-    def aipy_search_max_results(self):
+    def aiforge_search_max_results(self):
         with self._lock:
             if self.config is None:
                 raise ValueError("配置未加载")
-            return self.config["aipy_search_max_results"]
+            return self.config["aiforge_search_max_results"]
 
     @property
-    def aipy_search_min_results(self):
+    def aiforge_search_min_results(self):
         with self._lock:
             if self.config is None:
                 raise ValueError("配置未加载")
-            return self.config["aipy_search_min_results"]
+            return self.config["aiforge_search_min_results"]
 
     @property
     def min_article_len(self):
@@ -461,20 +457,22 @@ class Config:
 
             return api_keys_list
 
-    # aipy 配置
+    # aiforge 配置
     @property
-    def aipy_default_llm_provider(self):
+    def aiforge_default_llm_provider(self):
         with self._lock:
-            if self.aipy_config is None:
+            if self.aiforge_config is None:
                 raise ValueError("配置未加载")
-            return self.aipy_config["default_llm_provider"]
+            return self.aiforge_config["default_llm_provider"]
 
     @property
-    def aipy_api_key(self):
+    def aiforge_api_key(self):
         with self._lock:
-            if self.aipy_config is None:
+            if self.aiforge_config is None:
                 raise ValueError("配置未加载")
-            return self.aipy_config["llm"][self.aipy_config["default_llm_provider"]]["api_key"]
+            return self.aiforge_config["llm"][self.aiforge_config["default_llm_provider"]][
+                "api_key"
+            ]
 
     def __get_config_path(self, file_name="config.yaml"):
         # 配置文件不是资源，所以需要重新创建，也可以从资源先提取再创建，不能直接使用
@@ -510,9 +508,9 @@ class Config:
         """加载配置，从 config.yaml 或默认配置，不验证"""
         with self._lock:
             ret = True
-            if os.path.exists(self._config_path):
+            if os.path.exists(self.config_path):
                 try:
-                    with open(self._config_path, "r", encoding="utf-8") as f:
+                    with open(self.config_path, "r", encoding="utf-8") as f:
                         self.config = yaml.safe_load(f)
                         if self.config is None:
                             self.config = self.default_config
@@ -524,19 +522,19 @@ class Config:
             else:
                 self.config = self.default_config
 
-            if os.path.exists(self._config_aipy_path):
+            if os.path.exists(self.config_aiforge_path):
                 try:
-                    with open(self._config_aipy_path, "r", encoding="utf-8") as f:
-                        self.aipy_config = tomlkit.parse(f.read())
-                        if self.aipy_config is None:
-                            self.aipy_config = self.default_aipy_config
+                    with open(self.config_aiforge_path, "r", encoding="utf-8") as f:
+                        self.aiforge_config = tomlkit.parse(f.read())
+                        if self.aiforge_config is None:
+                            self.aiforge_config = self.default_aiforge_config
                 except Exception as e:
-                    self.error_message = f"加载 aipyapp.toml 失败: {e}"
+                    self.error_message = f"加载 aiforge.toml 失败: {e}"
                     comm.send_update("error", self.error_message)
-                    self.aipy_config = self.default_aipy_config
+                    self.aiforge_config = self.default_aiforge_config
                     ret = False
             else:
-                self.aipy_config = self.default_aipy_config
+                self.aiforge_config = self.default_aiforge_config
 
             return ret
 
@@ -572,9 +570,9 @@ class Config:
                     self.error_message = "未配置有效的微信公众号appid和appsecret，请打开配置填写"
                     return False
 
-            # 检查是否配置了aipy api_key
-            if not self.aipy_api_key and self.use_search_service:
-                self.error_message = "AIPy未配置有效的llm提供商的api_key"
+            # 检查是否配置了aiforge api_key
+            if not self.aiforge_api_key and self.use_search_service:
+                self.error_message = "AIForge未配置有效的llm提供商的api_key"
                 return False
 
             total_weight = sum(platform["weight"] for platform in self.platforms)
@@ -595,42 +593,13 @@ class Config:
                 raise ValueError("配置未加载")
             return self.config
 
-    def get_aipy_config(self):
-        with self._lock:
-            if self.aipy_config is None:
-                raise ValueError("配置未加载")
-            return self.aipy_config
-
-    def __update_aipy_config(self):
-        file_abs_path = os.path.abspath(self._config_aipy_path)
-        dir_path = os.path.dirname(file_abs_path)
-        conf = ConfigManager(get_default_config(), dir_path)
-        conf.check_config()
-        settings = conf.get_config()
-
-        # 软件模式直接安装
-        if utils.get_is_release_ver():
-            settings.auto_install = True
-        else:
-            settings.auto_install = False
-
-        self._aipy_settings = settings
-
-    def get_aipy_settings(self):
-        # 如果有变化，需要重新加载，在更新保存的地方加载
-        with self._lock:
-            if self._aipy_settings is None:
-                self.__update_aipy_config()
-
-            return self._aipy_settings
-
-    def save_config(self, config, aipy_config=None):
+    def save_config(self, config, aiforge_config=None):
         """保存配置到 config.yaml，不验证"""
         with self._lock:
             ret = True
             self.config = config
             try:
-                with open(self._config_path, "w", encoding="utf-8") as f:
+                with open(self.config_path, "w", encoding="utf-8") as f:
                     yaml.dump(
                         config,
                         f,
@@ -646,22 +615,15 @@ class Config:
                 ret = False
 
             # 如果传递了
-            if aipy_config is not None:
-                self.aipy_config = aipy_config
+            if aiforge_config is not None:
+                self.aiforge_config = aiforge_config
                 try:
-                    with open(self._config_aipy_path, "w", encoding="utf-8") as f:
-                        f.write(tomlkit.dumps(self.aipy_config))
+                    with open(self.config_aiforge_path, "w", encoding="utf-8") as f:
+                        f.write(tomlkit.dumps(self.aiforge_config))
 
-                    self.__update_aipy_config()  # 更新配置
                 except Exception as e:
-                    self.error_message = f"保存 aipyapp.toml 失败: {e}"
+                    self.error_message = f"保存 aiforge.toml 失败: {e}"
                     comm.send_update("error", self.error_message)
                     ret = False
 
             return ret
-
-    def get_config_path(self):
-        return self._config_path
-
-    def get_aipy_config_path(self):
-        return self._config_aipy_path

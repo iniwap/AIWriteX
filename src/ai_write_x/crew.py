@@ -6,7 +6,7 @@ from crewai.cli.constants import ENV_VARS  # 需要根据此判断是否支持�
 from src.ai_write_x.tools.custom_tool import (
     PublisherTool,
     ReadTemplateTool,
-    AIPySearchTool,
+    AIForgeSearchTool,
     SaveArticleTool,
 )
 from src.ai_write_x.utils import utils
@@ -54,7 +54,7 @@ class AIWriteXCrew:
     def writer(self) -> Agent:
         return Agent(
             config=self.agents_config["writer"],
-            tools=[AIPySearchTool()],
+            tools=[AIForgeSearchTool()],
             verbose=True,
             llm=self.llm,
         )

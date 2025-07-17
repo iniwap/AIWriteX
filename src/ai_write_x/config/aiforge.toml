@@ -1,12 +1,12 @@
-workdir = "aipy_work"
-record = true
+workdir = "aiforge_work"
 max_tokens = 4096
+max_rounds = 5
 default_llm_provider = "openrouter"
 
 [llm.openrouter]
 type = "openai"
 model = "deepseek/deepseek-chat-v3-0324:free"                                         # deepseek/deepseek-r1-0528:free # deepseek/deepseek-chat-v3-0324:free
-api_key = ""
+api_key = "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"
 base_url = "https://openrouter.ai/api/v1"
 enable = true
 default = true
