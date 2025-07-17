@@ -1,6 +1,6 @@
 # AIWriteX - CrewAI微信公众号全自动生成排版发布工具
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AiForge](https://img.shields.io/badge/aiforge-0.1.27+-pink) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-green) ![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-red) ![AiForge](https://img.shields.io/badge/aiforge-0.1.0+-pink) ![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-yellow) ![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)
 
 **AIWriteX**是一款基于 CrewAI 、AiForge 的微信公众号自动化工具软件，自动获取抖音、微博等平台热点，融合“搜索+借鉴+AI”，生成**高时效（实时）**、高质量、排版高大上的文章并发布到微信公众号。  
 
@@ -126,7 +126,7 @@
 - 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 
 ### AiForge 相关问题
-**AIForge是我自研的类AIPy库，后续可能单独发布，目前随本项目一起发布**
+**[AIForge](https://github.com/iniwap/AIForge)是我自研的类AIPy库，已开启单独开源项目，目前暂随本项目一起发布**
 - **搜索模式**：
   - **缓存模式**：仅使用 AiForge，初次搜索较慢，后续执行依赖缓存代码，效率逐步提升
   - **非缓存模式**：结合本地搜索与 AiForge，成功率更高，每次耗时相当
