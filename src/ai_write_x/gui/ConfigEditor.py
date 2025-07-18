@@ -339,8 +339,8 @@ class ConfigEditor:
             "- 不需要：生成文章后直接填充模板，消耗低，文章可能略差",
             "use_compress": "压缩模板：\n- 压缩：读取模板后压缩，降低token消耗，可能影响AI解析模板\n"
             "- 不压缩：token消耗，AI可能理解更精确",
-            "use_search_service": "AIForge搜索代码缓存：\n- 使用：使用本地缓存的代码进行搜索，初次执行耗时，后续更快\n"
-            "- 不使用：本地模板搜索+AIForge搜索，无代码缓存，每次耗时相当",
+            "use_aiforge": "启用AIForge：\n- 使用：优先本地搜索，同时使用AIForge搜索，增加搜索到结果几率\n"
+            "- 不使用：仅执行本地搜索，速度快，可能获取不到结果",
             "aiforge_search_max_results": "最大搜索数量：返回的最大搜索结果数（1~20）",
             "aiforge_search_min_results": "最小搜索数量：返回的最小搜索结果数（1~10）",
             "min_article_len": "最小文章字数：生成文章的最小字数（500）",
@@ -418,12 +418,13 @@ class ConfigEditor:
                 ),
             ],
             [
+                sg.Text("搜索模式：", size=(15, 1), tooltip=tips["use_aiforge"]),
                 sg.Checkbox(
-                    "启用搜索代码缓存",
-                    default=self.config.use_search_service,
-                    key="-USE_SEARCH_SERVICE-",
-                    tooltip=tips["use_search_service"],
-                )
+                    "启用AIForge",
+                    default=self.config.use_aiforge,
+                    key="-USE_AIFORGE-",
+                    tooltip=tips["use_aiforge"],
+                ),
             ],
             [
                 sg.Text("最大搜索数量：", size=(15, 1), tooltip=tips["aiforge_search_max_results"]),
@@ -625,7 +626,7 @@ class ConfigEditor:
                     "",
                     default=cache_config.get("enabled", True),
                     key="-CACHE_ENABLED-",
-                    tooltip="是否启用代码缓存功能",
+                    tooltip="缓存代码有助于后续执行速度（相当于本地执行），但首次较慢",
                 ),
             ],
             [
@@ -1129,7 +1130,7 @@ class ConfigEditor:
                 config["need_auditor"] = values["-NEED_AUDITOR-"]
                 config["use_compress"] = values["-USE_COMPRESS-"]
                 config["article_format"] = values["-ARTICLE_FORMAT-"]
-                config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
+                config["use_aiforge"] = values["-USE_AIFORGE-"]
 
                 if values["-SYS_FONT-"]:
                     self.set_global_font("Helvetica")
@@ -1332,7 +1333,7 @@ class ConfigEditor:
                 config["need_auditor"] = self.config.default_config["need_auditor"]
                 config["use_compress"] = self.config.default_config["use_compress"]
                 config["article_format"] = self.config.default_config["article_format"]
-                config["use_search_service"] = self.config.default_config["use_search_service"]
+                config["use_aiforge"] = self.config.default_config["use_aiforge"]
                 config["aiforge_search_max_results"] = self.config.default_config[
                     "aiforge_search_max_results"
                 ]

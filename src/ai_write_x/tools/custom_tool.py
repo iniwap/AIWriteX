@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from src.ai_write_x.tools.wx_publisher import pub2wx
 from src.ai_write_x.utils import utils
 from src.ai_write_x.config.config import Config
-from src.ai_write_x.tools.search_service import SearchService
 from src.ai_write_x.utils import log
 from src.ai_write_x.tools import search_template
 
@@ -182,14 +181,15 @@ class AIForgeSearchTool(BaseTool):
 
         if len(urls) == 0:
             log.print_log("开始执行搜索，请耐心等待...")
-            if config.use_search_service:
-                results = self._use_search_service(
-                    topic, config.aiforge_search_max_results, config.aiforge_search_min_results
-                )
-            else:
-                results = self._nouse_search_service(
-                    topic, config.aiforge_search_max_results, config.aiforge_search_min_results
-                )
+
+            results = self._excute_search(
+                topic,
+                config.aiforge_search_max_results,
+                config.aiforge_search_min_results,
+                config.use_aiforge,
+                config.aiforge_api_key,
+            )
+
             source_type = "搜索"
         else:
             log.print_log("开始提取参考链接中的文章信息，请耐心等待...")
@@ -248,23 +248,15 @@ class AIForgeSearchTool(BaseTool):
         else:
             return f"未能找到关于'{topic}'的{source_type}结果。"
 
-    def _use_search_service(self, topic, max_results, min_results):
-        try:
-            # 执行搜索
-            return SearchService().aiforge_search(topic, max_results, min_results)
-        except Exception as e:
-            log.print_traceback("搜索过程中发生错误：", e)
-            return None
-
-    def _nouse_search_service(self, topic, max_results, min_results):
+    def _excute_search(self, topic, max_results, min_results, use_aiforge, aiforge_api_key):
         try:
             # 第一步：尝试使用本地模板代码
             template_result = search_template.search_web(topic, max_results, min_results)
             if template_result:
                 return template_result.get("results")
 
-            # 只有配置了key才能使用aiforge搜索，否则只能用本地搜索
-            if Config.get_instance().aiforge_api_key:
+            # 启用AIForge并且配置了key才能使用aiforge搜索，否则只能用本地搜索
+            if use_aiforge and aiforge_api_key:
                 # 第二步：渐进式AI生成
                 log.print_log("本地模板搜索失败，尝试基于模板的约束性生成搜索代码...")
 
@@ -298,7 +290,7 @@ class AIForgeSearchTool(BaseTool):
             topic, max_results, min_results
         )
 
-        result = aiforge.generate_and_execute(search_instruction)
+        result = aiforge.run_task(search_instruction)
         if search_template.simple_validate_search_result(result, min_results, "ai_guided"):
             return result
 
@@ -311,7 +303,7 @@ class AIForgeSearchTool(BaseTool):
             topic, max_results, min_results
         )
 
-        result = aiforge.generate_and_execute(search_instruction)
+        result = aiforge.run_task(search_instruction)
         if search_template.simple_validate_search_result(result, min_results, "ai_free"):
             return result
 

@@ -173,7 +173,7 @@ class Config:
             "template": "",
             "need_auditor": False,
             "use_compress": True,
-            "use_search_service": False,
+            "use_aiforge": False,
             "aiforge_search_max_results": 10,
             "aiforge_search_min_results": 1,
             "min_article_len": 1000,
@@ -386,11 +386,11 @@ class Config:
             return self.config["use_compress"]
 
     @property
-    def use_search_service(self):
+    def use_aiforge(self):
         with self._lock:
             if self.config is None:
                 raise ValueError("配置未加载")
-            return self.config["use_search_service"]
+            return self.config["use_aiforge"]
 
     @property
     def aiforge_search_max_results(self):
@@ -568,7 +568,7 @@ class Config:
                     return False
 
             # 检查是否配置了aiforge api_key
-            if not self.aiforge_api_key and self.use_search_service:
+            if not self.aiforge_api_key and self.use_aiforge:
                 self.error_message = "AIForge未配置有效的llm提供商的api_key"
                 return False
 

@@ -1,8 +1,10 @@
 import json
-
-from .llm_client import AIForgeLLMClient
-from .executor import AIForgeExecutor
 from rich.console import Console
+import re
+
+from ..llm.llm_client import AIForgeLLMClient
+from ..execution.executor import AIForgeExecutor
+from ..optimization.feedback_optimizer import FeedbackOptimizer
 
 
 def should_use_detailed_prompt(instruction: str) -> bool:
@@ -183,8 +185,24 @@ def should_use_detailed_prompt(instruction: str) -> bool:
     return False
 
 
-def get_aiforge_system_prompt(user_prompt=None):
-    base_prompt = """
+def get_aiforge_system_prompt(user_prompt=None, optimize_tokens=True):
+    if optimize_tokens:
+        base_prompt = """
+# 角色定义
+你是 AIForge，一个专业的 Python 代码生成和执行助手。
+
+# 代码生成规则
+- 生成极简代码，无注释，无空行
+- 使用最短变量名(a,b,c,d等)
+- 使用预装库：requests,bs4,pandas,numpy
+- 结果赋值给__result__
+- 必须包含错误处理
+
+# 执行环境
+Python解释器，预装常用库，支持网络和文件操作
+"""
+    else:
+        base_prompt = """
 # 角色定义
 你是 AIForge，一个专业的 Python 代码生成和执行助手。
 
@@ -211,13 +229,54 @@ def get_aiforge_system_prompt(user_prompt=None):
 
 
 class AIForgeTask:
-    def __init__(self, llm_client: AIForgeLLMClient, max_rounds):
+    def __init__(self, llm_client: AIForgeLLMClient, max_rounds, optimize_tokens=True):
         self.client = llm_client
         self.executor = AIForgeExecutor()
         self.console = Console()
         self.instruction = None
         self.system_prompt = None
         self.max_rounds = max_rounds
+        self.optimize_tokens = optimize_tokens
+        self.feedback_optimizer = FeedbackOptimizer() if optimize_tokens else None
+
+    def _compress_error(self, error_msg: str, max_length: int = 200) -> str:
+        """压缩错误信息以减少token消耗"""
+        if not error_msg or len(error_msg) <= max_length:
+            return error_msg
+
+        # 提取关键错误信息的正则模式
+        key_patterns = [
+            r"(NameError|TypeError|ValueError|AttributeError|ImportError|SyntaxError): (.+)",
+            r"line (\d+)",
+            r'File "([^"]+)"',
+            r"in (.+)",
+            r"(\w+Exception): (.+)",
+        ]
+
+        compressed_parts = []
+
+        # 按优先级提取关键信息
+        for pattern in key_patterns:
+            matches = re.findall(pattern, error_msg)
+            if matches:
+                for match in matches[:2]:  # 最多保留2个匹配项
+                    if isinstance(match, tuple):
+                        compressed_parts.extend([str(m) for m in match])
+                    else:
+                        compressed_parts.append(str(match))
+
+        # 如果没有匹配到关键模式，截取开头部分
+        if not compressed_parts:
+            return error_msg[:max_length] + "..." if len(error_msg) > max_length else error_msg
+
+        # 组合压缩后的信息
+        compressed = " | ".join(compressed_parts[:5])  # 最多保留5个关键信息
+
+        # 确保不超过最大长度
+        if len(compressed) > max_length:
+            compressed = compressed[: max_length - 3] + "..."
+
+        return compressed
 
     def run(self, instruction: str = None, system_prompt: str = None):
         """执行AI代码生成任务"""
@@ -228,7 +287,9 @@ class AIForgeTask:
 
         # 动态构建 system prompt
         if not system_prompt:
-            system_prompt = get_aiforge_system_prompt(self.instruction)
+            system_prompt = get_aiforge_system_prompt(
+                self.instruction, optimize_tokens=self.optimize_tokens
+            )
 
         if not self.instruction:
             self.console.print("[red]没有提供指令[/red]")
@@ -303,6 +364,19 @@ class AIForgeTask:
                             f"❌ 代码块 {i+1} 执行失败: {result.get('error', '未知错误')}",
                             style="red",
                         )
+                        compressed_error = self._compress_error(
+                            result.get("error", "未知错误"),
+                            max_length=self.config.get("optimization", {}).get(
+                                "max_feedback_length", 200
+                            ),
+                        )
+                        # 发送压缩后的错误信息给LLM进行下一轮尝试
+                        feedback_prompt = (
+                            f"代码执行失败: {compressed_error}。请修复错误并重新生成代码。"
+                        )
+
+                        # 发送反馈给LLM
+                        response = self.client.send_feedback(feedback_prompt)
 
             # 如果本轮成功，退出循环
             if success:

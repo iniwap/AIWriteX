@@ -53,9 +53,9 @@
 | **template_category**      | 模板分类，精确匹配话题类型（如健康养生），需分类下存在指定模板                    |
 | **need_auditor**           | 是否启用质量审核 agent/task，关闭可降低 token 消耗（默认关闭）                  |
 | **use_compress**           | 是否压缩模板上传，降低 token 消耗                                             |
-| **use_search_service**     | 启用本地缓存代码优先的搜索扩展，首次成功率较低，后续效率高                       |
-| **aiforge_search_max_results**| AIForge 最大返回搜索结果条数，控制搜索广度                                        |
-| **aiforge_search_min_results**| AIForge 最小返回搜索结果条数，越大内容越丰富，但失败率越高                         |
+| **use_aiforge**            | 是否启用AIForge，启用则通过AI生成代码搜索，否则只执行本地搜索                    |
+| **aiforge_search_max_results**| AIForge 最大返回搜索结果条数，控制搜索广度                                  |
+| **aiforge_search_min_results**| AIForge 最小返回搜索结果条数，越大内容越丰富，但失败率越高                   |
 | **min_article_len**        | 生成文章最小字数（默认 1000）                                                 |
 | **max_article_len**        | 生成文章最大字数（默认 2000）                                                 |
 | **auto_publish**           | 控制自动发布，勾选（true）自动发布，不勾选(false)需手动发布                     |
@@ -67,10 +67,11 @@
 | 配置项                     | 说明                                                     |
 |----------------------------|---------------------------------------------------------|
 | **default_llm_provider**   | 使用模型提供商（默认 OpenRouter），可与 CrewAI 使用的模型不同  |
-| **api_key**                | 模型提供商的 API Key（`use_search_service=true`时，必填）   |
+| **api_key**                | 模型提供商的 API Key（`use_aiforge=true`时，必填）   |
 | **其他选填**               | 根据需要配置其他参数（选填），具体参考 UI 界面说明               |
 
-> *1、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*  
+> *1、aiforge.toml详细配置信息，参见[AIForge](https://github.com/iniwap/AIForge)项目主页*  
+> *2、通过配置管理界面，可以详细了解关键参数的解释说明（建议运行UI界面模式）*  
 > *2、⚠️ 微信公众号AppID/AppSecret、大模型提供商的API KEY是必填项，其他均可默认*  
 
 ## 🚀 快速开始
@@ -126,15 +127,15 @@
 - 点击打开日志文件，复制内容，提交至 [Issues](https://github.com/iniwap/AIWriteX/issues)
 
 ### AIForge 相关问题
-**[AIForge](https://github.com/iniwap/AIForge)是我自研的类AIPy库，已开启单独开源项目，目前暂随本项目一起发布**
+**[AIForge](https://github.com/iniwap/AIForge)是我自研的类AIPy库，已开启单独开源项目，目前暂随同本项目一起发布**
 - **搜索模式**：
-  - **缓存模式**：仅使用 AIForge，初次搜索较慢，后续执行依赖缓存代码，效率逐步提升
-  - **非缓存模式**：结合本地搜索与 AIForge，成功率更高，每次耗时相当
+  - **本地模式**：仅使用本地搜索，速度较快，但可能获取不到结果
+  - **AIForge模式**：本地搜索+AIForge模式，本地搜索失败时，采用AIForge，尽量保证能搜索到结果
 - **正常现象**：
   - 并非所有话题都能搜索到结果，失败属正常，任务会继续执行
   - 搜索代码生成可能出现错误，可忽略（系统有自动纠错机制，后续运行会修复）
 - **搜索缓存优化**：
-  - 搜索代码生成具有随机性，启用缓存模式时，多运行几次可提升效果
+  - 搜索代码生成具有随机性，启用AIForge缓存模式(`aiforge.toml``cache.code`enabled=True)时，多运行几次可提升效果
 - **搜索引擎限制**：
   - 由于搜索引擎限制或人工验证，偶尔搜索无结果，属正常现象，不影响整体运行
 - **⚠️ OpenRouter 免费服务限制**：
@@ -261,17 +262,20 @@
 - 使用DeepSeek请注意**费用消耗**
 
 
-## 🤝 贡献
+## 🤝 贡献&致谢
+### 贡献
 - 提交代码以及优化建议，新功能等等
-- 分享自动发文功能的新场景或改进点
+- 分享自动发文功能的新场景或改进点  
+### 感谢 
+- 感谢 [AIForge](https://github.com/iniwap/AIForge)开源库 
+- 感谢 ChatGPT、Grok、Gemini、Deepseek等
+- 感谢所有贡献者和社区支持
 
 ## 📩 联系我们
 如需了解配置详情或扩展、定制功能、商业授权，请联系QQ 522765228
 
 ## 📜 许可证 / License
 本项目采用 [Apache License 2.0](./LICENSE) 开源，并附带额外使用限制，详见 [NOTICE](./NOTICE) 文件。
-
-请在使用、修改、分发本项目前，务必阅读并遵守这两个文件中的条款。
 
 特别提醒：未经授权，禁止分发软件或利用软件向第三方提供服务。
 如需授权，请联系作者邮箱：iniwaper@gmail.com / 522765228@qq.com

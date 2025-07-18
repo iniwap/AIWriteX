@@ -6,7 +6,7 @@ default_llm_provider = "openrouter"
 [llm.openrouter]
 type = "openai"
 model = "deepseek/deepseek-chat-v3-0324:free"
-api_key = "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"
+api_key = ""
 base_url = "https://openrouter.ai/api/v1"
 timeout = 30
 max_tokens = 8192
