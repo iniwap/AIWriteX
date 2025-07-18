@@ -76,7 +76,7 @@ api:
     key: OPENROUTER_API_KEY
     key_index: 0
     api_key:
-      - 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
+      - ""
     model_index: 0
     model:
       - openrouter/deepseek/deepseek-chat-v3-0324:free
