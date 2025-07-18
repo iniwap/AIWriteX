@@ -320,6 +320,11 @@ class ConfigEditor:
         # 检查是否有模板
         is_template_empty = len(categories) == 0
 
+        if self.global_font:
+            is_sys_font = self.global_font.split(" ")[0] == "Helvetica"
+        else:
+            is_sys_font = True
+
         # Define tooltips for each relevant element
         tips = {
             "auto_publish": "自动发布文章：\n- 自动：生成文章后，自动发布到配置的微信公众号\n"
@@ -342,7 +347,7 @@ class ConfigEditor:
             "max_article_len": "最大文章字数：生成文章的最大字数（5000）",
             "article_format": "生成文章的格式：非HTML时，只生成文章，不用模板（不执行模板适配任务）",
             "format_publish": "格式化发布文章：非HTML格式，直接发布效果混乱，建议格式化发布",
-            "ui_font": "设置界面字体后保存，需要重启才能生效",
+            "ui_font": "设置界面字体后保存，需要重新打开才能生效",
         }
 
         layout = [
@@ -476,13 +481,18 @@ class ConfigEditor:
                 sg.Text("界面字体：", size=(15, 1), tooltip=tips["ui_font"]),
                 sg.Combo(
                     self.fonts,
-                    default_value=(
-                        self.global_font.split(" ")[0] if self.global_font else "Helvetica"
-                    ),
+                    default_value=(self.global_font.split(" ")[0] if not is_sys_font else None),
                     key="-FONT_COMBO-",
-                    size=(20, 1),
+                    size=(27, 1),
+                    disabled=is_sys_font,
                 ),
-                sg.Button("默认字体", key="-REST_FONT-"),
+                sg.Checkbox(
+                    "默认字体",
+                    default=is_sys_font,
+                    key="-SYS_FONT-",
+                    tooltip="使用系统默认字体",
+                    enable_events=True,
+                ),
             ],
             [
                 sg.Text(
@@ -1106,14 +1116,11 @@ class ConfigEditor:
                     )
 
             # 保存基础配置
-            elif event == "-REST_FONT-":
-                self.set_global_font("Helvetica")
-                self.window["-FONT_COMBO-"].update(value="Helvetica")
-                sg.popup(
-                    "软件重启，字体设置才能生效~",
-                    title="系统提示",
-                    icon=self.__get_icon(),
-                )
+            elif event == "-SYS_FONT-":
+                if values["-SYS_FONT-"]:
+                    self.window["-FONT_COMBO-"].update(disabled=True)
+                else:
+                    self.window["-FONT_COMBO-"].update(disabled=False)
             elif event.startswith("-SAVE_BASE-"):
                 config = self.config.get_config().copy()
                 config["auto_publish"] = values["-AUTO_PUBLISH-"]
@@ -1124,7 +1131,13 @@ class ConfigEditor:
                 config["article_format"] = values["-ARTICLE_FORMAT-"]
                 config["use_search_service"] = values["-USE_SEARCH_SERVICE-"]
 
-                self.set_global_font(values["-FONT_COMBO-"])
+                if values["-SYS_FONT-"]:
+                    self.set_global_font("Helvetica")
+                else:
+                    if values["-FONT_COMBO-"]:
+                        self.set_global_font(values["-FONT_COMBO-"])
+                    else:
+                        self.set_global_font("Helvetica")
 
                 if str(values["-AIFORGE_SEARCH_MAX_RESULTS-"]).isdigit():
                     input_value = int(values["-AIFORGE_SEARCH_MAX_RESULTS-"])
