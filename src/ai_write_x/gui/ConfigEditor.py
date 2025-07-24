@@ -31,9 +31,18 @@ class ConfigEditor:
 
     def set_global_font(self, font_name, size=10):
         """设置全局字体"""
-        font_string = f"{font_name} {size}"
-        sg.set_options(font=font_string)
-        sg.user_settings_set_entry("-global_font-", font_string)
+        try:
+            # 使用元组格式，避免空格解析问题
+            if isinstance(font_name, str) and " " in font_name:
+                font_tuple = (font_name, size)
+            else:
+                font_tuple = f"{font_name} {size}"
+
+            sg.set_options(font=font_tuple)
+            # 保存时使用特殊格式标记
+            sg.user_settings_set_entry("-global_font-", f"{font_name}|{size}")
+        except Exception:
+            sg.set_options(font="Helvetica 10")
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
@@ -321,9 +330,31 @@ class ConfigEditor:
         is_template_empty = len(categories) == 0
 
         if self.global_font:
-            is_sys_font = self.global_font.split(" ")[0] == "Helvetica"
+            # 从保存的字体字符串中提取字体名称
+            if "|" in self.global_font:
+                # 新格式：字体名|大小
+                font_name = self.global_font.split("|")[0]
+            else:
+                # 旧格式：字体名 大小
+                font_parts = self.global_font.split()
+                if len(font_parts) >= 2:
+                    font_name = " ".join(font_parts[:-1])
+                else:
+                    font_name = font_parts[0] if font_parts else "Helvetica"
+
+            # 当字体为 Helvetica 时，设置为系统默认字体
+            is_sys_font = font_name == "Helvetica"
         else:
             is_sys_font = True
+            font_name = "Helvetica"
+
+        # 设置字体下拉列表的默认值
+        if is_sys_font:
+            # 系统默认字体时，下拉列表显示为空或None
+            font_default_value = None
+        else:
+            # 非系统默认字体时，显示完整字体名称（如果在列表中）
+            font_default_value = font_name if font_name in self.fonts else None
 
         # Define tooltips for each relevant element
         tips = {
@@ -482,14 +513,14 @@ class ConfigEditor:
                 sg.Text("界面字体：", size=(15, 1), tooltip=tips["ui_font"]),
                 sg.Combo(
                     self.fonts,
-                    default_value=(self.global_font.split(" ")[0] if not is_sys_font else None),
+                    default_value=font_default_value,
                     key="-FONT_COMBO-",
                     size=(27, 1),
-                    disabled=is_sys_font,
+                    disabled=is_sys_font,  # 当为系统默认字体时禁用
                 ),
                 sg.Checkbox(
                     "默认字体",
-                    default=is_sys_font,
+                    default=is_sys_font,  # 当字体为Helvetica时自动勾选
                     key="-SYS_FONT-",
                     tooltip="使用系统默认字体",
                     enable_events=True,

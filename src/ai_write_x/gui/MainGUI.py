@@ -34,7 +34,7 @@ __author__ = "iniwaper@gmail.com"
 __copyright__ = "Copyright (C) 2025 iniwap"
 # __date__ = "2025/04/17"
 
-__version___ = "v2.1.3"
+__version___ = "v2.1.5"
 
 
 class MainGUI(object):
@@ -243,20 +243,29 @@ class MainGUI(object):
 
     def load_saved_font(self):
         """加载保存的字体设置"""
-        # 使用与系统菜单相似的字体大小
-        saved_font = sg.user_settings_get_entry("-global_font-", "Helvetica 10")
-        # 验证字体格式
-        if saved_font and len(saved_font.split()) >= 2:
-            try:
-                sg.set_options(font=saved_font)
-            except Exception:
-                sg.set_options(font="Helvetica 10")
-                saved_font = "Helvetica 10"
-        else:
-            sg.set_options(font="Helvetica 10")
-            saved_font = "Helvetica 10"
+        saved_font = sg.user_settings_get_entry("-global_font-", "Helvetica|10")
 
-        return saved_font
+        try:
+            if "|" in saved_font:
+                # 新格式：字体名|大小
+                font_name, size = saved_font.split("|", 1)
+                font_tuple = (font_name, int(size))
+            else:
+                # 兼容旧格式
+                parts = saved_font.split()
+                if len(parts) >= 2:
+                    size = parts[-1]
+                    font_name = " ".join(parts[:-1])
+                    font_tuple = (font_name, int(size))
+                else:
+                    font_tuple = "Helvetica 10"
+
+            sg.set_options(font=font_tuple)
+            return saved_font
+        except Exception as e:
+            print(f"字体加载失败: {e}")
+            sg.set_options(font="Helvetica 10")
+            return "Helvetica|10"
 
     def __get_icon(self):
         return utils.get_res_path("UI\\icon.ico", os.path.dirname(__file__))
