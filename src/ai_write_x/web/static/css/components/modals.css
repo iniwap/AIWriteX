@@ -63,7 +63,7 @@
     right: 0;  
     bottom: 0;  
     background: rgba(0, 0, 0, 0.5);  
-    z-index: 9998;  
+    z-index: 10100;  
     animation: modalFadeIn 0.2s ease;  
 }  
   
@@ -76,7 +76,7 @@
     background: var(--surface-color);  
     border-radius: 8px;  
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  
-    z-index: 9999;  
+    z-index: 10101;  
     min-width: 400px;  
     max-width: 500px;  
     animation: modalSlideIn 0.3s ease;  
@@ -129,7 +129,7 @@
     background: var(--surface-color);  
     border-radius: 8px;  
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  
-    z-index: 9999;  
+    z-index: 10101;  
     min-width: 400px;  
     max-width: 500px;  
     animation: modalSlideIn 0.3s ease;  
@@ -144,7 +144,7 @@
     background: var(--surface-color);  
     border-radius: 8px;  
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  
-    z-index: 9999;  
+    z-index: 10101;  
     min-width: 400px;  
     max-width: 500px;  
     animation: modalSlideIn 0.3s ease;  

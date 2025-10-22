@@ -212,7 +212,7 @@ class NotificationManager {
             position: fixed;  
             top: 20px;  
             right: 20px;  
-            z-index: 1000;  
+            z-index: 10100;  
             pointer-events: none;  
         `;  
         document.body.appendChild(container);  

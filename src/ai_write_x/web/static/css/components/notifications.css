@@ -8,7 +8,7 @@
     box-shadow: var(--shadow-lg);  
     padding: 16px 20px;  
     max-width: 400px;  
-    z-index: 1100;  
+    z-index: 10100;  
     border-left: 4px solid var(--primary-color);  
     animation: notificationSlideIn 0.3s ease;  
 }  

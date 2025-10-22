@@ -9,7 +9,12 @@ class TemplateEditorDialog {
         this.previewTimer = null;  
         this.isFullscreen = false;  
         this.monacoLoaded = false;  
-        this.themeObserver = null;  
+        this.themeObserver = null;
+        this.isClosing = false;  
+        this.keydownHandler = null;  
+        this.overlayClickHandler = null;  
+        this.resizeHandlers = null;
+        this.isResizing = false;
     }  
       
     async initialize() {  
@@ -29,11 +34,13 @@ class TemplateEditorDialog {
                 return;  
             }  
             
-            require.config({   
-                paths: { 'vs': '/static/monaco/vs' }  
-            });  
+            if (!window.monacoConfigured) {  
+                require.config({     
+                    paths: { 'vs': '/static/monaco/vs' }  
+                });  
+                window.monacoConfigured = true;  
+            }  
             
-            // 只加载 editor.main,它已包含所有基础语言支持  
             require(['vs/editor/editor.main'], () => {  
                 this.monacoLoaded = true;  
                 resolve();  
@@ -98,7 +105,7 @@ class TemplateEditorDialog {
                             <option value="markdown">Markdown</option>  
                             <option value="plaintext">纯文本</option>  
                         </select>  
-                          
+                        
                         <button class="btn-icon" id="format-code" title="格式化代码 (Shift+Alt+F)">  
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">  
                                 <path d="M4 7h16M4 12h10M4 17h16"/>  
@@ -120,37 +127,45 @@ class TemplateEditorDialog {
                         </button>  
                     </div>  
                 </div>  
-                  
+                
+                <!-- 统一的面板头部栏 -->  
+                <div class="panels-header">  
+                    <div class="panel-header-left">  
+                        <span id="language-label">HTML 代码</span>  
+                        <span class="editor-status" id="editor-status">行: 1, 列: 1</span>  
+                    </div>  
+                    <!-- 顶部静态分割线 -->  
+                    <div class="panel-header-divider"></div>  
+                    <div class="panel-header-right">  
+                        <span>实时预览</span>  
+                        <button class="btn-icon" id="refresh-preview" title="刷新预览">  
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">  
+                                <path d="M1 4v6h6M23 20v-6h-6"></path>  
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>  
+                            </svg>  
+                        </button>  
+                    </div>  
+                </div>  
+                
                 <div class="editor-body">  
                     <div class="editor-panel">  
-                        <div class="panel-header">  
-                            <span id="language-label">HTML 代码</span>  
-                            <span class="editor-status" id="editor-status">行: 1, 列: 1</span>  
-                        </div>  
                         <div id="monaco-editor-container"></div>  
                     </div>  
-                      
+                    
+                    <!-- 下方可交互分割线 -->  
                     <div class="resize-handle" id="resize-handle"></div>  
-                      
-                    <div class="preview-panel">  
-                        <div class="panel-header">  
-                            <span>实时预览</span>  
-                            <button class="btn-icon" id="refresh-preview" title="刷新预览">  
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>  
-                                </svg>  
-                            </button>  
-                        </div>  
+                    
+                    <div class="editor-preview-panel">  
                         <iframe id="preview-iframe" sandbox="allow-same-origin allow-scripts"></iframe>  
                     </div>  
                 </div>  
             </div>  
         `;  
-    }  
+    }
       
     async initMonacoEditor() {  
         const container = this.dialog.querySelector('#monaco-editor-container');  
-        const isDarkTheme = document.body.getAttribute('data-theme') === 'dark';  
+        const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';  
         
         this.editor = monaco.editor.create(container, {  
             language: this.currentLanguage,  
@@ -177,22 +192,23 @@ class TemplateEditorDialog {
         this.themeObserver = new MutationObserver((mutations) => {  
             mutations.forEach((mutation) => {  
                 if (mutation.attributeName === 'data-theme') {  
-                    const isDark = document.body.getAttribute('data-theme') === 'dark';  
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
                     monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');  
                 }  
             });  
         });  
         
-        this.themeObserver.observe(document.body, {  
+        this.themeObserver.observe(document.documentElement, {  
             attributes: true,  
             attributeFilter: ['data-theme']  
         });  
         
-        this.editor.onDidChangeModelContent(() => { 
-            this.isDirty = true;  
+        this.editor.onDidChangeModelContent(() => {  
+            const currentContent = this.editor.getValue();  
+            this.isDirty = currentContent !== this.originalContent;  
             this.updatePreviewDebounced();  
-        });  
-          
+        });
+            
         this.editor.onDidChangeCursorPosition((e) => {  
             const status = this.dialog.querySelector('#editor-status');  
             if (status) {  
@@ -203,7 +219,6 @@ class TemplateEditorDialog {
       
     async loadTemplate() {  
         try {  
-            // 确保编辑器已初始化  
             if (!this.editor) {  
                 throw new Error('编辑器未初始化');  
             }  
@@ -214,7 +229,6 @@ class TemplateEditorDialog {
             const content = await response.text();  
             this.originalContent = content;  
             
-            // 使用 setTimeout 确保编辑器完全就绪  
             setTimeout(() => {  
                 this.editor.setValue(content);  
                 this.isDirty = false;  
@@ -225,75 +239,202 @@ class TemplateEditorDialog {
                 }  
                 
                 this.updateLanguageLabel();  
-                this.updatePreview();  
+                
+                // 确保初始加载时更新预览  
+                if (this.currentLanguage === 'html') {  
+                    this.updatePreview();  
+                } else if (this.currentLanguage === 'markdown') {  
+                    this.updateMarkdownPreview();  
+                }  
             }, 100);  
         } catch (error) {  
             window.dialogManager?.showAlert('加载模板失败: ' + error.message, 'error');  
         }  
-    }  
+    }
       
     updatePreviewDebounced() {  
         clearTimeout(this.previewTimer);  
         this.previewTimer = setTimeout(() => {  
+            console.log('[Preview] Updating preview, language:', this.currentLanguage);  
             if (this.currentLanguage === 'html') {  
                 this.updatePreview();  
             } else if (this.currentLanguage === 'markdown') {  
                 this.updateMarkdownPreview();  
             }  
-        }, 500);  
-    }   
+        }, 300);
+    } 
       
     updatePreview() {  
         const content = this.editor.getValue();  
-        const iframe = this.dialog.querySelector('#preview-iframe');  
-          
+        const previewContainer = this.dialog.querySelector('.editor-preview-panel');  
+        
+        if (!previewContainer) return;  
+        
+        const oldIframe = previewContainer.querySelector('#preview-iframe');  
+        if (oldIframe) oldIframe.remove();  
+        
+        const iframe = document.createElement('iframe');  
+        iframe.id = 'preview-iframe';  
+        iframe.sandbox = 'allow-same-origin allow-scripts';  
+        
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
+        const scrollbarBg = isDark ? '#2d2d2d' : '#f5f5f5';  
+        const scrollbarThumb = isDark ? '#555' : '#e0e0e0';  
+        const scrollbarThumbHover = isDark ? '#666' : '#999';  
+        
         const styledContent = `  
-            <style>  
-                body {   
-                    margin: 0;   
-                    padding: 16px;  
-                    overflow: auto;  
-                }  
-            </style>  
-            ${content}  
+            <!DOCTYPE html>  
+            <html>  
+            <head>  
+                <meta charset="UTF-8">  
+                <style>  
+                    body {  
+                        margin: 0;  
+                        padding: 16px;  
+                        overflow: auto;  
+                    }  
+                    
+                    /* 隐藏滚动条箭头 - 关键修复 */  
+                    ::-webkit-scrollbar-button {  
+                        display: none !important;  
+                        height: 0 !important;  
+                        width: 0 !important;  
+                    }  
+                    
+                    /* 滚动条样式 */  
+                    ::-webkit-scrollbar {  
+                        width: 8px !important;  
+                        height: 8px !important;  
+                    }  
+                    
+                    ::-webkit-scrollbar-track {  
+                        background: ${scrollbarBg} !important;  
+                        border-radius: 4px !important;  
+                    }  
+                    
+                    ::-webkit-scrollbar-thumb {  
+                        background: ${scrollbarThumb} !important;  
+                        border-radius: 4px !important;  
+                    }  
+                    
+                    ::-webkit-scrollbar-thumb:hover {  
+                        background: ${scrollbarThumbHover} !important;  
+                    }  
+                    
+                    /* Firefox滚动条 */  
+                    html, body, * {  
+                        scrollbar-width: thin !important;  
+                        scrollbar-color: ${scrollbarThumb} ${scrollbarBg} !important;  
+                    }  
+                </style>  
+            </head>  
+            <body>  
+                ${content}  
+            </body>  
+            </html>  
         `;  
-          
+        
         iframe.srcdoc = styledContent;  
-    }  
-      
-    updateMarkdownPreview() {  
-        const content = this.editor.getValue();  
-        const iframe = this.dialog.querySelector('#preview-iframe');  
-          
-        const htmlContent = this.markdownToHtml(content);  
-          
-        const styledContent = `  
-            <style>  
-                body {   
-                    margin: 0;   
-                    padding: 16px;  
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  
-                    line-height: 1.6;  
-                }  
-                h1, h2, h3 { margin-top: 24px; }  
-                code {   
-                    background: #f5f5f5;   
-                    padding: 2px 6px;   
-                    border-radius: 3px;   
-                }  
-                pre {   
-                    background: #f5f5f5;   
-                    padding: 12px;   
-                    border-radius: 6px;   
-                    overflow-x: auto;   
-                }  
-            </style>  
-            ${htmlContent}  
-        `;  
-          
-        iframe.srcdoc = styledContent;  
-    }  
-      
+        previewContainer.appendChild(iframe);  
+    }
+
+    updateMarkdownPreview() {      
+        const content = this.editor.getValue();      
+        const previewContainer = this.dialog.querySelector('.editor-preview-panel');      
+        
+        if (!previewContainer) {      
+            return;      
+        }      
+        
+        const oldIframe = previewContainer.querySelector('#preview-iframe');      
+        if (oldIframe) {      
+            oldIframe.remove();      
+        }      
+        
+        const iframe = document.createElement('iframe');      
+        iframe.id = 'preview-iframe';      
+        iframe.sandbox = 'allow-same-origin allow-scripts';      
+        
+        const htmlContent = this.markdownToHtml(content);      
+        
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';      
+        const scrollbarBg = isDark ? '#2d2d2d' : '#f5f5f5';    
+        const scrollbarThumb = isDark ? '#555' : '#e0e0e0';    
+        const scrollbarThumbHover = isDark ? '#666' : '#999';    
+        
+        const styledContent = `      
+            <!DOCTYPE html>      
+            <html>      
+            <head>      
+                <meta charset="UTF-8">      
+                <style>      
+                    body {      
+                        margin: 0;      
+                        padding: 16px;      
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;      
+                        line-height: 1.6;      
+                        overflow: auto;      
+                    }      
+                    h1, h2, h3 { margin-top: 24px; }      
+                    code {      
+                        background: #f5f5f5;      
+                        padding: 2px 6px;      
+                        border-radius: 3px;      
+                    }      
+                    pre {      
+                        background: #f5f5f5;      
+                        padding: 12px;      
+                        border-radius: 6px;      
+                        overflow-x: auto;      
+                    }      
+                    
+                    /* 强制隐藏滚动条箭头并统一样式 */      
+                    ::-webkit-scrollbar {      
+                        width: 8px !important;      
+                        height: 8px !important;      
+                    }      
+                    
+                    ::-webkit-scrollbar-button {      
+                        display: none !important;      
+                        width: 0 !important;      
+                        height: 0 !important;      
+                    }      
+                    
+                    ::-webkit-scrollbar-track {      
+                        background: ${scrollbarBg} !important;      
+                        border-radius: 4px !important;      
+                    }      
+                    
+                    ::-webkit-scrollbar-thumb {      
+                        background: ${scrollbarThumb} !important;      
+                        border-radius: 4px !important;      
+                    }      
+                    
+                    ::-webkit-scrollbar-thumb:hover {      
+                        background: ${scrollbarThumbHover} !important;      
+                    }      
+                    
+                    ::-webkit-scrollbar-corner {      
+                        background: transparent !important;      
+                    }      
+                    
+                    /* Firefox滚动条 */      
+                    * {      
+                        scrollbar-width: thin !important;      
+                        scrollbar-color: ${scrollbarThumb} ${scrollbarBg} !important;      
+                    }      
+                </style>      
+            </head>      
+            <body>      
+                ${htmlContent}      
+            </body>      
+            </html>      
+        `;      
+        
+        iframe.srcdoc = styledContent;      
+        previewContainer.appendChild(iframe);      
+    }
+        
     markdownToHtml(markdown) {  
         return markdown  
             .replace(/^### (.*$)/gim, '<h3>$1</h3>')  
@@ -310,24 +451,24 @@ class TemplateEditorDialog {
         if (saveBtn) {  
             saveBtn.addEventListener('click', () => this.saveTemplate());  
         }  
-          
+        
         const cancelBtn = this.dialog.querySelector('#cancel-edit');  
         if (cancelBtn) {  
             cancelBtn.addEventListener('click', () => this.close());  
         }  
-          
+        
         const formatBtn = this.dialog.querySelector('#format-code');  
         if (formatBtn) {  
             formatBtn.addEventListener('click', () => {  
                 this.editor.getAction('editor.action.formatDocument').run();  
             });  
         }  
-          
+        
         const fullscreenBtn = this.dialog.querySelector('#toggle-fullscreen');  
         if (fullscreenBtn) {  
             fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());  
         }  
-          
+        
         const refreshBtn = this.dialog.querySelector('#refresh-preview');  
         if (refreshBtn) {  
             refreshBtn.addEventListener('click', () => {  
@@ -338,7 +479,7 @@ class TemplateEditorDialog {
                 }  
             });  
         }  
-          
+        
         const languageSelector = this.dialog.querySelector('#language-selector');  
         if (languageSelector) {  
             languageSelector.value = this.currentLanguage;  
@@ -346,71 +487,150 @@ class TemplateEditorDialog {
                 this.switchLanguage(e.target.value);  
             });  
         }  
-          
+        
         this.initResizeHandle();  
-          
-        document.addEventListener('keydown', this.handleKeydown.bind(this));  
-          
-        this.dialog.addEventListener('click', (e) => {  
-            if (e.target === this.dialog) {  
+        
+        this.keydownHandler = this.handleKeydown.bind(this);  
+        document.addEventListener('keydown', this.keydownHandler);  
+        
+        this.overlayClickHandler = (e) => {  
+            if (e.target === this.dialog && !this.isClosing) {  
                 this.close();  
             }  
-        });  
-    }  
+        };  
+        this.dialog.addEventListener('click', this.overlayClickHandler);  
+    }
     
     initResizeHandle() {  
         const handle = this.dialog.querySelector('#resize-handle');  
         const editorPanel = this.dialog.querySelector('.editor-panel');  
-        const previewPanel = this.dialog.querySelector('.preview-panel');  
+        const previewPanel = this.dialog.querySelector('.editor-preview-panel');  
+        const panelHeaderLeft = this.dialog.querySelector('.panel-header-left');  
+        const panelHeaderRight = this.dialog.querySelector('.panel-header-right');  
         
         if (!handle || !editorPanel || !previewPanel) return;  
         
-        let isResizing = false;  
         let startX = 0;  
-        let startWidth = 0;  
+        let startEditorWidth = 0;  
+        let startPreviewWidth = 0;  
     
-        handle.addEventListener('mousedown', (e) => {  
-            isResizing = true;  
+        const handleMouseDown = (e) => {  
+            // 只响应左键  
+            if (e.button !== 0) return;  
+            
+            // 如果已经在拖动中,停止当前拖动  
+            if (this.isResizing) {  
+                this.stopResizing();  
+                return;  
+            }  
+            
+            this.isResizing = true;  
             startX = e.clientX;  
-            startWidth = editorPanel.offsetWidth;  
+            startEditorWidth = editorPanel.offsetWidth;  
+            startPreviewWidth = previewPanel.offsetWidth;  
             document.body.style.cursor = 'col-resize';  
+            document.body.style.userSelect = 'none';  
+            
+            // 关键修复:在iframe上添加遮罩,防止鼠标事件被iframe捕获  
+            const iframe = this.dialog.querySelector('#preview-iframe');  
+            if (iframe) {  
+                iframe.style.pointerEvents = 'none';  
+            }  
+            
             e.preventDefault();  
-        });  
+            e.stopPropagation();  
+        };  
     
-        document.addEventListener('mousemove', (e) => {  
-            if (!isResizing) return;  
+        const handleMouseMove = (e) => {  
+            if (!this.isResizing) return;  
+            
+            e.preventDefault();  
+            e.stopPropagation();  
             
             const delta = e.clientX - startX;  
-            const newWidth = startWidth + delta;  
+            const newEditorWidth = startEditorWidth + delta;  
+            const newPreviewWidth = startPreviewWidth - delta;  
             const containerWidth = this.dialog.querySelector('.editor-body').offsetWidth;  
-            const minWidth = 300;  
-            const maxWidth = containerWidth - 300;  
+            const handleTotalWidth = 17; // 1px线条 + 16px间距  
             
-            if (newWidth >= minWidth && newWidth <= maxWidth) {  
-                const percentage = (newWidth / containerWidth) * 100;  
-                editorPanel.style.flex = `0 0 ${percentage}%`;  
-                previewPanel.style.flex = `1`;  
+            // 修复:简化边界检查,只要两个面板都大于50px即可  
+            const minWidth = 50;  
+            
+            if (newEditorWidth >= minWidth && newPreviewWidth >= minWidth) {  
+                editorPanel.style.width = `${newEditorWidth}px`;  
+                editorPanel.style.flex = 'none';  
+                editorPanel.style.maxWidth = 'none';  
+                
+                previewPanel.style.width = `${newPreviewWidth}px`;  
+                previewPanel.style.flex = 'none';  
+                
+                if (panelHeaderLeft) {  
+                    panelHeaderLeft.style.width = `${newEditorWidth}px`;  
+                    panelHeaderLeft.style.flex = 'none';  
+                    panelHeaderLeft.style.minWidth = 'unset';  
+                }  
+                
+                if (panelHeaderRight) {  
+                    panelHeaderRight.style.width = `${newPreviewWidth}px`;  
+                    panelHeaderRight.style.flex = 'none';  
+                }  
             }  
-        });  
+        };  
     
-        document.addEventListener('mouseup', () => {  
-            if (isResizing) {  
-                isResizing = false;  
-                document.body.style.cursor = '';  
+        const stopResizing = () => {  
+            if (!this.isResizing) return;  
+            
+            this.isResizing = false;  
+            document.body.style.cursor = '';  
+            document.body.style.userSelect = '';  
+            
+            // 恢复iframe的鼠标事件  
+            const iframe = this.dialog.querySelector('#preview-iframe');  
+            if (iframe) {  
+                iframe.style.pointerEvents = '';  
             }  
-        });  
+        };  
+        
+        // 将stopResizing保存为实例方法,方便在其他地方调用  
+        this.stopResizing = stopResizing;  
+    
+        const handleMouseUp = (e) => {  
+            stopResizing();  
+        };  
+        
+        const handleMouseLeave = (e) => {  
+            // 只有当鼠标真正离开窗口时才停止拖动  
+            if (e.target === document.documentElement) {  
+                stopResizing();  
+            }  
+        };  
+    
+        // 绑定事件  
+        handle.addEventListener('mousedown', handleMouseDown);  
+        document.addEventListener('mousemove', handleMouseMove);  
+        document.addEventListener('mouseup', handleMouseUp);  
+        document.addEventListener('mouseleave', handleMouseLeave);  
+        
+        // 保存所有事件处理器引用以便清理  
+        this.resizeHandlers = {  
+            handle: handle,  
+            mouseDown: handleMouseDown,  
+            mouseMove: handleMouseMove,  
+            mouseUp: handleMouseUp,  
+            mouseLeave: handleMouseLeave  
+        };  
     }
 
     switchLanguage(language) {  
         this.currentLanguage = language;  
-          
+        
         const model = this.editor.getModel();  
         monaco.editor.setModelLanguage(model, language);  
-          
+        
         this.updateLanguageLabel();  
-          
-        const previewPanel = this.dialog.querySelector('.preview-panel');  
-          
+        
+        const previewPanel = this.dialog.querySelector('.editor-preview-panel'); // 修改  
+        
         if (language === 'html') {  
             if (previewPanel) previewPanel.style.display = '';  
             this.updatePreview();  
@@ -472,22 +692,22 @@ class TemplateEditorDialog {
     async saveTemplate() {  
         const content = this.editor.getValue();  
         const saveBtn = this.dialog.querySelector('#save-template');  
-          
+            
         try {  
             saveBtn.disabled = true;  
             saveBtn.textContent = '保存中...';  
-              
+                
             const response = await fetch(`/api/templates/content/${encodeURIComponent(this.currentTemplate)}`, {  
                 method: 'PUT',  
                 headers: { 'Content-Type': 'application/json' },  
                 body: JSON.stringify({ content })  
             });  
-              
+                
             if (response.ok) {  
-                this.originalContent = content;  
+                this.originalContent = content; // 关键修复:更新 originalContent  
                 this.isDirty = false;  
                 window.app?.showNotification('模板已保存', 'success');  
-                  
+                    
                 if (window.templateManager) {  
                     await window.templateManager.loadTemplates(window.templateManager.currentCategory);  
                     window.templateManager.renderTemplateGrid();  
@@ -509,35 +729,90 @@ class TemplateEditorDialog {
                 保存 (Ctrl+S)  
             `;  
         }  
-    }  
-      
-    close() {  
-        if (this.isDirty) {  
-            window.dialogManager.showConfirm(  
-                '有未保存的修改,确认关闭?',  
-                () => this.destroy()  
-            );  
-        } else {  
-            this.destroy();  
-        }  
-    }  
-      
+    } 
+        
+    close() {      
+        // 防止重入      
+        if (this.isClosing) {      
+            return;      
+        }      
+        
+        if (this.isDirty) {      
+            this.isClosing = true;      
+            
+            // 临时移除遮罩点击事件,防止重复触发      
+            if (this.overlayClickHandler && this.dialog) {      
+                this.dialog.removeEventListener('click', this.overlayClickHandler);      
+            }      
+            
+            window.dialogManager.showConfirm(      
+                '有未保存的修改,确认关闭?',      
+                () => {      
+                    this.destroy();      
+                },      
+                () => {      
+                    // 取消时重新绑定遮罩点击事件,使用 setTimeout 确保在对话框关闭后执行  
+                    setTimeout(() => {  
+                        if (this.overlayClickHandler && this.dialog) {      
+                            this.dialog.addEventListener('click', this.overlayClickHandler);      
+                        }      
+                        this.isClosing = false;  
+                    }, 100);  
+                }      
+            );      
+        } else {      
+            this.destroy();      
+        }      
+    }
+    
     destroy() {  
+        if (this.keydownHandler) {  
+            document.removeEventListener('keydown', this.keydownHandler);  
+            this.keydownHandler = null;  
+        }  
+        
+        if (this.overlayClickHandler && this.dialog) {  
+            this.dialog.removeEventListener('click', this.overlayClickHandler);  
+            this.overlayClickHandler = null;  
+        }  
+        
+        // 清理resize事件监听器  
+        if (this.resizeHandlers) {  
+            const { handle, mouseDown, mouseMove, mouseUp, mouseLeave } = this.resizeHandlers;  
+            if (handle && mouseDown) {  
+                handle.removeEventListener('mousedown', mouseDown);  
+            }  
+            document.removeEventListener('mousemove', mouseMove);  
+            document.removeEventListener('mouseup', mouseUp);  
+            document.removeEventListener('mouseleave', mouseLeave);  
+            this.resizeHandlers = null;  
+        }  
+        
+        // 确保停止拖动并重置状态  
+        if (this.stopResizing) {  
+            this.stopResizing();  
+        }  
+        this.isResizing = false;  
+        
         if (this.themeObserver) {  
             this.themeObserver.disconnect();  
             this.themeObserver = null;  
         }  
+        
         if (this.editor) {  
             this.editor.dispose();  
             this.editor = null;  
         }  
+        
         if (this.dialog && this.dialog.parentNode) {  
             this.dialog.parentNode.removeChild(this.dialog);  
         }  
+        
         this.dialog = null;  
         this.currentTemplate = null;  
         this.isDirty = false;  
-    }  
+        this.isClosing = false;  
+    }
 }  
   
 document.addEventListener('DOMContentLoaded', () => {  
