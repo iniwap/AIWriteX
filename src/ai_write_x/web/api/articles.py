@@ -1,15 +1,21 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from datetime import datetime
 from pathlib import Path
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import HTMLResponse, Response
+from pydantic import BaseModel
 from typing import List, Optional
 import json
-from datetime import datetime
 
 from ...config.config import Config
 from ...utils.path_manager import PathManager
 from ...tools.wx_publisher import pub2wx
 
 router = APIRouter(prefix="/api/articles", tags=["articles"])
+
+
+class ArticleContentUpdate(BaseModel):
+    content: str
 
 
 class PublishRequest(BaseModel):
@@ -38,11 +44,12 @@ async def list_articles():
 
             articles.append(
                 {
+                    "name": file_path.stem,
                     "path": str(file_path),
                     "title": title,
                     "format": file_path.suffix[1:].upper(),
-                    "size": format_size(stat.st_size),
-                    "create_time": datetime.fromtimestamp(stat.st_mtime).strftime(
+                    "size": f"{stat.st_size / 1024:.2f} KB",
+                    "create_time": datetime.fromtimestamp(stat.st_ctime).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
                     "status": status,
@@ -50,37 +57,54 @@ async def list_articles():
             )
 
         articles.sort(key=lambda x: x["create_time"], reverse=True)
-        return articles
+        return {"status": "success", "data": articles}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/content")
 async def get_article_content(path: str):
-    """获取文章内容"""
-    try:
-        file_path = Path(path)
-        if not file_path.exists():
-            raise HTTPException(status_code=404, detail="文章不存在")
+    """获取文章内容 - 使用查询参数"""
+    file_path = Path(path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="文章不存在")
 
-        content = file_path.read_text(encoding="utf-8")
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    content = file_path.read_text(encoding="utf-8")
+    return Response(content=content, media_type="text/plain; charset=utf-8")
 
 
-@router.delete("/{path:path}")
-async def delete_article(path: str):
+@router.put("/content")
+async def update_article_content(path: str, update: ArticleContentUpdate):
+    """更新文章内容"""
+    file_path = Path(path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="文章不存在")
+
+    file_path.write_text(update.content, encoding="utf-8")
+    return {"status": "success", "message": "文章已保存"}
+
+
+@router.get("/preview")
+async def preview_article(path: str):
+    """安全预览文章 - 使用查询参数"""
+    file_path = Path(path)
+    if not file_path.exists():
+        return HTMLResponse("<p>文章不存在</p>")
+
+    content = file_path.read_text(encoding="utf-8")
+    return HTMLResponse(
+        content, headers={"Content-Security-Policy": "default-src 'self' 'unsafe-inline'"}
+    )
+
+
+@router.delete("/{article_path:path}")
+async def delete_article(article_path: str):
     """删除文章"""
-    try:
-        file_path = Path(path)
-        if not file_path.exists():
-            raise HTTPException(status_code=404, detail="文章不存在")
-
+    file_path = Path(article_path)
+    if file_path.exists():
         file_path.unlink()
         return {"status": "success", "message": "文章已删除"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=404, detail="文章不存在")
 
 
 @router.post("/publish")
@@ -181,10 +205,35 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
     records_file.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def format_size(size: int) -> str:
-    """格式化文件大小"""
-    for unit in ["B", "KB", "MB", "GB"]:
-        if size < 1024:
-            return f"{size:.2f} {unit}"
-        size /= 1024
-    return f"{size:.2f} TB"
+@router.get("/platforms")
+async def get_supported_platforms():
+    """获取支持的发布平台列表"""
+    config = Config.get_instance()
+
+    platforms = []
+
+    # 微信公众号
+    wechat_credentials = config.wechat_credentials or []
+    if wechat_credentials:
+        platforms.append(
+            {
+                "id": "wechat",
+                "name": "微信公众号",
+                "icon": "wechat",
+                "accounts": [
+                    {
+                        "index": idx,
+                        "author": cred.get("author_name", "未命名"),
+                        "appid": cred["appid"][-4:],
+                        "full_info": f"{cred.get('author_name', '未命名')} ({cred['appid'][-4:]})",
+                    }
+                    for idx, cred in enumerate(wechat_credentials)
+                ],
+            }
+        )
+
+    # 未来可扩展其他平台
+    # if config.other_platform_credentials:
+    #     platforms.append({...})
+
+    return {"status": "success", "data": platforms}

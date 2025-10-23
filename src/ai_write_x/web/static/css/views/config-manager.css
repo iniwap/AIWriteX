@@ -119,68 +119,67 @@
     font-size: 14px;      
 }      
       
-.checkbox-label {      
-    display: flex;      
-    align-items: center;      
-    gap: 8px;      
-    cursor: pointer;      
-    font-size: 14px;      
-    white-space: nowrap;      
-    min-width: fit-content;      
-}      
-      
-.checkbox-custom {      
-    width: 16px;      
-    height: 16px;      
-    border: 2px solid var(--border-color);      
-    border-radius: 3px;      
-    position: relative;      
-    transition: all 0.2s ease;      
-} 
-
-.checkbox-label input[type="checkbox"] {  
+/* 配置管理器专用的复选框样式 */  
+.config-panel .checkbox-label {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    cursor: pointer;  
+    font-size: 14px;  
+    white-space: nowrap;  
+    min-width: fit-content;  
+}  
+  
+.config-panel .checkbox-custom {  
+    width: 16px;  
+    height: 16px;  
+    border: 2px solid var(--border-color);  
+    border-radius: 3px;  
+    position: relative;  
+    transition: all 0.2s ease;  
+}  
+  
+.config-panel .checkbox-label input[type="checkbox"] {  
     position: absolute;  
     opacity: 0;  
     width: 0;  
     height: 0;  
     pointer-events: none;  
 }  
-
-.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {      
-    background: var(--primary-color);      
-    border-color: var(--primary-color);      
-}      
-      
-.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {      
-    content: '✓';      
-    position: absolute;      
-    top: -2px;      
-    left: 2px;      
-    color: white;      
-    font-size: 12px;      
-    font-weight: bold;      
-}      
-    
-/* 复选框禁用状态 */  
-.checkbox-label input[type="checkbox"]:disabled + .checkbox-custom {  
+  
+.config-panel .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {  
+    background: var(--primary-color);  
+    border-color: var(--primary-color);  
+}  
+  
+.config-panel .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {  
+    content: '✓';  
+    position: absolute;  
+    top: -2px;  
+    left: 2px;  
+    color: white;  
+    font-size: 12px;  
+    font-weight: bold;  
+}  
+  
+.config-panel .checkbox-label input[type="checkbox"]:disabled + .checkbox-custom {  
     background: var(--surface-color);  
     border-color: var(--border-color);  
     opacity: 0.5;  
     cursor: not-allowed;  
 }  
   
-.checkbox-label input[type="checkbox"]:disabled:checked + .checkbox-custom {  
+.config-panel .checkbox-label input[type="checkbox"]:disabled:checked + .checkbox-custom {  
     background: var(--border-color);  
     border-color: var(--border-color);  
     opacity: 0.5;  
 }  
   
-.checkbox-label input[type="checkbox"]:disabled:checked + .checkbox-custom::after {  
+.config-panel .checkbox-label input[type="checkbox"]:disabled:checked + .checkbox-custom::after {  
     color: rgba(255, 255, 255, 0.6);  
 }  
   
-/* 禁用状态下的标签文字 */  
-.checkbox-label:has(input[type="checkbox"]:disabled) {  
+.config-panel .checkbox-label:has(input[type="checkbox"]:disabled) {  
     opacity: 0.6;  
     cursor: not-allowed;  
 }

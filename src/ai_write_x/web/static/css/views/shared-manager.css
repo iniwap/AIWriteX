@@ -1,0 +1,658 @@
+/* ========== 共享管理器样式 ========== */  
+/* 此文件包含文章管理和模板管理的共享样式 */  
+  
+/* 主布局容器 */  
+.manager-layout {  
+    display: flex;  
+    flex-direction: row;  
+    gap: 0;  
+    flex: 1;  
+    min-height: 0;  
+    overflow: hidden;  
+    height: calc(100vh - var(--header-height) - var(--footer-height));  
+}  
+  
+.main-wrapper {  
+    display: flex;  
+    flex-direction: column;  
+    flex: 1;  
+    min-height: 0;  
+    overflow: hidden;  
+}  
+  
+/* 侧边栏 */  
+.manager-sidebar {  
+    width: 200px;  
+    flex-shrink: 0;  
+    background: var(--surface-color);  
+    border-right: 1px solid var(--border-color);  
+    padding: 16px;  
+    overflow-y: auto;  
+    height: 100%;  
+    display: flex;  
+    flex-direction: column;  
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));  
+}  
+  
+.sidebar-header {  
+    flex-shrink: 0;  
+    display: flex;  
+    justify-content: space-between;  
+    align-items: center;  
+    margin-bottom: 16px;  
+    padding-bottom: 12px;  
+    border-bottom: 1px solid var(--border-color);  
+}  
+  
+.sidebar-header h3 {  
+    font-size: 14px;  
+    font-weight: 600;  
+    color: var(--text-primary);  
+    margin: 0;  
+}  
+  
+.sidebar-header .btn-icon {  
+    width: 28px;  
+    height: 28px;  
+    padding: 0;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    border-radius: 4px;  
+    background: transparent;  
+    border: 1px solid var(--border-color);  
+    cursor: pointer;  
+    transition: all 0.2s;  
+}  
+  
+.sidebar-header .btn-icon:hover {  
+    background: var(--primary-color);  
+    border-color: var(--primary-color);  
+    color: white;  
+}  
+  
+/* 侧边栏树形结构 */  
+.sidebar-tree {  
+    flex: 1;  
+    overflow-y: auto;  
+    min-height: 0;  
+}  
+  
+.tree-item {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    padding: 8px 12px;  
+    border-radius: 6px;  
+    cursor: pointer;  
+    transition: all 0.2s;  
+    font-size: 13px;  
+    color: var(--text-secondary);  
+    margin-bottom: 4px;  
+    min-width: 0;  
+}  
+  
+.tree-item > div {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    flex: 1;  
+    min-width: 0;  
+}  
+  
+.tree-item:hover {  
+    background: var(--hover-color);  
+    color: var(--text-primary);  
+}  
+  
+.tree-item.active {  
+    background: var(--primary-color);  
+    color: white;  
+}  
+  
+.tree-icon {  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    flex-shrink: 0;  
+}  
+  
+.tree-icon svg {  
+    stroke-width: 2;  
+}  
+  
+.tree-name {  
+    flex: 1;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
+    white-space: nowrap;  
+    min-width: 0;  
+}  
+  
+/* 计数徽章 */  
+.item-count {  
+    margin-left: auto;  
+    font-size: 10px;  
+    min-width: 18px;  
+    height: 18px;  
+    padding: 0 5px;  
+    border-radius: 9px;  
+    background: rgba(0,0,0,0.1);  
+    display: inline-flex;  
+    align-items: center;  
+    justify-content: center;  
+    line-height: 1;  
+    font-weight: 500;  
+    flex-shrink: 0;  
+}  
+  
+.tree-item.active .item-count {  
+    background: rgba(255,255,255,0.2);  
+}  
+  
+/* 工具栏 */  
+.manager-toolbar {  
+    flex-shrink: 0;  
+    display: flex;  
+    justify-content: space-between;  
+    align-items: center;  
+    padding: 16px 20px;  
+    background: var(--surface-color);  
+    border-bottom: 1px solid var(--border-color);  
+    gap: 16px;  
+}  
+  
+/* 搜索框 */  
+.search-box {  
+    position: relative;  
+    flex: 1;  
+    max-width: 400px;  
+}  
+  
+.search-icon {  
+    position: absolute;  
+    left: 12px;  
+    top: 50%;  
+    transform: translateY(-50%);  
+    color: var(--text-tertiary);  
+    pointer-events: none;  
+}  
+  
+.search-box input {  
+    width: 100%;  
+    padding: 8px 12px 8px 40px;  
+    border: 1px solid var(--border-color);  
+    border-radius: 6px;  
+    background: var(--background-color);  
+    color: var(--text-primary);  
+    font-size: 14px;  
+    transition: border-color 0.2s, box-shadow 0.2s;  
+}  
+  
+.search-box input:focus {  
+    outline: none;  
+    border-color: var(--primary-color);  
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);  
+}  
+  
+/* 工具栏操作区 */  
+.toolbar-actions {  
+    display: flex;  
+    gap: 12px;  
+    align-items: center;  
+}  
+  
+/* 视图切换按钮 */  
+.view-toggle {  
+    display: flex;  
+    gap: 4px;  
+    background: var(--background-color);  
+    border: 1px solid var(--border-color);  
+    border-radius: 6px;  
+    padding: 2px;  
+}  
+  
+.view-btn {  
+    padding: 6px 10px;  
+    border: none;  
+    background: transparent;  
+    border-radius: 4px;  
+    cursor: pointer;  
+    color: var(--text-secondary);  
+    transition: all 0.05s;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+}  
+  
+.view-btn:hover {  
+    background: var(--hover-color);  
+    color: var(--text-primary);  
+}  
+  
+.view-btn.active {  
+    background: var(--primary-color);  
+    color: white;  
+    transition: none;  
+}  
+  
+/* 滚动容器 */  
+.manager-main {  
+    flex: 1;  
+    overflow-y: auto;  
+    padding: 0;  
+    min-height: 0;  
+    max-height: calc(100% - 2px);  
+}  
+  
+.manager-main::-webkit-scrollbar {  
+    width: 8px;  
+}  
+  
+.manager-main::-webkit-scrollbar-track {  
+    background: var(--background-color);  
+    border-radius: 4px;  
+}  
+  
+.manager-main::-webkit-scrollbar-thumb {  
+    background: var(--border-color);  
+    border-radius: 4px;  
+}  
+  
+.manager-main::-webkit-scrollbar-thumb:hover {  
+    background: var(--secondary-color);  
+}  
+  
+/* 内容网格 */  
+.content-grid {  
+    padding: 10px 15px var(--content-bottom-padding) 15px;  
+    display: grid;  
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));  
+    gap: 20px;  
+    align-content: start;  
+}  
+  
+/* 卡片 */  
+.content-card {  
+    background: var(--surface-color);  
+    border: 1px solid var(--border-color);  
+    border-radius: 8px;  
+    overflow: hidden;  
+    transition: all 0.2s;  
+    cursor: pointer;  
+    display: flex;  
+    flex-direction: column;  
+    content-visibility: auto;  
+    contain-intrinsic-size: 0 300px;  
+}  
+  
+.content-card:hover {  
+    transform: translateY(-2px);  
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);  
+    border-color: var(--primary-color);  
+}  
+  
+/* 卡片预览 */  
+.card-preview {  
+    height: 160px;  
+    background: #f5f5f5;  
+    position: relative;  
+    overflow: hidden !important;  
+}  
+  
+.card-preview iframe {  
+    width: 200%;  
+    height: 200%;  
+    border: none;  
+    pointer-events: none;  
+    transform: scale(0.5);  
+    transform-origin: top left;  
+    overflow: hidden !important;  
+    scrollbar-width: none !important;  
+    -ms-overflow-style: none !important;  
+}  
+  
+.card-preview iframe::-webkit-scrollbar {  
+    display: none !important;  
+    width: 0 !important;  
+    height: 0 !important;  
+}  
+  
+.card-preview iframe body {  
+    overflow: hidden !important;  
+}  
+  
+.preview-loading {  
+    position: absolute;  
+    top: 50%;  
+    left: 50%;  
+    transform: translate(-50%, -50%);  
+    color: var(--text-tertiary);  
+    font-size: 12px;  
+    pointer-events: none;  
+    z-index: 1;  
+}  
+  
+.card-preview iframe[data-loaded="true"] + .preview-loading {  
+    display: none !important;  
+}  
+  
+/* 卡片内容 */  
+.card-content {  
+    padding: 10px 12px;  
+    display: flex;  
+    flex-direction: column;  
+    gap: 6px;  
+    min-width: 0;  
+    overflow: hidden;  
+}  
+  
+.card-title {  
+    font-size: 14px;  
+    font-weight: 500;  
+    color: var(--text-primary);  
+    margin: 0;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
+    white-space: nowrap;  
+    max-width: 100%;  
+    -webkit-font-smoothing: antialiased;  
+    -moz-osx-font-smoothing: grayscale;  
+    text-rendering: optimizeLegibility;  
+}  
+  
+.card-meta {  
+    display: flex;  
+    align-items: center;  
+    gap: 6px;  
+    font-size: 12px;  
+    color: var(--text-tertiary);  
+    -webkit-font-smoothing: antialiased;  
+    -moz-osx-font-smoothing: grayscale;  
+}  
+  
+.meta-badge {  
+    padding: 2px 8px;  
+    background: var(--primary-color);  
+    color: white;  
+    border-radius: 4px;  
+    font-size: 11px;  
+    line-height: 1.4;  
+    font-weight: 500;  
+    display: inline-block;  
+    max-width: 120px;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
+    white-space: nowrap;  
+    vertical-align: middle;  
+}  
+  
+.size-info,  
+.time-info {  
+    color: var(--text-tertiary);  
+    font-size: 11px;  
+}  
+  
+.meta-divider {  
+    color: var(--text-tertiary);  
+    opacity: 0.6;  
+}  
+  
+/* 卡片操作按钮 */  
+.card-actions {  
+    display: flex;  
+    gap: 4px;  
+    padding: 8px 12px;  
+    border-top: 1px solid var(--border-color);  
+}  
+  
+.card-actions .btn-icon {  
+    flex: 1;  
+    padding: 6px;  
+    font-size: 14px;  
+    border: none;  
+    background: transparent;  
+    border-radius: 4px;  
+    cursor: pointer;  
+    color: var(--text-secondary);  
+    transition: all 0.2s;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+}  
+  
+.card-actions .btn-icon:hover {  
+    background: var(--hover-color);  
+    color: var(--text-primary);  
+}  
+  
+/* 列表视图 */  
+.content-grid.list-view {  
+    grid-template-columns: 1fr;  
+}  
+  
+.content-grid.list-view .content-card {  
+    flex-direction: row;  
+    height: 72px;  
+    align-items: center;  
+}  
+  
+.content-grid.list-view .card-preview {  
+    width: 108px;  
+    height: 68px;  
+    flex-shrink: 0;  
+}  
+  
+.content-grid.list-view .card-content {  
+    flex: 1;  
+    display: flex;  
+    flex-direction: column;  
+    justify-content: center;  
+    padding: 10px 12px;  
+    gap: 6px;  
+    min-width: 0;  
+    overflow: hidden;  
+}  
+  
+.content-grid.list-view .card-title {  
+    font-size: 14px;  
+    font-weight: 500;  
+    color: var(--text-primary);  
+    margin: 0;  
+    overflow: hidden !important;  
+    text-overflow: ellipsis !important;  
+    white-space: nowrap !important;  
+    min-width: 0;  
+    -webkit-font-smoothing: antialiased;  
+    -moz-osx-font-smoothing: grayscale;  
+    text-rendering: optimizeLegibility;  
+}  
+  
+.content-grid.list-view .meta-badge {  
+    max-width: 250px;  
+}
+
+.content-grid.list-view .card-meta {  
+    display:  flex;  
+    align-items: center;  
+    gap: 6px;  
+    font-size: 12px;  
+    color: var(--text-tertiary);  
+    -webkit-font-smoothing: antialiased;  
+    -moz-osx-font-smoothing: grayscale;  
+}  
+  
+.content-grid.list-view .card-actions {  
+    border-top: none;  
+    border-left: 1px solid var(--border-color);  
+    flex-direction: row;  
+    width: auto;  
+    padding: 0 8px;  
+    gap: 4px;  
+    flex-shrink: 0;  
+}  
+  
+.content-grid.list-view .card-actions .btn-icon {  
+    padding: 8px;  
+    width: 32px;  
+    height: 32px;  
+}  
+  
+/* 空状态 */  
+.empty-state {  
+    grid-column: 1 / -1;  
+    text-align: center;  
+    padding: 60px 20px;  
+    color: var(--text-tertiary);  
+    font-size: 14px;  
+}  
+  
+/* ========== 响应式设计 ========== */  
+  
+/* 中等屏幕 (1400px - 1920px) */  
+@media (min-width: 1400px) and (max-width: 1920px) {  
+    .content-grid {  
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));  
+        gap: 20px;  
+    }  
+      
+    .meta-badge {  
+        max-width: 140px;  
+    }  
+}  
+  
+/* 大屏幕 (1920px - 2560px) */  
+@media (min-width: 1920px) and (max-width: 2560px) {  
+    .content-grid {  
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));  
+        gap: 24px;  
+    }  
+      
+    .card-preview {  
+        height: 180px;  
+    }  
+      
+    .card-title {  
+        font-size: 15px;  
+    }  
+      
+    .card-meta {  
+        font-size: 13px;  
+    }  
+      
+    .meta-badge {  
+        max-width: 160px;  
+    }  
+      
+    .content-grid.list-view .content-card {  
+        height: 84px;  
+    }  
+      
+    .content-grid.list-view .card-preview {  
+        width: 126px;  
+        height: 80px;  
+    }  
+      
+    .content-grid.list-view .card-title {  
+        font-size: 15px;  
+    }  
+      
+    .content-grid.list-view .card-meta {  
+        font-size: 13px;  
+    }  
+      
+    .content-grid.list-view .card-content {  
+        padding: 10px 14px;  
+    }  
+      
+    .content-grid.list-view .meta-badge {  
+        max-width: 200px;  
+    }  
+}  
+  
+/* 超大屏幕 (>2560px): 4K显示器 */  
+@media (min-width: 2560px) {  
+    .content-grid {  
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));  
+        gap: 28px;  
+    }  
+      
+    .card-preview {  
+        height: 200px;  
+    }  
+      
+    .card-title {  
+        font-size: 16px;  
+    }  
+      
+    .card-meta {  
+        font-size: 14px;  
+    }  
+      
+    .card-content {  
+        padding: 14px;  
+    }  
+      
+    .meta-badge {  
+        max-width: 180px;  
+    }  
+      
+    .content-grid.list-view .content-card {  
+        height: 96px;  
+    }  
+      
+    .content-grid.list-view .card-preview {  
+        width: 144px;  
+        height: 92px;  
+    }  
+      
+    .content-grid.list-view .card-title {  
+        font-size: 16px;  
+    }  
+      
+    .content-grid.list-view .card-meta {  
+        font-size: 14px;  
+    }  
+      
+    .content-grid.list-view .card-content {  
+        padding: 12px 16px;  
+        gap: 8px;  
+    }  
+      
+    .content-grid.list-view .card-actions .btn-icon {  
+        width: 36px;  
+        height: 36px;  
+    }  
+      
+    .content-grid.list-view .meta-badge {  
+        max-width: 250px;  
+    }  
+}  
+  
+/* 小屏幕响应式 */  
+@media (max-width: 1200px) {  
+    .content-grid {  
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));  
+    }  
+}  
+  
+@media (max-width: 800px) {  
+    .manager-layout {  
+        flex-direction: column;  
+    }  
+      
+    .manager-sidebar {  
+        width: 100%;  
+        height: auto;  
+        border-right: none;  
+        border-bottom: 1px solid var(--border-color);  
+    }  
+      
+    .toolbar {  
+        flex-wrap: wrap;  
+    }  
+      
+    .search-box {  
+        max-width: 100%;  
+    }  
+}

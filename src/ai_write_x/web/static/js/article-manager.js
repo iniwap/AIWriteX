@@ -9,31 +9,52 @@ class ArticleManager {
         this.selectedArticles = new Set();  
         this.observer = null;  
         this.publishingArticles = [];  
+        this.platforms = null;
+        this.platformAccounts = {};
           
         this.init();  
     }  
       
     async init() {  
         await this.loadArticles();  
-        this.renderStatusTree();  
+        this.renderStatusTree(); 
         this.bindEvents();  
         this.initIntersectionObserver();  
+        // 异步加载平台列表,不阻塞初始化  
+        this.loadPlatforms().catch(err => {  
+            console.error('加载平台列表失败:', err);  
+        }); 
     }  
-      
-    // 加载文章列表  
-    async loadArticles() {  
+    
+    // 加载平台列表(仅初始化时调用一次)  
+    async loadPlatforms() {  
         try {  
-            const response = await fetch('/api/articles');  
+            const response = await fetch('/api/config/platforms');  
             if (response.ok) {  
-                this.articles = await response.json();  
-                this.filterArticles();  
+                const result = await response.json();  
+                this.platforms = result.data || [];  
             }  
         } catch (error) {  
-            console.error('加载文章失败:', error);  
-            this.showNotification('加载文章失败', 'error');  
+            console.error('加载平台列表失败:', error);  
         }  
+    }
+
+    // 加载文章列表  
+    async loadArticles() {    
+        try {    
+            const response = await fetch('/api/articles');    
+            if (response.ok) {    
+                const result = await response.json();  
+                // 与模板管理保持一致,提取 data 字段  
+                this.articles = result.data || [];  
+                this.filterArticles();    
+            }    
+        } catch (error) {    
+            console.error('加载文章失败:', error);    
+            this.showNotification('加载文章失败', 'error');    
+        }    
     }  
-      
+        
     // 渲染状态分类树  
     renderStatusTree() {  
         const statusTree = document.getElementById('status-tree');  
@@ -107,28 +128,34 @@ class ArticleManager {
     }  
     
     // 渲染文章卡片  
-    renderArticles() {  
-        const grid = document.getElementById('article-grid');  
-        if (!grid) return;  
+    renderArticles() {    
+        const grid = document.getElementById('article-grid');    
+        if (!grid) return;    
         
-        grid.className = `article-grid ${this.currentLayout === 'list' ? 'list-view' : ''}`;  
-        grid.innerHTML = '';  
+        grid.className = `article-grid ${this.currentLayout === 'list' ? 'list-view' : ''}`;    
         
-        this.filteredArticles.forEach(article => {  
-            const card = this.createArticleCard(article);  
-            grid.appendChild(card);  
-        });  
-        
-        // 绑定卡片事件  
-        this.bindCardEvents();  
-        
-        // 重新观察所有卡片  
-        if (this.observer) {  
-            document.querySelectorAll('.article-card').forEach(card => {  
-                this.observer.observe(card);  
-            });  
+        // 添加空状态判断  
+        if (this.filteredArticles.length === 0) {    
+            grid.innerHTML = '<div class="empty-state">暂无文章</div>';    
+            return;    
         }  
-    }  
+        
+        grid.innerHTML = '';    
+        
+        this.filteredArticles.forEach(article => {    
+            const card = this.createArticleCard(article);    
+            grid.appendChild(card);    
+        });    
+        
+        this.bindCardEvents();    
+        
+        requestAnimationFrame(() => {  
+            if (this.observer) {    
+                const cards = grid.querySelectorAll('.article-card');    
+                cards.forEach(card => this.observer.observe(card));    
+            }  
+        });  
+    } 
     
     // 创建文章卡片  
     createArticleCard(article) {  
@@ -173,14 +200,22 @@ class ArticleManager {
             <div class="card-content">  
                 <h4 class="card-title" title="${this.escapeHtml(article.title)}">${this.escapeHtml(article.title)}</h4>  
                 <div class="card-meta">  
+                    <span class="format-badge">${article.format}</span>  
+                    <span class="meta-divider">•</span>  
                     <span class="status-badge ${statusClass}" title="点击查看发布记录">${statusText}</span>  
                     <span class="meta-divider">•</span>  
                     <span class="size-info">${article.size}</span>  
                     <span class="meta-divider">•</span>  
                     <span class="time-info">${formatTime(article.create_time)}</span>  
-                </div>  
+                </div> 
             </div>  
             <div class="card-actions">  
+                <button class="btn-icon" data-action="edit" title="编辑">  
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>  
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>  
+                    </svg>  
+                </button>  
                 <button class="btn-icon" data-action="illustration" title="配图">  
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>  
@@ -240,8 +275,10 @@ class ArticleManager {
     
     async handleCardAction(action, article) {  
         switch(action) {  
+            case 'edit':  
+                await this.editArticle(article);  
+                break;  
             case 'illustration':  
-                // 配图功能 - 暂时保留接口  
                 this.showNotification('配图功能开发中', 'info');  
                 break;  
             case 'publish':  
@@ -251,115 +288,133 @@ class ArticleManager {
                 await this.deleteArticle(article.path);  
                 break;  
         }  
-    }  
-    
-    // 初始化懒加载观察器  
-    initIntersectionObserver() {  
-        const options = {  
-            root: document.querySelector('.article-main'),  
-            rootMargin: '50px',  
-            threshold: 0.01  
-        };  
+    } 
         
-        this.observer = new IntersectionObserver((entries) => {  
-            entries.forEach(entry => {  
-                if (entry.isIntersecting) {  
-                    const iframe = entry.target.querySelector('iframe[data-loaded="false"]');  
-                    if (iframe) {  
-                        this.loadSinglePreview(iframe);  
-                    }  
-                }  
-            });  
-        }, options);  
+    // 初始化懒加载观察器    
+    initIntersectionObserver() {    
+        const options = {    
+            root: document.querySelector('.article-main'),  
+            rootMargin: '200px',  // 提前200px开始加载  
+            threshold: 0.01    
+        };    
+        
+        this.observer = new IntersectionObserver((entries) => {    
+            entries.forEach(entry => {    
+                if (entry.isIntersecting) {    
+                    const card = entry.target;  // 观察的是卡片本身  
+                    const iframe = card.querySelector('iframe[data-template-path]');    
+                    if (iframe && iframe.dataset.loaded !== 'true') {    
+                        this.loadSinglePreview(iframe);    
+                        this.observer.unobserve(card);  // 加载后立即取消观察  
+                    }    
+                }    
+            });    
+        }, options);    
     }  
     
     // 加载单个预览  
-    async loadSinglePreview(iframe) {  
-        const templatePath = iframe.dataset.templatePath;  
-        const loadingEl = iframe.parentElement.querySelector('.preview-loading');  
-        
-        try {  
-            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(templatePath)}`);  
-            if (!response.ok) {  
-                throw new Error(`HTTP ${response.status}`);  
-            }  
-            const html = await response.text();  
-            const styledHtml = `  
-                <style>  
-                    body {   
-                        overflow: hidden !important;   
-                        margin: 0;  
-                    }  
-                    ::-webkit-scrollbar { display: none !important; }  
-                    * { scrollbar-width: none !important; }  
-                </style>  
-                ${html}  
-            `;  
-            iframe.srcdoc = styledHtml;  
-            iframe.dataset.loaded = 'true';  
-            if (loadingEl) loadingEl.style.display = 'none';  
-        } catch (error) {  
-            iframe.srcdoc = '<div style="padding: 20px; color: red;">加载失败</div>';  
-            if (loadingEl) loadingEl.textContent = '加载失败';  
-        }  
+    async loadSinglePreview(iframe) {    
+        const templatePath = iframe.dataset.templatePath;    
+        const loadingEl = iframe.parentElement.querySelector('.preview-loading');    
+            
+        try {    
+            // 使用查询参数格式(与后端API一致)  
+            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(templatePath)}`);    
+            if (!response.ok) {    
+                throw new Error(`HTTP ${response.status}`);    
+            }    
+            const html = await response.text();    
+            
+            // 注入完全相同的CSS样式  
+            const styledHtml = `    
+                <style>    
+                    body {     
+                        overflow: hidden !important;     
+                        margin: 0;    
+                    }    
+                    ::-webkit-scrollbar { display: none !important; }    
+                    * { scrollbar-width: none !important; }    
+                </style>    
+                ${html}    
+            `;    
+            
+            iframe.srcdoc = styledHtml;    
+            iframe.dataset.loaded = 'true';    
+            if (loadingEl) loadingEl.style.display = 'none';    
+        } catch (error) {    
+            iframe.srcdoc = '<div style="padding: 20px; color: red;">加载失败</div>';    
+            if (loadingEl) loadingEl.textContent = '加载失败';    
+        }    
     }
     
     // 绑定事件  
-    bindEvents() {  
-        // 状态树点击  
-        document.getElementById('status-tree')?.addEventListener('click', (e) => {  
-            const item = e.target.closest('.status-item');  
-            if (item) {  
-                this.currentStatus = item.dataset.status;  
-                this.filterArticles();  
-                this.renderStatusTree();  
-            }  
-        });  
+    bindEvents() {    
+        // 状态树点击    
+        document.getElementById('status-tree')?.addEventListener('click', (e) => {    
+            const item = e.target.closest('.status-item');    
+            if (item) {    
+                this.currentStatus = item.dataset.status;    
+                this.filterArticles();    
+                this.renderStatusTree();    
+            }    
+        });    
         
-        // 搜索  
-        document.getElementById('article-search')?.addEventListener('input', (e) => {  
-            this.searchArticles(e.target.value);  
-        });  
+        // 搜索    
+        document.getElementById('article-search')?.addEventListener('input', (e) => {    
+            this.searchArticles(e.target.value);    
+        });    
         
-        // 视图切换  
-        document.querySelectorAll('.view-btn').forEach(btn => {  
-            btn.addEventListener('click', () => {  
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));  
-                btn.classList.add('active');  
-                this.currentLayout = btn.dataset.layout;  
-                this.renderArticles();  
+        // 视图切换 - 删除全局绑定,只保留限定作用域的绑定  
+        const articleView = document.getElementById('article-manager-view');    
+        if (articleView) {    
+            articleView.querySelectorAll('.view-btn').forEach(btn => {    
+                btn.addEventListener('click', () => {    
+                    // 只移除文章管理视图内的active状态    
+                    articleView.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));    
+                    btn.classList.add('active');    
+                    this.currentLayout = btn.dataset.layout;    
+                    this.renderArticles();    
+                });    
+            });    
+        }  
+    
+        // 批量操作模式    
+        document.getElementById('batch-mode-toggle')?.addEventListener('click', () => {    
+            this.toggleBatchMode();    
+        });    
+        
+        // 批量删除    
+        document.getElementById('batch-delete')?.addEventListener('click', () => {    
+            this.batchDelete();    
+        });    
+        
+        // 批量发布    
+        document.getElementById('batch-publish')?.addEventListener('click', () => {    
+            this.batchPublish();    
+        });    
+        
+        // 卡片复选框变化    
+        document.addEventListener('change', (e) => {    
+            if (e.target.classList.contains('batch-checkbox')) {    
+                const card = e.target.closest('.article-card');    
+                const path = card.dataset.path;    
+                if (e.target.checked) {    
+                    this.selectedArticles.add(path);    
+                } else {    
+                    this.selectedArticles.delete(path);    
+                }    
+                this.updateBatchButtons();    
+            }    
+        });
+        
+        // 平台选择变化  
+        const platformSelect = document.getElementById('publish-platform-select');  
+        if (platformSelect) {  
+            platformSelect.addEventListener('change', (e) => {  
+                this.onPlatformChange(e.target.value);  
             });  
-        });  
-        
-        // 批量操作模式  
-        document.getElementById('batch-mode-toggle')?.addEventListener('click', () => {  
-            this.toggleBatchMode();  
-        });  
-        
-        // 批量删除  
-        document.getElementById('batch-delete')?.addEventListener('click', () => {  
-            this.batchDelete();  
-        });  
-        
-        // 批量发布  
-        document.getElementById('batch-publish')?.addEventListener('click', () => {  
-            this.batchPublish();  
-        });  
-        
-        // 卡片复选框变化  
-        document.addEventListener('change', (e) => {  
-            if (e.target.classList.contains('batch-checkbox')) {  
-                const card = e.target.closest('.article-card');  
-                const path = card.dataset.path;  
-                if (e.target.checked) {  
-                    this.selectedArticles.add(path);  
-                } else {  
-                    this.selectedArticles.delete(path);  
-                }  
-                this.updateBatchButtons();  
-            }  
-        });  
-    }  
+        } 
+    }
     
     // 搜索文章  
     searchArticles(query) {  
@@ -405,23 +460,23 @@ class ArticleManager {
     }  
     
     // 预览文章  
-    async previewArticle(article) {  
-        try {  
-            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(article.path)}`);  
-            if (response.ok) {  
-                const html = await response.text();  
-                // 使用全局预览面板管理器  
-                if (window.previewPanelManager) {  
-                    window.previewPanelManager.show(html);  
-                } else {  
-                    this.showNotification('预览面板未初始化', 'error');  
-                }  
-            } else {  
-                throw new Error('加载失败');  
-            }  
-        } catch (error) {  
-            this.showNotification('预览失败: ' + error.message, 'error');  
-        }
+    async previewArticle(article) {    
+        try {    
+            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(article.path)}`);    
+            if (response.ok) {    
+                const html = await response.text();    
+                // 使用全局预览面板管理器    
+                if (window.previewPanelManager) {    
+                    window.previewPanelManager.show(html);    
+                } else {    
+                    this.showNotification('预览面板未初始化', 'error');    
+                }    
+            } else {    
+                throw new Error('加载失败');    
+            }    
+        } catch (error) {    
+            this.showNotification('预览失败: ' + error.message, 'error');    
+        }  
     }  
     
     // 显示发布对话框  
@@ -441,33 +496,173 @@ class ArticleManager {
         await this.loadAccountsAndShowDialog();  
     }  
     
-    // 加载账号并显示对话框  
+    // 加载平台并显示对话框  
     async loadAccountsAndShowDialog() {  
         try {  
+            // 如果平台列表未加载,先加载  
+            if (!this.platforms) {  
+                await this.loadPlatforms();  
+            }  
+            
+            // 填充平台选择器  
+            const platformSelect = document.getElementById('publish-platform-select');  
+            if (platformSelect) {  
+                platformSelect.innerHTML = '<option value="">请选择发布平台...</option>' +  
+                    this.platforms.map(p => `<option value="${p.value}">${p.label}</option>`).join('');  
+            }  
+            
+            // 隐藏账号选择区域,等待用户选择平台  
+            document.getElementById('account-selection-group').style.display = 'none';  
+            document.getElementById('no-accounts-tip').style.display = 'none';  
+            
+            // 禁用确认按钮  
+            document.getElementById('confirm-publish-btn').disabled = true;  
+            
+            // 显示对话框  
+            document.getElementById('publish-dialog').style.display = 'flex';  
+        } catch (error) {  
+            this.showNotification('加载平台列表失败: ' + error.message, 'error');  
+        }  
+    }
+    
+    // 平台选择变化  
+    async onPlatformChange(platformId) {  
+        const accountSelectionGroup = document.getElementById('account-selection-group');  
+        const noAccountsTip = document.getElementById('no-accounts-tip');  
+        const accountList = document.getElementById('account-list');  
+        
+        if (!platformId) {  
+            accountSelectionGroup.style.display = 'none';  
+            noAccountsTip.style.display = 'none';  
+            this.updatePublishButtonState();  
+            return;  
+        }  
+        
+        try {  
+            // 检查缓存  
+            if (this.platformAccounts[platformId]) {  
+                this.renderPlatformAccounts(platformId, this.platformAccounts[platformId]);  
+                return;  
+            }  
+            
+            // 获取该平台的账号列表  
             const response = await fetch('/api/config/');  
             if (!response.ok) throw new Error('加载配置失败');  
             
             const config = await response.json();  
-            const credentials = config.data?.wechat_credentials || [];  
+            let accounts = [];  
             
-            if (credentials.length === 0) {  
-                this.showNotification('请先在系统设置中配置微信账号', 'warning');  
-                return;  
+            if (platformId === 'wechat') {  
+                const allCredentials = config.data?.wechat_credentials || [];  
+                // 过滤掉 appid 为空的占位配置  
+                const validCredentials = allCredentials.filter(cred => cred.appid && cred.appid.trim() !== '');  
+                
+                accounts = validCredentials.map((cred, index) => ({  
+                    index: allCredentials.indexOf(cred),  
+                    author: cred.author_name || '未命名',  
+                    appid: cred.appid.slice(-4)  
+                }));  
             }  
             
-            const accountList = document.getElementById('account-list');  
-            accountList.innerHTML = credentials.map((cred, index) => `  
+            // 缓存账号列表  
+            this.platformAccounts[platformId] = accounts;  
+            
+            this.renderPlatformAccounts(platformId, accounts);  
+        } catch (error) {  
+            this.showNotification('加载账号失败: ' + error.message, 'error');  
+        }  
+    }  
+    
+    // 渲染平台账号列表  
+    renderPlatformAccounts(platformId, accounts) {  
+        const accountSelectionGroup = document.getElementById('account-selection-group');  
+        const noAccountsTip = document.getElementById('no-accounts-tip');  
+        const accountList = document.getElementById('account-list');  
+        
+        if (accounts.length === 0) {  
+            // 无账号  
+            accountSelectionGroup.style.display = 'none';  
+            noAccountsTip.style.display = 'block';  
+            this.updatePublishButtonState();  
+        } else {  
+            // 有账号  
+            noAccountsTip.style.display = 'none';  
+            accountSelectionGroup.style.display = 'block';  
+            
+            // 渲染账号列表  
+            accountList.innerHTML = accounts.map(account => `  
                 <div class="account-checkbox-item">  
-                    <input type="checkbox" id="account-${index}" value="${index}">  
-                    <label for="account-${index}">  
-                        ${cred.author_name || '未命名'} (${cred.appid.slice(-4)})  
+                    <label class="checkbox-label">  
+                        <input type="checkbox" class="account-checkbox" value="${account.index}">  
+                        <div class="account-info">  
+                            <div class="account-name">${account.author}</div>  
+                            <div class="account-detail">AppID: ${account.appid}</div>  
+                        </div>  
                     </label>  
                 </div>  
             `).join('');  
             
-            document.getElementById('publish-dialog').style.display = 'flex';  
-        } catch (error) {  
-            this.showNotification('加载账号失败: ' + error.message, 'error');  
+            // 绑定账号选择事件  
+            accountList.querySelectorAll('.account-checkbox').forEach(checkbox => {  
+                checkbox.addEventListener('change', () => {  
+                    this.updateSelectedAccountCount();  
+                    this.updatePublishButtonState();  
+                });  
+            });  
+            
+            this.updateSelectedAccountCount();  
+            this.updatePublishButtonState();  
+        }  
+    }
+
+    // 更新发布按钮状态  
+    updatePublishButtonState() {  
+        const platformSelected = document.getElementById('publish-platform-select')?.value;  
+        const accountSelected = document.querySelectorAll('.account-checkbox:checked').length > 0;  
+        const confirmBtn = document.getElementById('confirm-publish-btn');  
+        
+        if (confirmBtn) {  
+            confirmBtn.disabled = !(platformSelected && accountSelected);  
+        }  
+    }
+
+    // 更新已选账号数量  
+    updateSelectedAccountCount() {  
+        const checkboxes = document.querySelectorAll('.account-checkbox:checked');  
+        const count = checkboxes.length;  
+        
+        document.getElementById('selected-account-count').textContent = `(已选 ${count} 个)`;  
+        document.getElementById('confirm-publish-btn').disabled = count === 0;  
+    }  
+    
+    // 全选账号  
+    selectAllAccounts() {  
+        document.querySelectorAll('.account-checkbox').forEach(checkbox => {  
+            checkbox.checked = true;  
+        });  
+        this.updateSelectedAccountCount();  
+    }  
+    
+    // 取消全选  
+    deselectAllAccounts() {  
+        document.querySelectorAll('.account-checkbox').forEach(checkbox => {  
+            checkbox.checked = false;  
+        });  
+        this.updateSelectedAccountCount();  
+    }  
+    
+    // 前往设置  
+    goToSettings() {  
+        this.closePublishDialog();  
+        // 切换到系统设置-微信公众号  
+        const settingsLink = document.querySelector('[data-view="config-manager"]');  
+        if (settingsLink) {  
+            settingsLink.click();  
+            // 延迟切换到微信公众号配置  
+            setTimeout(() => {  
+                const wechatConfig = document.querySelector('[data-config="wechat"]');  
+                if (wechatConfig) wechatConfig.click();  
+            }, 100);  
         }  
     }  
     
@@ -479,12 +674,13 @@ class ArticleManager {
     
     // 确认发布  
     async confirmPublish() {  
+        const platformId = document.getElementById('publish-platform-select')?.value;  
         const selectedAccounts = Array.from(  
-            document.querySelectorAll('#account-list input:checked')  
+            document.querySelectorAll('.account-checkbox:checked')  
         ).map(input => parseInt(input.value));  
         
-        if (selectedAccounts.length === 0) {  
-            this.showNotification('请至少选择一个账号', 'warning');  
+        if (!platformId || selectedAccounts.length === 0) {  
+            this.showNotification('请选择平台和账号', 'warning');  
             return;  
         }  
         
@@ -497,7 +693,7 @@ class ArticleManager {
                 body: JSON.stringify({  
                     article_paths: this.publishingArticles,  
                     account_indices: selectedAccounts,  
-                    platform: 'wechat'  
+                    platform: platformId  
                 })  
             });  
             
@@ -508,33 +704,39 @@ class ArticleManager {
                     result.fail_count === 0 ? 'success' : 'warning'  
                 );  
                 await this.loadArticles();  
+                this.renderStatusTree();  
             } else {  
                 throw new Error('发布请求失败');  
             }  
         } catch (error) {  
             this.showNotification('发布失败: ' + error.message, 'error');  
         }  
-    }  
+    } 
     
     // 删除文章  
     async deleteArticle(path) {  
-        if (!confirm('确认删除这篇文章吗?')) return;  
-        
-        try {  
-            const response = await fetch(`/api/articles/${encodeURIComponent(path)}`, {  
-                method: 'DELETE'  
-            });  
-            
-            if (response.ok) {  
-                this.showNotification('文章已删除', 'success');  
-                await this.loadArticles();  
-            } else {  
-                throw new Error('删除失败');  
+        window.dialogManager.showConfirm(  
+            '确认删除这篇文章吗?',  
+            async () => {  
+                try {  
+                    const response = await fetch(`/api/articles/${encodeURIComponent(path)}`, {  
+                        method: 'DELETE'  
+                    });  
+                    
+                    if (response.ok) {  
+                        this.showNotification('文章已删除', 'success');  
+                        await this.loadArticles();  
+                        this.renderStatusTree();  // 添加这一行  
+                    } else {  
+                        const error = await response.json();  
+                        window.dialogManager.showAlert('删除失败: ' + (error.detail || '未知错误'), 'error');  
+                    }  
+                } catch (error) {  
+                    window.dialogManager.showAlert('删除失败: ' + error.message, 'error');  
+                }  
             }  
-        } catch (error) {  
-            this.showNotification('删除失败: ' + error.message, 'error');  
-        }  
-    }  
+        );  
+    }
     
     // 批量删除  
     async batchDelete() {  
@@ -544,27 +746,32 @@ class ArticleManager {
         }  
         
         const count = this.selectedArticles.size;  
-        if (!confirm(`确认删除选中的 ${count} 篇文章吗?`)) return;  
         
-        const paths = Array.from(this.selectedArticles);  
-        let successCount = 0;  
-        
-        for (const path of paths) {  
-            try {  
-                const response = await fetch(`/api/articles/${encodeURIComponent(path)}`, {  
-                    method: 'DELETE'  
-                });  
-                if (response.ok) successCount++;  
-            } catch (error) {  
-                console.error('删除失败:', path, error);  
+        window.dialogManager.showConfirm(  
+            `确认删除选中的 ${count} 篇文章吗?`,  
+            async () => {  
+                const paths = Array.from(this.selectedArticles);  
+                let successCount = 0;  
+                
+                for (const path of paths) {  
+                    try {  
+                        const response = await fetch(`/api/articles/${encodeURIComponent(path)}`, {  
+                            method: 'DELETE'  
+                        });  
+                        if (response.ok) successCount++;  
+                    } catch (error) {  
+                        console.error('删除失败:', path, error);  
+                    }  
+                }  
+                
+                this.showNotification(`删除完成: ${successCount}/${count}`, 'success');  
+                this.selectedArticles.clear();  
+                this.batchMode = false;  
+                await this.loadArticles();  
+                this.renderStatusTree();  // 添加这一行  
             }  
-        }  
-        
-        this.showNotification(`删除完成: ${successCount}/${count}`, 'success');  
-        this.selectedArticles.clear();  
-        this.batchMode = false;  
-        await this.loadArticles();  
-    }  
+        );  
+    }
     
     // HTML转义  
     escapeHtml(text) {  

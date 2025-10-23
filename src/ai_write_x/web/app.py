@@ -14,6 +14,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 import uvicorn
 
+from src.ai_write_x.utils.path_manager import PathManager
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.utils import log
 
@@ -63,6 +64,8 @@ templates_path = web_path / "templates"
 
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+app.mount("/images", StaticFiles(directory=PathManager.get_image_dir()), name="images")
+
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # 模板引擎

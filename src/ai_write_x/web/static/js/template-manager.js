@@ -74,62 +74,66 @@ class TemplateManager {
         this.templates = result.data;  
     }  
   
-    bindEvents() {  
-        // 新建模板  
-        const addTemplateBtn = document.getElementById('add-template');  
-        if (addTemplateBtn) {  
-            addTemplateBtn.addEventListener('click', () => {  
-                this.showCreateTemplateDialog();  
-            });  
+    bindEvents() {    
+        // 新建模板    
+        const addTemplateBtn = document.getElementById('add-template');    
+        if (addTemplateBtn) {    
+            addTemplateBtn.addEventListener('click', () => {    
+                this.showCreateTemplateDialog();    
+            });    
+        }    
+            
+        // 新建分类    
+        const addCategoryBtn = document.getElementById('add-category');    
+        if (addCategoryBtn) {    
+            addCategoryBtn.addEventListener('click', () => {    
+                this.showCreateCategoryDialog();    
+            });    
+        }    
+            
+        // 搜索    
+        const searchInput = document.getElementById('template-search');    
+        if (searchInput) {    
+            searchInput.addEventListener('input', (e) => {    
+                this.filterTemplates(e.target.value);    
+            });    
+        }    
+            
+        // 视图切换 - 删除全局绑定,只保留限定作用域的绑定  
+        const templateView = document.getElementById('template-manager-view');    
+        if (templateView) {    
+            templateView.querySelectorAll('.view-btn').forEach(btn => {    
+                btn.addEventListener('click', () => {    
+                    templateView.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));    
+                    btn.classList.add('active');    
+                    this.currentLayout = btn.dataset.layout === 'grid' ? 'grid' : 'list';    
+                    this.renderTemplateGrid();    
+                });    
+            });    
         }  
-          
-        // 新建分类  
-        const addCategoryBtn = document.getElementById('add-category');  
-        if (addCategoryBtn) {  
-            addCategoryBtn.addEventListener('click', () => {  
-                this.showCreateCategoryDialog();  
-            });  
+            
+        // 分类树点击    
+        const categoryTree = document.getElementById('category-tree');    
+        if (categoryTree) {    
+            categoryTree.addEventListener('click', (e) => {    
+                const categoryItem = e.target.closest('.category-item');    
+                if (categoryItem) {    
+                    this.selectCategory(categoryItem.dataset.category);    
+                }    
+            });    
         }  
-          
-        // 搜索  
-        const searchInput = document.getElementById('template-search');  
-        if (searchInput) {  
-            searchInput.addEventListener('input', (e) => {  
-                this.filterTemplates(e.target.value);  
-            });  
-        }  
-          
-        // 视图切换 
-        document.querySelectorAll('.view-toggle .view-btn').forEach(btn => {  
-            btn.addEventListener('click', (e) => {  
-                e.preventDefault();  
-                e.stopPropagation();  
-                this.switchLayout(btn.dataset.layout);  
-            });  
-        });  
-          
-        // 分类树点击  
-        const categoryTree = document.getElementById('category-tree');  
-        if (categoryTree) {  
-            categoryTree.addEventListener('click', (e) => {  
-                const categoryItem = e.target.closest('.category-item');  
-                if (categoryItem) {  
-                    this.selectCategory(categoryItem.dataset.category);  
-                }  
-            });  
-        }
-
-        // 快捷键刷新 (F5 或 Ctrl+R) - 隐藏功能  
-        document.addEventListener('keydown', (e) => {  
-            const templateView = document.getElementById('template-manager-view');  
-            if (templateView && templateView.style.display !== 'none') {  
-                if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {  
-                    e.preventDefault();  
-                    this.refreshTemplates();  
-                }  
-            }  
-        }); 
-    }  
+    
+        // 快捷键刷新 (F5 或 Ctrl+R) - 隐藏功能    
+        document.addEventListener('keydown', (e) => {    
+            const templateView = document.getElementById('template-manager-view');    
+            if (templateView && templateView.style.display !== 'none') {    
+                if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {    
+                    e.preventDefault();    
+                    this.refreshTemplates();    
+                }    
+            }    
+        });   
+    }
   
     async refreshTemplates() {  
         try {  

@@ -82,20 +82,45 @@
             <button class="modal-close" onclick="window.articleManager.closePublishDialog()">×</button>  
         </div>  
         <div class="modal-body">  
+            <!-- 平台选择 -->  
             <div class="form-group">  
-                <label>选择平台</label>  
-                <select id="publish-platform" class="form-control">  
-                    <option value="wechat">微信公众号</option>  
+                <label>选择平台 <span class="required">*</span></label>  
+                <select id="publish-platform-select" class="form-control">  
+                    <option value="">请选择发布平台...</option>  
                 </select>  
             </div>  
-            <div class="form-group">  
-                <label>选择账号 (可多选)</label>  
+              
+            <!-- 账号选择区域 -->  
+            <div class="form-group" id="account-selection-group" style="display: none;">  
+                <label>  
+                    选择账号 <span class="required">*</span>  
+                    <span class="account-count" id="selected-account-count">(已选 0 个)</span>  
+                </label>  
+                  
+                <!-- 快捷操作 -->  
+                <div class="account-quick-actions">  
+                    <button type="button" class="btn-link" onclick="window.articleManager.selectAllAccounts()">全选</button>  
+                    <span class="divider">|</span>  
+                    <button type="button" class="btn-link" onclick="window.articleManager.deselectAllAccounts()">取消全选</button>  
+                </div>  
+                  
                 <div id="account-list" class="account-checkbox-list"></div>  
+            </div>  
+              
+            <!-- 无账号提示 -->  
+            <div id="no-accounts-tip" class="no-accounts-tip" style="display: none;">  
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor">  
+                    <circle cx="12" cy="12" r="10"/>  
+                    <line x1="12" y1="8" x2="12" y2="12"/>  
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                </svg>  
+                <p>该平台暂无配置的账号</p>  
+                <button class="btn btn-primary" onclick="window.articleManager.goToSettings()">前往设置</button>  
             </div>  
         </div>  
         <div class="modal-footer">  
             <button class="btn btn-secondary" onclick="window.articleManager.closePublishDialog()">取消</button>  
-            <button class="btn btn-primary" onclick="window.articleManager.confirmPublish()">确认发布</button>  
+            <button class="btn btn-primary" id="confirm-publish-btn" onclick="window.articleManager.confirmPublish()" disabled>确认发布</button>  
         </div>  
     </div>  
 </div>

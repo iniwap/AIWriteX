@@ -111,7 +111,7 @@ class ContentEditorDialog {
                                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>    
                             </svg>    
                         </button>    
-                        <button class="btn btn-secondary" id="cancel-edit">取消</button>    
+                        <button class="btn btn-secondary" id="cancel-edit">关闭</button>    
                         <button class="btn btn-primary" id="save-template">    
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">    
                                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>    
@@ -440,7 +440,7 @@ class ContentEditorDialog {
     bindEvents() {    
         const saveBtn = this.dialog.querySelector('#save-template');    
         if (saveBtn) {    
-            saveBtn.addEventListener('click', () => this.saveTemplate());    
+            saveBtn.addEventListener('click', () => this.saveContent());    
         }    
           
         const cancelBtn = this.dialog.querySelector('#cancel-edit');    
@@ -638,7 +638,7 @@ class ContentEditorDialog {
             
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {    
             e.preventDefault();    
-            this.saveTemplate();    
+            this.saveContent();    
         }    
             
         if (e.key === 'Escape') {    
@@ -668,54 +668,55 @@ class ContentEditorDialog {
         }    
     }    
         
-    async saveTemplate() {    
-        const content = this.editor.getValue();    
-        const saveBtn = this.dialog.querySelector('#save-template');    
-              
-        try {    
-            saveBtn.disabled = true;    
-            saveBtn.textContent = '保存中...';    
-              
-            const apiPath = this.contentType === 'article'   
-                ? `/api/articles/content/${encodeURIComponent(this.currentTemplate)}`  
-                : `/api/templates/content/${encodeURIComponent(this.currentTemplate)}`;  
-                  
-            const response = await fetch(apiPath, {    
-                method: 'PUT',    
-                headers: { 'Content-Type': 'application/json' },    
-                body: JSON.stringify({ content })    
-            });    
-                  
-            if (response.ok) {    
-                this.originalContent = content;  
-                this.isDirty = false;    
-                  
-                const successMsg = this.contentType === 'article' ? '文章已保存' : '模板已保存';  
-                window.app?.showNotification(successMsg, 'success');    
-                      
-                if (this.contentType === 'article' && window.articleManager) {    
-                    await window.articleManager.loadArticles();    
-                } else if (this.contentType === 'template' && window.templateManager) {    
-                    await window.templateManager.loadTemplates(window.templateManager.currentCategory);    
-                    window.templateManager.renderTemplateGrid();    
-                }    
-            } else {    
-                const error = await response.json(); 
-                window.dialogManager?.showAlert('保存失败: ' + (error.detail || '未知错误'), 'error');    
-            }    
-        } catch (error) {    
-            window.dialogManager?.showAlert('保存失败: ' + error.message, 'error');    
-        } finally {    
-            saveBtn.disabled = false;    
-            saveBtn.innerHTML = `    
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">    
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>    
-                    <polyline points="17 21 17 13 7 13 7 21"/>    
-                    <polyline points="7 3 7 8 15 8"/>    
-                </svg>    
-                保存 (Ctrl+S)    
-            `;    
-        }    
+    async saveContent() {    
+        const content = this.editor.getValue();      
+        const saveBtn = this.dialog.querySelector('#save-template');      
+                
+        try {      
+            saveBtn.disabled = true;      
+            saveBtn.textContent = '保存中...';      
+                
+            // 修改为查询参数格式  
+            const apiPath = this.contentType === 'article'     
+                ? `/api/articles/content?path=${encodeURIComponent(this.currentTemplate)}`    
+                : `/api/templates/content/${encodeURIComponent(this.currentTemplate)}`;    
+                    
+            const response = await fetch(apiPath, {      
+                method: 'PUT',      
+                headers: { 'Content-Type': 'application/json' },      
+                body: JSON.stringify({ content })      
+            });      
+                    
+            if (response.ok) {      
+                this.originalContent = content;    
+                this.isDirty = false;      
+                    
+                const successMsg = this.contentType === 'article' ? '文章已保存' : '模板已保存';    
+                window.app?.showNotification(successMsg, 'success');      
+                        
+                if (this.contentType === 'article' && window.articleManager) {      
+                    await window.articleManager.loadArticles();      
+                } else if (this.contentType === 'template' && window.templateManager) {      
+                    await window.templateManager.loadTemplates(window.templateManager.currentCategory);      
+                    window.templateManager.renderTemplateGrid();      
+                }      
+            } else {      
+                const error = await response.json();   
+                window.dialogManager?.showAlert('保存失败: ' + (error.detail || '未知错误'), 'error');      
+            }      
+        } catch (error) {      
+            window.dialogManager?.showAlert('保存失败: ' + error.message, 'error');      
+        } finally {      
+            saveBtn.disabled = false;      
+            saveBtn.innerHTML = `      
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">      
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>      
+                    <polyline points="17 21 17 13 7 13 7 21"/>      
+                    <polyline points="7 3 7 8 15 8"/>      
+                </svg>      
+                保存 (Ctrl+S)      
+            `;      
+        }     
     }   
           
     close() {        
