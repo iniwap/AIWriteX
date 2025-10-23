@@ -143,38 +143,46 @@ class TemplateManager {
         }  
     }
 
-    renderCategoryTree() {  
-        const tree = document.getElementById('category-tree');  
-        if (!tree) return;  
+    renderCategoryTree() {    
+        const tree = document.getElementById('category-tree');    
+        if (!tree) return;    
         
-        const allCount = this.templates.length;  
-        tree.innerHTML = `  
-            <div class="category-item ${!this.currentCategory ? 'active' : ''}" data-category="">  
-                <span class="category-icon">📁</span>  
-                <span class="category-name" title="全部模板">全部模板</span>  
-                <span class="category-count">${allCount}</span>  
-            </div>  
-            ${this.categories.map(cat => `  
-                <div class="category-item ${this.currentCategory === cat.name ? 'active' : ''}"   
-                    data-category="${cat.name}">  
-                    <span class="category-icon">📂</span>  
-                    <span class="category-name" title="${cat.name}">${cat.name}</span>  
-                    <span class="category-count">${cat.template_count}</span>  
-                </div>  
-            `).join('')}  
-        `;  
+        const allCount = this.templates.length;    
+        tree.innerHTML = `    
+            <div class="category-item ${!this.currentCategory ? 'active' : ''}" data-category="">    
+                <span class="category-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">  
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>  
+                    </svg>
+                </span>    
+                <span class="category-name" title="全部模板">全部模板</span>    
+                <span class="category-count">${allCount}</span>    
+            </div>    
+            ${this.categories.map(cat => `    
+                <div class="category-item ${this.currentCategory === cat.name ? 'active' : ''}"     
+                    data-category="${cat.name}">    
+                    <span class="category-icon">  
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">  
+                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>  
+                        </svg>  
+                    </span>    
+                    <span class="category-name" title="${cat.name}">${cat.name}</span>    
+                    <span class="category-count">${cat.template_count}</span>    
+                </div>    
+            `).join('')}    
+        `;    
         
-        // 绑定右键菜单事件  
-        tree.querySelectorAll('.category-item[data-category]:not([data-category=""])').forEach(item => {  
-            item.addEventListener('contextmenu', (e) => {  
-                e.preventDefault();  
-                const categoryName = item.dataset.category;  
-                this.showCategoryContextMenu(e, categoryName);  
-            });  
-        });  
+        // 绑定右键菜单事件    
+        tree.querySelectorAll('.category-item[data-category]:not([data-category=""])').forEach(item => {    
+            item.addEventListener('contextmenu', (e) => {    
+                e.preventDefault();    
+                const categoryName = item.dataset.category;    
+                this.showCategoryContextMenu(e, categoryName);    
+            });    
+        });    
         
-        // 绑定拖拽接收事件  
-        this.bindCategoryDropEvents();  
+        // 绑定拖拽接收事件    
+        this.bindCategoryDropEvents();    
     }
 
     bindCategoryDropEvents() {  
@@ -712,12 +720,11 @@ class TemplateManager {
     async editTemplate(template) {  
         try {  
             // 确保编辑器实例存在  
-            if (!window.templateEditorDialog) {  
-                window.templateEditorDialog = new TemplateEditorDialog();  
+            if (!window.contentEditorDialog) {  
+                window.contentEditorDialog = new ContentEditorDialog();  
             }  
-            await window.templateEditorDialog.open(template.path, template.name);  
+            await window.contentEditorDialog.open(template.path, template.name, 'template'); 
         } catch (error) {  
-            console.error('打开编辑器失败:', error);  
             window.dialogManager?.showAlert('打开编辑器失败: ' + error.message, 'error');  
         }  
     }

@@ -167,11 +167,22 @@ class PreviewPanelManager {
         }  
     }  
       
-    // 预览文章内容  
-    previewArticle(articleId) {  
-        // 这里可以调用 API 获取文章内容  
-        console.log('预览文章:', articleId);  
-        this.show('<div class="article-preview">文章内容加载中...</div>');  
+    async previewArticle(article) {  
+        try {  
+            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(article.path)}`);  
+            if (response.ok) {  
+                const html = await response.text();  
+                if (window.previewPanelManager) {  
+                    window.previewPanelManager.show(html);  
+                } else {  
+                    this.showNotification('预览面板未初始化', 'error');  
+                }  
+            } else {  
+                throw new Error('加载失败');  
+            }  
+        } catch (error) {  
+            this.showNotification('预览失败: ' + error.message, 'error');  
+        }  
     }  
       
     // 预览生成的内容  

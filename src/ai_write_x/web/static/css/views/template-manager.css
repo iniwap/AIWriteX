@@ -108,8 +108,14 @@
 }  
   
 .category-icon {  
-    font-size: 16px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
 }  
+  
+.category-icon svg {  
+    stroke-width: 2;  
+}
   
 .category-count {  
     margin-left: auto;  

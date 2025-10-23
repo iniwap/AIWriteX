@@ -55,6 +55,10 @@
     gap: 12px;  
 }
 
+.modal-close:hover {  
+    background: var(--hover-color);  
+}
+
 /* 确认弹窗遮罩层 */  
 .dialog-overlay {  
     position: fixed;  
