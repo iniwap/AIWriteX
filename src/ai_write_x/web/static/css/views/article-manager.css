@@ -1,524 +1,70 @@
-/* 文章管理视图样式 - 完全统一模板管理风格 */    
-.article-manager-layout {      
-    display: flex;      
-    flex-direction: row;      
-    gap: 0;  
-    flex: 1;      
-    min-height: 0;      
-    overflow: hidden;      
-    height: calc(100vh - var(--header-height) - var(--footer-height));      
-}       
-    
-.article-main-wrapper {      
-    display: flex;      
-    flex-direction: column;      
-    flex: 1;  
-    min-height: 0;        
-    overflow: hidden;      
-}       
-    
-/* 左侧状态树 */    
-.article-sidebar {      
-    width: 200px;      
-    flex-shrink: 0;      
-    background: var(--surface-color);      
-    border-right: 1px solid var(--border-color);      
-    padding: 16px;   
-    overflow-y: auto;      
-    height: 100%;      
-    display: flex;      
-    flex-direction: column;      
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));      
+/* ========== 文章管理特有样式 ========== */  
+  
+/* 批量选择复选框 */  
+.article-card .batch-checkbox {  
+    position: absolute;  
+    top: 8px;  
+    left: 8px;  
+    width: 20px;  
+    height: 20px;  
+    z-index: 10;  
+    cursor: pointer;  
+    display: none;  
 }  
   
-/* 侧边栏标题区域 - 与模板管理统一 */  
-.sidebar-header {  
-    flex-shrink: 0;  
-    display: flex;  
-    justify-content: space-between;  
-    align-items: center;  
-    margin-bottom: 16px;  
-    padding-bottom: 12px;  
-    border-bottom: 1px solid var(--border-color);  
+.article-card.batch-mode .batch-checkbox {  
+    display: block;  
 }  
-    
-.sidebar-header h3 {    
-    font-size: 14px;    
-    font-weight: 600;    
-    color: var(--text-primary);    
-    margin: 0;    
-}    
-    
-.status-tree {    
-    flex: 1;    
-    overflow-y: auto;    
-    min-height: 0;    
-}    
-    
-/* 状态项 - 与分类项统一 */  
-.status-item {    
-    display: flex;  
-    align-items: center;  
-    gap: 8px;  
-    padding: 8px 12px;  
-    margin-bottom: 4px;    
-    border-radius: 6px;    
-    cursor: pointer;    
-    transition: all 0.2s;    
-    font-size: 13px;  /* 与模板管理统一 */  
-    color: var(--text-secondary);  
-    min-width: 0;  
-}    
-    
-.status-item > div {    
-    flex: 1;  
-    display: flex;    
-    align-items: center;    
-    gap: 8px;  
+  
+/* 文件格式徽章 */  
+.format-badge {  
+    padding: 2px 8px;  
+    background: var(--primary-color);  
+    color: white;  
+    border-radius: 4px;  
+    font-size: 11px;  
+    line-height: 1.4;  
+    font-weight: 500;  
+    display: inline-block;  
+    max-width: 120px;  
     overflow: hidden;  
     text-overflow: ellipsis;  
     white-space: nowrap;  
-    min-width: 0;  
-}    
-    
-.status-item:hover {    
-    background: var(--hover-color);    
-    color: var(--text-primary);    
-}    
-    
-.status-item.active {    
-    background: var(--primary-color);    
-    color: white;    
-}    
-    
-.status-icon {    
-    display: flex;    
-    align-items: center;    
-    justify-content: center;  
-    flex-shrink: 0;  
-}    
-    
-.status-icon svg {    
-    stroke-width: 2;    
-}    
-    
-/* 数字徽章 - 完全统一模板管理样式 */  
-.status-count {    
-    margin-left: auto;  
-    font-size: 10px;  /* 从11px改为10px */  
-    min-width: 18px;  /* 添加最小宽度 */  
-    height: 18px;  /* 添加固定高度 */  
-    padding: 0 5px;  /* 从2px 8px改为0 5px */  
-    border-radius: 9px;  /* 从12px改为9px */  
-    background: rgba(0,0,0,0.1);  /* 统一背景色 */  
-    display: inline-flex;  /* 从默认改为inline-flex */  
-    align-items: center;  
-    justify-content: center;  
-    line-height: 1;  
-    font-weight: 500;  
-    flex-shrink: 0;  
-}    
-    
-.status-item.active .status-count {    
-    background: rgba(255, 255, 255, 0.2);    
-    color: white;    
-}    
-    
-/* 工具栏 */    
-.article-toolbar {      
-    flex-shrink: 0;      
-    display: flex;      
-    justify-content: space-between;      
-    align-items: center;      
-    padding: 16px 20px;      
-    background: var(--surface-color);      
-    border-bottom: 1px solid var(--border-color);      
-    gap: 16px;      
-}   
-    
-/* 搜索框 */    
-.search-box {    
-    position: relative;    
-    flex: 1;    
-    max-width: 400px;    
-}    
-    
-.search-icon {    
-    position: absolute;    
-    left: 12px;    
-    top: 50%;    
-    transform: translateY(-50%);    
-    color: var(--text-tertiary);  
-    pointer-events: none;  /* 添加,防止阻挡输入框 */  
-}    
-    
-.search-box input {    
-    width: 100%;    
-    padding: 8px 12px 8px 40px;  /* 从36px改为40px,与模板管理统一 */  
-    border: 1px solid var(--border-color);    
-    border-radius: 6px;    
-    font-size: 14px;  /* 明确字体大小 */  
-    background: var(--background-color);    
-    color: var(--text-primary);  
-    transition: all 0.2s;  /* 添加过渡效果 */  
-}    
-    
-.search-box input:focus {    
-    outline: none;    
-    border-color: var(--primary-color);  
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);  /* 添加聚焦阴影 */  
-}    
-    
-/* 工具栏操作按钮 */    
-.toolbar-actions {    
-    display: flex;    
-    gap: 12px;  /* 从8px改为12px,与模板管理统一 */  
-    align-items: center;    
-}    
-    
-/* 视图切换 - 完全统一模板管理样式 */  
-.view-toggle {    
-    display: flex;    
-    gap: 4px;    
-    background: var(--background-color);  
-    border: 1px solid var(--border-color);  /* 添加边框 */  
-    border-radius: 6px;  
-    padding: 2px;  /* 添加内边距 */  
-}    
-    
-.view-btn {    
-    padding: 6px 10px;  /* 从6px改为6px 10px */  
-    border: none;    
-    background: transparent;    
-    border-radius: 4px;    
-    cursor: pointer;    
-    color: var(--text-secondary);    
-    transition: all 0.05s;  /* 从0.2s改为0.05s */  
-    display: flex;    
-    align-items: center;    
-    justify-content: center;    
-}    
-    
-.view-btn:hover {    
-    background: var(--hover-color);    
-    color: var(--text-primary);    
-}    
-    
-.view-btn.active {    
-    background: var(--primary-color);    
-    color: white;  
-    transition: none;  /* 添加,激活状态无过渡 */  
-}    
-    
-/* 滚动容器 */    
-.article-main {    
-    flex: 1;    
-    overflow-y: auto;    
-    padding: 0;    
-    min-height: 0;    
-    max-height: calc(100% - 2px);    
-}    
-    
-.article-main::-webkit-scrollbar {    
-    width: 8px;    
-}    
-    
-.article-main::-webkit-scrollbar-track {    
-    background: var(--background-color);    
-    border-radius: 4px;    
-}    
-    
-.article-main::-webkit-scrollbar-thumb {    
-    background: var(--border-color);    
-    border-radius: 4px;    
-}    
-    
-.article-main::-webkit-scrollbar-thumb:hover {    
-    background: var(--secondary-color);    
-}    
-    
-/* 文章网格 */    
-.article-grid {    
-    padding: 10px 15px var(--content-bottom-padding) 15px;    
-    display: grid;    
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));    
-    gap: 20px;    
-    align-content: start;    
-}    
-    
-/* 文章卡片 */    
-.article-card {    
-    background: var(--surface-color);    
-    border: 1px solid var(--border-color);    
-    border-radius: 8px;    
-    overflow: hidden;    
-    transition: all 0.2s;    
-    cursor: pointer;    
-    display: flex;    
-    flex-direction: column;    
-    content-visibility: auto;    
-    contain-intrinsic-size: 0 300px;    
-    position: relative;    
-}    
-    
-.article-card:hover {    
-    transform: translateY(-2px);    
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);    
-    border-color: var(--primary-color);    
-}    
-    
-/* 批量选择复选框 */    
-.article-card .batch-checkbox {    
-    position: absolute;    
-    top: 8px;    
-    left: 8px;    
-    width: 20px;    
-    height: 20px;    
-    z-index: 10;    
-    cursor: pointer;    
-    display: none;    
-}    
-    
-.article-card.batch-mode .batch-checkbox {    
-    display: block;    
-}    
-    
-/* 卡片预览 */    
-.card-preview {      
-    height: 160px;      
-    background: #f5f5f5;      
-    position: relative;      
-    overflow: hidden !important;      
-}      
-      
-.card-preview iframe {      
-    width: 200%;      
-    height: 200%;      
-    border: none;      
-    pointer-events: none;      
-    transform: scale(0.5);      
-    transform-origin: top left;      
-    overflow: hidden !important;      
-    scrollbar-width: none !important;      
-    -ms-overflow-style: none !important;      
-}      
-  
-.card-preview iframe::-webkit-scrollbar {      
-    display: none !important;      
-    width: 0 !important;      
-    height: 0 !important;      
-}      
-      
-.card-preview iframe body {      
-    overflow: hidden !important;      
-}    
-  
-.preview-loading {      
-    position: absolute;      
-    top: 50%;      
-    left: 50%;      
-    transform: translate(-50%, -50%);      
-    color: var(--text-tertiary);      
-    font-size: 12px;    
-    z-index: 1;  
-    pointer-events: none;  /* 添加,与模板管理统一 */  
-}    
-  
-.card-preview iframe[data-loaded="true"] + .preview-loading {      
-    display: none !important;      
-}  
-  
-/* 卡片内容 */    
-.card-content {    
-    padding: 10px 12px;    
-    display: flex;    
-    flex-direction: column;    
-    gap: 6px;    
-    min-width: 0;    
-    overflow: hidden;    
-}
-
-.card-title {    
-    font-size: 14px;    
-    font-weight: 500;    
-    color: var(--text-primary);    
-    margin: 0;    
-    overflow: hidden;    
-    text-overflow: ellipsis;    
-    white-space: nowrap;    
-    max-width: 100%;  
-    -webkit-font-smoothing: antialiased;     
-    -moz-osx-font-smoothing: grayscale;      
-    text-rendering: optimizeLegibility;      
-}   
-    
-.card-meta {    
-    display: flex;    
-    align-items: center;    
-    gap: 6px;    
-    font-size: 12px;  /* 与模板管理统一 */  
-    color: var(--text-tertiary);    
-    -webkit-font-smoothing: antialiased;    
-    -moz-osx-font-smoothing: grayscale;    
-}    
-  
-/* 文件格式徽章 - 与分类徽章统一样式 */  
-.format-badge {      
-    padding: 2px 8px;      
-    background: var(--primary-color);      
-    color: white;      
-    border-radius: 4px;      
-    font-size: 11px;     
-    line-height: 1.4;      
-    font-weight: 500;    
-    display: inline-block;     
-    max-width: 120px;  
-    overflow: hidden;    
-    text-overflow: ellipsis;    
-    white-space: nowrap;    
     vertical-align: middle;  
 }  
-    
-/* 发布状态徽章 */    
-.status-badge {    
-    padding: 2px 8px;    
-    border-radius: 4px;    
-    font-size: 11px;    
-    line-height: 1.4;    
-    font-weight: 500;    
-    display: inline-block;    
-    cursor: help;    
-    max-width: 120px;    
-    overflow: hidden;    
-    text-overflow: ellipsis;    
-    white-space: nowrap;    
-    vertical-align: middle;    
-}    
-    
-.status-badge.published {    
-    background: #10b981;    
-    color: white;    
-}    
-    
-.status-badge.failed {    
-    background: #ef4444;    
-    color: white;    
-}    
-    
-.status-badge.unpublished {    
-    background: var(--border-color);    
-    color: var(--text-secondary);    
-}    
-    
-.size-info,    
-.time-info {    
-    color: var(--text-tertiary);    
-    font-size: 11px;  /* 与模板管理统一 */  
-}    
-    
-.meta-divider {    
-    color: var(--text-tertiary);    
-    opacity: 0.6;  
-}    
-    
-/* 卡片操作按钮 */    
-.card-actions {    
-    display: flex;    
-    gap: 4px;    
-    padding: 8px 12px;    
-    border-top: 1px solid var(--border-color);    
-}    
-    
-.card-actions .btn-icon {    
-    flex: 1;    
-    padding: 6px;    
-    font-size: 14px;    
-    border: none;    
-    background: transparent;    
-    border-radius: 4px;    
-    cursor: pointer;    
-    color: var(--text-secondary);    
-    transition: all 0.2s;    
-    display: flex;    
-    align-items: center;    
-    justify-content: center;    
-}    
-    
-.card-actions .btn-icon:hover {    
-    background: var(--hover-color);    
-    color: var(--text-primary);    
-}    
-    
-/* 列表视图 - 完全对齐模板管理 */    
-.article-grid.list-view {    
-    grid-template-columns: 1fr;    
-}    
-    
-.article-grid.list-view .article-card {    
-    flex-direction: row;    
-    height: 72px;    
-    align-items: center;    
-}    
-    
-.article-grid.list-view .card-preview {    
-    width: 108px;    
-    height: 68px;    
-    flex-shrink: 0;    
-}    
-    
-.article-grid.list-view .card-content {      
-    flex: 1;        
-    display: flex;        
-    flex-direction: column;        
-    justify-content: center;        
-    padding: 10px 12px;       
-    gap: 6px;      
-    min-width: 0;  
+  
+/* 发布状态徽章 */  
+.status-badge {  
+    padding: 2px 8px;  
+    border-radius: 4px;  
+    font-size: 11px;  
+    line-height: 1.4;  
+    font-weight: 500;  
+    display: inline-block;  
+    cursor: help;  
+    max-width: 120px;  
     overflow: hidden;  
+    text-overflow: ellipsis;  
+    white-space: nowrap;  
+    vertical-align: middle;  
 }  
   
-.article-grid.list-view .card-title {      
-    font-size: 14px;      
-    font-weight: 500;      
-    color: var(--text-primary);      
-    margin: 0;      
-    overflow: hidden !important;   
-    text-overflow: ellipsis !important;         
-    white-space: nowrap !important;             
-    min-width: 0;      
-    -webkit-font-smoothing: antialiased;      
-    -moz-osx-font-smoothing: grayscale;      
-    text-rendering: optimizeLegibility;      
+.status-badge.published {  
+    background: #10b981;  
+    color: white;  
 }  
   
-.article-grid.list-view .format-badge,  
-.article-grid.list-view .status-badge {    
-    max-width: 250px;  /* 列表视图有更多空间 */  
+.status-badge.failed {  
+    background: #ef4444;  
+    color: white;  
 }  
   
-.article-grid.list-view .card-meta {    
-    display: flex;    
-    gap: 6px;    
-    font-size: 12px;  
-}    
-    
-.article-grid.list-view .card-actions {    
-    border-top: none;    
-    border-left: 1px solid var(--border-color);    
-    flex-direction: row;  
-    width: auto;    
-    padding: 0 8px;    
-    gap: 4px;    
-    flex-shrink: 0;    
-}    
-    
-.article-grid.list-view .card-actions .btn-icon {    
-    padding: 8px;    
-    width: 32px;    
-    height: 32px;    
+.status-badge.unpublished {  
+    background: var(--border-color);  
+    color: var(--text-secondary);  
 }  
   
-/* 发布对话框 */  
+/* ========== 发布对话框样式 ========== */  
 .publish-modal {  
     width: 560px;  
     max-width: 90vw;  
@@ -537,12 +83,14 @@
   
 .required {  
     color: var(--danger-color);  
+    margin-left: 2px;  
 }  
   
 .account-count {  
     font-size: 12px;  
     color: var(--text-tertiary);  
     font-weight: normal;  
+    margin-left: 4px;  
 }  
   
 /* 快捷操作 */  
@@ -637,7 +185,7 @@
     padding: 40px 20px;  
     color: var(--text-tertiary);  
 }  
-
+  
 .no-accounts-tip svg {  
     margin-bottom: 16px;  
     opacity: 0.5;  
@@ -648,7 +196,7 @@
     font-size: 14px;  
 }  
   
-/* 平台选择器样式 */  
+/* 表单控件 */  
 .form-control {  
     width: 100%;  
     padding: 10px 12px;  
@@ -672,20 +220,6 @@
     opacity: 0.6;  
 }  
   
-/* 必填标识 */  
-.required {  
-    color: var(--danger-color);  
-    margin-left: 2px;  
-}  
-  
-/* 账号计数器 */  
-.account-count {  
-    font-size: 12px;  
-    color: var(--text-tertiary);  
-    font-weight: normal;  
-    margin-left: 4px;  
-}  
-  
 /* 按钮禁用状态 */  
 .btn-primary:disabled {  
     opacity: 0.5;  
@@ -693,7 +227,41 @@
     background: var(--border-color);  
 }  
   
-/* 响应式设计 */  
+/* ========== 响应式设计 ========== */  
+  
+/* 徽章宽度调整 */  
+@media (min-width: 1400px) and (max-width: 1920px) {  
+    .format-badge,  
+    .status-badge {  
+        max-width: 140px;  
+    }  
+}  
+  
+@media (min-width: 1920px) and (max-width: 2560px) {  
+    .format-badge,  
+    .status-badge {  
+        max-width: 160px;  
+    }  
+      
+    .content-grid.list-view .format-badge,  
+    .content-grid.list-view .status-badge {  
+        max-width: 200px;  
+    }  
+}  
+  
+@media (min-width: 2560px) {  
+    .format-badge,  
+    .status-badge {  
+        max-width: 180px;  
+    }  
+      
+    .content-grid.list-view .format-badge,  
+    .content-grid.list-view .status-badge {  
+        max-width: 250px;  
+    }  
+}  
+  
+/* 发布对话框响应式 */  
 @media (max-width: 600px) {  
     .publish-modal {  
         width: 95vw;  
@@ -706,172 +274,4 @@
     .account-checkbox-list {  
         max-height: 250px;  
     }  
-}
-/* ========== 响应式设计 - 与模板管理对齐 ========== */    
-    
-/* 中等屏幕 (1400px - 1920px) */      
-@media (min-width: 1400px) and (max-width: 1920px) {      
-    .article-grid {      
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));      
-        gap: 20px;      
-    }    
-        
-    /* 徽章宽度增加 */    
-    .format-badge,  
-    .status-badge {    
-        max-width: 140px;    
-    }    
-}      
-      
-/* 大屏幕 (1920px - 2560px) */      
-@media (min-width: 1920px) and (max-width: 2560px) {      
-    .article-grid {      
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));      
-        gap: 24px;      
-    }      
-          
-    .card-preview {      
-        height: 180px;      
-    }      
-          
-    .card-title {      
-        font-size: 15px;      
-    }      
-          
-    .card-meta {      
-        font-size: 13px;      
-    }    
-        
-    /* 徽章宽度增加 */    
-    .format-badge,  
-    .status-badge {    
-        max-width: 160px;    
-    }    
-          
-    /* 列表视图 */      
-    .article-grid.list-view .article-card {      
-        height: 84px;      
-    }      
-          
-    .article-grid.list-view .card-preview {      
-        width: 126px;      
-        height: 80px;      
-    }      
-          
-    .article-grid.list-view .card-title {      
-        font-size: 15px;      
-    }      
-          
-    .article-grid.list-view .card-meta {      
-        font-size: 13px;      
-    }      
-          
-    .article-grid.list-view .card-content {      
-        padding: 10px 14px;      
-    }    
-        
-    .article-grid.list-view .format-badge,  
-    .article-grid.list-view .status-badge {    
-        max-width: 200px;    
-    }    
-}      
-      
-/* 超大屏幕 (>2560px): 4K显示器 */      
-@media (min-width: 2560px) {      
-    .article-grid {      
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));      
-        gap: 28px;      
-    }      
-          
-    .card-preview {      
-        height: 200px;      
-    }      
-          
-    .card-title {      
-        font-size: 16px;      
-    }      
-          
-    .card-meta {      
-        font-size: 14px;      
-    }      
-          
-    .card-content {      
-        padding: 14px;      
-    }    
-        
-    .format-badge,  
-    .status-badge {    
-        max-width: 180px;    
-    }    
-          
-    /* 列表视图 */      
-    .article-grid.list-view .article-card {      
-        height: 96px;      
-    }      
-          
-    .article-grid.list-view .card-preview {      
-        width: 144px;      
-        height: 92px;      
-    }      
-          
-    .article-grid.list-view .card-title {      
-        font-size: 16px;      
-    }      
-          
-    .article-grid.list-view .card-meta {      
-        font-size: 14px;      
-    }      
-          
-    .article-grid.list-view .card-content {      
-        padding: 12px 16px;      
-        gap: 8px;      
-    }      
-          
-    .article-grid.list-view .card-actions .btn-icon {      
-        width: 36px;      
-        height: 36px;      
-    }    
-        
-    .article-grid.list-view .format-badge,  
-    .article-grid.list-view .status-badge {    
-        max-width: 250px;    
-    }    
-}  
-  
-/* 小屏幕响应式 */  
-@media (max-width: 1200px) {    
-    .article-grid {    
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));    
-    }    
-}    
-    
-@media (max-width: 800px) {    
-    .article-manager-layout {    
-        flex-direction: column;    
-    }    
-        
-    .article-sidebar {    
-        width: 100%;    
-        height: auto;    
-        border-right: none;    
-        border-bottom: 1px solid var(--border-color);    
-    }    
-        
-    .status-tree {    
-        display: flex;    
-        gap: 8px;    
-        overflow-x: auto;    
-    }    
-        
-    .status-item {    
-        flex-shrink: 0;    
-    }    
-        
-    .article-toolbar {    
-        flex-wrap: wrap;    
-    }    
-        
-    .search-box {    
-        max-width: 100%;    
-    }    
 }

@@ -291,7 +291,16 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);  
     border-color: var(--primary-color);  
 }  
-  
+
+/* 空状态 */  
+.empty-state {  
+    grid-column: 1 / -1;  
+    text-align: center;  
+    padding: 60px 20px;  
+    color: var(--text-tertiary);  
+    font-size: 14px;  
+}
+
 /* 卡片预览 */  
 .card-preview {  
     height: 160px;  
@@ -358,7 +367,6 @@
     max-width: 100%;  
     -webkit-font-smoothing: antialiased;  
     -moz-osx-font-smoothing: grayscale;  
-    text-rendering: optimizeLegibility;  
 }  
   
 .card-meta {  
@@ -367,8 +375,8 @@
     gap: 6px;  
     font-size: 12px;  
     color: var(--text-tertiary);  
-    -webkit-font-smoothing: antialiased;  
-    -moz-osx-font-smoothing: grayscale;  
+    flex-wrap: wrap;  
+    min-width: 0;  
 }  
   
 .meta-badge {  
@@ -470,16 +478,14 @@
   
 .content-grid.list-view .meta-badge {  
     max-width: 250px;  
-}
-
+}  
+  
 .content-grid.list-view .card-meta {  
-    display:  flex;  
+    display: flex;  
     align-items: center;  
     gap: 6px;  
     font-size: 12px;  
     color: var(--text-tertiary);  
-    -webkit-font-smoothing: antialiased;  
-    -moz-osx-font-smoothing: grayscale;  
 }  
   
 .content-grid.list-view .card-actions {  
@@ -498,33 +504,17 @@
     height: 32px;  
 }  
   
-/* 空状态 */  
-.empty-state {  
-    grid-column: 1 / -1;  
-    text-align: center;  
-    padding: 60px 20px;  
-    color: var(--text-tertiary);  
-    font-size: 14px;  
-}  
-  
-/* ========== 响应式设计 ========== */  
-  
-/* 中等屏幕 (1400px - 1920px) */  
+/* 响应式设计 */  
 @media (min-width: 1400px) and (max-width: 1920px) {  
     .content-grid {  
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));  
-        gap: 20px;  
-    }  
-      
-    .meta-badge {  
-        max-width: 140px;  
+        gap: 22px;  
     }  
 }  
   
-/* 大屏幕 (1920px - 2560px) */  
 @media (min-width: 1920px) and (max-width: 2560px) {  
     .content-grid {  
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));  
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 24px;  
     }  
       
@@ -544,6 +534,7 @@
         max-width: 160px;  
     }  
       
+    /* 列表视图 */  
     .content-grid.list-view .content-card {  
         height: 84px;  
     }  
@@ -597,6 +588,7 @@
         max-width: 180px;  
     }  
       
+    /* 列表视图 */  
     .content-grid.list-view .content-card {  
         height: 96px;  
     }  
@@ -648,7 +640,17 @@
         border-bottom: 1px solid var(--border-color);  
     }  
       
-    .toolbar {  
+    .sidebar-tree {  
+        display: flex;  
+        gap: 8px;  
+        overflow-x: auto;  
+    }  
+      
+    .tree-item {  
+        flex-shrink: 0;  
+    }  
+      
+    .manager-toolbar {  
         flex-wrap: wrap;  
     }  
       

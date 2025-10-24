@@ -10,35 +10,45 @@ class TemplateManager {
         this.init();
     }  
   
-    async init() {    
-        if (this.initialized) {    
-            await this.loadCategories();      
-            await this.loadTemplates(this.currentCategory);      
-            this.renderCategoryTree();    
+    async init() {        
+        if (this.initialized) {        
+            await this.loadCategories();          
+            await this.loadTemplates(this.currentCategory);          
+            this.renderCategoryTree();        
+            this.renderTemplateGrid();    
             
-            if (this.observer) {    
-                const cards = document.querySelectorAll('.template-card');    
-                cards.forEach(card => {    
-                    if (card.querySelector('iframe[data-loaded="true"]')) {    
-                        return;    
-                    }    
-                    this.observer.observe(card);    
-                });    
-            }  
-            this.updateAddTemplateButtonState();  
-            return;      
-        }  
+            requestAnimationFrame(() => {  
+                if (this.observer) {        
+                    // 使用限定作用域的选择器,只选择当前视图中的卡片  
+                    const grid = document.getElementById('template-content-grid');  
+                    if (grid) {  
+                        const cards = grid.querySelectorAll('.template-card');        
+                        cards.forEach(card => {        
+                            const iframe = card.querySelector('iframe[data-template-path]');  
+                            // 只观察未加载的卡片  
+                            if (iframe && iframe.dataset.loaded !== 'true') {        
+                                this.observer.observe(card);        
+                            }        
+                        });  
+                    }      
+                }    
+            });  
+            
+            this.updateAddTemplateButtonState();      
+            return;          
+        }    
         
-        await this.loadDefaultCategories();  
-        await this.loadCategories();      
-        await this.loadTemplates();      
-        this.setupIntersectionObserver();      
-        this.bindEvents();      
-        this.renderCategoryTree();      
-        this.renderTemplateGrid();      
-        this.initialized = true;  
-        this.updateAddTemplateButtonState();  
-    }  
+        // 首次初始化逻辑保持不变    
+        await this.loadDefaultCategories();      
+        await this.loadCategories();          
+        await this.loadTemplates();          
+        this.setupIntersectionObserver();          
+        this.bindEvents();          
+        this.renderCategoryTree();          
+        this.renderTemplateGrid();          
+        this.initialized = true;      
+        this.updateAddTemplateButtonState();      
+    }
     
     // 从后端加载默认分类  
     async loadDefaultCategories() {  
@@ -113,10 +123,10 @@ class TemplateManager {
         }  
             
         // 分类树点击    
-        const categoryTree = document.getElementById('category-tree');    
+        const categoryTree = document.getElementById('template-sidebar-tree');    
         if (categoryTree) {    
             categoryTree.addEventListener('click', (e) => {    
-                const categoryItem = e.target.closest('.category-item');    
+                const categoryItem = e.target.closest('.tree-item');    
                 if (categoryItem) {    
                     this.selectCategory(categoryItem.dataset.category);    
                 }    
@@ -148,36 +158,36 @@ class TemplateManager {
     }
 
     renderCategoryTree() {    
-        const tree = document.getElementById('category-tree');    
+        const tree = document.getElementById('template-sidebar-tree');    
         if (!tree) return;    
         
         const allCount = this.templates.length;    
         tree.innerHTML = `    
-            <div class="category-item ${!this.currentCategory ? 'active' : ''}" data-category="">    
-                <span class="category-icon">
+            <div class="tree-item ${!this.currentCategory ? 'active' : ''}" data-category="">    
+                <span class="tree-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">  
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>  
                     </svg>
                 </span>    
-                <span class="category-name" title="全部模板">全部模板</span>    
-                <span class="category-count">${allCount}</span>    
+                <span class="tree-name" title="全部模板">全部模板</span>    
+                <span class="item-count">${allCount}</span>    
             </div>    
             ${this.categories.map(cat => `    
-                <div class="category-item ${this.currentCategory === cat.name ? 'active' : ''}"     
+                <div class="tree-item ${this.currentCategory === cat.name ? 'active' : ''}"     
                     data-category="${cat.name}">    
-                    <span class="category-icon">  
+                    <span class="tree-icon">  
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">  
                             <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>  
                         </svg>  
                     </span>    
-                    <span class="category-name" title="${cat.name}">${cat.name}</span>    
-                    <span class="category-count">${cat.template_count}</span>    
+                    <span class="tree-name" title="${cat.name}">${cat.name}</span>    
+                    <span class="item-count">${cat.template_count}</span>    
                 </div>    
             `).join('')}    
         `;    
         
         // 绑定右键菜单事件    
-        tree.querySelectorAll('.category-item[data-category]:not([data-category=""])').forEach(item => {    
+        tree.querySelectorAll('.tree-item[data-category]:not([data-category=""])').forEach(item => {    
             item.addEventListener('contextmenu', (e) => {    
                 e.preventDefault();    
                 const categoryName = item.dataset.category;    
@@ -190,11 +200,11 @@ class TemplateManager {
     }
 
     bindCategoryDropEvents() {  
-        const tree = document.getElementById('category-tree');  
+        const tree = document.getElementById('template-sidebar-tree');  
         if (!tree) return;  
         
         // 为所有分类项(除了"全部模板")绑定拖拽接收事件  
-        tree.querySelectorAll('.category-item[data-category]:not([data-category=""])').forEach(item => {  
+        tree.querySelectorAll('.tree-item[data-category]:not([data-category=""])').forEach(item => {  
             // 拖拽悬停  
             item.addEventListener('dragover', (e) => {  
                 e.preventDefault();  
@@ -472,17 +482,17 @@ class TemplateManager {
                 }  
             });  
         }, {  
-            root: document.querySelector('.template-main'),  
+            root: document.querySelector('#template-manager-view .manager-main'),
             rootMargin: '200px',  
             threshold: 0.01  
         });  
     }
   
     renderTemplateGrid() {  
-        const grid = document.getElementById('template-grid');  
+        const grid = document.getElementById('template-content-grid');  
         if (!grid) return;  
         
-        grid.className = this.currentLayout === 'grid' ? 'template-grid' : 'template-grid list-view';  
+        grid.className = this.currentLayout === 'grid' ? 'content-grid' : 'content-grid list-view';  
         
         if (this.templates.length === 0) {  
             grid.innerHTML = '<div class="empty-state">暂无模板</div>';  
@@ -502,7 +512,7 @@ class TemplateManager {
         
         // 渲染卡片结构,添加 draggable 属性  
         grid.innerHTML = this.templates.map(template => `  
-            <div class="template-card"   
+            <div class="content-card template-card"   
                 data-template-path="${template.path}"  
                 data-template-name="${template.name}"  
                 data-template-category="${template.category}"  
@@ -592,7 +602,7 @@ class TemplateManager {
     } 
   
     bindCardEvents() {  
-        const grid = document.getElementById('template-grid');  
+        const grid = document.getElementById('template-content-grid');  
         if (!grid) return;  
           
         grid.querySelectorAll('.template-card').forEach(card => {  
@@ -623,7 +633,7 @@ class TemplateManager {
     }
 
     bindDragEvents() {  
-        const grid = document.getElementById('template-grid');  
+        const grid = document.getElementById('template-content-grid');  
         if (!grid) return;  
         
         // 为所有模板卡片绑定拖拽开始事件  
@@ -733,38 +743,40 @@ class TemplateManager {
         }  
     }
   
-    async copyTemplate(template) {  
-        window.dialogManager.showInput(  
-            '复制模板',  
-            '请输入新模板名称:',  
-            template.name + '_copy',  
-            async (newName) => {  
-                if (!newName) return;  
+    async copyTemplate(template) {    
+        window.dialogManager.showInput(    
+            '复制模板',    
+            '请输入新模板名称:',    
+            template.name + '_copy',    
+            async (newName) => {    
+                if (!newName) return;    
     
-                try {  
-                    const response = await fetch('/api/templates/copy', {  
-                        method: 'POST',  
-                        headers: { 'Content-Type': 'application/json' },  
-                        body: JSON.stringify({  
-                            source_path: template.path,  
-                            new_name: newName,  
-                            target_category: template.category  
-                        })  
-                    });  
+                try {    
+                    const response = await fetch('/api/templates/copy', {    
+                        method: 'POST',    
+                        headers: { 'Content-Type': 'application/json' },    
+                        body: JSON.stringify({    
+                            source_path: template.path,    
+                            new_name: newName,    
+                            target_category: template.category    
+                        })    
+                    });    
     
-                    if (response.ok) {  
-                        await this.loadTemplates(this.currentCategory);  
-                        this.renderTemplateGrid();  
-                        window.app?.showNotification('模板已复制', 'success');  
-                    } else {  
-                        const error = await response.json();  
-                        window.dialogManager.showAlert('复制失败: ' + (error.detail || '未知错误'), 'error');  
-                    }  
-                } catch (error) {  
-                    window.dialogManager.showAlert('复制失败: ' + error.message, 'error');  
-                }  
-            }  
-        );  
+                    if (response.ok) {    
+                        await this.loadCategories();  // 添加这一行  
+                        await this.loadTemplates(this.currentCategory);    
+                        this.renderCategoryTree();  // 添加这一行  
+                        this.renderTemplateGrid();    
+                        window.app?.showNotification('模板已复制', 'success');    
+                    } else {    
+                        const error = await response.json();    
+                        window.dialogManager.showAlert('复制失败: ' + (error.detail || '未知错误'), 'error');    
+                    }    
+                } catch (error) {    
+                    window.dialogManager.showAlert('复制失败: ' + error.message, 'error');    
+                }    
+            }    
+        );    
     } 
   
     async deleteTemplate(template) {  
@@ -840,7 +852,7 @@ class TemplateManager {
             template.name.toLowerCase().includes(searchText.toLowerCase())  
         );  
           
-        const grid = document.getElementById('template-grid');  
+        const grid = document.getElementById('template-content-grid');  
         if (!grid) return;  
           
         // 临时替换templates进行渲染  

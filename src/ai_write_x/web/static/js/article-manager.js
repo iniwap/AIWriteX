@@ -11,20 +11,39 @@ class ArticleManager {
         this.publishingArticles = [];  
         this.platforms = null;
         this.platformAccounts = {};
-          
+        this.initialized = false;
+        
         this.init();  
     }  
-      
+        
     async init() {  
+        if (this.initialized) {  
+            await this.loadArticles();  
+            this.renderStatusTree();  
+            this.renderArticles();
+            
+            if (this.observer) {  
+                const cards = document.querySelectorAll('.content-card');  
+                cards.forEach(card => {  
+                    if (card.querySelector('iframe[data-loaded="true"]')) {  
+                        return;  
+                    }  
+                    this.observer.observe(card);  
+                });  
+            }  
+            return;  
+        }  
+        
+        // 首次初始化逻辑  
         await this.loadArticles();  
-        this.renderStatusTree(); 
+        this.renderStatusTree();   
         this.bindEvents();  
         this.initIntersectionObserver();  
-        // 异步加载平台列表,不阻塞初始化  
         this.loadPlatforms().catch(err => {  
             console.error('加载平台列表失败:', err);  
-        }); 
-    }  
+        });  
+        this.initialized = true;  
+    }
     
     // 加载平台列表(仅初始化时调用一次)  
     async loadPlatforms() {  
@@ -57,7 +76,7 @@ class ArticleManager {
         
     // 渲染状态分类树  
     renderStatusTree() {  
-        const statusTree = document.getElementById('status-tree');  
+        const statusTree = document.getElementById('article-sidebar-tree');  
         if (!statusTree) return;  
           
         const statusCounts = {  
@@ -104,13 +123,13 @@ class ArticleManager {
         ];  
         
         statusTree.innerHTML = statuses.map(status => `  
-            <div class="status-item ${this.currentStatus === status.key ? 'active' : ''}"   
+            <div class="tree-item ${this.currentStatus === status.key ? 'active' : ''}"   
                 data-status="${status.key}">  
                 <div>  
-                    <span class="status-icon">${status.icon}</span>  
+                    <span class="tree-icon">${status.icon}</span>  
                     <span>${status.label}</span>  
                 </div>  
-                <span class="status-count">${statusCounts[status.key]}</span>  
+                <span class="item-count">${statusCounts[status.key]}</span>  
             </div>  
         `).join('');  
     }  
@@ -129,10 +148,10 @@ class ArticleManager {
     
     // 渲染文章卡片  
     renderArticles() {    
-        const grid = document.getElementById('article-grid');    
+        const grid = document.getElementById('article-content-grid');    
         if (!grid) return;    
         
-        grid.className = `article-grid ${this.currentLayout === 'list' ? 'list-view' : ''}`;    
+        grid.className = `content-grid ${this.currentLayout === 'list' ? 'list-view' : ''}`;    
         
         // 添加空状态判断  
         if (this.filteredArticles.length === 0) {    
@@ -151,7 +170,7 @@ class ArticleManager {
         
         requestAnimationFrame(() => {  
             if (this.observer) {    
-                const cards = grid.querySelectorAll('.article-card');    
+                const cards = grid.querySelectorAll('.content-card');    
                 cards.forEach(card => this.observer.observe(card));    
             }  
         });  
@@ -160,7 +179,7 @@ class ArticleManager {
     // 创建文章卡片  
     createArticleCard(article) {  
         const card = document.createElement('div');  
-        card.className = `article-card ${this.batchMode ? 'batch-mode' : ''}`;  
+        card.className = `content-card article-card ${this.batchMode ? 'batch-mode' : ''}`;
         card.dataset.path = article.path;  
         card.dataset.title = article.title;  
         
@@ -243,7 +262,7 @@ class ArticleManager {
     
     // 绑定卡片事件  
     bindCardEvents() {  
-        const grid = document.getElementById('article-grid');  
+        const grid = document.getElementById('article-content-grid');  
         if (!grid) return;  
         
         grid.querySelectorAll('.article-card').forEach(card => {  
@@ -293,7 +312,7 @@ class ArticleManager {
     // 初始化懒加载观察器    
     initIntersectionObserver() {    
         const options = {    
-            root: document.querySelector('.article-main'),  
+            root: document.querySelector('#article-manager-view .manager-main'),
             rootMargin: '200px',  // 提前200px开始加载  
             threshold: 0.01    
         };    
@@ -350,8 +369,8 @@ class ArticleManager {
     // 绑定事件  
     bindEvents() {    
         // 状态树点击    
-        document.getElementById('status-tree')?.addEventListener('click', (e) => {    
-            const item = e.target.closest('.status-item');    
+        document.getElementById('article-sidebar-tree')?.addEventListener('click', (e) => {    
+            const item = e.target.closest('.tree-item');    
             if (item) {    
                 this.currentStatus = item.dataset.status;    
                 this.filterArticles();    

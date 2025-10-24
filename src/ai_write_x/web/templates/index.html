@@ -4,9 +4,9 @@
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <title>AIWriteX - 智能内容创作平台</title>  
-    
-    <link rel="icon" href="data:," />
-    
+      
+    <link rel="icon" href="data:," />  
+      
     <!-- 核心样式文件 -->  
     <link rel="stylesheet" href="/static/css/main.css">  
       
@@ -17,22 +17,23 @@
     <!-- 组件样式文件 -->  
     <link rel="stylesheet" href="/static/css/components/header.css">  
     <link rel="stylesheet" href="/static/css/components/sidebar.css">  
-    <link rel="stylesheet" href="/static/css/components/footer.css"> 
+    <link rel="stylesheet" href="/static/css/components/footer.css">  
     <link rel="stylesheet" href="/static/css/components/navigation.css">  
     <link rel="stylesheet" href="/static/css/components/buttons.css">  
     <link rel="stylesheet" href="/static/css/components/forms.css">  
     <link rel="stylesheet" href="/static/css/components/notifications.css">  
     <link rel="stylesheet" href="/static/css/components/modals.css">  
-    <link rel="stylesheet" href="/static/css/components/preview-panel.css">
-    <link rel="stylesheet" href="/static/css/components/content-editor.css">
+    <link rel="stylesheet" href="/static/css/components/preview-panel.css">  
+    <link rel="stylesheet" href="/static/css/components/content-editor.css">  
       
-    <!-- 视图样式文件 -->  
+    <!-- 视图样式文件  -->  
+    <link rel="stylesheet" href="/static/css/views/shared-manager.css">  
     <link rel="stylesheet" href="/static/css/views/creative-workshop.css">  
     <link rel="stylesheet" href="/static/css/views/article-manager.css">  
     <link rel="stylesheet" href="/static/css/views/template-manager.css">  
     <link rel="stylesheet" href="/static/css/views/config-manager.css">  
-</head>
-
+</head>  
+  
 <body class="window-mode-standard" data-window-mode="standard">  
     <div class="app-container">  
         <!-- 组件化的头部 -->  
@@ -53,23 +54,22 @@
         </div>  
           
         <!-- 右侧面板 -->  
-        {% include 'components/preview-panel.html' %}
+        {% include 'components/preview-panel.html' %}  
           
         <!-- 组件化的底部 -->  
         {% include 'components/footer.html' %}  
     </div>  
   
-    <!-- 脚本加载 -->
-    <!--<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script> --> 
-    <script src="/static/monaco/vs/loader.js"></script> 
-    <script src="/static/js/dialog.js"></script>
+    <!-- 脚本加载 -->  
+    <script src="/static/monaco/vs/loader.js"></script>  
+    <script src="/static/js/dialog.js"></script>  
     <script src="/static/js/preview-panel.js"></script>  
-    <script src="/static/js/main.js"></script>
-    <script src="/static/js/article-manager.js"></script>
+    <script src="/static/js/main.js"></script>  
+    <script src="/static/js/article-manager.js"></script>  
     <script src="/static/js/template-manager.js"></script>  
-    <script src="/static/js/content-editor.js"></script>
-    <script src="/static/js/config-manager.js"></script>    
-    <script src="/static/js/theme-manager.js"></script>    
-    <script src="/static/js/window-modes.js"></script>
+    <script src="/static/js/content-editor.js"></script>  
+    <script src="/static/js/config-manager.js"></script>  
+    <script src="/static/js/theme-manager.js"></script>  
+    <script src="/static/js/window-modes.js"></script>  
 </body>  
 </html>

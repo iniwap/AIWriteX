@@ -1,63 +1,63 @@
-<div id="template-manager-view" class="view-content" style="display: none;">  
-    <div class="template-manager-layout">  
-        <!-- 左侧分类树 -->  
-        <aside class="template-sidebar">  
-            <div class="sidebar-header">  
-                <h3>模板分类</h3>  
-                <button class="btn-icon" id="add-category" title="新建分类">  
-                    <svg viewBox="0 0 24 24" width="16" height="16">  
-                        <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2"/>  
-                    </svg>  
-                </button>  
-            </div>  
-            <div class="category-tree" id="category-tree"></div>  
-        </aside>  
-          
-        <!-- 主内容区 -->  
-        <main class="template-main-wrapper">  
-            <div class="template-toolbar">  
-                <div class="search-box">  
-                    <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">  
-                        <circle cx="11" cy="11" r="8"/>  
-                        <path d="m21 21-4.35-4.35"/>  
-                    </svg>  
-                    <input type="text" id="template-search" placeholder="搜索模板...">  
-                </div> 
-                  
-                <div class="toolbar-actions">  
-                    <div class="view-toggle">  
-                        <button class="view-btn active" data-layout="grid" title="网格视图">  
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">  
-                                <rect x="3" y="3" width="7" height="7"/>  
-                                <rect x="14" y="3" width="7" height="7"/>  
-                                <rect x="3" y="14" width="7" height="7"/>  
-                                <rect x="14" y="14" width="7" height="7"/>  
-                            </svg>  
-                        </button>  
-                        <button class="view-btn" data-layout="list" title="列表视图">  
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">  
-                                <line x1="8" y1="6" x2="21" y2="6"/>  
-                                <line x1="8" y1="12" x2="21" y2="12"/>  
-                                <line x1="8" y1="18" x2="21" y2="18"/>  
-                                <line x1="3" y1="6" x2="3.01" y2="6"/>  
-                                <line x1="3" y1="12" x2="3.01" y2="12"/>  
-                                <line x1="3" y1="18" x2="3.01" y2="18"/>  
-                            </svg>  
-                        </button>  
-                    </div> 
-                      
-                    <button class="btn btn-primary" id="add-template">  
-                        <svg viewBox="0 0 24 24" width="16" height="16">  
-                            <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2"/>  
-                        </svg>  
-                        新建模板  
-                    </button>  
-                </div>  
-            </div>  
+<div id="template-manager-view" class="view-content" style="display: none;">      
+    <div class="manager-layout">      
+        <!-- 左侧分类树 -->      
+        <aside class="manager-sidebar">      
+            <div class="sidebar-header">      
+                <h3>模板分类</h3>      
+                <button class="btn-icon" id="add-category" title="新建分类">      
+                    <svg viewBox="0 0 24 24" width="16" height="16">      
+                        <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2"/>      
+                    </svg>      
+                </button>      
+            </div>      
+            <div class="sidebar-tree" id="template-sidebar-tree"></div>      
+        </aside>      
               
-            <div class="template-main">  
-                <div class="template-grid" id="template-grid"></div>    
-            </div>  
-        </main>  
-    </div>  
+        <!-- 主内容区 -->      
+        <main class="main-wrapper">      
+            <div class="manager-toolbar">      
+                <div class="search-box">      
+                    <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">      
+                        <circle cx="11" cy="11" r="8"/>      
+                        <path d="m21 21-4.35-4.35"/>      
+                    </svg>      
+                    <input type="text" id="template-search" placeholder="搜索模板...">      
+                </div>     
+                      
+                <div class="toolbar-actions">      
+                    <div class="view-toggle">      
+                        <button class="view-btn active" data-layout="grid" title="网格视图">      
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">      
+                                <rect x="3" y="3" width="7" height="7"/>      
+                                <rect x="14" y="3" width="7" height="7"/>      
+                                <rect x="3" y="14" width="7" height="7"/>      
+                                <rect x="14" y="14" width="7" height="7"/>      
+                            </svg>      
+                        </button>      
+                        <button class="view-btn" data-layout="list" title="列表视图">      
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">      
+                                <line x1="8" y1="6" x2="21" y2="6"/>      
+                                <line x1="8" y1="12" x2="21" y2="12"/>      
+                                <line x1="8" y1="18" x2="21" y2="18"/>      
+                                <line x1="3" y1="6" x2="3.01" y2="6"/>      
+                                <line x1="3" y1="12" x2="3.01" y2="12"/>      
+                                <line x1="3" y1="18" x2="3.01" y2="18"/>      
+                            </svg>      
+                        </button>      
+                    </div>     
+                          
+                    <button class="btn btn-primary" id="add-template">      
+                        <svg viewBox="0 0 24 24" width="16" height="16">      
+                            <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2"/>      
+                        </svg>      
+                        新建模板      
+                    </button>      
+                </div>      
+            </div>      
+                  
+            <div class="manager-main">      
+                <div class="content-grid" id="template-content-grid"></div>        
+            </div>      
+        </main>      
+    </div>      
 </div>
