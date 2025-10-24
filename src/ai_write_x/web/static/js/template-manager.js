@@ -15,25 +15,7 @@ class TemplateManager {
             await this.loadCategories();          
             await this.loadTemplates(this.currentCategory);          
             this.renderCategoryTree();        
-            this.renderTemplateGrid();    
-            
-            requestAnimationFrame(() => {  
-                if (this.observer) {        
-                    // 使用限定作用域的选择器,只选择当前视图中的卡片  
-                    const grid = document.getElementById('template-content-grid');  
-                    if (grid) {  
-                        const cards = grid.querySelectorAll('.template-card');        
-                        cards.forEach(card => {        
-                            const iframe = card.querySelector('iframe[data-template-path]');  
-                            // 只观察未加载的卡片  
-                            if (iframe && iframe.dataset.loaded !== 'true') {        
-                                this.observer.observe(card);        
-                            }        
-                        });  
-                    }      
-                }    
-            });  
-            
+            this.renderTemplateGrid();
             this.updateAddTemplateButtonState();      
             return;          
         }    
@@ -510,67 +492,95 @@ class TemplateManager {
             return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });  
         };  
         
-        // 渲染卡片结构,添加 draggable 属性  
-        grid.innerHTML = this.templates.map(template => `  
-            <div class="content-card template-card"   
-                data-template-path="${template.path}"  
-                data-template-name="${template.name}"  
-                data-template-category="${template.category}"  
-                draggable="true">  
-                <div class="card-preview">  
-                    <iframe sandbox="allow-same-origin allow-scripts"   
-                            loading="lazy"  
-                            data-template-path="${template.path}"  
-                            data-loaded="false"></iframe>  
-                    <div class="preview-loading">加载中...</div>  
-                </div>  
-                <div class="card-content">  
-                    <h4 class="card-title" title="${template.name}">${template.name}</h4>  
-                    <div class="card-meta">  
-                        <span class="category-badge" title="${template.category}">${template.category}</span>  
-                        <span class="meta-divider">•</span>  
-                        <span class="size-info">${template.size}</span>  
-                        <span class="meta-divider">•</span>  
-                        <span class="time-info">${formatTime(template.create_time)}</span>  
-                    </div>  
-                </div>  
-                <div class="card-actions">  
-                    <button class="btn-icon" data-action="edit" title="编辑">  
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>  
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>  
-                        </svg>  
-                    </button>  
-                    <button class="btn-icon" data-action="rename" title="重命名">    
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">    
-                            <path d="M4 7h16M4 12h10M4 17h10"/>  
-                            <path d="M20 17l-4-4 4-4"/>  
-                        </svg>    
-                    </button> 
-                    <button class="btn-icon" data-action="copy" title="复制">  
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>  
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>  
-                        </svg>  
-                    </button>  
-                    <button class="btn-icon" data-action="delete" title="删除">  
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                            <polyline points="3 6 5 6 21 6"/>  
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>  
-                        </svg>  
-                    </button>  
-                </div>  
-            </div>  
-        `).join('');  
+        // 关键修改1: 先清空  
+        grid.innerHTML = '';  
+        
+        // 使用forEach + appendChild逐个添加  
+        this.templates.forEach(template => {  
+            const card = this.createTemplateCard(template);  
+            grid.appendChild(card);  
+        });  
         
         this.bindCardEvents();  
-        this.bindDragEvents(); // 新增:绑定拖拽事件  
+        this.bindDragEvents();  
         
-        // 观察所有卡片,实现懒加载  
-        const cards = grid.querySelectorAll('.template-card');  
-        cards.forEach(card => this.observer.observe(card));  
+        // 在requestAnimationFrame中延迟观察  
+        requestAnimationFrame(() => {  
+            if (this.observer) {  
+                const cards = grid.querySelectorAll('.template-card');  
+                cards.forEach(card => this.observer.observe(card));  
+            }  
+        });  
     }
-  
+
+    createTemplateCard(template) {  
+        const card = document.createElement('div');  
+        card.className = 'content-card template-card';  
+        card.dataset.templatePath = template.path;  
+        card.dataset.templateName = template.name;  
+        card.dataset.templateCategory = template.category;  
+        card.draggable = true;  
+        
+        const formatTime = (timeStr) => {  
+            const date = new Date(timeStr);  
+            const today = new Date();  
+            const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));  
+            
+            if (diffDays === 0) return '今天';  
+            if (diffDays === 1) return '昨天';  
+            if (diffDays < 7) return `${diffDays}天前`;  
+            return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });  
+        };  
+        
+        card.innerHTML = `  
+            <div class="card-preview">  
+                <iframe sandbox="allow-same-origin allow-scripts"   
+                        loading="lazy"  
+                        data-template-path="${template.path}"  
+                        data-loaded="false"></iframe>  
+                <div class="preview-loading">加载中...</div>  
+            </div>  
+            <div class="card-content">  
+                <h4 class="card-title" title="${template.name}">${template.name}</h4>  
+                <div class="card-meta">  
+                    <span class="category-badge" title="${template.category}">${template.category}</span>  
+                    <span class="meta-divider">•</span>  
+                    <span class="size-info">${template.size}</span>  
+                    <span class="meta-divider">•</span>  
+                    <span class="time-info">${formatTime(template.create_time)}</span>  
+                </div>  
+            </div>  
+            <div class="card-actions">  
+                <button class="btn-icon" data-action="edit" title="编辑">  
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>  
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>  
+                    </svg>  
+                </button>  
+                <button class="btn-icon" data-action="rename" title="重命名">  
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                        <path d="M4 7h16M4 12h10M4 17h10"/>  
+                        <path d="M20 17l-4-4 4-4"/>  
+                    </svg>  
+                </button>  
+                <button class="btn-icon" data-action="copy" title="复制">  
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>  
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>  
+                    </svg>  
+                </button>  
+                <button class="btn-icon" data-action="delete" title="删除">  
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                        <polyline points="3 6 5 6 21 6"/>  
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>  
+                    </svg>  
+                </button>  
+            </div>  
+        `;  
+        
+        return card;  
+    }
+    
     async loadSinglePreview(iframe) {  
         const templatePath = iframe.dataset.templatePath;  
         const loadingEl = iframe.parentElement.querySelector('.preview-loading');  
