@@ -256,7 +256,7 @@ class AIWriteXApp {
               
             // 延迟初始化各个管理器  
             if (viewName === 'template-manager' && !window.templateManager) {    
-                window.templateManager = new TemplateManager();    
+                window.templateManager = new TemplateManager();   
             }  
               
             // 延迟初始化文章管理器  
@@ -265,7 +265,7 @@ class AIWriteXApp {
             }  
         }    
           
-        // 关键修改:如果切换到配置管理视图,默认激活界面设置子菜单    
+        // 如果切换到配置管理视图,默认激活界面设置子菜单    
         if (viewName === 'config-manager') {    
             // 清除所有子菜单的active状态    
             document.querySelectorAll('.nav-sublink').forEach(sublink => {    
@@ -283,7 +283,7 @@ class AIWriteXApp {
                 window.configManager.showConfigPanel('ui');    
             }    
         } else {    
-            // 关键:如果切换到非配置管理视图,折叠系统设置菜单    
+            // 如果切换到非配置管理视图,折叠系统设置菜单    
             const expandableNavItem = document.querySelector('.nav-item-expandable');    
             if (expandableNavItem) {    
                 expandableNavItem.classList.remove('expanded');    

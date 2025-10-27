@@ -301,3 +301,4 @@ uv pip install -r requirements.txt
 
 ## 📜 许可证 / License
 本项目采用 [Apache License 2.0](./LICENSE) 开源，并附带额外使用限制，详见 [NOTICE](./NOTICE) 文件。
+- 👉**最近发现有人偷卖我的项目，请尊重知识产权，本项目禁止用于商业用途，仅限个人使用。**

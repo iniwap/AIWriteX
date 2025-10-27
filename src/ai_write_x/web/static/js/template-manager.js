@@ -481,17 +481,6 @@ class TemplateManager {
             return;  
         }  
         
-        const formatTime = (timeStr) => {  
-            const date = new Date(timeStr);  
-            const today = new Date();  
-            const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));  
-            
-            if (diffDays === 0) return '今天';  
-            if (diffDays === 1) return '昨天';  
-            if (diffDays < 7) return `${diffDays}天前`;  
-            return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });  
-        };  
-        
         // 关键修改1: 先清空  
         grid.innerHTML = '';  
         
