@@ -19,9 +19,7 @@ class ArticleManager {
     async init() {  
         if (this.initialized) {  
             await this.loadArticles();  
-            this.renderStatusTree();  
-            this.renderArticles();
-            
+            this.renderStatusTree();            
             if (this.observer) {  
                 const cards = document.querySelectorAll('.content-card');  
                 cards.forEach(card => {  
@@ -212,7 +210,7 @@ class ArticleManager {
             <div class="card-preview">  
                 <iframe sandbox="allow-same-origin allow-scripts"   
                         loading="lazy"   
-                        data-template-path="${article.path}"  
+                        data-article-path="${article.path}"  
                         data-loaded="false"></iframe>  
                 <div class="preview-loading">加载中...</div>  
             </div>  
@@ -321,7 +319,7 @@ class ArticleManager {
             entries.forEach(entry => {    
                 if (entry.isIntersecting) {    
                     const card = entry.target;  // 观察的是卡片本身  
-                    const iframe = card.querySelector('iframe[data-template-path]');    
+                    const iframe = card.querySelector('iframe[data-article-path]');    
                     if (iframe && iframe.dataset.loaded !== 'true') {    
                         this.loadSinglePreview(iframe);    
                         this.observer.unobserve(card);  // 加载后立即取消观察  
@@ -331,30 +329,125 @@ class ArticleManager {
         }, options);    
     }  
     
-    // 加载单个预览  
+    // 加载单个预览    
     async loadSinglePreview(iframe) {    
-        const templatePath = iframe.dataset.templatePath;    
+        const articlePath = iframe.dataset.articlePath;    
         const loadingEl = iframe.parentElement.querySelector('.preview-loading');    
-            
+        
         try {    
-            // 使用查询参数格式(与后端API一致)  
-            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(templatePath)}`);    
+            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(articlePath)}`);    
             if (!response.ok) {    
                 throw new Error(`HTTP ${response.status}`);    
             }    
-            const html = await response.text();    
+            const content = await response.text();    
             
-            // 注入完全相同的CSS样式  
+            const ext = articlePath.toLowerCase().split('.').pop();    
+            let htmlContent = content;    
+            
+            if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {    
+                htmlContent = window.markdownRenderer.render(content);    
+            } else if (ext === 'txt') {    
+                htmlContent = content.split('\n')    
+                    .map(line => line.trim() ? `<p>${line}</p>` : '<br>')    
+                    .join('\n');    
+            }    
+            
+            // 添加完整的Markdown样式定义(卡片预览版本)  
             const styledHtml = `    
                 <style>    
                     body {     
                         overflow: hidden !important;     
                         margin: 0;    
+                        padding: 8px;  
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  
+                        font-size: 12px;  
+                        line-height: 1.4;  
                     }    
+                    
+                    /* 标题样式 - 更紧凑 */  
+                    h1, h2, h3, h4, h5, h6 {   
+                        margin: 4px 0 2px 0;   
+                        font-weight: 600;  
+                    }  
+                    h1 { font-size: 16px; }  
+                    h2 { font-size: 14px; }  
+                    h3 { font-size: 13px; }  
+                    
+                    /* 段落样式 */  
+                    p { margin: 0 0 4px 0; }  
+                    
+                    /* 引用块样式 - 关键! */  
+                    blockquote {  
+                        margin: 4px 0;  
+                        padding: 2px 8px;  
+                        border-left: 2px solid #ddd;  
+                        background: #f9f9f9;  
+                        font-style: italic;  
+                    }  
+                    
+                    /* 代码样式 */  
+                    code {  
+                        background: #f0f0f0;  
+                        padding: 1px 3px;  
+                        border-radius: 2px;  
+                        font-size: 11px;  
+                    }  
+                    
+                    pre {  
+                        background: #f0f0f0;  
+                        padding: 4px;  
+                        border-radius: 3px;  
+                        font-size: 10px;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    /* 表格样式 */  
+                    table {  
+                        border-collapse: collapse;  
+                        width: 100%;  
+                        font-size: 10px;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    table th, table td {  
+                        padding: 2px 4px;  
+                        border: 1px solid #ddd;  
+                    }  
+                    
+                    table th {  
+                        background: #f0f0f0;  
+                        font-weight: 600;  
+                    }  
+                    
+                    /* 链接样式 */  
+                    a {  
+                        color: #0366d6;  
+                        text-decoration: none;  
+                    }  
+                    
+                    /* 列表样式 */  
+                    ul, ol {  
+                        margin: 2px 0;  
+                        padding-left: 16px;  
+                    }  
+                    
+                    li {  
+                        margin: 1px 0;  
+                    }  
+                    
+                    /* 分割线样式 */  
+                    hr {  
+                        height: 1px;  
+                        background: #ddd;  
+                        border: 0;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    /* 隐藏滚动条 */  
                     ::-webkit-scrollbar { display: none !important; }    
                     * { scrollbar-width: none !important; }    
                 </style>    
-                ${html}    
+                ${htmlContent}    
             `;    
             
             iframe.srcdoc = styledHtml;    
@@ -432,9 +525,32 @@ class ArticleManager {
             platformSelect.addEventListener('change', (e) => {  
                 this.onPlatformChange(e.target.value);  
             });  
-        } 
+        }
+
+        // 快捷键刷新 (F5 或 Ctrl+R) - 隐藏功能    
+        document.addEventListener('keydown', (e) => {    
+            const articleView = document.getElementById('article-manager-view');    
+            if (articleView && articleView.style.display !== 'none') {    
+                if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {    
+                    e.preventDefault();    
+                    this.refreshArticles();    
+                }    
+            }    
+        });   
     }
     
+    async refreshArticles() {  
+        try {
+            await this.loadArticles();  
+            this.renderStatusTree();  
+            this.renderArticles();
+
+            window.app?.showNotification('已刷新文章列表', 'success');  
+        } catch (error) {  
+            window.app?.showNotification('刷新失败: ' + error.message, 'error');  
+        }  
+    }
+
     // 搜索文章  
     searchArticles(query) {  
         if (!query.trim()) {  
@@ -479,24 +595,93 @@ class ArticleManager {
     }  
     
     // 预览文章  
-    async previewArticle(article) {    
-        try {    
-            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(article.path)}`);    
-            if (response.ok) {    
-                const html = await response.text();    
-                // 使用全局预览面板管理器    
-                if (window.previewPanelManager) {    
-                    window.previewPanelManager.show(html);    
-                } else {    
-                    this.showNotification('预览面板未初始化', 'error');    
-                }    
-            } else {    
-                throw new Error('加载失败');    
-            }    
-        } catch (error) {    
-            this.showNotification('预览失败: ' + error.message, 'error');    
+    async previewArticle(article) {  
+        try {  
+            const response = await fetch(`/api/articles/content?path=${encodeURIComponent(article.path)}`);  
+            if (response.ok) {  
+                const content = await response.text();  
+                
+                // 检测文件扩展名  
+                const ext = article.path.toLowerCase().split('.').pop();  
+                let htmlContent = content;  
+                
+                // 如果是Markdown文件,使用 renderWithStyles 生成带滚动条的完整文档  
+                if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {  
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
+                    htmlContent = window.markdownRenderer.renderWithStyles(content, isDark);  
+                } else if (ext === 'txt') {  
+                    // TXT文件:生成带滚动条的完整文档  
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
+                    const computedStyle = getComputedStyle(document.documentElement);  
+                    const bgColor = computedStyle.getPropertyValue('--background-color').trim();  
+                    const borderColor = computedStyle.getPropertyValue('--border-color').trim();  
+                    const secondaryColor = computedStyle.getPropertyValue('--secondary-color').trim();  
+                    const textColor = computedStyle.getPropertyValue('--text-primary').trim();  
+                    
+                    // 将纯文本转换为HTML段落  
+                    const txtHtml = content.split('\n')  
+                        .map(line => line.trim() ? `<p>${line}</p>` : '<br>')  
+                        .join('\n');  
+                    
+                    htmlContent = `  
+    <!DOCTYPE html>  
+    <html>  
+    <head>  
+        <meta charset="UTF-8">  
+        <style>  
+            body {  
+                margin: 0;  
+                padding: 16px;  
+                overflow: auto;  
+                color: ${textColor};  
+                background: transparent;  
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  
+                line-height: 1.6;  
+            }  
+            
+            p {  
+                margin: 0 0 16px 0;  
+            }  
+            
+            /* 使用与全局CSS相同的滚动条样式 */  
+            ::-webkit-scrollbar {  
+                width: 6px;  
+                height: 6px;  
+            }  
+            
+            ::-webkit-scrollbar-track {  
+                background: ${bgColor};  
+            }  
+            
+            ::-webkit-scrollbar-thumb {  
+                background: ${borderColor};  
+                border-radius: 3px;  
+            }  
+            
+            ::-webkit-scrollbar-thumb:hover {  
+                background: ${secondaryColor};  
+            }  
+        </style>  
+    </head>  
+    <body>  
+        ${txtHtml}  
+    </body>  
+    </html>  
+                    `;  
+                }  
+                
+                if (window.previewPanelManager) {  
+                    window.previewPanelManager.show(htmlContent);  
+                } else {  
+                    this.showNotification('预览面板未初始化', 'error');  
+                }  
+            } else {  
+                throw new Error('加载失败');  
+            }  
+        } catch (error) {  
+            this.showNotification('预览失败: ' + error.message, 'error');  
         }  
-    }  
+    }
     
     // 显示发布对话框  
     async showPublishDialog(path) {  
@@ -517,7 +702,10 @@ class ArticleManager {
     
     // 加载平台并显示对话框  
     async loadAccountsAndShowDialog() {  
-        try {  
+        try {
+            // 清除缓存,强制重新加载    
+            this.platformAccounts = {};   
+
             // 如果平台列表未加载,先加载  
             if (!this.platforms) {  
                 await this.loadPlatforms();  

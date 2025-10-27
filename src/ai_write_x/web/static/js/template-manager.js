@@ -10,26 +10,33 @@ class TemplateManager {
         this.init();
     }  
   
-    async init() {        
-        if (this.initialized) {        
-            await this.loadCategories();          
-            await this.loadTemplates(this.currentCategory);          
-            this.renderCategoryTree();        
-            this.renderTemplateGrid();
-            this.updateAddTemplateButtonState();      
-            return;          
-        }    
+    async init() {          
+        if (this.initialized) {  
+            // 关键修改:并行加载数据而不是串行  
+            await Promise.all([  
+                this.loadCategories(),  
+                this.loadTemplates(this.currentCategory)  
+            ]);  
+            
+            this.renderCategoryTree();          
+            this.renderTemplateGrid();  
+            this.updateAddTemplateButtonState();        
+            return;            
+        }      
         
-        // 首次初始化逻辑保持不变    
-        await this.loadDefaultCategories();      
-        await this.loadCategories();          
-        await this.loadTemplates();          
-        this.setupIntersectionObserver();          
-        this.bindEvents();          
-        this.renderCategoryTree();          
-        this.renderTemplateGrid();          
-        this.initialized = true;      
-        this.updateAddTemplateButtonState();      
+        // 首次初始化也改为并行  
+        await Promise.all([  
+            this.loadDefaultCategories(),
+            this.loadCategories(),  
+            this.loadTemplates()  
+        ]);  
+        
+        this.setupIntersectionObserver();            
+        this.bindEvents();            
+        this.renderCategoryTree();            
+        this.renderTemplateGrid();            
+        this.initialized = true;        
+        this.updateAddTemplateButtonState();        
     }
     
     // 从后端加载默认分类  
@@ -481,19 +488,19 @@ class TemplateManager {
             return;  
         }  
         
-        // 关键修改1: 先清空  
-        grid.innerHTML = '';  
-        
-        // 使用forEach + appendChild逐个添加  
+        // 使用 DocumentFragment 批量添加  
+        const fragment = document.createDocumentFragment();  
         this.templates.forEach(template => {  
             const card = this.createTemplateCard(template);  
-            grid.appendChild(card);  
+            fragment.appendChild(card);  
         });  
+        
+        grid.innerHTML = '';  
+        grid.appendChild(fragment);
         
         this.bindCardEvents();  
         this.bindDragEvents();  
         
-        // 在requestAnimationFrame中延迟观察  
         requestAnimationFrame(() => {  
             if (this.observer) {  
                 const cards = grid.querySelectorAll('.template-card');  
@@ -570,35 +577,152 @@ class TemplateManager {
         return card;  
     }
     
-    async loadSinglePreview(iframe) {  
-        const templatePath = iframe.dataset.templatePath;  
-        const loadingEl = iframe.parentElement.querySelector('.preview-loading');  
-          
-        try {  
-            const response = await fetch(`/api/templates/content/${encodeURIComponent(templatePath)}`);  
-            if (!response.ok) {  
-                throw new Error(`HTTP ${response.status}`);  
+    async loadSinglePreview(iframe) {    
+        const templatePath = iframe.dataset.templatePath;    
+        const loadingEl = iframe.parentElement.querySelector('.preview-loading');    
+        
+        try {    
+            const response = await fetch(`/api/templates/content/${encodeURIComponent(templatePath)}`);    
+            if (!response.ok) {    
+                throw new Error(`HTTP ${response.status}`);    
+            }    
+            const content = await response.text();    
+            
+            // 检测文件扩展名    
+            const ext = templatePath.toLowerCase().split('.').pop();    
+            let htmlContent = content;    
+            
+            // 如果是Markdown文件,渲染HTML内容    
+            if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {    
+                htmlContent = window.markdownRenderer.render(content);    
+            } else if (ext === 'txt') {  
+                // TXT文件:将换行符转换为HTML段落  
+                htmlContent = content.split('\n')  
+                    .map(line => line.trim() ? `<p>${line}</p>` : '<br>')  
+                    .join('\n');  
             }  
-            const html = await response.text();  
-            const styledHtml = `  
-                <style>  
-                    body {   
-                        overflow: hidden !important;   
+            
+            // 为卡片预览添加完整的Markdown样式(紧凑版)  
+            const styledHtml = `    
+                <style>    
+                    body {     
+                        overflow: hidden !important;     
                         margin: 0;  
+                        padding: 8px;  
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  
+                        line-height: 1.4;  
+                        font-size: 12px;  
                     }  
-                    ::-webkit-scrollbar { display: none !important; }  
-                    * { scrollbar-width: none !important; }  
-                </style>  
-                ${html}  
-            `;  
-            iframe.srcdoc = styledHtml;  
-            iframe.dataset.loaded = 'true';  
-            if (loadingEl) loadingEl.style.display = 'none';  
-        } catch (error) {  
-            iframe.srcdoc = '<div style="padding: 20px; color: red;">加载失败</div>';  
-            if (loadingEl) loadingEl.textContent = '加载失败';  
-        }  
-    } 
+                    
+                    /* 标题样式 - 紧凑版 */  
+                    h1, h2, h3, h4, h5, h6 {  
+                        margin: 4px 0 2px 0;  
+                        font-weight: 600;  
+                    }  
+                    h1 { font-size: 16px; }  
+                    h2 { font-size: 14px; }  
+                    h3 { font-size: 13px; }  
+                    h4, h5, h6 { font-size: 12px; }  
+                    
+                    /* 段落样式 */  
+                    p {  
+                        margin: 2px 0 4px 0;  
+                    }  
+                    
+                    /* 引用块样式 - 关键修复 */  
+                    blockquote {  
+                        margin: 4px 0;  
+                        padding: 2px 8px;  
+                        border-left: 3px solid #ddd;  
+                        background: #f9f9f9;  
+                        font-style: italic;  
+                        font-size: 11px;  
+                    }  
+                    
+                    /* 代码样式 */  
+                    code {  
+                        background: #f0f0f0;  
+                        padding: 1px 3px;  
+                        border-radius: 2px;  
+                        font-family: 'Consolas', 'Monaco', monospace;  
+                        font-size: 10px;  
+                    }  
+                    
+                    pre {  
+                        background: #f0f0f0;  
+                        padding: 6px;  
+                        border-radius: 3px;  
+                        overflow-x: auto;  
+                        font-size: 10px;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    pre code {  
+                        background: none;  
+                        padding: 0;  
+                    }  
+                    
+                    /* 表格样式 */  
+                    table {  
+                        border-collapse: collapse;  
+                        width: 100%;  
+                        font-size: 10px;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    table th, table td {  
+                        padding: 2px 4px;  
+                        border: 1px solid #ddd;  
+                    }  
+                    
+                    table th {  
+                        background: #f0f0f0;  
+                        font-weight: 600;  
+                    }  
+                    
+                    /* 链接样式 */  
+                    a {  
+                        color: #0366d6;  
+                        text-decoration: none;  
+                    }  
+                    
+                    /* 列表样式 */  
+                    ul, ol {  
+                        margin: 2px 0;  
+                        padding-left: 16px;  
+                    }  
+                    
+                    li {  
+                        margin: 1px 0;  
+                    }  
+                    
+                    /* 分割线样式 */  
+                    hr {  
+                        height: 1px;  
+                        background: #ddd;  
+                        border: 0;  
+                        margin: 4px 0;  
+                    }  
+                    
+                    /* 强调样式 */  
+                    strong { font-weight: 600; }  
+                    em { font-style: italic; }  
+                    
+                    /* 隐藏滚动条 */  
+                    ::-webkit-scrollbar { display: none !important; }    
+                    * { scrollbar-width: none !important; }    
+                </style>    
+                ${htmlContent}    
+            `;    
+            
+            iframe.srcdoc = styledHtml;    
+            iframe.dataset.loaded = 'true';    
+            if (loadingEl) loadingEl.style.display = 'none';    
+        } catch (error) {    
+            iframe.srcdoc = '<div style="padding: 20px; color: red;">加载失败</div>';    
+            if (loadingEl) loadingEl.textContent = '加载失败';    
+        }    
+    }
   
     bindCardEvents() {  
         const grid = document.getElementById('template-content-grid');  

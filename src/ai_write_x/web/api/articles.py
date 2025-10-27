@@ -140,7 +140,7 @@ async def publish_articles(request: PublishRequest):
                         content=content,
                         appid=cred["appid"],
                         appsecret=cred["appsecret"],
-                        author=cred.get("author_name", ""),
+                        author=cred.get("author", ""),
                     )
 
                     if result.get("success"):
@@ -195,7 +195,7 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
     records[article_path].append(
         {
             "timestamp": datetime.now().isoformat(),
-            "account": credential.get("author_name", ""),
+            "account": credential.get("author", ""),
             "appid": credential["appid"][-4:],
             "success": success,
             "error": error,
@@ -223,9 +223,9 @@ async def get_supported_platforms():
                 "accounts": [
                     {
                         "index": idx,
-                        "author": cred.get("author_name", "未命名"),
+                        "author_name": cred.get("author", "未命名"),
                         "appid": cred["appid"][-4:],
-                        "full_info": f"{cred.get('author_name', '未命名')} ({cred['appid'][-4:]})",
+                        "full_info": f"{cred.get('author', '未命名')} ({cred['appid'][-4:]})",
                     }
                     for idx, cred in enumerate(wechat_credentials)
                 ],
