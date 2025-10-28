@@ -7,9 +7,11 @@ from pydantic import BaseModel
 from typing import List, Optional
 import json
 
-from ...config.config import Config
-from ...utils.path_manager import PathManager
-from ...tools.wx_publisher import pub2wx
+from src.ai_write_x.config.config import Config
+from src.ai_write_x.utils.path_manager import PathManager
+from src.ai_write_x.tools.wx_publisher import pub2wx
+from src.ai_write_x.utils import utils
+
 
 router = APIRouter(prefix="/api/articles", tags=["articles"])
 
@@ -119,15 +121,40 @@ async def publish_articles(request: PublishRequest):
 
         success_count = 0
         fail_count = 0
+        error_details = []
+        format_publish = config.format_publish
 
         for article_path in request.article_paths:
             file_path = Path(article_path)
             if not file_path.exists():
                 fail_count += 1
+                error_details.append(f"{article_path}: 文件不存在")
                 continue
 
             content = file_path.read_text(encoding="utf-8")
-            title = file_path.stem
+
+            ext = file_path.suffix.lower()
+
+            try:
+                if ext == ".html":
+                    title, digest = utils.extract_html(content)
+                elif ext == ".md":
+                    title, digest = utils.extract_markdown_content(content)
+                elif ext == ".txt":
+                    title, digest = utils.extract_text_content(content)
+                else:
+                    fail_count += 1
+                    error_details.append(f"{article_path}: 不支持的文件格式 {ext}")
+                    continue
+            except Exception as e:
+                fail_count += 1
+                error_details.append(f"{article_path}: 内容提取失败 - {str(e)}")
+                continue
+
+            if title is None:
+                fail_count += 1
+                error_details.append(f"{article_path}: 标题提取失败，无法发布")
+                continue
 
             for account_index in request.account_indices:
                 if account_index >= len(credentials):
@@ -135,26 +162,38 @@ async def publish_articles(request: PublishRequest):
 
                 cred = credentials[account_index]
                 try:
-                    result = pub2wx(
+                    article_to_publish = content
+                    if ext != ".html" and format_publish:
+                        article_to_publish = utils.get_format_article(ext, content)
+
+                    message, _, success = pub2wx(
                         title=title,
-                        content=content,
+                        digest=digest,
+                        article=article_to_publish,
                         appid=cred["appid"],
                         appsecret=cred["appsecret"],
                         author=cred.get("author", ""),
                     )
 
-                    if result.get("success"):
+                    if success:
                         success_count += 1
                         save_publish_record(article_path, cred, True, None)
                     else:
                         fail_count += 1
-                        save_publish_record(article_path, cred, False, result.get("error"))
+                        save_publish_record(article_path, cred, False, message)
+                        error_details.append(f"{cred.get('author', '未命名')}: {message}")
 
                 except Exception as e:
                     fail_count += 1
-                    save_publish_record(article_path, cred, False, str(e))
-
-        return {"status": "success", "success_count": success_count, "fail_count": fail_count}
+                    error_msg = str(e)
+                    save_publish_record(article_path, cred, False, error_msg)
+                    error_details.append(f"{cred.get('author', '未命名')}: {error_msg}")
+        return {
+            "status": "success" if success_count > 0 else "error",
+            "success_count": success_count,
+            "fail_count": fail_count,
+            "error_details": error_details,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -180,7 +219,7 @@ def get_publish_status(title: str) -> str:
 
 def save_publish_record(article_path: str, credential: dict, success: bool, error: Optional[str]):
     """保存发布记录"""
-    records_file = PathManager.get_data_dir() / "publish_records.json"
+    records_file = PathManager.get_article_dir() / "publish_records.json"
 
     records = {}
     if records_file.exists():
@@ -223,7 +262,7 @@ async def get_supported_platforms():
                 "accounts": [
                     {
                         "index": idx,
-                        "author_name": cred.get("author", "未命名"),
+                        "author": cred.get("author", "未命名"),
                         "appid": cred["appid"][-4:],
                         "full_info": f"{cred.get('author', '未命名')} ({cred['appid'][-4:]})",
                     }

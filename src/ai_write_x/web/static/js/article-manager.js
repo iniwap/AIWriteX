@@ -732,131 +732,129 @@ class ArticleManager {
         }  
     }
     
-    // 平台选择变化  
-    async onPlatformChange(platformId) {  
-        const accountSelectionGroup = document.getElementById('account-selection-group');  
-        const noAccountsTip = document.getElementById('no-accounts-tip');  
-        const accountList = document.getElementById('account-list');  
+    // 平台选择变化    
+    async onPlatformChange(platformId) {    
+        const accountSelectionGroup = document.getElementById('account-selection-group');    
+        const noAccountsTip = document.getElementById('no-accounts-tip');    
+        const accountList = document.getElementById('account-list');    
         
-        if (!platformId) {  
-            accountSelectionGroup.style.display = 'none';  
-            noAccountsTip.style.display = 'none';  
-            this.updatePublishButtonState();  
-            return;  
-        }  
+        if (!platformId) {    
+            accountSelectionGroup.style.display = 'none';    
+            noAccountsTip.style.display = 'none';    
+            this.updatePublishButtonState();    
+            return;    
+        }    
         
-        try {  
-            // 检查缓存  
-            if (this.platformAccounts[platformId]) {  
-                this.renderPlatformAccounts(platformId, this.platformAccounts[platformId]);  
-                return;  
-            }  
+        try {    
+            // 检查缓存    
+            if (this.platformAccounts[platformId]) {    
+                this.renderPlatformAccounts(platformId, this.platformAccounts[platformId]);    
+                return;    
+            }    
             
-            // 获取该平台的账号列表  
-            const response = await fetch('/api/config/');  
-            if (!response.ok) throw new Error('加载配置失败');  
+            // 获取该平台的账号列表    
+            const response = await fetch('/api/config/');    
+            if (!response.ok) throw new Error('加载配置失败');    
             
-            const config = await response.json();  
-            let accounts = [];  
+            const config = await response.json();    
+            let accounts = [];    
             
-            if (platformId === 'wechat') {  
-                const allCredentials = config.data?.wechat_credentials || [];  
-                // 过滤掉 appid 为空的占位配置  
-                const validCredentials = allCredentials.filter(cred => cred.appid && cred.appid.trim() !== '');  
+            if (platformId === 'wechat') {    
+                const allCredentials = config.data?.wechat?.credentials || [];    
+                const validCredentials = allCredentials.filter(cred => cred.appid && cred.appid.trim() !== '');    
                 
-                accounts = validCredentials.map((cred, index) => ({  
-                    index: allCredentials.indexOf(cred),  
-                    author: cred.author_name || '未命名',  
-                    appid: cred.appid.slice(-4)  
-                }));  
-            }  
+                accounts = validCredentials.map((cred, index) => ({    
+                    index: allCredentials.indexOf(cred),    
+                    author: cred.author || '未命名',    
+                    appid: cred.appid  // 显示完整AppID,不再截取  
+                }));    
+            }   
             
-            // 缓存账号列表  
-            this.platformAccounts[platformId] = accounts;  
+            // 缓存账号列表    
+            this.platformAccounts[platformId] = accounts;    
             
-            this.renderPlatformAccounts(platformId, accounts);  
-        } catch (error) {  
-            this.showNotification('加载账号失败: ' + error.message, 'error');  
-        }  
+            this.renderPlatformAccounts(platformId, accounts);    
+        } catch (error) {    
+            this.showNotification('加载账号失败: ' + error.message, 'error');    
+        }    
+    }
+    
+    // 渲染平台账号列表    
+    renderPlatformAccounts(platformId, accounts) {    
+        const accountSelectionGroup = document.getElementById('account-selection-group');    
+        const noAccountsTip = document.getElementById('no-accounts-tip');    
+        const accountList = document.getElementById('account-list');    
+        
+        if (accounts.length === 0) {    
+            accountSelectionGroup.style.display = 'none';    
+            noAccountsTip.style.display = 'block';    
+            this.updatePublishButtonState();    
+        } else {    
+            noAccountsTip.style.display = 'none';    
+            accountSelectionGroup.style.display = 'block';    
+            
+            // 渲染账号列表 - 新设计:可点击选择  
+            accountList.innerHTML = accounts.map(account => `    
+                <div class="account-item" data-account-index="${account.index}">    
+                    <div class="account-info">    
+                        <span class="account-name" title="${account.author}">${account.author}</span>  
+                        <span class="account-detail">AppID: ${account.appid}</span>  
+                    </div>  
+                    <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">  
+                        <polyline points="20 6 9 17 4 12"/>  
+                    </svg>  
+                </div>    
+            `).join('');    
+            
+            // 绑定点击事件  
+            accountList.querySelectorAll('.account-item').forEach(item => {    
+                item.addEventListener('click', () => {    
+                    item.classList.toggle('selected');  
+                    this.updateSelectedAccountCount();    
+                    this.updatePublishButtonState();    
+                });    
+            });    
+            
+            this.updateSelectedAccountCount();    
+            this.updatePublishButtonState();    
+        }    
     }  
     
-    // 渲染平台账号列表  
-    renderPlatformAccounts(platformId, accounts) {  
-        const accountSelectionGroup = document.getElementById('account-selection-group');  
-        const noAccountsTip = document.getElementById('no-accounts-tip');  
-        const accountList = document.getElementById('account-list');  
+    // 更新已选账号数量  
+    updateSelectedAccountCount() {    
+        const selectedItems = document.querySelectorAll('.account-item.selected');  // ✅ 修正  
+        const count = selectedItems.length;    
         
-        if (accounts.length === 0) {  
-            // 无账号  
-            accountSelectionGroup.style.display = 'none';  
-            noAccountsTip.style.display = 'block';  
-            this.updatePublishButtonState();  
-        } else {  
-            // 有账号  
-            noAccountsTip.style.display = 'none';  
-            accountSelectionGroup.style.display = 'block';  
-            
-            // 渲染账号列表  
-            accountList.innerHTML = accounts.map(account => `  
-                <div class="account-checkbox-item">  
-                    <label class="checkbox-label">  
-                        <input type="checkbox" class="account-checkbox" value="${account.index}">  
-                        <div class="account-info">  
-                            <div class="account-name">${account.author}</div>  
-                            <div class="account-detail">AppID: ${account.appid}</div>  
-                        </div>  
-                    </label>  
-                </div>  
-            `).join('');  
-            
-            // 绑定账号选择事件  
-            accountList.querySelectorAll('.account-checkbox').forEach(checkbox => {  
-                checkbox.addEventListener('change', () => {  
-                    this.updateSelectedAccountCount();  
-                    this.updatePublishButtonState();  
-                });  
-            });  
-            
-            this.updateSelectedAccountCount();  
-            this.updatePublishButtonState();  
-        }  
+        document.getElementById('selected-account-count').textContent = `(已选 ${count} 个)`;    
+        document.getElementById('confirm-publish-btn').disabled = count === 0;    
+    } 
+    
+    // 全选账号  
+    selectAllAccounts() {    
+        document.querySelectorAll('.account-item').forEach(item => {    
+            item.classList.add('selected');    
+        });    
+        this.updateSelectedAccountCount();    
+    }    
+    
+    // 取消全选  
+    deselectAllAccounts() {    
+        document.querySelectorAll('.account-item').forEach(item => {    
+            item.classList.remove('selected');    
+        });    
+        this.updateSelectedAccountCount();    
     }
 
     // 更新发布按钮状态  
-    updatePublishButtonState() {  
-        const platformSelected = document.getElementById('publish-platform-select')?.value;  
-        const accountSelected = document.querySelectorAll('.account-checkbox:checked').length > 0;  
-        const confirmBtn = document.getElementById('confirm-publish-btn');  
+    updatePublishButtonState() {    
+        const platformSelected = document.getElementById('publish-platform-select')?.value;    
+        const accountSelected = document.querySelectorAll('.account-item.selected').length > 0;  
+        const confirmBtn = document.getElementById('confirm-publish-btn');    
         
-        if (confirmBtn) {  
-            confirmBtn.disabled = !(platformSelected && accountSelected);  
-        }  
+        if (confirmBtn) {    
+            confirmBtn.disabled = !(platformSelected && accountSelected);    
+        }    
     }
-
-    // 更新已选账号数量  
-    updateSelectedAccountCount() {  
-        const checkboxes = document.querySelectorAll('.account-checkbox:checked');  
-        const count = checkboxes.length;  
-        
-        document.getElementById('selected-account-count').textContent = `(已选 ${count} 个)`;  
-        document.getElementById('confirm-publish-btn').disabled = count === 0;  
-    }  
-    
-    // 全选账号  
-    selectAllAccounts() {  
-        document.querySelectorAll('.account-checkbox').forEach(checkbox => {  
-            checkbox.checked = true;  
-        });  
-        this.updateSelectedAccountCount();  
-    }  
-    
-    // 取消全选  
-    deselectAllAccounts() {  
-        document.querySelectorAll('.account-checkbox').forEach(checkbox => {  
-            checkbox.checked = false;  
-        });  
-        this.updateSelectedAccountCount();  
-    }  
     
     // 前往设置  
     goToSettings() {  
@@ -880,45 +878,56 @@ class ArticleManager {
     }  
     
     // 确认发布  
-    async confirmPublish() {  
-        const platformId = document.getElementById('publish-platform-select')?.value;  
-        const selectedAccounts = Array.from(  
-            document.querySelectorAll('.account-checkbox:checked')  
-        ).map(input => parseInt(input.value));  
+    async confirmPublish() {      
+        const platformId = document.getElementById('publish-platform-select')?.value;      
         
-        if (!platformId || selectedAccounts.length === 0) {  
-            this.showNotification('请选择平台和账号', 'warning');  
-            return;  
-        }  
+        const selectedAccounts = Array.from(      
+            document.querySelectorAll('.account-item.selected')      
+        ).map(item => parseInt(item.dataset.accountIndex));      
         
-        this.closePublishDialog();  
+        if (!platformId || selectedAccounts.length === 0) {      
+            this.showNotification('请选择平台和账号', 'warning');      
+            return;      
+        }      
         
-        try {  
-            const response = await fetch('/api/articles/publish', {  
-                method: 'POST',  
-                headers: { 'Content-Type': 'application/json' },  
-                body: JSON.stringify({  
-                    article_paths: this.publishingArticles,  
-                    account_indices: selectedAccounts,  
-                    platform: platformId  
-                })  
-            });  
+        const articlePaths = [...this.publishingArticles];  
+        
+        this.closePublishDialog();      
+        
+        try {      
+            const response = await fetch('/api/articles/publish', {      
+                method: 'POST',      
+                headers: { 'Content-Type': 'application/json' },      
+                body: JSON.stringify({      
+                    article_paths: articlePaths,  // ✅ 使用保存的值  
+                    account_indices: selectedAccounts,      
+                    platform: platformId      
+                })      
+            });      
             
-            if (response.ok) {  
-                const result = await response.json();  
-                this.showNotification(  
-                    `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`,  
-                    result.fail_count === 0 ? 'success' : 'warning'  
-                );  
-                await this.loadArticles();  
-                this.renderStatusTree();  
-            } else {  
-                throw new Error('发布请求失败');  
-            }  
-        } catch (error) {  
-            this.showNotification('发布失败: ' + error.message, 'error');  
-        }  
-    } 
+            if (response.ok) {      
+                const result = await response.json();    
+                
+                let message = `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`;    
+                
+                if (result.fail_count > 0 && result.error_details && result.error_details.length > 0) {    
+                    message += '\n失败详情:\n' + result.error_details.slice(0, 3).join('\n');    
+                    if (result.error_details.length > 3) {    
+                        message += `\n...还有${result.error_details.length - 3}个错误`;    
+                    }    
+                }    
+                
+                this.showNotification(      
+                    message,    
+                    result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error')    
+                );      
+                await this.loadArticles();      
+                this.renderStatusTree();      
+            }      
+        } catch (error) {      
+            this.showNotification('发布失败: ' + error.message, 'error');      
+        }      
+    }
     
     // 删除文章  
     async deleteArticle(path) {  
@@ -933,7 +942,7 @@ class ArticleManager {
                     if (response.ok) {  
                         this.showNotification('文章已删除', 'success');  
                         await this.loadArticles();  
-                        this.renderStatusTree();  // 添加这一行  
+                        this.renderStatusTree(); 
                     } else {  
                         const error = await response.json();  
                         window.dialogManager.showAlert('删除失败: ' + (error.detail || '未知错误'), 'error');  
@@ -975,7 +984,7 @@ class ArticleManager {
                 this.selectedArticles.clear();  
                 this.batchMode = false;  
                 await this.loadArticles();  
-                this.renderStatusTree();  // 添加这一行  
+                this.renderStatusTree();
             }  
         );  
     }
