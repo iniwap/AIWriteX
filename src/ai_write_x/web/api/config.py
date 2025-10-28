@@ -179,3 +179,22 @@ async def get_platforms():
     except Exception as e:
         log.print_log(f"获取平台列表失败: {str(e)}", "error")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/system-messages")
+async def get_system_messages():
+    """获取系统消息/帮助信息"""
+    config = Config.get_instance()
+
+    # 从配置中读取系统消息
+    system_messages = config.config.get("system_messages", [])
+
+    # 如果配置中没有,返回默认消息
+    if not system_messages:
+        system_messages = [
+            {"text": "欢迎使用AIWriteX智能内容创作平台", "type": "info"},
+            {"text": "提示: 使用Ctrl+Enter快速开始生成", "type": "info"},
+            {"text": "支持多平台发布: 微信公众号、今日头条等", "type": "info"},
+        ]
+
+    return {"status": "success", "data": system_messages}

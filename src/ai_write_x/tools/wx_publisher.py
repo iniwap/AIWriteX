@@ -486,7 +486,7 @@ def pub2wx(title, digest, article, appid, appsecret, author):
                 return (
                     "自动发布失败，【自2025年7月15日起，个人主体账号、未认证企业账号及不支持认证的账号的发布权限被回收，需到公众号管理后台->草稿箱->发表】",
                     article,
-                    False,
+                    True,  # 此类目前认为是发布成功
                 )
             else:
                 return f"{err_msg}，无法继续发布文章", article, False

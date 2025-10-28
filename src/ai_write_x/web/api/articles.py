@@ -177,7 +177,9 @@ async def publish_articles(request: PublishRequest):
 
                     if success:
                         success_count += 1
-                        save_publish_record(article_path, cred, True, None)
+                        save_publish_record(
+                            article_path, cred, True, message if "草稿箱" in message else None
+                        )
                     else:
                         fail_count += 1
                         save_publish_record(article_path, cred, False, message)
@@ -221,6 +223,8 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
     """保存发布记录"""
     records_file = PathManager.get_article_dir() / "publish_records.json"
 
+    title = Path(article_path).stem.replace("_", "|")
+
     records = {}
     if records_file.exists():
         try:
@@ -228,10 +232,10 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
         except Exception:
             pass
 
-    if article_path not in records:
-        records[article_path] = []
+    if title not in records:
+        records[title] = []
 
-    records[article_path].append(
+    records[title].append(
         {
             "timestamp": datetime.now().isoformat(),
             "account": credential.get("author", ""),
@@ -276,3 +280,27 @@ async def get_supported_platforms():
     #     platforms.append({...})
 
     return {"status": "success", "data": platforms}
+
+
+@router.get("/publish-history/{article_path:path}")
+async def get_publish_history(article_path: str):
+    """获取文章发布历史"""
+    records_file = PathManager.get_article_dir() / "publish_records.json"
+
+    title = Path(article_path).stem.replace("_", "|")
+
+    if not records_file.exists():
+        return {"status": "success", "data": {"article_path": article_path, "records": []}}
+
+    try:
+        records = json.loads(records_file.read_text(encoding="utf-8"))
+        article_records = records.get(title, [])
+
+        sorted_records = sorted(article_records, key=lambda x: x.get("timestamp", ""), reverse=True)
+
+        return {
+            "status": "success",
+            "data": {"article_path": article_path, "records": sorted_records},
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

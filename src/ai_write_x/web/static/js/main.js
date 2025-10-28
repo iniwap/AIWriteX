@@ -5,7 +5,7 @@ class AIWriteXApp {
         this.ws = null;    
         this.currentView = 'creative-workshop';    
         this.isGenerating = false;    
-            
+
         this.init();    
     }    
         
@@ -13,7 +13,7 @@ class AIWriteXApp {
         this.setupEventListeners();    
         this.connectWebSocket();    
         this.showView(this.currentView);    
-            
+    
         // 等待配置管理器初始化完成后再加载配置    
         this.waitForConfigManager();  
     }    
@@ -192,28 +192,35 @@ class AIWriteXApp {
         }    
     }    
         
-    addLogEntry(logData) {    
-        const logPanel = document.getElementById('log-panel');    
-        if (!logPanel) return;    
-            
-        const entry = document.createElement('div');    
-        entry.className = `log-entry ${logData.type}`;    
-            
-        const timestamp = new Date(logData.timestamp * 1000).toLocaleTimeString();    
-        entry.innerHTML = `    
-            <span class="log-timestamp">[${timestamp}]</span>    
-            <span class="log-message">${this.escapeHtml(logData.message)}</span>    
-        `;    
-            
-        logPanel.appendChild(entry);    
-        logPanel.scrollTop = logPanel.scrollHeight;    
-            
-        // 限制日志条数    
-        const entries = logPanel.querySelectorAll('.log-entry');    
-        if (entries.length > 1000) {    
-            entries[0].remove();    
-        }    
-    }    
+    addLogEntry(logData) {  
+        const logPanel = document.getElementById('log-panel');  
+        if (!logPanel) return;  
+        
+        const entry = document.createElement('div');  
+        entry.className = `log-entry ${logData.type}`;  
+        
+        const timestamp = new Date(logData.timestamp * 1000).toLocaleTimeString();  
+        entry.innerHTML = `  
+            <span class="log-timestamp">[${timestamp}]</span>  
+            <span class="log-message">${this.escapeHtml(logData.message)}</span>  
+        `;  
+        
+        logPanel.appendChild(entry);  
+        logPanel.scrollTop = logPanel.scrollHeight;  
+        
+        // 重要消息推送到走马灯  
+        if (logData.type === 'success' || logData.type === 'error') {  
+            if (window.footerMarquee) {  
+                window.footerMarquee.addMessage(logData.message, logData.type);  
+            }  
+        }  
+        
+        // 限制日志条数  
+        const entries = logPanel.querySelectorAll('.log-entry');  
+        if (entries.length > 1000) {  
+            entries[0].remove();  
+        }  
+    }   
         
     escapeHtml(text) {    
         const div = document.createElement('div');    

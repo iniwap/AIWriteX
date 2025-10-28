@@ -219,7 +219,11 @@ class ArticleManager {
                 <div class="card-meta">  
                     <span class="format-badge">${article.format}</span>  
                     <span class="meta-divider">•</span>  
-                    <span class="status-badge ${statusClass}" title="点击查看发布记录">${statusText}</span>  
+                    <span class="status-badge ${statusClass}"     
+                        data-article-path="${article.path}"    
+                        title="点击查看发布记录">    
+                        ${statusText}    
+                    </span>   
                     <span class="meta-divider">•</span>  
                     <span class="size-info">${article.size}</span>  
                     <span class="meta-divider">•</span>  
@@ -258,13 +262,156 @@ class ArticleManager {
         return card;  
     }  
     
+    // 添加新方法显示发布历史  
+    async showPublishHistory(article) {  
+        try {  
+            const response = await fetch(`/api/articles/publish-history/${encodeURIComponent(article.path)}`);  
+            if (!response.ok) {  
+                throw new Error('获取发布历史失败');  
+            }  
+            
+            const result = await response.json();  
+            const records = result.data.records || [];  
+            
+            // 显示发布历史对话框  
+            this.renderPublishHistoryDialog(article, records);  
+        } catch (error) {  
+            this.showNotification('获取发布历史失败: ' + error.message, 'error');  
+        }  
+    }  
+    
+    renderPublishHistoryDialog(article, records) {  
+        const dialogHtml = `  
+            <div class="modal-overlay" id="publish-history-dialog">  
+                <div class="modal-content publish-history-modal">  
+                    <div class="modal-header">  
+                        <h3>发布记录</h3>  
+                        <button class="modal-close" onclick="window.articleManager.closePublishHistoryDialog()">×</button>  
+                    </div>  
+                    <div class="modal-body">  
+                        <div class="article-info">  
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>  
+                                <polyline points="14,2 14,8 20,8"/>  
+                            </svg>  
+                            <span class="article-title">${this.escapeHtml(article.title)}</span>  
+                        </div>  
+                        
+                        ${records.length === 0 ? `  
+                            <div class="empty-state">  
+                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor">  
+                                    <circle cx="12" cy="12" r="10"/>  
+                                    <line x1="12" y1="8" x2="12" y2="12"/>  
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                                </svg>  
+                                <p>暂无发布记录</p>  
+                            </div>  
+                        ` : `  
+                            <div class="history-timeline">  
+                                ${records.map((record, index) => `  
+                                    <div class="history-item ${record.success ? 'success' : 'failed'}">  
+                                        <div class="history-icon">  
+                                            ${record.success ? `  
+                                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>  
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>  
+                                                </svg>  
+                                            ` : `  
+                                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
+                                                    <circle cx="12" cy="12" r="10"/>  
+                                                    <line x1="15" y1="9" x2="9" y2="15"/>  
+                                                    <line x1="9" y1="9" x2="15" y2="15"/>  
+                                                </svg>  
+                                            `}  
+                                        </div>  
+                                        <div class="history-content">  
+                                            <div class="history-header">  
+                                                <span class="history-account">${this.escapeHtml(record.account || '未知账号')}</span>  
+                                                <span class="history-appid">AppID: ${this.escapeHtml(record.appid || 'N/A')}</span>  
+                                            </div>  
+                                            <div class="history-time">${this.formatHistoryTime(record.timestamp)}</div>  
+                                            ${!record.success && record.error ? `  
+                                                <div class="history-error">  
+                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">  
+                                                        <circle cx="12" cy="12" r="10"/>  
+                                                        <line x1="12" y1="8" x2="12" y2="12"/>  
+                                                        <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                                                    </svg>  
+                                                    <span>${this.escapeHtml(this.truncateError(record.error))}</span>  
+                                                </div>  
+                                            ` : ''}  
+                                        </div>  
+                                        ${index < records.length - 1 ? '<div class="history-line"></div>' : ''}  
+                                    </div>  
+                                `).join('')}  
+                            </div>  
+                        `}  
+                    </div>  
+                    <div class="modal-footer">  
+                        <button class="btn btn-secondary" onclick="window.articleManager.closePublishHistoryDialog()">关闭</button>  
+                    </div>  
+                </div>  
+            </div>  
+        `;  
+        
+        document.body.insertAdjacentHTML('beforeend', dialogHtml);  
+    }  
+    
+    // 辅助方法:格式化时间  
+    formatHistoryTime(timestamp) {  
+        const date = new Date(timestamp);  
+        const now = new Date();  
+        const diffMs = now - date;  
+        const diffMins = Math.floor(diffMs / 60000);  
+        const diffHours = Math.floor(diffMs / 3600000);  
+        const diffDays = Math.floor(diffMs / 86400000);  
+        
+        if (diffMins < 1) return '刚刚';  
+        if (diffMins < 60) return `${diffMins}分钟前`;  
+        if (diffHours < 24) return `${diffHours}小时前`;  
+        if (diffDays < 7) return `${diffDays}天前`;  
+        
+        return date.toLocaleString('zh-CN', {  
+            year: 'numeric',  
+            month: '2-digit',  
+            day: '2-digit',  
+            hour: '2-digit',  
+            minute: '2-digit'  
+        });  
+    }  
+    
+    // 辅助方法:截断错误信息  
+    truncateError(error) {  
+        if (!error) return '';  
+        const maxLength = 100;  
+        return error.length > maxLength ? error.substring(0, maxLength) + '...' : error;  
+    }  
+
+    closePublishHistoryDialog() {  
+        const dialog = document.getElementById('publish-history-dialog');  
+        if (dialog) dialog.remove();  
+    }
+
     // 绑定卡片事件  
     bindCardEvents() {  
         const grid = document.getElementById('article-content-grid');  
         if (!grid) return;  
         
         grid.querySelectorAll('.article-card').forEach(card => {  
-            // 卡片点击预览 - 完全参照模板管理  
+            // 状态徽章点击事件  
+            const statusBadge = card.querySelector('.status-badge');  
+            if (statusBadge) {  
+                statusBadge.addEventListener('click', (e) => {  
+                    e.stopPropagation(); // 阻止事件冒泡  
+                    const path = card.dataset.path;  
+                    const article = this.articles.find(a => a.path === path);  
+                    if (article) {  
+                        this.showPublishHistory(article);  
+                    }  
+                });  
+            }  
+
+            // 卡片点击预览  
             card.addEventListener('click', (e) => {  
                 if (!e.target.closest('.card-actions') && !e.target.closest('.batch-checkbox')) {  
                     const path = card.dataset.path;  
@@ -287,7 +434,7 @@ class ArticleManager {
                     }  
                 });  
             });  
-        });  
+        }); 
     }  
     
     async handleCardAction(action, article) {  
@@ -878,57 +1025,345 @@ class ArticleManager {
     }  
     
     // 确认发布  
-    async confirmPublish() {      
-        const platformId = document.getElementById('publish-platform-select')?.value;      
+    async confirmPublish() {  
+        const platformId = document.getElementById('publish-platform-select')?.value;  
+        const selectedAccounts = Array.from(  
+            document.querySelectorAll('.account-item.selected')  
+        ).map(item => parseInt(item.dataset.accountIndex));  
         
-        const selectedAccounts = Array.from(      
-            document.querySelectorAll('.account-item.selected')      
-        ).map(item => parseInt(item.dataset.accountIndex));      
-        
-        if (!platformId || selectedAccounts.length === 0) {      
-            this.showNotification('请选择平台和账号', 'warning');      
-            return;      
-        }      
+        if (!platformId || selectedAccounts.length === 0) {  
+            this.showNotification('请选择平台和账号', 'warning');  
+            return;  
+        }  
         
         const articlePaths = [...this.publishingArticles];  
+        this.closePublishDialog();  
         
-        this.closePublishDialog();      
+        // 显示进度对话框  
+        this.showPublishProgressDialog(articlePaths.length, selectedAccounts.length, true);  
         
-        try {      
-            const response = await fetch('/api/articles/publish', {      
-                method: 'POST',      
-                headers: { 'Content-Type': 'application/json' },      
-                body: JSON.stringify({      
-                    article_paths: articlePaths,  // ✅ 使用保存的值  
-                    account_indices: selectedAccounts,      
-                    platform: platformId      
-                })      
-            });      
+        try {  
+            const response = await fetch('/api/articles/publish', {  
+                method: 'POST',  
+                headers: { 'Content-Type': 'application/json' },  
+                body: JSON.stringify({  
+                    article_paths: articlePaths,  
+                    account_indices: selectedAccounts,  
+                    platform: platformId  
+                })  
+            });  
             
-            if (response.ok) {      
-                const result = await response.json();    
+            if (response.ok) {  
+                const result = await response.json();  
                 
-                let message = `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`;    
+                // 检查进度对话框是否仍然存在  
+                const progressDialog = document.getElementById('publish-progress-dialog');  
                 
-                if (result.fail_count > 0 && result.error_details && result.error_details.length > 0) {    
-                    message += '\n失败详情:\n' + result.error_details.slice(0, 3).join('\n');    
-                    if (result.error_details.length > 3) {    
-                        message += `\n...还有${result.error_details.length - 3}个错误`;    
-                    }    
-                }    
+                if (progressDialog) {  
+                    // 对话框仍然打开 - 更新为结果显示,不显示右上角通知  
+                    this.updateProgressDialogWithResult(result);  
+                } else {  
+                    // 对话框已关闭 - 只显示右上角通知(简洁版本)  
+                    let notificationMessage = '发布完成: ';  
+                    if (result.success_count > 0 && result.fail_count > 0) {  
+                        notificationMessage += `成功 ${result.success_count}, 失败 ${result.fail_count}`;  
+                    } else if (result.success_count > 0) {  
+                        notificationMessage += `成功 ${result.success_count}`;  
+                    } else {  
+                        notificationMessage += `失败 ${result.fail_count}`;  
+                    }  
+                    
+                    this.showNotification(  
+                        notificationMessage,  
+                        result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error')  
+                    );  
+                }  
                 
-                this.showNotification(      
-                    message,    
-                    result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error')    
-                );      
-                await this.loadArticles();      
-                this.renderStatusTree();      
-            }      
-        } catch (error) {      
-            this.showNotification('发布失败: ' + error.message, 'error');      
-        }      
+                // 构建走马灯消息  
+                let marqueeMessage = '';  
+                if (result.success_count > 0 && result.fail_count === 0) {  
+                    marqueeMessage = `发布完成: 成功 ${result.success_count}`;  
+                } else if (result.success_count > 0 && result.fail_count > 0) {  
+                    marqueeMessage = `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`;  
+                } else {  
+                    marqueeMessage = `发布完成: 失败 ${result.fail_count}`;  
+                }  
+                
+                // 添加详细信息(包括权限回收提示)  
+                if (result.error_details && result.error_details.length > 0) {  
+                    const details = result.error_details.slice(0, 3).join('; ');  
+                    marqueeMessage += ` | 详情: ${details}`;  
+                }  
+                
+                // 推送到走马灯(重要消息,循环3次)  
+                if (window.footerMarquee) {  
+                    window.footerMarquee.addMessage(  
+                        marqueeMessage,  
+                        result.fail_count === 0 ? 'success' : 'warning',
+                        false,  
+                        3  
+                    );  
+                }   
+                
+                if (window.footerMarquee) {  
+                    window.footerMarquee.addMessage(  
+                        marqueeMessage,  
+                        result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error'),  
+                        false,  
+                        1  
+                    );  
+                }  
+                
+                await this.loadArticles();  
+                this.renderStatusTree();  
+            } else {  
+                throw new Error('发布请求失败');  
+            }  
+        } catch (error) {  
+            this.showNotification('发布失败: ' + error.message, 'error');  
+            
+            if (window.footerMarquee) {  
+                window.footerMarquee.addMessage(  
+                    '发布失败: ' + error.message,  
+                    'error',  
+                    false,  
+                    1  
+                );  
+            }  
+            
+            const progressDialog = document.getElementById('publish-progress-dialog');  
+            if (progressDialog) progressDialog.remove();  
+        }  
     }
-    
+
+    // 在进度对话框中显示结果  
+    updateProgressDialogWithResult(result) {  
+        const dialog = document.getElementById('publish-progress-dialog');  
+        if (!dialog) return; // 用户已关闭,不显示结果  
+        
+        const modalBody = dialog.querySelector('.modal-body');  
+        if (!modalBody) return;  
+        
+        const resultType = result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error');  
+        
+        modalBody.innerHTML = `  
+            <div class="result-summary ${resultType}">  
+                <h4>发布完成</h4>  
+                ${result.success_count > 0 ? `<p>✓ 成功: ${result.success_count}</p>` : ''}  
+                ${result.fail_count > 0 ? `<p>✗ 失败: ${result.fail_count}</p>` : ''}  
+            </div>  
+            ${result.error_details && result.error_details.length > 0 ? `  
+                <div class="error-details">  
+                    <h5>错误详情:</h5>  
+                    <div class="error-list">  
+                        ${result.error_details.map(err => `  
+                            <div class="error-item">${this.escapeHtml(err)}</div>  
+                        `).join('')}  
+                    </div>  
+                </div>  
+            ` : ''}  
+        `;  
+        
+        // 更新对话框头部和按钮  
+        const header = dialog.querySelector('.modal-header h3');  
+        if (header) header.textContent = '发布结果';  
+        
+        const closeBtn = dialog.querySelector('.modal-close');  
+        if (closeBtn) closeBtn.onclick = () => this.closeProgressDialog();  
+        
+        // 添加底部按钮  
+        let footer = dialog.querySelector('.modal-footer');  
+        if (!footer) {  
+            footer = document.createElement('div');  
+            footer.className = 'modal-footer';  
+            dialog.querySelector('.modal-content').appendChild(footer);  
+        }  
+        
+        footer.innerHTML = `  
+            <button class="btn btn-secondary" onclick="window.articleManager.closeProgressDialog()">关闭</button>  
+            <button class="btn btn-primary" onclick="window.open('https://mp.weixin.qq.com', '_blank')">打开公众号后台</button>  
+        `;  
+    }  
+
+    // 格式化发布结果为走马灯消息  
+    formatPublishMarqueeMessage(result) {  
+        const { success_count, fail_count } = result;  
+        const parts = [];  
+        
+        if (success_count > 0) {  
+            parts.push(`成功 ${success_count}`);  
+        }  
+        if (fail_count > 0) {  
+            parts.push(`失败 ${fail_count}`);  
+        }  
+        
+        return parts.length > 0 ? `发布完成: ${parts.join(', ')}` : '发布完成';  
+    }
+
+    // 推送发布结果到走马灯  
+    pushResultToMarquee(result) {  
+        if (!window.footerMarquee) return;  
+        
+        const { success_count, fail_count, error_details } = result;  
+        
+        // 构建详细的结果消息  
+        let message = '发布完成: ';  
+        
+        // 只显示非零的统计  
+        if (success_count > 0 && fail_count > 0) {  
+            message += `成功 ${success_count}, 失败 ${fail_count}`;  
+        } else if (success_count > 0) {  
+            message += `成功 ${success_count}`;  
+        } else if (fail_count > 0) {  
+            message += `失败 ${fail_count}`;  
+        }  
+        
+        // 添加失败详情(最多显示3条)  
+        if (fail_count > 0 && error_details && error_details.length > 0) {  
+            const details = error_details.slice(0, 3).join('; ');  
+            message += ` | 失败详情: ${details}`;  
+            if (error_details.length > 3) {  
+                message += `...还有${error_details.length - 3}个错误`;  
+            }  
+        }  
+        
+        // 推送到走马灯  
+        window.footerMarquee.addMessage(  
+            message,  
+            fail_count === 0 ? 'success' : (success_count > 0 ? 'warning' : 'error'),  
+            false,  // persistent=false (临时消息)  
+            1       // loopCount=1 (立即显示一次,不循环)  
+        );  
+    }
+
+    showPublishProgressDialog(articleCount, accountCount, showCloseButton = true) {  // ✅ 改为showCloseButton  
+        const dialogHtml = `    
+            <div class="modal-overlay" id="publish-progress-dialog" data-user-closed="false">    
+                <div class="modal-content publish-progress-modal">    
+                    <div class="modal-header">    
+                        <h3>正在发布</h3>    
+                        ${showCloseButton ? '<button class="btn-icon modal-close" onclick="window.articleManager.closeProgressDialog()">×</button>' : ''}    
+                    </div>  
+                    <div class="modal-body">    
+                        <div class="progress-info">    
+                            <p>正在发布 ${articleCount} 篇文章到 ${accountCount} 个账号...</p>    
+                            <p class="progress-detail">您可以关闭此窗口,发布将在后台继续</p>    
+                        </div>    
+                        <div class="progress-spinner">    
+                            <svg class="spinner" viewBox="0 0 50 50">    
+                                <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>    
+                            </svg>    
+                        </div>    
+                    </div>    
+                </div>    
+            </div>    
+        `;    
+        
+        document.body.insertAdjacentHTML('beforeend', dialogHtml);    
+    } 
+
+    // 关闭进度对话框(转为后台执行)  
+    closeProgressDialog() {  
+        const dialog = document.getElementById('publish-progress-dialog');  
+        if (dialog) dialog.remove();  
+    }
+
+    // 显示简洁的发布通知  
+    showPublishNotification(result) {  
+        const { success_count, fail_count } = result;  
+        
+        // 构建简洁消息  
+        let message = '发布完成';  
+        const parts = [];  
+        
+        if (success_count > 0) {  
+            parts.push(`成功 ${success_count}`);  
+        }  
+        if (fail_count > 0) {  
+            parts.push(`失败 ${fail_count}`);  
+        }  
+        
+        if (parts.length > 0) {  
+            message += ': ' + parts.join(', ');  
+        }  
+        
+        const type = fail_count === 0 ? 'success' : (success_count > 0 ? 'warning' : 'error');  
+        this.showNotification(message, type);  
+    }  
+
+    // 显示详细结果对话框  
+    showPublishResultDialog(result) {  
+        const { success_count, fail_count, error_details } = result;  
+        
+        let statusClass = 'success';  
+        let statusText = '发布成功';  
+        if (fail_count > 0 && success_count > 0) {  
+            statusClass = 'warning';  
+            statusText = '部分成功';  
+        } else if (fail_count > 0) {  
+            statusClass = 'error';  
+            statusText = '发布失败';  
+        }  
+        
+        const dialogHtml = `  
+            <div id="publish-result-dialog" class="modal-overlay">  
+                <div class="modal-content publish-result-modal">  
+                    <div class="modal-header">  
+                        <h3>发布结果</h3>  
+                        <button class="modal-close" onclick="window.articleManager.closeResultDialog()">×</button>  
+                    </div>  
+                    <div class="modal-body">  
+                        <div class="result-summary ${statusClass}">  
+                            <h4>${statusText}</h4>  
+                            <div class="result-stats">  
+                                ${success_count > 0 ? `  
+                                    <div class="stat-item">  
+                                        <div class="stat-number success">${success_count}</div>  
+                                        <div class="stat-label">成功</div>  
+                                    </div>  
+                                ` : ''}  
+                                ${fail_count > 0 ? `  
+                                    <div class="stat-item">  
+                                        <div class="stat-number failed">${fail_count}</div>  
+                                        <div class="stat-label">失败</div>  
+                                    </div>  
+                                ` : ''}  
+                            </div>  
+                        </div>  
+                        
+                        ${error_details && error_details.length > 0 ? `  
+                            <div class="error-details-section">  
+                                <div class="error-details-header">  
+                                    <span class="error-details-title">失败详情</span>  
+                                </div>  
+                                <div class="error-list">  
+                                    ${error_details.map(err => `  
+                                        <div class="error-item">${this.escapeHtml(err)}</div>  
+                                    `).join('')}  
+                                </div>  
+                            </div>  
+                        ` : ''}  
+                    </div>  
+                    <div class="modal-footer">  
+                        <button class="btn btn-secondary" onclick="window.articleManager.closeResultDialog()">关闭</button>  
+                        <button class="btn btn-primary" onclick="window.open('https://mp.weixin.qq.com', '_blank')">打开公众号后台</button>  
+                    </div>  
+                </div>  
+            </div>  
+        `;  
+        
+        // 移除进度对话框  
+        const progressDialog = document.getElementById('publish-progress-dialog');  
+        if (progressDialog) progressDialog.remove();  
+        
+        document.body.insertAdjacentHTML('beforeend', dialogHtml);  
+    }  
+
+    closeResultDialog() {  
+        const dialog = document.getElementById('publish-result-dialog');  
+        if (dialog) dialog.remove();  
+    }
+
     // 删除文章  
     async deleteArticle(path) {  
         window.dialogManager.showConfirm(  
