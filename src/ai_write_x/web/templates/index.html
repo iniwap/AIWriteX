@@ -25,7 +25,9 @@
     <link rel="stylesheet" href="/static/css/components/modals.css">  
     <link rel="stylesheet" href="/static/css/components/preview-panel.css">  
     <link rel="stylesheet" href="/static/css/components/content-editor.css">  
-      
+    
+    <link rel="stylesheet" href="/static/lib/grapesjs/css/grapes.min.css">  
+
     <!-- 视图样式文件  -->  
     <link rel="stylesheet" href="/static/css/views/shared-manager.css">  
     <link rel="stylesheet" href="/static/css/views/creative-workshop.css">  
@@ -49,7 +51,7 @@
                 {% include 'components/views/creative-workshop.html' %}  
                 {% include 'components/views/article-manager.html' %}  
                 {% include 'components/views/template-manager.html' %}  
-                {% include 'components/views/config-manager/config-manager.html' %}  
+                {% include 'components/views/config-manager/config-manager.html' %}
             </main>  
         </div>  
           
@@ -61,9 +63,13 @@
     </div>  
   
     <!-- 脚本加载 -->
-    <script src="/static/js/lib/marked.min.js"></script>
+    <script src="/static/lib/grapesjs/grapes.min.js"></script>  
+    <script src="/static/lib/grapesjs/plugins/grapesjs-preset-webpage.min.js"></script>
+    <script src="/static/js/image-designer.js"></script>
+ 
+    <script src="/static/lib/marked/marked.min.js"></script>
     <script src="/static/js/markdown-renderer.js"></script> 
-    <script src="/static/monaco/vs/loader.js"></script>  
+    <script src="/static/lib/monaco/vs/loader.js"></script>  
     <script src="/static/js/dialog.js"></script>  
     <script src="/static/js/preview-panel.js"></script>
     <script src="/static/js/footer-marquee.js"></script>  

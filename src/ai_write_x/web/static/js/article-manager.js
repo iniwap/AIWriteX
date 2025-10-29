@@ -237,12 +237,10 @@ class ArticleManager {
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>  
                     </svg>  
                 </button>  
-                <button class="btn-icon" data-action="illustration" title="配图">  
+                <button class="btn-icon" data-action="illustration" title="设计">  
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>  
-                        <circle cx="8.5" cy="8.5" r="1.5"/>  
-                        <polyline points="21 15 16 10 5 21"/>  
-                    </svg>  
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>  
+                    </svg>        
                 </button>  
                 <button class="btn-icon" data-action="publish" title="发布">  
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
@@ -262,6 +260,17 @@ class ArticleManager {
         return card;  
     }  
     
+    async openImageDesigner(article) {  
+        try {  
+            if (!window.imageDesignerDialog) {  
+                window.imageDesignerDialog = new ImageDesignerDialog();  
+            }  
+            await window.imageDesignerDialog.open(article.path, article.title);  
+        } catch (error) {  
+            this.showNotification('打开配图设计器失败: ' + error.message, 'error');  
+        }  
+    }
+
     // 添加新方法显示发布历史  
     async showPublishHistory(article) {  
         try {  
@@ -449,7 +458,7 @@ class ArticleManager {
                 await this.editArticle(article);  
                 break;  
             case 'illustration':  
-                this.showNotification('配图功能开发中', 'info');  
+                await this.openImageDesigner(article)
                 break;  
             case 'publish':  
                 await this.showPublishDialog(article.path);  

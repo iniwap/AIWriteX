@@ -3184,6 +3184,50 @@ class AIWriteXConfigManager {
         });  
     }
 
+    populateImageDesignUI() {  
+        if (!this.config.image_design) return;  
+        
+        const imageMargin = document.getElementById('image-margin');  
+        if (imageMargin) imageMargin.value = this.config.image_design.margin || 20;  
+        
+        const borderRadius = document.getElementById('image-border-radius');  
+        if (borderRadius) borderRadius.value = this.config.image_design.border_radius || 8;  
+        
+        const maxWidth = document.getElementById('image-max-width');  
+        if (maxWidth) maxWidth.value = this.config.image_design.max_width || 100;  
+        
+        const autoTheme = document.getElementById('auto-theme-adapt');  
+        if (autoTheme) autoTheme.checked = this.config.image_design.auto_theme_adapt !== false;  
+    }  
+    
+    // 保存配置  
+    async saveImageDesignConfig() {  
+        const imageDesignConfig = {  
+            margin: parseInt(document.getElementById('image-margin')?.value || 20),  
+            border_radius: parseInt(document.getElementById('image-border-radius')?.value || 8),  
+            max_width: parseInt(document.getElementById('image-max-width')?.value || 100),  
+            auto_theme_adapt: document.getElementById('auto-theme-adapt')?.checked || false,  
+            light_bg_color: document.getElementById('light-bg-color')?.value || '#ffffff',  
+            dark_bg_color: document.getElementById('dark-bg-color')?.value || '#1a1a1a'  
+        };  
+        
+        await this.updateConfig({ image_design: imageDesignConfig });  
+        const success = await this.saveConfig();  
+        
+        if (success) {  
+            const saveBtn = document.getElementById('save-image-design-config');  
+            if (saveBtn) {  
+                saveBtn.classList.remove('has-changes');  
+                saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+            }  
+        }  
+        
+        window.app?.showNotification(  
+            success ? '页面设计已保存' : '保存配置失败',  
+            success ? 'success' : 'error'  
+        );  
+    }
+
     updateSliderValue(slider) {  
         const value = slider.value;  
         const valueDisplay = slider.parentElement.querySelector('.slider-value');  
@@ -3216,7 +3260,8 @@ class AIWriteXConfigManager {
                 'api': 'save-api-config',  
                 'img-api': 'save-img-api-config',
                 'aiforge': 'save-aiforge-config',
-                'creative': 'save-creative-config'
+                'creative': 'save-creative-config',
+                'image-design': 'save-image-design-config'
             };  
             
             const saveBtnId = panelButtonMap[this.currentPanel];  

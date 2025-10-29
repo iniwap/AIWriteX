@@ -1,0 +1,60 @@
+<div class="config-panel" id="config-image-design">  
+    <div class="config-header">  
+        <h2>页面设计</h2>  
+        <p class="config-description">页面设计的默认样式和行为</p>  
+    </div>  
+      
+    <div class="config-form">  
+        <div class="config-section">  
+            <h3 class="section-title">默认样式</h3>  
+              
+            <div class="form-group">  
+                <label>图片边距(px)</label>  
+                <input type="number" id="image-margin" class="form-control" value="20" min="0" max="100">  
+            </div>  
+              
+            <div class="form-group">  
+                <label>图片圆角(px)</label>  
+                <input type="number" id="image-border-radius" class="form-control" value="8" min="0" max="50">  
+            </div>  
+              
+            <div class="form-group">  
+                <label>图片最大宽度(%)</label>  
+                <input type="number" id="image-max-width" class="form-control" value="100" min="50" max="100">  
+            </div>  
+        </div>  
+          
+        <div class="config-section">  
+            <h3 class="section-title">主题适配</h3>  
+              
+            <div class="form-group">  
+                <label class="checkbox-label">  
+                    <input type="checkbox" id="auto-theme-adapt" checked>  
+                    <span class="checkbox-custom"></span>  
+                    自动适配亮色/暗色主题  
+                </label>  
+            </div>  
+              
+            <div class="form-group">  
+                <label>亮色模式背景色</label>  
+                <input type="color" id="light-bg-color" class="form-control" value="#ffffff">  
+            </div>  
+              
+            <div class="form-group">  
+                <label>暗色模式背景色</label>  
+                <input type="color" id="dark-bg-color" class="form-control" value="#1a1a1a">  
+            </div>  
+        </div>  
+    </div>  
+      
+    <div class="config-actions">  
+        <button type="button" class="btn btn-primary" id="save-image-design-config">  
+            <i class="icon-save"></i>  
+            保存设置  
+        </button>  
+        <button type="button" class="btn btn-secondary" id="reset-image-design-config">  
+            <i class="icon-reset"></i>  
+            恢复默认  
+        </button>  
+    </div>  
+</div>

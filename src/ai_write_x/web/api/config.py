@@ -203,3 +203,20 @@ async def get_system_messages():
         ]
 
     return {"status": "success", "data": system_messages}
+
+
+@router.get("/image-design")
+async def get_image_design_config():
+    """获取页面设计"""
+    config = Config.get_instance()
+    return config.get_config().get(
+        "image_design",
+        {
+            "margin": 20,
+            "border_radius": 8,
+            "max_width": 100,
+            "auto_theme_adapt": True,
+            "light_bg_color": "#ffffff",
+            "dark_bg_color": "#1a1a1a",
+        },
+    )

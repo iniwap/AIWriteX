@@ -310,3 +310,45 @@ async def get_publish_history(article_path: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class ArticleDesign(BaseModel):
+    article: str
+    html: str
+    css: str
+
+
+@router.post("/design")
+async def save_article_design(design: ArticleDesign):
+    """保存文章设计"""
+    try:
+        # 保存设计到.design.json文件
+        article_path = Path(design.article)
+        design_path = article_path.with_suffix(".design.json")
+
+        design_data = {"html": design.html, "css": design.css}
+
+        with open(design_path, "w", encoding="utf-8") as f:
+            json.dump(design_data, f, ensure_ascii=False, indent=2)
+
+        return {"success": True, "message": "设计已保存"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/design")
+async def load_article_design(article: str):
+    """加载文章设计"""
+    try:
+        article_path = Path(article)
+        design_path = article_path.with_suffix(".design.json")
+
+        if not design_path.exists():
+            return {"html": "", "css": ""}
+
+        with open(design_path, "r", encoding="utf-8") as f:
+            design_data = json.load(f)
+
+        return design_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

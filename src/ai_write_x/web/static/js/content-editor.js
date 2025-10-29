@@ -37,7 +37,7 @@ class ContentEditorDialog {
               
             if (!window.monacoConfigured) {    
                 require.config({       
-                    paths: { 'vs': '/static/monaco/vs' }    
+                    paths: { 'vs': '/static/lib/monaco/vs' }    
                 });    
                 window.monacoConfigured = true;    
             }    
