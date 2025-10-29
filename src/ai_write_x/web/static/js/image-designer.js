@@ -70,25 +70,12 @@ class ImageDesignerDialog {
     async initGrapesJS() {  
         const appTheme = document.documentElement.getAttribute('data-theme') || 'light';  
         const isDark = appTheme === 'dark';  
-        
-        console.log('[ImageDesigner] Initializing GrapesJS with theme:', appTheme);  
-        
+                
         // 检查容器尺寸  
         const container = this.dialog.querySelector('#gjs-editor');  
-        console.log('[ImageDesigner] Container dimensions:', {  
-            width: container.offsetWidth,  
-            height: container.offsetHeight,  
-            clientWidth: container.clientWidth,  
-            clientHeight: container.clientHeight  
-        });  
         
         if (container.offsetHeight === 0) {  
-            console.error('[ImageDesigner] Container height is 0! Waiting...');  
-            await new Promise(resolve => setTimeout(resolve, 200));  
-            console.log('[ImageDesigner] After wait, dimensions:', {  
-                width: container.offsetWidth,  
-                height: container.offsetHeight  
-            });  
+            await new Promise(resolve => setTimeout(resolve, 200));   
         }  
         
         this.editor = grapesjs.init({  
@@ -98,44 +85,6 @@ class ImageDesignerDialog {
             fromElement: false,  
             
             storageManager: false,  
-            
-            // 明确启用默认面板  
-            panels: {   
-                defaults: [  
-                    {  
-                        id: 'basic-actions',  
-                        el: '.panel__basic-actions',  
-                        buttons: [  
-                            {  
-                                id: 'visibility',  
-                                active: true,  
-                                className: 'btn-toggle-borders',  
-                                label: '<i class="fa fa-clone"></i>',  
-                                command: 'sw-visibility',  
-                            }  
-                        ],  
-                    },  
-                    {  
-                        id: 'panel-devices',  
-                        el: '.panel__devices',  
-                        buttons: [  
-                            {  
-                                id: 'device-desktop',  
-                                label: '<i class="fa fa-desktop"></i>',  
-                                command: 'set-device-desktop',  
-                                active: true,  
-                                togglable: false,  
-                            },  
-                            {  
-                                id: 'device-mobile',  
-                                label: '<i class="fa fa-mobile"></i>',  
-                                command: 'set-device-mobile',  
-                                togglable: false,  
-                            }  
-                        ],  
-                    }  
-                ]  
-            },  
             
             plugins: ['grapesjs-preset-webpage'],  
             pluginsOpts: {  
@@ -204,19 +153,12 @@ class ImageDesignerDialog {
                 blocks: []  
             }  
         });  
-        
-        console.log('[ImageDesigner] GrapesJS instance created:', this.editor);  
-        
+                
         // 等待编辑器完全加载  
         this.editor.on('load', () => {  
-            console.log('[ImageDesigner] Editor loaded event fired');  
             this.syncTheme(isDark);  
-            
             // 强制刷新编辑器  
             this.editor.refresh();  
-            
-            console.log('[ImageDesigner] Editor panels:', this.editor.Panels.getPanels());  
-            console.log('[ImageDesigner] Editor canvas:', this.editor.Canvas);  
         });  
         
         this.addCustomBlocks();  
@@ -268,12 +210,9 @@ class ImageDesignerDialog {
         });  
     }  
       
-    syncTheme(isDark) {  
-        console.log('[ImageDesigner] Syncing theme:', isDark ? 'dark' : 'light');  
-          
+    syncTheme(isDark) {            
         const canvas = this.editor?.Canvas?.getDocument();  
         if (!canvas) {  
-            console.warn('[ImageDesigner] Canvas not available');  
             return;  
         }  
           
@@ -301,8 +240,6 @@ class ImageDesignerDialog {
                 }  
             });  
         }  
-          
-        console.log('[ImageDesigner] Theme synced to canvas');  
     }  
       
     async loadDesign() {  
@@ -317,7 +254,7 @@ class ImageDesignerDialog {
                 }  
             }  
         } catch (error) {  
-            console.error('加载设计失败:', error);  
+            
         }  
     }  
       
@@ -443,7 +380,7 @@ class ImageDesignerDialog {
             try {  
                 this.editor.destroy();  
             } catch (e) {  
-                console.warn('[ImageDesigner] Editor destroy failed:', e);  
+
             }  
             this.editor = null;  
         }  
