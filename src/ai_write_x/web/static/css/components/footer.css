@@ -45,22 +45,37 @@
   
 .footer-marquee-content {  
     display: inline-block; 
-    white-space: nowrap;  
-    padding-left: 100%; 
-    animation: marquee-scroll 30s linear infinite;  
+    white-space: nowrap;
 }  
   
 .footer-marquee-content.paused {  
     animation-play-state: paused;  
 }  
 
-@keyframes marquee-scroll {  
-    0% {  
-        transform: translateX(0);
-    }  
-    100% {  
-        transform: translateX(-100%);
-    }  
+/* 底部品牌链接 */  
+.footer-brand-link {  
+    text-decoration: none;  
+    color: var(--text-secondary);  
+    transition: color 0.2s;  
+}  
+  
+.footer-brand-link:hover {  
+    color: var(--primary-color);  
+    cursor: pointer;  
+}  
+  
+.footer-brand-link .footer-brand {  
+    font-size: 13px;  
+    font-weight: 500;  
+}
+
+@keyframes marquee-scroll {    
+    0% {    
+        transform: translateX(var(--start-pos, 100%));  
+    }    
+    100% {    
+        transform: translateX(var(--end-pos, -100%));  
+    }    
 }
 
 /* 单条消息滚动动画 */  

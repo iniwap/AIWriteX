@@ -90,50 +90,51 @@ class FooterMarqueeManager {
     }
       
     // 显示当前消息  
-    showCurrentMessage() {    
-        if (this.messages.length === 0) {    
-            this.container.innerHTML = '';    
-            return;    
+    showCurrentMessage() {      
+        if (this.messages.length === 0) {      
+            this.container.innerHTML = '';      
+            return;      
+        }      
+            
+        const message = this.messages[this.currentIndex];      
+            
+        this.container.innerHTML = `      
+            <span class="marquee-item ${message.type}">      
+                ${this.escapeHtml(message.text)}      
+            </span>      
+        `;        
+            
+        // 获取容器和消息宽度      
+        const containerWidth = this.container.parentElement.offsetWidth;      
+        const messageWidth = this.container.offsetWidth;      
+            
+        // 计算总移动距离      
+        const totalDistance = containerWidth + messageWidth;      
+            
+        // 根据距离动态调整动画时长(保持恒定速度)      
+        const speed = 100; // 像素/秒      
+        const duration = Math.max(10, Math.min(60, totalDistance / speed));  
+            
+        // 设置CSS变量        
+        this.container.style.setProperty('--start-pos', `${containerWidth}px`);        
+        this.container.style.setProperty('--end-pos', `-${messageWidth}px`);  
+            
+        // 重置动画(先清空)  
+        this.container.style.animation = 'none';        
+        void this.container.offsetWidth; // 强制重排  
+            
+        // 使用完整的animation简写属性  
+        this.container.style.animation = `marquee-scroll ${duration}s linear 1`;  
+        
+        // 动态设置下一次切换的时间    
+        if (this.rotationTimeout) {    
+            clearTimeout(this.rotationTimeout);    
         }    
-            
-        const message = this.messages[this.currentIndex];    
-            
-        this.container.innerHTML = `    
-            <span class="marquee-item ${message.type}">    
-                ${this.escapeHtml(message.text)}    
-            </span>    
-        `;      
-            
-        // 获取容器和消息宽度    
-        const containerWidth = this.container.parentElement.offsetWidth;    
-        const messageWidth = this.container.offsetWidth;    
-            
-        // 计算总移动距离    
-        const totalDistance = containerWidth + messageWidth;    
-            
-        // 根据距离动态调整动画时长(保持恒定速度)    
-        const speed = 100; // 像素/秒    
-        const duration = Math.max(10, Math.min(60, totalDistance / speed)); // 限制在10-60秒之间  
-            
-        // 设置CSS变量    
-        this.container.style.setProperty('--start-pos', `${containerWidth}px`);    
-        this.container.style.setProperty('--end-pos', `-${messageWidth}px`);    
-        this.container.style.animationDuration = `${duration}s`;    
-            
-        // 重置动画    
-        this.container.style.animation = 'none';    
-        void this.container.offsetWidth;    
-        this.container.style.animation = '';    
         
-        // ✅ 添加:动态设置下一次切换的时间  
-        if (this.rotationTimeout) {  
-            clearTimeout(this.rotationTimeout);  
-        }  
-        
-        this.rotationTimeout = setTimeout(() => {  
-            this.nextMessage();  
-        }, duration * 1000); // 根据动画时长设置切换时间  
-    }     
+        this.rotationTimeout = setTimeout(() => {    
+            this.nextMessage();    
+        }, duration * 1000);  
+    }    
       
     // 切换到下一条消息  
     nextMessage() {  

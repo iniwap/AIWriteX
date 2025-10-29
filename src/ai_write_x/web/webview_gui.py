@@ -178,7 +178,7 @@ class WebViewGUI:
 
             # 创建WebView窗口时设置图标
             window_kwargs = {
-                "title": "AIWriteX - 智能内容创作平台",
+                "title": "AIWriteX",
                 "url": f"http://127.0.0.1:{self.server_port}",
                 "width": window_config["width"],
                 "height": window_config["height"],

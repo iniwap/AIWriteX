@@ -193,8 +193,13 @@ async def get_system_messages():
     if not system_messages:
         system_messages = [
             {"text": "欢迎使用AIWriteX智能内容创作平台", "type": "info"},
-            {"text": "提示: 使用Ctrl+Enter快速开始生成", "type": "info"},
-            {"text": "支持多平台发布: 微信公众号、今日头条等", "type": "info"},
+            {"text": "本项目禁止用于商业用途，仅限个人使用", "type": "info"},
+            {"text": "如需商业授权，请联系522765228@qq.com", "type": "info"},
+            {
+                "text": "AIWriteX重新定义AI辅助内容创作的边界，融合搜索+借鉴+AI+创意四重能力，多种超绝玩法，让内容创作充满无限可能",
+                "type": "info",
+            },
+            {"text": "更多AIWriteX功能开发中，敬请期待", "type": "info"},
         ]
 
     return {"status": "success", "data": system_messages}

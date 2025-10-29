@@ -453,25 +453,30 @@ def pub2wx(title, digest, article, appid, appsecret, author):
         image_urls = utils.extract_image_urls(article)
         for image_url in image_urls:
             if utils.is_local_path(image_url):
-                # 本地路径，检查文件是否存在
                 if os.path.exists(image_url):
-                    _, url, _ = publisher.upload_image(image_url)
-                    article = article.replace(image_url, url)
+                    _, url, err_msg = publisher.upload_image(image_url)
+                    if url:
+                        article = article.replace(image_url, url)
+                    else:
+                        log.print_log(f"本地图片上传失败: {image_url}, 错误: {err_msg}")
                 else:
                     log.print_log(f"本地图片文件不存在: {image_url}")
             else:
-                # 网络URL，先下载再上传
+                # 网络URL处理
                 local_filename = utils.download_and_save_image(
                     image_url,
                     str(PathManager.get_image_dir()),
                 )
                 if local_filename:
-                    _, url, _ = publisher.upload_image(local_filename)
-                    article = article.replace(image_url, url)
+                    _, url, err_msg = publisher.upload_image(local_filename)
+                    if url:
+                        article = article.replace(image_url, url)
+                    else:
+                        log.print_log(f"网络图片上传失败: {image_url}, 错误: {err_msg}")
                 else:
-                    log.print_log(f"下载图片失败：{image_url}")
+                    log.print_log(f"下载图片失败:{image_url}")
     except Exception as e:
-        log.print_log(f"上传配图出错，影响阅读，可继续发布文章:{e}")
+        log.print_log(f"上传配图出错,影响阅读,可继续发布文章:{e}")
 
     # 账号是否认证
     if not publisher.is_verified:

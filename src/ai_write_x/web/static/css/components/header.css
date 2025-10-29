@@ -44,6 +44,17 @@
     background: currentColor;  
     animation: headerPulse 2s infinite;  
 }  
+
+.app-title-link {  
+    text-decoration: none;  
+    color: inherit;  
+    cursor: pointer;  
+}  
+  
+.app-title-link:hover .app-title {  
+    color: var(--primary-color);  
+    opacity: 0.8;  
+}
   
 @keyframes headerPulse {  
     0%, 100% { opacity: 1; }  

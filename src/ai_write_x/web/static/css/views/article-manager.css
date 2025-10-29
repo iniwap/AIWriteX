@@ -463,7 +463,51 @@
 .error-item:last-child {  
     margin-bottom: 0;  
 } 
+
+/* 警告项样式 */  
+.warning-item {  
+    padding: 10px 12px;  
+    margin-bottom: 6px;  
+    background: var(--background-color);  
+    border-left: 3px solid #f59e0b;
+    border-radius: 4px;  
+    font-size: 13px;  
+    line-height: 1.5;  
+    color: var(--text-secondary);  
+}  
   
+.warning-item:last-child {  
+    margin-bottom: 0;  
+}  
+  
+/* 警告详情区域 */  
+.warning-details {  
+    margin-top: 20px;  
+}  
+  
+.warning-list {  
+    max-height: 200px;  
+    overflow-y: auto;  
+    background: var(--surface-color);  
+    border: 1px solid var(--border-color);  
+    border-radius: 6px;  
+    padding: 8px;  
+}  
+  
+.warning-item {  
+    padding: 10px 12px;  
+    margin-bottom: 6px;  
+    background: var(--background-color);  
+    border-left: 3px solid #f59e0b;  /* 橙色 */  
+    border-radius: 4px;  
+    font-size: 13px;  
+    line-height: 1.5;  
+    color: var(--text-secondary);  
+}  
+  
+.warning-item:last-child {  
+    margin-bottom: 0;  
+}
 
 /* 发布历史对话框 */  
 .publish-history-modal {  
@@ -646,6 +690,30 @@
     background: var(--secondary-color);  
 }  
 
+/* 警告信息 */  
+.history-warning {  
+    display: flex;  
+    align-items: flex-start;  
+    gap: 6px;  
+    padding: 8px 12px;  
+    background: rgba(245, 158, 11, 0.05);  
+    border-left: 3px solid #f59e0b;  
+    border-radius: 4px;  
+    margin-top: 8px;  
+}  
+  
+.history-warning svg {  
+    flex-shrink: 0;  
+    margin-top: 2px;  
+    stroke: #f59e0b;  
+}  
+  
+.history-warning span {  
+    font-size: 12px;  
+    color: #f59e0b;  
+    line-height: 1.5;  
+    word-break: break-word;  
+}
 
 /* ========== 响应式设计 ========== */  
   

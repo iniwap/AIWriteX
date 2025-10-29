@@ -330,12 +330,18 @@ class ArticleManager {
                                                 <span class="history-appid">AppID: ${this.escapeHtml(record.appid || 'N/A')}</span>  
                                             </div>  
                                             <div class="history-time">${this.formatHistoryTime(record.timestamp)}</div>  
-                                            ${!record.success && record.error ? `  
-                                                <div class="history-error">  
+                                            ${record.error ? `  
+                                                <div class="history-${record.success ? 'warning' : 'error'}">  
                                                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">  
-                                                        <circle cx="12" cy="12" r="10"/>  
-                                                        <line x1="12" y1="8" x2="12" y2="12"/>  
-                                                        <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                                                        ${record.success ? `  
+                                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>  
+                                                            <line x1="12" y1="9" x2="12" y2="13"/>  
+                                                            <line x1="12" y1="17" x2="12.01" y2="17"/>  
+                                                        ` : `  
+                                                            <circle cx="12" cy="12" r="10"/>  
+                                                            <line x1="12" y1="8" x2="12" y2="12"/>  
+                                                            <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                                                        `}  
                                                     </svg>  
                                                     <span>${this.escapeHtml(this.truncateError(record.error))}</span>  
                                                 </div>  
@@ -355,7 +361,7 @@ class ArticleManager {
         `;  
         
         document.body.insertAdjacentHTML('beforeend', dialogHtml);  
-    }  
+    }
     
     // 辅助方法:格式化时间  
     formatHistoryTime(timestamp) {  
@@ -913,7 +919,7 @@ class ArticleManager {
                 accounts = validCredentials.map((cred, index) => ({    
                     index: allCredentials.indexOf(cred),    
                     author: cred.author || '未命名',    
-                    appid: cred.appid  // 显示完整AppID,不再截取  
+                    appid: cred.appid
                 }));    
             }   
             
@@ -1056,6 +1062,20 @@ class ArticleManager {
             if (response.ok) {  
                 const result = await response.json();  
                 
+                // 获取文章标题  
+                const articleTitles = articlePaths.map(path => {  
+                    const article = this.articles.find(a => a.path === path);  
+                    return article ? article.title : '未知文章';  
+                }).filter(title => title !== '未知文章');  
+                
+                // 构建标题前缀  
+                let titlePrefix = '';  
+                if (articleTitles.length === 1) {  
+                    titlePrefix = `《${articleTitles[0]}》 `;  
+                } else if (articleTitles.length > 1) {  
+                    titlePrefix = `《${articleTitles[0]}》等${articleTitles.length}篇 `;  
+                }  
+                
                 // 检查进度对话框是否仍然存在  
                 const progressDialog = document.getElementById('publish-progress-dialog');  
                 
@@ -1063,8 +1083,8 @@ class ArticleManager {
                     // 对话框仍然打开 - 更新为结果显示,不显示右上角通知  
                     this.updateProgressDialogWithResult(result);  
                 } else {  
-                    // 对话框已关闭 - 只显示右上角通知(简洁版本)  
-                    let notificationMessage = '发布完成: ';  
+                    // 对话框已关闭 - 显示右上角通知(简洁版本,包含文章标题)  
+                    let notificationMessage = titlePrefix + '发布完成: ';  // 添加标题前缀  
                     if (result.success_count > 0 && result.fail_count > 0) {  
                         notificationMessage += `成功 ${result.success_count}, 失败 ${result.fail_count}`;  
                     } else if (result.success_count > 0) {  
@@ -1079,38 +1099,48 @@ class ArticleManager {
                     );  
                 }  
                 
-                // 构建走马灯消息  
-                let marqueeMessage = '';  
+                // 构建走马灯消息(包含文章标题)  
+                let marqueeMessage = titlePrefix;  // 以标题开头  
+                
                 if (result.success_count > 0 && result.fail_count === 0) {  
-                    marqueeMessage = `发布完成: 成功 ${result.success_count}`;  
+                    marqueeMessage += `发布完成: 成功 ${result.success_count}`;  
                 } else if (result.success_count > 0 && result.fail_count > 0) {  
-                    marqueeMessage = `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`;  
+                    marqueeMessage += `发布完成: 成功 ${result.success_count}, 失败 ${result.fail_count}`;  
                 } else {  
-                    marqueeMessage = `发布完成: 失败 ${result.fail_count}`;  
+                    marqueeMessage += `发布完成: 失败 ${result.fail_count}`;  
                 }  
                 
-                // 添加详细信息(包括权限回收提示)  
+                // 添加详细信息(最多3条)  
                 if (result.error_details && result.error_details.length > 0) {  
                     const details = result.error_details.slice(0, 3).join('; ');  
                     marqueeMessage += ` | 详情: ${details}`;  
+                    if (result.error_details.length > 3) {  
+                        marqueeMessage += `...等${result.error_details.length}条`;  
+                    }  
                 }  
                 
-                // 推送到走马灯(重要消息,循环3次)  
-                if (window.footerMarquee) {  
-                    window.footerMarquee.addMessage(  
-                        marqueeMessage,  
-                        result.fail_count === 0 ? 'success' : 'warning',
-                        false,  
-                        3  
-                    );  
-                }   
+                // 判断消息类型(正确区分成功/警告/错误)  
+                let messageType;  
+                if (result.fail_count === 0) {  
+                    // 全部成功  
+                    if (result.error_details && result.error_details.length > 0) {  
+                        messageType = 'warning';  // 成功但有警告(如权限回收) - 橙色  
+                    } else {  
+                        messageType = 'success';  // 完全成功 - 绿色  
+                    }  
+                } else if (result.success_count > 0) {  
+                    messageType = 'warning';  // 部分成功 - 橙色  
+                } else {  
+                    messageType = 'error';  // 全部失败 - 红色  
+                }  
                 
+                // 推送到走马灯(循环3次,使用正确的颜色)  
                 if (window.footerMarquee) {  
                     window.footerMarquee.addMessage(  
                         marqueeMessage,  
-                        result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error'),  
+                        messageType,  
                         false,  
-                        1  
+                        1 
                     );  
                 }  
                 
@@ -1139,12 +1169,32 @@ class ArticleManager {
     // 在进度对话框中显示结果  
     updateProgressDialogWithResult(result) {  
         const dialog = document.getElementById('publish-progress-dialog');  
-        if (!dialog) return; // 用户已关闭,不显示结果  
+        if (!dialog) return;  
         
         const modalBody = dialog.querySelector('.modal-body');  
         if (!modalBody) return;  
         
+        // 判断标题颜色  
+        const hasWarnings = result.warning_details && result.warning_details.length > 0;  
+        const hasErrors = result.error_details && result.error_details.length > 0;  
         const resultType = result.fail_count === 0 ? 'success' : (result.success_count > 0 ? 'warning' : 'error');  
+        
+        // 合并所有详情信息  
+        const allDetails = [];  
+        
+        // 添加警告信息(橙色竖线)  
+        if (hasWarnings) {  
+            result.warning_details.forEach(detail => {  
+                allDetails.push({ text: detail, type: 'warning' });  
+            });  
+        }  
+        
+        // 添加错误信息(红色竖线)  
+        if (hasErrors) {  
+            result.error_details.forEach(detail => {  
+                allDetails.push({ text: detail, type: 'error' });  
+            });  
+        }  
         
         modalBody.innerHTML = `  
             <div class="result-summary ${resultType}">  
@@ -1152,12 +1202,12 @@ class ArticleManager {
                 ${result.success_count > 0 ? `<p>✓ 成功: ${result.success_count}</p>` : ''}  
                 ${result.fail_count > 0 ? `<p>✗ 失败: ${result.fail_count}</p>` : ''}  
             </div>  
-            ${result.error_details && result.error_details.length > 0 ? `  
+            ${allDetails.length > 0 ? `  
                 <div class="error-details">  
-                    <h5>错误详情:</h5>  
+                    <h5 style="color: ${result.fail_count > 0 && result.success_count === 0 ? '#ef4444' : '#f59e0b'};">结果详情</h5>  
                     <div class="error-list">  
-                        ${result.error_details.map(err => `  
-                            <div class="error-item">${this.escapeHtml(err)}</div>  
+                        ${allDetails.map(item => `  
+                            <div class="${item.type === 'warning' ? 'warning-item' : 'error-item'}">${this.escapeHtml(item.text)}</div>  
                         `).join('')}  
                     </div>  
                 </div>  
@@ -1183,7 +1233,7 @@ class ArticleManager {
             <button class="btn btn-secondary" onclick="window.articleManager.closeProgressDialog()">关闭</button>  
             <button class="btn btn-primary" onclick="window.open('https://mp.weixin.qq.com', '_blank')">打开公众号后台</button>  
         `;  
-    }  
+    }
 
     // 格式化发布结果为走马灯消息  
     formatPublishMarqueeMessage(result) {  

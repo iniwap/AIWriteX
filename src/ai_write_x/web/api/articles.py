@@ -122,6 +122,7 @@ async def publish_articles(request: PublishRequest):
         success_count = 0
         fail_count = 0
         error_details = []
+        warning_details = []
         format_publish = config.format_publish
 
         for article_path in request.article_paths:
@@ -177,6 +178,9 @@ async def publish_articles(request: PublishRequest):
 
                     if success:
                         success_count += 1
+                        # 如果message包含权限回收提示,添加到warning_details
+                        if message and "草稿箱" in message:
+                            warning_details.append(f"{cred.get('author', '未命名')}: {message}")
                         save_publish_record(
                             article_path, cred, True, message if "草稿箱" in message else None
                         )
@@ -190,10 +194,12 @@ async def publish_articles(request: PublishRequest):
                     error_msg = str(e)
                     save_publish_record(article_path, cred, False, error_msg)
                     error_details.append(f"{cred.get('author', '未命名')}: {error_msg}")
+
         return {
             "status": "success" if success_count > 0 else "error",
             "success_count": success_count,
             "fail_count": fail_count,
+            "warning_details": warning_details,
             "error_details": error_details,
         }
     except Exception as e:
@@ -213,7 +219,7 @@ def get_publish_status(title: str) -> str:
         if not article_records:
             return "unpublished"
 
-        latest = max(article_records, key=lambda x: x.get("publish_time", ""))
+        latest = max(article_records, key=lambda x: x.get("timestamp", ""))
         return "published" if latest.get("success") else "failed"
     except Exception:
         return "unpublished"
@@ -239,7 +245,7 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
         {
             "timestamp": datetime.now().isoformat(),
             "account": credential.get("author", ""),
-            "appid": credential["appid"][-4:],
+            "appid": credential["appid"],
             "success": success,
             "error": error,
         }
@@ -267,8 +273,8 @@ async def get_supported_platforms():
                     {
                         "index": idx,
                         "author": cred.get("author", "未命名"),
-                        "appid": cred["appid"][-4:],
-                        "full_info": f"{cred.get('author', '未命名')} ({cred['appid'][-4:]})",
+                        "appid": cred["appid"],
+                        "full_info": f"{cred.get('author', '未命名')} ({cred['appid']})",
                     }
                     for idx, cred in enumerate(wechat_credentials)
                 ],
