@@ -137,9 +137,9 @@ class ImageDesignerDialog {
                 ]  
             },  
             
-            plugins: ['gjs-preset-webpage'],  
+            plugins: ['grapesjs-preset-webpage'],  
             pluginsOpts: {  
-                'gjs-preset-webpage': {  
+                'grapesjs-preset-webpage': {  
                     blocks: ['link-block', 'quote', 'text-basic'],  
                     modalImportTitle: '导入',  
                     modalImportLabel: '<div>粘贴HTML</div>',  
