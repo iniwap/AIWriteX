@@ -14,37 +14,28 @@ class ImageDesignerDialog {
         this.currentArticle = articlePath;  
         this.createDialog(articleTitle);  
         
-        // 直接添加dialog到body  
         document.body.appendChild(this.dialog);  
         
-        // 等待DOM渲染  
-        await new Promise(resolve => setTimeout(resolve, 100));  
+        // 使用第一个版本的等待方式  
+        await new Promise(resolve => requestAnimationFrame(resolve));  
         
-        // 初始化GrapesJS  
         await this.initGrapesJS();  
         await this.loadDesign();  
         this.bindEvents();  
         
-        // 显示对话框  
         requestAnimationFrame(() => {  
             this.dialog.classList.add('show');  
         });  
-    }     
+    }    
       
     createDialog(articleTitle) {  
         this.dialog = document.createElement('div');  
         this.dialog.className = 'content-editor-dialog';  
         
         this.dialog.innerHTML = `  
-            <div class="editor-container" style="display: flex; flex-direction: column; height: 85vh; max-height: 85vh;">  
-                <div class="editor-header" style="flex-shrink: 0;">  
-                    <h2 class="editor-title">  
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
-                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>  
-                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>  
-                            <path d="M2 2l7.586 7.586"/>  
-                            <circle cx="11" cy="11" r="2"/>  
-                        </svg>  
+            <div class="editor-container" style="display: flex; flex-direction: column; height: 85vh;">  
+                <div class="editor-header" style="flex-shrink: 0;">   
+                    <h2 class="editor-title">
                         <span>页面设计 - ${articleTitle}</span>  
                     </h2>  
                     <div class="editor-actions">  
@@ -60,112 +51,94 @@ class ImageDesignerDialog {
                     </div>  
                 </div>  
                 
-                <div class="editor-body" style="flex: 1; display: flex; overflow: hidden; min-height: 0;">  
-                    <div id="gjs-editor" style="width: 100%; height: 100%; min-height: 500px;"></div>  
+                <div class="editor-body" style="flex: 1; display: block; overflow: hidden;">  
+                    <div id="gjs-editor" style="height: 100%;"></div>  
                 </div>  
             </div>  
         `;  
     }   
       
-    async initGrapesJS() {  
-        const appTheme = document.documentElement.getAttribute('data-theme') || 'light';  
-        const isDark = appTheme === 'dark';  
-                
-        // 检查容器尺寸  
-        const container = this.dialog.querySelector('#gjs-editor');  
+    async initGrapesJS() {    
+        const appTheme = document.documentElement.getAttribute('data-theme') || 'light';    
+        const isDark = appTheme === 'dark';    
         
-        if (container.offsetHeight === 0) {  
-            await new Promise(resolve => setTimeout(resolve, 200));   
-        }  
+        const container = this.dialog.querySelector('#gjs-editor');    
+        if (container.offsetHeight === 0) {    
+            await new Promise(resolve => setTimeout(resolve, 200));     
+        }    
         
-        this.editor = grapesjs.init({  
-            container: '#gjs-editor',  
-            height: '100%',  
-            width: 'auto',  
-            fromElement: false,  
+        this.editor = grapesjs.init({    
+            container: '#gjs-editor',    
+            height: '100%',    
+            width: 'auto',    
+            fromElement: false,    
             
-            storageManager: false,  
+            storageManager: false,    
             
-            plugins: ['grapesjs-preset-webpage'],  
-            pluginsOpts: {  
-                'grapesjs-preset-webpage': {  
-                    blocks: ['link-block', 'quote', 'text-basic'],  
-                    modalImportTitle: '导入',  
-                    modalImportLabel: '<div>粘贴HTML</div>',  
-                }  
-            },  
+            plugins: ['grapesjs-preset-webpage'],    
+            pluginsOpts: {    
+                'grapesjs-preset-webpage': {    
+                    // 移除 blocks 限制,使用所有预设组件  
+                    modalImportTitle: '导入',    
+                    modalImportLabel: '<div>粘贴HTML</div>',    
+                }    
+            },    
             
-            canvas: {  
-                styles: [  
-                    '/static/css/themes/light-theme.css',  
-                    '/static/css/themes/dark-theme.css',  
-                ],  
-            },  
+            canvas: {    
+                styles: [    
+                    '/static/css/themes/light-theme.css',    
+                    '/static/css/themes/dark-theme.css',    
+                ],    
+            },    
             
-            styleManager: {  
-                sectors: [  
-                    {  
-                        name: '布局',  
-                        open: true,  
-                        properties: [  
-                            'margin',  
-                            'padding',  
-                            'width',  
-                            'height',  
-                            'display',  
-                            'flex-direction',  
-                            'justify-content',  
-                            'align-items'  
-                        ]  
-                    },  
-                    {  
-                        name: '排版',  
-                        properties: [  
-                            'font-family',  
-                            'font-size',  
-                            'font-weight',  
-                            'color',  
-                            'text-align',  
-                            'line-height'  
-                        ]  
-                    },  
-                    {  
-                        name: '背景',  
-                        properties: [  
-                            'background-color',  
-                            'background-image',  
-                            'background-size',  
-                            'background-position'  
-                        ]  
-                    },  
-                    {  
-                        name: '边框',  
-                        properties: [  
-                            'border',  
-                            'border-radius',  
-                            'box-shadow'  
-                        ]  
-                    }  
-                ]  
-            },  
-            
-            blockManager: {  
-                blocks: []  
+            styleManager: {    
+                sectors: [    
+                    {    
+                        name: '布局',    
+                        open: true,    
+                        properties: ['margin', 'padding', 'width', 'height', 'display']    
+                    },    
+                    {    
+                        name: '排版',    
+                        properties: ['font-family', 'font-size', 'font-weight', 'color', 'text-align']    
+                    },    
+                    {    
+                        name: '背景',    
+                        properties: ['background-color', 'background-image']    
+                    },    
+                    {    
+                        name: '边框',    
+                        properties: ['border', 'border-radius', 'box-shadow']    
+                    }    
+                ]    
             }  
-        });  
-                
-        // 等待编辑器完全加载  
-        this.editor.on('load', () => {  
+        });    
+        
+        this.editor.on('load', () => {    
             this.syncTheme(isDark);  
-            // 强制刷新编辑器  
-            this.editor.refresh();  
-        });  
+            
+            // 添加自定义blocks  
+            this.addCustomBlocks();  
+            
+            // 如果画布为空,添加欢迎内容  
+            if (!this.editor.getComponents().length) {  
+                this.editor.setComponents(`  
+                    <div style="padding: 40px; text-align: center; background: var(--surface-color); border-radius: 8px; margin: 20px;">  
+                        <h2 style="color: var(--text-primary); margin-bottom: 16px;">欢迎使用页面设计器</h2>  
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">从右侧拖拽组件开始设计,或导入现有HTML代码</p>  
+                        <div style="display: flex; gap: 12px; justify-content: center;">  
+                            <button style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">开始设计</button>  
+                        </div>  
+                    </div>  
+                `);  
+            }  
+            
+            this.editor.refresh();    
+        });    
         
-        this.addCustomBlocks();  
-        
-        this.editor.on('change:changesCount', () => {  
-            this.isDirty = true;  
-        });  
+        this.editor.on('change:changesCount', () => {    
+            this.isDirty = true;    
+        });    
     }
       
     addCustomBlocks() {  
@@ -244,19 +217,32 @@ class ImageDesignerDialog {
       
     async loadDesign() {  
         try {  
-            const response = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);  
-            if (response.ok) {  
-                const data = await response.json();  
+            // 1. 先尝试加载已保存的设计  
+            const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);  
+            if (designResponse.ok) {  
+                const data = await designResponse.json();  
                 if (data.html) {  
+                    // 如果有保存的设计,使用设计数据  
                     this.editor.setComponents(data.html);  
                     this.editor.setStyle(data.css);  
                     this.isDirty = false;  
+                    return;  
                 }  
             }  
-        } catch (error) {  
             
+            // 2. 如果没有保存的设计,加载原始 HTML  
+            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);  
+            if (contentResponse.ok) {  
+                const htmlContent = await contentResponse.text();  
+                
+                // 将原始 HTML 加载到编辑器  
+                this.editor.setComponents(htmlContent);  
+                this.isDirty = false;  // 初始加载不算修改  
+            }  
+        } catch (error) {  
+            console.error('加载内容失败:', error);  
         }  
-    }  
+    } 
       
     async saveDesign() {  
         const html = this.editor.getHtml();  
