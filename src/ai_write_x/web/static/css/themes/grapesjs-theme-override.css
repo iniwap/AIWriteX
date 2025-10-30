@@ -193,51 +193,57 @@
     color: var(--text-primary) !important;    
 }    
     
-/* ============================================    
-   输入框和表单控件    
-   ============================================ */    
-.gjs-field,    
-.gjs-input-holder input,    
-.gjs-select,    
-.gjs-sm-input,    
-.gjs-field input,    
-.gjs-field select,    
-.gjs-field textarea {    
-    background-color: var(--background-color) !important;    
-    color: var(--text-primary) !important;    
-    border: 1px solid var(--border-color) !important;    
-}    
-    
-.gjs-field:focus,    
-.gjs-input-holder input:focus,    
-.gjs-select:focus,    
-.gjs-sm-input:focus {    
-    border-color: var(--primary-color) !important;    
-}    
-    
-.gjs-select option {    
-    color: var(--text-primary) !important;    
-    background-color: var(--surface-color) !important;    
-}    
-    
-.gjs-field-integer input,    
-.gjs-field-number input {    
-    color: var(--text-primary) !important;    
-}    
-    
-.gjs-field-color-picker {    
-    background-color: var(--background-color) !important;    
-    border: 1px solid var(--border-color) !important;    
-}    
-    
-.gjs-field-range {    
-    background-color: var(--border-color) !important;    
-}    
-    
-.gjs-field-range::-webkit-slider-thumb {    
-    background-color: var(--primary-color) !important;    
-}    
-    
+/* ============================================      
+   输入框和表单控件 
+   ============================================ */      
+.gjs-field,      
+.gjs-input-holder input,      
+.gjs-sm-input,      
+.gjs-field input,      
+.gjs-field textarea {      
+    background-color: var(--background-color) !important;      
+    color: var(--text-primary) !important;      
+    border: 1px solid var(--border-color) !important;      
+}      
+      
+.gjs-field:focus,      
+.gjs-input-holder input:focus,      
+.gjs-sm-input:focus {      
+    border-color: var(--primary-color) !important;      
+}  
+      
+.gjs-field-integer input,      
+.gjs-field-number input {      
+    color: var(--text-primary) !important;      
+}      
+      
+.gjs-field-color-picker {      
+    background-color: var(--background-color) !important;      
+    border: 1px solid var(--border-color) !important;      
+}      
+      
+.gjs-field-range {      
+    background-color: var(--border-color) !important;      
+}      
+      
+.gjs-field-range::-webkit-slider-thumb {      
+    background-color: var(--primary-color) !important;      
+}  
+
+/* 单位下拉框 - 只设置颜色,确保在亮色主题下可见 */  
+.gjs-field select,  
+.gjs-field-units select {  
+    color: var(--text-primary) !important;  
+    background-color: var(--background-color) !important;  
+}  
+  
+/* 下拉框选项颜色 */  
+.gjs-field select option,  
+.gjs-field-units select option {  
+    color: var(--text-primary) !important;  
+    background-color: var(--background-color) !important;  
+}
+
 /* ============================================    
    按钮    
    ============================================ */    

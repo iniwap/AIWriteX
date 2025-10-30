@@ -471,6 +471,31 @@ def is_local_path(url):
     return True
 
 
+def resolve_image_path(url):
+    """将图片URL解析为实际文件系统路径"""
+    from src.ai_write_x.utils.path_manager import PathManager
+
+    # 如果是网络URL,直接返回
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme in ("http", "https", "ftp"):
+        return url
+
+    # 如果是绝对路径,直接返回
+    if os.path.isabs(url):
+        return url
+
+    # 如果是 Web 路由路径(以 / 开头但不是绝对路径)
+    if url.startswith("/"):
+        # 尝试匹配已知的静态文件路由
+        if url.startswith("/images/"):
+            filename = url.replace("/images/", "")
+            return str(PathManager.get_image_dir() / filename)
+        # 可以在这里添加更多路由映射
+
+    # 相对路径,相对于当前工作目录
+    return url
+
+
 def crop_cover_image(image_path, target_size=(900, 384)):
     """
     将封面图片裁剪为指定尺寸

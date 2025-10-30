@@ -64,7 +64,8 @@ class AIWriteXConfigManager {
             // 4. 填充UI(只负责填充值,不绑定事件)    
             this.populateUI();    
             this.showConfigPanel(this.currentPanel);    
-            
+            this.toggleGrapesJSTheme(this.uiConfig.designTheme || 'follow-system');
+
             // 5. 通知主题管理器和窗口模式管理器    
             if (window.themeManager) {    
                 window.themeManager.onConfigLoaded();    
@@ -117,6 +118,23 @@ class AIWriteXConfigManager {
             });    
         }  
         
+        // 网页设计器主题选择器  
+        const designThemeSelector = document.getElementById('design-theme-selector');  
+        if (designThemeSelector) {  
+            designThemeSelector.addEventListener('change', (e) => {  
+                this.uiConfig.designTheme = e.target.value;  
+                
+                // 动态加载/卸载 grapesjs-theme-override.css  
+                this.toggleGrapesJSTheme(e.target.value);  
+                
+                const saveBtn = document.getElementById('save-ui-config');  
+                if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
+                    saveBtn.classList.add('has-changes');  
+                    saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
+                }  
+            });  
+        } 
+
         // 保存按钮  
         const saveUIConfigBtn = document.getElementById('save-ui-config');    
         if (saveUIConfigBtn) {    
@@ -140,27 +158,35 @@ class AIWriteXConfigManager {
         }
         
         // 恢复默认按钮  
-        const resetUIConfigBtn = document.getElementById('reset-ui-config');  
-        if (resetUIConfigBtn) {  
-            resetUIConfigBtn.addEventListener('click', async () => {  
-                const oldWindowMode = this.uiConfig.windowMode;  
-                this.uiConfig = { theme: 'light', windowMode: 'STANDARD' };  
+        const resetUIConfigBtn = document.getElementById('reset-ui-config');    
+        if (resetUIConfigBtn) {    
+            resetUIConfigBtn.addEventListener('click', async () => {    
+                const oldWindowMode = this.uiConfig.windowMode;    
+                this.uiConfig = {   
+                    theme: 'light',   
+                    windowMode: 'STANDARD',  
+                    designTheme: 'follow-system'  
+                };    
                 
-                // 更新UI显示  
-                const themeSelector = document.getElementById('theme-selector');  
+                // 更新UI显示    
+                const themeSelector = document.getElementById('theme-selector');    
                 const windowModeSelector = document.getElementById('window-mode-selector');  
-                if (themeSelector) themeSelector.value = 'light';  
+                const designThemeSelector = document.getElementById('design-theme-selector');  
+                
+                if (themeSelector) themeSelector.value = 'light';    
                 if (windowModeSelector) windowModeSelector.value = 'STANDARD';  
+                if (designThemeSelector) designThemeSelector.value = 'follow-system';  
                 
-                if (window.themeManager) window.themeManager.applyTheme('light', false);  
+                if (window.themeManager) window.themeManager.applyTheme('light', false);    
                 if (window.windowModeManager) window.windowModeManager.applyMode('STANDARD');  
+                this.toggleGrapesJSTheme('follow-system');  // 应用设计主题  
                 
-                const success = await this.saveUIConfig(this.uiConfig);  
-                if (success && oldWindowMode !== 'STANDARD') {  
-                    window.windowModeManager?.showRestartNotification();  
-                }  
-            });  
-        }  
+                const success = await this.saveUIConfig(this.uiConfig);    
+                if (success && oldWindowMode !== 'STANDARD') {    
+                    window.windowModeManager?.showRestartNotification();    
+                }    
+            });    
+        } 
         
         // 基础设置保存按钮  
         const saveBaseConfigBtn = document.getElementById('save-base-config');  
@@ -780,6 +806,27 @@ class AIWriteXConfigManager {
         }
     }  
     
+    toggleGrapesJSTheme(designTheme) {  
+        const linkId = 'grapesjs-theme-override-link';  
+        const existingLink = document.getElementById(linkId);  
+        
+        if (designTheme === 'follow-system') {  
+            // 跟随系统: 确保 CSS 已加载  
+            if (!existingLink) {  
+                const link = document.createElement('link');  
+                link.id = linkId;  
+                link.rel = 'stylesheet';  
+                link.href = '/static/css/themes/grapesjs-theme-override.css';  
+                document.head.appendChild(link);  
+            }  
+        } else if (designTheme === 'default') {  
+            // 默认主题: 移除自定义 CSS  
+            if (existingLink) {  
+                existingLink.remove();  
+            }  
+        }  
+    }
+
     populateUI() {  
         // ========== 填充发布平台 ==========  
         const publishPlatformSelect = document.getElementById('publish-platform');  
@@ -892,6 +939,11 @@ class AIWriteXConfigManager {
         const windowModeSelector = document.getElementById('window-mode-selector');  
         if (windowModeSelector) {  
             windowModeSelector.value = this.getWindowMode();  
+        }
+        // 填充设计主题选择器  
+        const designThemeSelector = document.getElementById('design-theme-selector');  
+        if (designThemeSelector) {  
+            designThemeSelector.value = this.uiConfig.designTheme || 'follow-system';  
         }
         
         // ========== 填充热搜平台配置 ==========  
@@ -2065,50 +2117,51 @@ class AIWriteXConfigManager {
   
     // ========== UI配置管理(localStorage) ==========  
       
-    loadUIConfig() {    
-        try {    
-            const saved = localStorage.getItem('aiwritex_ui_config');    
-            const defaultConfig = {    
-                theme: 'light',    
-                windowMode: 'STANDARD'    
-            };    
-              
-            if (saved) {    
-                return { ...defaultConfig, ...JSON.parse(saved) };    
-            }    
-            return defaultConfig;    
-        } catch (e) {    
-            return { theme: 'light', windowMode: 'STANDARD' };    
-        }    
-    }    
-      
-    async saveUIConfig(updates) {    
-        try {    
-            const newConfig = updates.theme !== undefined && updates.windowMode !== undefined     
-                ? updates     
-                : { ...this.uiConfig, ...updates };    
-              
-            // 1. 保存到 localStorage    
-            localStorage.setItem('aiwritex_ui_config', JSON.stringify(newConfig));    
-            this.uiConfig = newConfig;    
-              
-            // 2. 同步到后端文件(持久化)    
-            const response = await fetch('/api/config/ui-config', {    
-                method: 'POST',    
-                headers: { 'Content-Type': 'application/json' },    
-                body: JSON.stringify(newConfig)    
-            });    
-              
-            if (!response.ok) {    
-                throw new Error('保存失败');    
-            }    
-              
-            return true;    
-        } catch (e) {    
-            console.error('保存 UI 配置失败:', e);    
-            return false;    
-        }    
-    }  
+    loadUIConfig() {      
+        try {      
+            const saved = localStorage.getItem('aiwritex_ui_config');      
+            const defaultConfig = {      
+                theme: 'light',      
+                windowMode: 'STANDARD',  
+                designTheme: 'follow-system'
+            };      
+                
+            if (saved) {      
+                return { ...defaultConfig, ...JSON.parse(saved) };      
+            }      
+            return defaultConfig;      
+        } catch (e) {      
+            return { theme: 'light', windowMode: 'STANDARD', designTheme: 'follow-system' };      
+        }      
+    }      
+        
+    async saveUIConfig(updates) {      
+        try {      
+            const newConfig = updates.theme !== undefined && updates.windowMode !== undefined && updates.designTheme !== undefined  
+                ? updates       
+                : { ...this.uiConfig, ...updates };      
+                
+            // 1. 保存到 localStorage      
+            localStorage.setItem('aiwritex_ui_config', JSON.stringify(newConfig));      
+            this.uiConfig = newConfig;      
+                
+            // 2. 同步到后端文件(持久化)      
+            const response = await fetch('/api/config/ui-config', {      
+                method: 'POST',      
+                headers: { 'Content-Type': 'application/json' },      
+                body: JSON.stringify(newConfig)      
+            });      
+                
+            if (!response.ok) {      
+                throw new Error('保存失败');      
+            }      
+                
+            return true;      
+        } catch (e) {      
+            console.error('保存 UI 配置失败:', e);      
+            return false;      
+        }      
+    }
   
     getUIConfig() {    
         return this.uiConfig;    

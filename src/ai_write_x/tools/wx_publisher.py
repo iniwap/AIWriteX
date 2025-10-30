@@ -181,37 +181,40 @@ class WeixinPublisher:
         return img_url
 
     def upload_image(self, image_url):
+        from src.ai_write_x.utils.utils import resolve_image_path  # 导入新函数
+
         if not image_url:
-            # 如果图片URL为空，则返回一个默认的图片ID
             return "SwCSRjrdGJNaWioRQUHzgF68BHFkSlb_f5xlTquvsOSA6Yy0ZRjFo0aW9eS3JJu_", None, None
 
         ret = None, None, None
         try:
-            if image_url.startswith(("http://", "https://")):
+            # 先解析图片路径
+            resolved_path = resolve_image_path(image_url)
+
+            if resolved_path.startswith(("http://", "https://")):
                 # 处理网络图片
-                image_response = requests.get(image_url, stream=True)
+                image_response = requests.get(resolved_path, stream=True)
                 image_response.raise_for_status()
                 image_buffer = BytesIO(image_response.content)
 
-                # 动态确定 MIME 类型和文件名后缀
                 mime_type = image_response.headers.get("Content-Type")
                 if not mime_type:
-                    mime_type = "image/jpeg"  # 默认值
+                    mime_type = "image/jpeg"
                 file_ext = mimetypes.guess_extension(mime_type)
                 file_name = "image" + file_ext if file_ext else "image.jpg"
             else:
                 # 处理本地图片
-                if not os.path.exists(image_url):
-                    ret = None, None, f"本地图片未找到: {image_url}"
+                if not os.path.exists(resolved_path):
+                    ret = None, None, f"本地图片未找到: {resolved_path}"
+                    return ret
 
-                with open(image_url, "rb") as f:
+                with open(resolved_path, "rb") as f:
                     image_buffer = BytesIO(f.read())
 
-                # 动态确定 MIME 类型和文件名后缀
-                mime_type, _ = mimetypes.guess_type(image_url)
+                mime_type, _ = mimetypes.guess_type(resolved_path)
                 if not mime_type:
-                    mime_type = "image/jpeg"  # 默认值
-                file_name = os.path.basename(image_url)
+                    mime_type = "image/jpeg"
+                file_name = os.path.basename(resolved_path)
 
             token = self._ensure_access_token()
             if self.is_verified:
@@ -406,33 +409,38 @@ class WeixinPublisher:
 
 
 def pub2wx(title, digest, article, appid, appsecret, author):
-
     publisher = WeixinPublisher(appid, appsecret, author)
-
     config = Config.get_instance()
+
     cropped_image_path = ""
+    final_image_path = None  # 最终要上传的图片路径
+
     if config.current_preview_cover:
-        # 裁剪封面图片
-        cropped_image_path = utils.crop_cover_image(config.current_preview_cover, (900, 384))
+        # 解析封面图片路径
+        resolved_cover_path = utils.resolve_image_path(config.current_preview_cover)
+        cropped_image_path = utils.crop_cover_image(resolved_cover_path, (900, 384))
+
         if cropped_image_path:
-            image_url = cropped_image_path
+            final_image_path = cropped_image_path  # 裁剪后的路径已经是绝对路径
         else:
-            # 裁剪失败，直接使用原图
-            image_url = config.current_preview_cover
+            final_image_path = resolved_cover_path
     else:
         image_url = publisher.generate_img(
-            "主题：" + title.split("|")[-1] + "，内容：" + digest,
+            "主题:" + title.split("|")[-1] + ",内容:" + digest,
             "900*384",
         )
 
-    if image_url is None:
-        log.print_log("生成图片出错，使用默认图片")
-        image_url = utils.get_res_path(
-            os.path.join("UI", "bg.png"), os.path.dirname(__file__) + "/../gui/"
-        )
+        if image_url is None:
+            log.print_log("生成图片出错,使用默认图片")
+            default_image = utils.get_res_path(
+                os.path.join("UI", "bg.png"), os.path.dirname(__file__) + "/../gui/"
+            )
+            final_image_path = utils.resolve_image_path(default_image)
+        else:
+            final_image_path = utils.resolve_image_path(image_url)
 
-    # 封面图片
-    media_id, _, err_msg = publisher.upload_image(image_url)
+    # 封面图片上传
+    media_id, _, err_msg = publisher.upload_image(final_image_path)
 
     # 如果使用了临时裁剪文件，上传后删除
     if (
@@ -452,19 +460,24 @@ def pub2wx(title, digest, article, appid, appsecret, author):
     try:
         image_urls = utils.extract_image_urls(article)
         for image_url in image_urls:
-            if utils.is_local_path(image_url):
-                if os.path.exists(image_url):
-                    _, url, err_msg = publisher.upload_image(image_url)
+            # 先解析图片路径
+            resolved_path = utils.resolve_image_path(image_url)
+
+            # 判断解析后的路径类型
+            if utils.is_local_path(resolved_path):
+                # 本地路径处理
+                if os.path.exists(resolved_path):
+                    _, url, err_msg = publisher.upload_image(resolved_path)
                     if url:
                         article = article.replace(image_url, url)
                     else:
                         log.print_log(f"本地图片上传失败: {image_url}, 错误: {err_msg}")
                 else:
-                    log.print_log(f"本地图片文件不存在: {image_url}")
+                    log.print_log(f"本地图片文件不存在: {resolved_path}")
             else:
                 # 网络URL处理
                 local_filename = utils.download_and_save_image(
-                    image_url,
+                    resolved_path,
                     str(PathManager.get_image_dir()),
                 )
                 if local_filename:

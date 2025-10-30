@@ -3,6 +3,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse, Response
+from fastapi import File, UploadFile
+import uuid
 from pydantic import BaseModel
 from typing import List, Optional
 import json
@@ -352,3 +354,65 @@ async def load_article_design(article: str):
         return design_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/upload-image")
+async def upload_image(image: UploadFile = File(...)):
+    """上传图片并返回路径"""
+    try:
+        # 获取图片保存目录
+        image_dir = PathManager.get_image_dir()
+
+        # 生成唯一文件名
+        file_ext = Path(image.filename).suffix or ".jpg"
+        unique_filename = f"{uuid.uuid4().hex}{file_ext}"
+        file_path = image_dir / unique_filename
+
+        # 保存图片
+        with open(file_path, "wb") as f:
+            content = await image.read()
+            f.write(content)
+
+        # 返回相对路径(用于 HTML src 属性)
+        relative_path = f"/images/{unique_filename}"
+
+        return {"status": "success", "path": relative_path, "filename": unique_filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/images")
+async def get_images():
+    """获取已上传的图片列表"""
+    try:
+        image_dir = PathManager.get_image_dir()
+        images = []
+
+        # 支持的图片格式
+        image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+
+        for file_path in image_dir.iterdir():
+            if file_path.is_file() and file_path.suffix.lower() in image_extensions:
+                images.append({"filename": file_path.name, "path": f"/images/{file_path.name}"})
+
+        return images
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/config/set-cover")
+async def set_cover(request: dict):
+    """设置微信公众号封面图片"""
+    cover_path = request.get("cover_path")
+
+    # 如果是 /images/ 路径,转换为实际文件路径
+    if cover_path.startswith("/images/"):
+        filename = cover_path.replace("/images/", "")
+        actual_path = str(PathManager.get_image_dir() / filename)
+        cover_path = actual_path
+
+    # 更新配置
+    config = Config.get_instance()
+    config.current_preview_cover = cover_path
+
+    return {"status": "success", "cover_path": cover_path}
