@@ -1,0 +1,442 @@
+/* ============================================    
+   GrapesJS 主题颜色适配 - 优化版  
+   只覆盖颜色,不改变任何布局    
+   ============================================ */    
+    
+/* 编辑器主容器 */    
+#gjs-editor {    
+    background-color: var(--background-color) !important;    
+}    
+    
+/* ============================================      
+   顶部工具栏区域    
+   ============================================ */    
+.gjs-pn-panels {    
+    background-color: var(--surface-color) !important;    
+    border-bottom: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-pn-panel {    
+    background-color: transparent !important;    
+}    
+    
+/* 工具栏按钮 */    
+.gjs-pn-btn {    
+    background-color: transparent !important;    
+    color: var(--text-secondary) !important;    
+    border: 1px solid transparent !important;    
+    border-radius: 4px !important;    
+    transition: all 0.2s ease !important;    
+}    
+    
+.gjs-pn-btn:hover,    
+.gjs-pn-btn.gjs-pn-active {    
+    background-color: var(--surface-color) !important;    
+    color: var(--primary-color) !important;    
+    border-color: var(--border-color) !important;    
+}    
+    
+/* 工具栏图标 - 最细线条,确保无填充 */    
+.gjs-pn-btn svg {    
+    stroke: var(--text-secondary) !important;    
+    fill: none !important;    
+    stroke-width: 1 !important;  
+}    
+  
+.gjs-pn-btn svg * {  
+    fill: none !important;  /* 确保所有子元素也无填充 */  
+}  
+    
+.gjs-pn-btn:hover svg,    
+.gjs-pn-btn.gjs-pn-active svg {    
+    stroke: var(--primary-color) !important;    
+    fill: none !important;  
+}    
+    
+/* 选中框效果 - 简洁风格,无阴影 */    
+.gjs-selected {    
+    outline: 2px solid var(--primary-color) !important;    
+    outline-offset: 0px !important;  
+    box-shadow: none !important;  
+}    
+    
+.gjs-hovered {    
+    outline: 1px dashed var(--primary-color) !important;    
+    outline-offset: 0px !important;  
+    box-shadow: none !important;  
+}    
+    
+/* 画布工具栏(元素操作按钮) */    
+.gjs-toolbar {    
+    background-color: var(--surface-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+    border-radius: 4px !important;    
+    box-shadow: none !important;  /* 移除阴影 */  
+}    
+    
+.gjs-toolbar-item {    
+    color: var(--text-secondary) !important;    
+    transition: all 0.2s ease !important;    
+}    
+    
+.gjs-toolbar-item:hover {    
+    color: var(--primary-color) !important;    
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important;    
+}
+    
+/* ============================================    
+   左侧面板    
+   ============================================ */    
+.gjs-pn-views-container {    
+    background-color: var(--background-color) !important;    
+    border-right: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-pn-views {    
+    background-color: var(--background-color) !important;    
+}    
+    
+/* ============================================    
+   Blocks 组件面板    
+   ============================================ */    
+.gjs-blocks-c {    
+    background-color: var(--background-color) !important;    
+}    
+    
+.gjs-block-category .gjs-title {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-block {    
+    background-color: var(--surface-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+    color: var(--text-primary) !important;    
+}    
+    
+.gjs-block:hover {    
+    border-color: var(--primary-color) !important;    
+}    
+    
+.gjs-block svg {    
+    stroke: var(--text-secondary) !important;    
+    fill: none !important;    
+}    
+    
+.gjs-block:hover svg {    
+    stroke: var(--primary-color) !important;    
+}    
+    
+.gjs-block-label {    
+    color: var(--text-primary) !important;    
+}    
+    
+/* ============================================    
+   Layers 图层面板    
+   ============================================ */    
+.gjs-layers {    
+    background-color: var(--background-color) !important;    
+}    
+    
+.gjs-layer {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+    border-bottom: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-layer:hover {    
+    background-color: rgba(var(--primary-color-rgb), 0.05) !important;    
+}    
+    
+.gjs-layer.gjs-selected {    
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important;    
+    box-shadow: inset 3px 0 0 var(--primary-color) !important;    
+}    
+    
+.gjs-layer__icon {    
+    color: var(--text-secondary) !important;    
+}    
+    
+.gjs-layer__name {    
+    color: var(--text-primary) !important;    
+}    
+    
+/* ============================================    
+   右侧样式管理器    
+   ============================================ */    
+.gjs-sm-sectors {    
+    background-color: var(--background-color) !important;    
+}    
+    
+.gjs-sm-sector {    
+    background-color: var(--surface-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-sm-sector .gjs-sm-title {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+    border-bottom: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-sm-property {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+}    
+    
+.gjs-sm-label {    
+    color: var(--text-secondary) !important;    
+}    
+    
+.gjs-sm-property-value {    
+    color: var(--text-primary) !important;    
+}    
+    
+/* ============================================    
+   输入框和表单控件    
+   ============================================ */    
+.gjs-field,    
+.gjs-input-holder input,    
+.gjs-select,    
+.gjs-sm-input,    
+.gjs-field input,    
+.gjs-field select,    
+.gjs-field textarea {    
+    background-color: var(--background-color) !important;    
+    color: var(--text-primary) !important;    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-field:focus,    
+.gjs-input-holder input:focus,    
+.gjs-select:focus,    
+.gjs-sm-input:focus {    
+    border-color: var(--primary-color) !important;    
+}    
+    
+.gjs-select option {    
+    color: var(--text-primary) !important;    
+    background-color: var(--surface-color) !important;    
+}    
+    
+.gjs-field-integer input,    
+.gjs-field-number input {    
+    color: var(--text-primary) !important;    
+}    
+    
+.gjs-field-color-picker {    
+    background-color: var(--background-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-field-range {    
+    background-color: var(--border-color) !important;    
+}    
+    
+.gjs-field-range::-webkit-slider-thumb {    
+    background-color: var(--primary-color) !important;    
+}    
+    
+/* ============================================    
+   按钮    
+   ============================================ */    
+.gjs-btn-prim {    
+    background-color: var(--primary-color) !important;    
+    color: white !important;    
+}    
+    
+.gjs-btn-prim:hover {    
+    background-color: var(--primary-hover) !important;    
+}    
+    
+/* ============================================    
+   画布工具栏(元素操作按钮)    
+   ============================================ */    
+.gjs-toolbar {    
+    background-color: var(--surface-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+    border-radius: 4px !important;    
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;    
+}    
+    
+.gjs-toolbar-item {    
+    color: var(--text-secondary) !important;    
+    transition: all 0.2s ease !important;    
+}    
+    
+.gjs-toolbar-item:hover {    
+    color: var(--primary-color) !important;    
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important;    
+}    
+    
+/* ============================================    
+   选中和悬停效果    
+   ============================================ */    
+.gjs-selected {    
+    outline: 2px solid var(--primary-color) !important;    
+    outline-offset: 2px !important;    
+}    
+    
+.gjs-hovered {    
+    outline: 1px dashed var(--primary-color) !important;    
+    outline-offset: 1px !important;    
+}    
+    
+/* ============================================    
+   通用文本颜色类    
+   ============================================ */    
+.gjs-one-bg,    
+.gjs-two-bg,    
+.gjs-three-bg,    
+.gjs-four-bg {    
+    background-color: var(--background-color) !important;    
+}    
+    
+.gjs-one-color,    
+.gjs-two-color,    
+.gjs-label {    
+    color: var(--text-primary) !important;    
+}    
+    
+.gjs-three-color {    
+    color: var(--text-secondary) !important;    
+}    
+    
+.gjs-four-color,    
+.gjs-four-color-h:hover {    
+    color: var(--primary-color) !important;    
+}    
+    
+/* ============================================    
+   模态框    
+   ============================================ */    
+.gjs-mdl-dialog {    
+    background-color: var(--surface-color) !important;    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-mdl-title {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+    border-bottom: 1px solid var(--border-color) !important;    
+}    
+    
+.gjs-mdl-content {    
+    background-color: var(--surface-color) !important;    
+    color: var(--text-primary) !important;    
+}    
+    
+/* ============================================    
+   滚动条    
+   ============================================ */    
+.gjs-blocks-c::-webkit-scrollbar,    
+.gjs-layers::-webkit-scrollbar,    
+.gjs-sm-sectors::-webkit-scrollbar {    
+    width: 8px !important;    
+    height: 8px !important;    
+}    
+    
+.gjs-blocks-c::-webkit-scrollbar-track,    
+.gjs-layers::-webkit-scrollbar-track,    
+.gjs-sm-sectors::-webkit-scrollbar-track {    
+    background: var(--background-color) !important;    
+}    
+    
+.gjs-blocks-c::-webkit-scrollbar-thumb,    
+.gjs-layers::-webkit-scrollbar-thumb,    
+.gjs-sm-sectors::-webkit-scrollbar-thumb {    
+    background: var(--border-color) !important;    
+    border-radius: 4px !important;    
+}    
+    
+.gjs-blocks-c::-webkit-scrollbar-thumb:hover,    
+.gjs-layers::-webkit-scrollbar-thumb:hover,    
+.gjs-sm-sectors::-webkit-scrollbar-thumb:hover {    
+    background: var(--secondary-color) !important;    
+}    
+    
+/* ============================================    
+   响应式设备切换    
+   ============================================ */    
+.gjs-pn-devices-c {    
+    background-color: transparent !important;    
+}    
+    
+.gjs-pn-device {    
+    background-color: transparent !important;    
+    color: var(--text-secondary) !important;    
+    border: 1px solid transparent !important;    
+}    
+
+.gjs-pn-device:hover,    
+.gjs-pn-device.gjs-pn-active {    
+    background-color: var(--surface-color) !important;    
+    color: var(--primary-color) !important;    
+    border-color: var(--border-color) !important;    
+}    
+    
+/* ============================================    
+   其他细节    
+   ============================================ */    
+.gjs-cv-canvas {    
+    background-color: var(--background-color) !important;    
+}    
+    
+.gjs-frame-wrapper {    
+    border: 1px solid var(--border-color) !important;    
+}    
+    
+/* 选中元素的边框 - 使用 outline-offset 增强视觉效果 */    
+.gjs-selected {    
+    outline: 2px solid var(--primary-color) !important;    
+    outline-offset: 2px !important;  
+}    
+    
+/* 悬停元素的边框 */    
+.gjs-hovered {    
+    outline: 1px dashed var(--primary-color) !important;    
+    outline-offset: 1px !important;  
+}  
+  
+/* ============================================    
+   中文字体优化 - 完整版  
+   ============================================ */    
+  
+/* 为所有需要显示中文的元素设置字体 */    
+#gjs-editor,    
+.gjs-sm-label,    
+.gjs-sm-property,    
+.gjs-sm-sector-title,    
+.gjs-field,    
+.gjs-label,    
+.gjs-layer__name,    
+.gjs-block-label,    
+.gjs-block-category .gjs-title {    
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif !important;    
+    -webkit-font-smoothing: antialiased !important;    
+    -moz-osx-font-smoothing: grayscale !important;    
+}    
+    
+/* 统一字体大小 */    
+.gjs-sm-label,    
+.gjs-sm-property,    
+.gjs-field,    
+.gjs-label {    
+    font-size: 12px !important;    
+}    
+    
+.gjs-sm-sector-title,    
+.gjs-block-category .gjs-title {    
+    font-size: 13px !important;    
+    font-weight: 600 !important;    
+}    
+    
+/* 输入框字体 */    
+.gjs-sm-input,    
+.gjs-field input,    
+.gjs-field select,    
+.gjs-field textarea {    
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif !important;    
+    font-size: 12px !important;    
+}

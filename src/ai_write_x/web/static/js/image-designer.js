@@ -36,6 +36,13 @@ class ImageDesignerDialog {
             <div class="editor-container" style="display: flex; flex-direction: column; height: 85vh;">  
                 <div class="editor-header" style="flex-shrink: 0;">   
                     <h2 class="editor-title">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor">  
+                            <rect x="3" y="3" width="7" height="7"/>  
+                            <rect x="14" y="3" width="7" height="7"/>  
+                            <rect x="3" y="14" width="7" height="7"/>  
+                            <rect x="14" y="14" width="7" height="7"/>  
+                            <path d="M10 10l4 4"/>  
+                        </svg>  
                         <span>页面设计 - ${articleTitle}</span>  
                     </h2>  
                     <div class="editor-actions">  
@@ -58,87 +65,66 @@ class ImageDesignerDialog {
         `;  
     }   
       
-    async initGrapesJS() {    
-        const appTheme = document.documentElement.getAttribute('data-theme') || 'light';    
-        const isDark = appTheme === 'dark';    
+    async initGrapesJS() {      
+        const appTheme = document.documentElement.getAttribute('data-theme') || 'light';      
+        const isDark = appTheme === 'dark';      
         
-        const container = this.dialog.querySelector('#gjs-editor');    
-        if (container.offsetHeight === 0) {    
-            await new Promise(resolve => setTimeout(resolve, 200));     
-        }    
+        const container = this.dialog.querySelector('#gjs-editor');      
+        if (container.offsetHeight === 0) {      
+            await new Promise(resolve => setTimeout(resolve, 200));       
+        }      
         
-        this.editor = grapesjs.init({    
-            container: '#gjs-editor',    
-            height: '100%',    
-            width: 'auto',    
-            fromElement: false,    
-            
-            storageManager: false,    
-            
-            plugins: ['grapesjs-preset-webpage'],    
-            pluginsOpts: {    
-                'grapesjs-preset-webpage': {    
-                    // 移除 blocks 限制,使用所有预设组件  
-                    modalImportTitle: '导入',    
-                    modalImportLabel: '<div>粘贴HTML</div>',    
-                }    
-            },    
-            
-            canvas: {    
-                styles: [    
-                    '/static/css/themes/light-theme.css',    
-                    '/static/css/themes/dark-theme.css',    
-                ],    
-            },    
-            
-            styleManager: {    
-                sectors: [    
-                    {    
-                        name: '布局',    
-                        open: true,    
-                        properties: ['margin', 'padding', 'width', 'height', 'display']    
-                    },    
-                    {    
-                        name: '排版',    
-                        properties: ['font-family', 'font-size', 'font-weight', 'color', 'text-align']    
-                    },    
-                    {    
-                        name: '背景',    
-                        properties: ['background-color', 'background-image']    
-                    },    
-                    {    
-                        name: '边框',    
-                        properties: ['border', 'border-radius', 'box-shadow']    
-                    }    
-                ]    
-            }  
-        });    
+        this.editor = grapesjs.init({      
+            container: '#gjs-editor',      
+            height: '100%',      
+            width: 'auto',      
+            fromElement: false,      
+            storageManager: false,      
+            plugins: ['grapesjs-preset-webpage'],      
+            pluginsOpts: {      
+                'grapesjs-preset-webpage': {      
+                    modalImportTitle: '导入',      
+                    modalImportLabel: '<div>粘贴HTML</div>',      
+                }      
+            },      
+            canvas: {      
+                styles: [      
+                    '/static/css/themes/light-theme.css',      
+                    '/static/css/themes/dark-theme.css',  
+                ],      
+            },      
+            styleManager: {      
+                sectors: [      
+                    { name: '布局', open: true, properties: ['margin', 'padding', 'width', 'height', 'display'] },      
+                    { name: '排版', properties: ['font-family', 'font-size', 'font-weight', 'color', 'text-align'] },      
+                    { name: '背景', properties: ['background-color', 'background-image'] },      
+                    { name: '边框', properties: ['border', 'border-radius', 'box-shadow'] }      
+                ]      
+            }    
+        });      
         
-        this.editor.on('load', () => {    
-            this.syncTheme(isDark);  
+        this.editor.on('load', () => {      
+            this.syncTheme(isDark);    
+            this.addCustomBlocks();    
             
-            // 添加自定义blocks  
-            this.addCustomBlocks();  
+            if (!this.editor.getComponents().length) {    
+                this.editor.setComponents(`    
+                    <div style="padding: 40px; text-align: center; background: var(--surface-color); border-radius: 8px; margin: 20px;">    
+                        <h2 style="color: var(--text-primary); margin-bottom: 16px;">欢迎使用页面设计器</h2>    
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">从右侧拖拽组件开始设计,或导入现有HTML代码</p>    
+                        <div style="display: flex; gap: 12px; justify-content: center;">    
+                            <button style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">开始设计</button>    
+                        </div>    
+                    </div>    
+                `);    
+            }    
             
-            // 如果画布为空,添加欢迎内容  
-            if (!this.editor.getComponents().length) {  
-                this.editor.setComponents(`  
-                    <div style="padding: 40px; text-align: center; background: var(--surface-color); border-radius: 8px; margin: 20px;">  
-                        <h2 style="color: var(--text-primary); margin-bottom: 16px;">欢迎使用页面设计器</h2>  
-                        <p style="color: var(--text-secondary); margin-bottom: 24px;">从右侧拖拽组件开始设计,或导入现有HTML代码</p>  
-                        <div style="display: flex; gap: 12px; justify-content: center;">  
-                            <button style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">开始设计</button>  
-                        </div>  
-                    </div>  
-                `);  
-            }  
-            
-            this.editor.refresh();    
-        });    
+            this.editor.refresh();      
+        });      
         
-        this.editor.on('change:changesCount', () => {    
-            this.isDirty = true;    
-        });    
+        this.editor.on('change:changesCount', () => {      
+            this.isDirty = true;      
+        });          
     }
       
     addCustomBlocks() {  
@@ -344,49 +330,42 @@ class ImageDesignerDialog {
         }  
     }
       
-    destroy() {  
-        // 1. 先移除所有事件监听器  
-        if (this.keydownHandler) {  
-            document.removeEventListener('keydown', this.keydownHandler);  
-            this.keydownHandler = null;  
-        }  
+    destroy() {    
+        if (this.keydownHandler) {    
+            document.removeEventListener('keydown', this.keydownHandler);    
+            this.keydownHandler = null;    
+        }    
         
-        if (this.overlayClickHandler && this.dialog) {  
-            this.dialog.removeEventListener('click', this.overlayClickHandler);  
-            this.overlayClickHandler = null;  
-        }  
+        if (this.overlayClickHandler && this.dialog) {    
+            this.dialog.removeEventListener('click', this.overlayClickHandler);    
+            this.overlayClickHandler = null;    
+        }    
         
-        if (this.themeObserver) {  
-            this.themeObserver.disconnect();  
-            this.themeObserver = null;  
-        }  
+        if (this.themeObserver) {    
+            this.themeObserver.disconnect();    
+            this.themeObserver = null;    
+        }    
         
-        // 2. 销毁GrapesJS实例  
-        if (this.editor) {  
-            try {  
-                this.editor.destroy();  
-            } catch (e) {  
-
-            }  
-            this.editor = null;  
-        }  
+        if (this.editor) {    
+            try {    
+                this.editor.destroy();    
+            } catch (e) {    
+                // 忽略销毁错误  
+            }    
+            this.editor = null;    
+        }    
         
-        // 3. 强制移除dialog元素  
-        if (this.dialog) {  
-            this.dialog.classList.remove('show');  
-            
-            // 使用更可靠的移除方式  
-            if (this.dialog.parentNode) {  
-                this.dialog.parentNode.removeChild(this.dialog);  
-            }  
-            
-            this.dialog = null;  
-        }  
+        if (this.dialog) {    
+            this.dialog.classList.remove('show');    
+            if (this.dialog.parentNode) {    
+                this.dialog.parentNode.removeChild(this.dialog);    
+            }    
+            this.dialog = null;    
+        }    
         
-        // 4. 重置状态  
-        this.currentArticle = null;  
-        this.isDirty = false;  
-        this.isClosing = false;  
+        this.currentArticle = null;    
+        this.isDirty = false;    
+        this.isClosing = false;    
     }
 }  
   

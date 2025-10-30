@@ -239,8 +239,12 @@ class ArticleManager {
                 </button>  
                 <button class="btn-icon" data-action="illustration" title="设计">  
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>  
-                    </svg>        
+                        <rect x="3" y="3" width="7" height="7"/>  
+                        <rect x="14" y="3" width="7" height="7"/>  
+                        <rect x="3" y="14" width="7" height="7"/>  
+                        <rect x="14" y="14" width="7" height="7"/>  
+                        <path d="M10 10l4 4"/>  
+                    </svg>     
                 </button>  
                 <button class="btn-icon" data-action="publish" title="发布">  
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  

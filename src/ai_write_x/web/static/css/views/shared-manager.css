@@ -433,7 +433,11 @@
     background: var(--hover-color);  
     color: var(--text-primary);  
 }  
-  
+
+.card-actions .btn-icon svg {  
+    stroke-width: 1;  
+}
+
 /* 列表视图 */  
 .content-grid.list-view {  
     grid-template-columns: 1fr;  
