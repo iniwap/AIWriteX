@@ -365,10 +365,7 @@ class ArticleManager {
                                 `).join('')}  
                             </div>  
                         `}  
-                    </div>  
-                    <div class="modal-footer">  
-                        <button class="btn btn-secondary" onclick="window.articleManager.closePublishHistoryDialog()">关闭</button>  
-                    </div>  
+                    </div>
                 </div>  
             </div>  
         `;  

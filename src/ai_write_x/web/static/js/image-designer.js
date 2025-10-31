@@ -4,29 +4,34 @@ class ImageDesignerDialog {
         this.editor = null;  
         this.currentArticle = null;  
         this.isClosing = false;  
-        this.isDirty = false;  
+        this.isDirty = false;
+        this.isInitializing = true;  
         this.keydownHandler = null;  
         this.overlayClickHandler = null;  
         this.themeObserver = null;  
     }
       
-    async open(articlePath, articleTitle) {  
-        this.currentArticle = articlePath;  
-        this.createDialog(articleTitle);  
+    async open(articlePath, articleTitle) {    
+        // 重置状态标志  
+        this.isInitializing = true;  
+        this.isDirty = false;  
+        this.isClosing = false;  
         
-        document.body.appendChild(this.dialog);  
+        this.currentArticle = articlePath;    
+        this.createDialog(articleTitle);    
         
-        // 使用第一个版本的等待方式  
-        await new Promise(resolve => requestAnimationFrame(resolve));  
+        document.body.appendChild(this.dialog);    
         
-        await this.initGrapesJS();  
-        await this.loadDesign();  
-        this.bindEvents();  
+        await new Promise(resolve => requestAnimationFrame(resolve));    
         
-        requestAnimationFrame(() => {  
-            this.dialog.classList.add('show');  
-        });  
-    }    
+        await this.initGrapesJS();    
+        await this.loadDesign();    
+        this.bindEvents();    
+        
+        requestAnimationFrame(() => {    
+            this.dialog.classList.add('show');    
+        });    
+    }   
       
     createDialog(articleTitle) {    
         this.dialog = document.createElement('div');    
@@ -162,33 +167,42 @@ class ImageDesignerDialog {
             this.selectedAsset = asset;  
         });
 
-        this.editor.on('load', async () => {        
-            this.syncTheme(isDark);      
-            this.addCustomBlocks();      
+        this.editor.on('load', async () => {          
+            this.syncTheme(isDark);        
+            this.addCustomBlocks();        
             
-            // 延迟加载,确保 Asset Manager 完全就绪  
-            setTimeout(async () => {  
-                await this.loadExistingImages();  
+            // 延迟加载,确保 Asset Manager 完全就绪    
+            setTimeout(async () => {    
+                await this.loadExistingImages();    
+            }, 1000);    
+            
+            if (!this.editor.getComponents().length) {        
+                this.editor.setComponents(`        
+                    <div style="padding: 40px; text-align: center; background: var(--surface-color); border-radius: 8px; margin: 20px;">        
+                        <h2 style="color: var(--text-primary); margin-bottom: 16px;">欢迎使用页面设计器</h2>        
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">从右侧拖拽组件开始设计,或导入现有HTML代码</p>        
+                        <div style="display: flex; gap: 12px; justify-content: center;">        
+                            <button style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">开始设计</button>        
+                        </div>        
+                    </div>        
+                `);        
+            }        
+            
+            this.editor.refresh();  
+            
+            // 在所有初始化完成后,延迟设置初始化完成标志  
+            // 这个延迟要足够长,确保所有自动触发的change事件都已完成  
+            setTimeout(() => {  
+                this.isInitializing = false;  
             }, 1000);  
-            
-            if (!this.editor.getComponents().length) {      
-                this.editor.setComponents(`      
-                    <div style="padding: 40px; text-align: center; background: var(--surface-color); border-radius: 8px; margin: 20px;">      
-                        <h2 style="color: var(--text-primary); margin-bottom: 16px;">欢迎使用页面设计器</h2>      
-                        <p style="color: var(--text-secondary); margin-bottom: 24px;">从右侧拖拽组件开始设计,或导入现有HTML代码</p>      
-                        <div style="display: flex; gap: 12px; justify-content: center;">      
-                            <button style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">开始设计</button>      
-                        </div>      
-                    </div>      
-                `);      
-            }      
-            
-            this.editor.refresh();        
         });        
         
-        this.editor.on('change:changesCount', () => {        
-            this.isDirty = true;        
-        });            
+        this.editor.on('change:changesCount', () => {  
+            // 只有在初始化完成后才标记为已修改  
+            if (!this.isInitializing) {  
+                this.isDirty = true;  
+            }  
+        });           
     }
       
     async loadExistingImages() {  
@@ -285,35 +299,35 @@ class ImageDesignerDialog {
             });  
         }  
     }  
-      
-    async loadDesign() {  
-        try {  
-            // 1. 先尝试加载已保存的设计  
-            const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);  
-            if (designResponse.ok) {  
-                const data = await designResponse.json();  
-                if (data.html) {  
-                    // 如果有保存的设计,使用设计数据  
-                    this.editor.setComponents(data.html);  
-                    this.editor.setStyle(data.css);  
+        
+    async loadDesign() {      
+        try {      
+            // 1. 先尝试加载已保存的设计      
+            const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);      
+            if (designResponse.ok) {      
+                const data = await designResponse.json();      
+                if (data.html) {      
+                    // 如果有保存的设计,使用设计数据      
+                    this.editor.setComponents(data.html);      
+                    this.editor.setStyle(data.css);      
                     this.isDirty = false;  
-                    return;  
-                }  
-            }  
+                    return;      
+                }      
+            }      
             
-            // 2. 如果没有保存的设计,加载原始 HTML  
-            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);  
-            if (contentResponse.ok) {  
-                const htmlContent = await contentResponse.text();  
+            // 2. 如果没有保存的设计,加载原始 HTML      
+            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);      
+            if (contentResponse.ok) {      
+                const htmlContent = await contentResponse.text();      
                 
-                // 将原始 HTML 加载到编辑器  
-                this.editor.setComponents(htmlContent);  
-                this.isDirty = false;  // 初始加载不算修改  
-            }  
-        } catch (error) {  
-            console.error('加载内容失败:', error);  
-        }  
-    } 
+                // 将原始 HTML 加载到编辑器      
+                this.editor.setComponents(htmlContent);      
+                this.isDirty = false;  
+            }      
+        } catch (error) {      
+
+        }      
+    }
       
     async saveDesign() {  
         const bodyHtml = this.editor.getHtml();  
@@ -478,7 +492,7 @@ class ImageDesignerDialog {
                             </svg>  
                             设置封面图片  
                         </h2>  
-                        <button class="btn btn-secondary" id="cover-cancel">关闭</button>  
+                        <button class="btn-icon modal-close" id="cover-cancel">×</button>  
                     </div>  
                     
                     <div class="editor-body" style="display: flex; gap: 20px; padding: 20px; overflow: hidden; height: calc(70vh - 80px);">  
