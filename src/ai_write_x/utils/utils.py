@@ -454,6 +454,15 @@ def get_format_article(ext, article):
 
 def is_local_path(url):
     """判断URL是否为本地路径"""
+    # 检查是否为网络URL
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme in ("http", "https", "ftp"):
+        return False
+
+    # 检查是否为Web路由路径(以/开头但不是真实的本地绝对路径)
+    if url.startswith("/images/") or url.startswith("/static/"):
+        return False  # 这些是Web路径,不是本地路径
+
     # 检查是否为绝对路径
     if os.path.isabs(url):
         return True
@@ -461,11 +470,6 @@ def is_local_path(url):
     # 检查是否为相对路径
     if url.startswith("./") or url.startswith("../"):
         return True
-
-    # 检查是否为网络URL
-    parsed = urllib.parse.urlparse(url)
-    if parsed.scheme in ("http", "https", "ftp"):
-        return False
 
     # 其他情况视为本地路径
     return True
@@ -480,17 +484,20 @@ def resolve_image_path(url):
     if parsed.scheme in ("http", "https", "ftp"):
         return url
 
-    # 如果是绝对路径,直接返回
-    if os.path.isabs(url):
-        return url
-
-    # 如果是 Web 路由路径(以 / 开头但不是绝对路径)
+    # 先检查Web路由路径,再检查绝对路径
     if url.startswith("/"):
         # 尝试匹配已知的静态文件路由
         if url.startswith("/images/"):
             filename = url.replace("/images/", "")
-            return str(PathManager.get_image_dir() / filename)
-        # 可以在这里添加更多路由映射
+            local_path = PathManager.get_image_dir() / filename
+            return str(local_path)  # 始终返回本地路径
+        # 如果不是/images/,才当作Unix绝对路径处理
+        elif os.path.isabs(url):
+            return url
+
+    # 如果是绝对路径(Windows: C:\, Unix: 已在上面处理)
+    if os.path.isabs(url):
+        return url
 
     # 相对路径,相对于当前工作目录
     return url

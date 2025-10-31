@@ -400,19 +400,36 @@ async def get_images():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class SetCoverRequest(BaseModel):
+    cover_path: str
+
+
 @router.post("/config/set-cover")
-async def set_cover(request: dict):
-    """设置微信公众号封面图片"""
-    cover_path = request.get("cover_path")
-
-    # 如果是 /images/ 路径,转换为实际文件路径
-    if cover_path.startswith("/images/"):
-        filename = cover_path.replace("/images/", "")
-        actual_path = str(PathManager.get_image_dir() / filename)
-        cover_path = actual_path
-
-    # 更新配置
+async def set_cover(request: SetCoverRequest):
+    """设置封面图片"""
     config = Config.get_instance()
-    config.current_preview_cover = cover_path
 
-    return {"status": "success", "cover_path": cover_path}
+    if request.cover_path:
+        if request.cover_path.startswith("/images/"):
+            filename = request.cover_path.replace("/images/", "")
+            local_path = PathManager.get_image_dir() / filename
+            config.current_preview_cover = str(local_path)
+        else:
+            config.current_preview_cover = request.cover_path
+    else:
+        config.current_preview_cover = ""
+
+    return {"status": "success"}
+
+
+@router.get("/config/get-cover")
+async def get_cover():
+    """获取当前封面"""
+    config = Config.get_instance()
+    cover_path = config.current_preview_cover
+
+    if cover_path and not cover_path.startswith("/images/"):
+        filename = Path(cover_path).name
+        cover_path = f"/images/{filename}"
+
+    return {"cover_path": cover_path or ""}
