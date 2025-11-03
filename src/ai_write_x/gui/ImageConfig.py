@@ -134,7 +134,6 @@ class ImageConfigWindow:
     def _clear_cover_setting(self):
         """清空封面设置"""
         self.current_cover_filename = None
-        Config.get_instance().current_preview_cover = ""
         if self.window and "-CURRENT_COVER_DISPLAY-" in self.window.AllKeysDict:
             self.window["-CURRENT_COVER_DISPLAY-"].update(value="未设置")
             self.window["-PREVIEW_COVER-"].update(disabled=True)
@@ -681,10 +680,6 @@ class ImageConfigWindow:
                                     and "-CURRENT_COVER_DISPLAY-" in self.window.AllKeysDict
                                 ):
                                     self.window["-CURRENT_COVER_DISPLAY-"].update(new_filename)
-                                # 更新配置
-                                Config.get_instance().current_preview_cover = str(
-                                    PathManager.get_image_dir() / new_filename
-                                )
 
                             sg.popup(
                                 f"重命名成功: {new_filename}",
@@ -894,9 +889,6 @@ class ImageConfigWindow:
                 self.window["-CURRENT_COVER_DISPLAY-"].update(value=self.current_cover_filename)
                 self.window["-PREVIEW_COVER-"].update(disabled=False)
                 self.window["-CLEAR_COVER-"].update(disabled=False)
-                Config.get_instance().current_preview_cover = str(
-                    PathManager.get_image_dir() / self.current_preview_filename  # type: ignore
-                )
             elif event == "-PREVIEW_COVER-":
                 if self.current_cover_filename:
                     file_path = os.path.join(self.image_dir, self.current_cover_filename)
@@ -919,7 +911,6 @@ class ImageConfigWindow:
                 self.window["-CURRENT_COVER_DISPLAY-"].update(value="未设置")
                 self.window["-PREVIEW_COVER-"].update(disabled=True)
                 self.window["-CLEAR_COVER-"].update(disabled=True)
-                Config.get_instance().current_preview_cover = ""
             elif event == "-REPLACE_WITH_PREVIEW-":
                 if not values["-ARTICLE_IMAGES-"]:
                     sg.popup_error(

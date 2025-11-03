@@ -176,6 +176,7 @@ async def publish_articles(request: PublishRequest):
                         appid=cred["appid"],
                         appsecret=cred["appsecret"],
                         author=cred.get("author", ""),
+                        cover_path=utils.get_cover_path(article_path),
                     )
 
                     if success:
@@ -318,17 +319,17 @@ class ArticleDesign(BaseModel):
     article: str
     html: str
     css: str
+    cover: Optional[str] = ""
 
 
 @router.post("/design")
 async def save_article_design(design: ArticleDesign):
-    """保存文章设计"""
+    """保存文章设计(包括封面)"""
     try:
-        # 保存设计到.design.json文件
         article_path = Path(design.article)
         design_path = article_path.with_suffix(".design.json")
 
-        design_data = {"html": design.html, "css": design.css}
+        design_data = {"html": design.html, "css": design.css, "cover": design.cover}  # 保存封面
 
         with open(design_path, "w", encoding="utf-8") as f:
             json.dump(design_data, f, ensure_ascii=False, indent=2)
@@ -340,18 +341,22 @@ async def save_article_design(design: ArticleDesign):
 
 @router.get("/design")
 async def load_article_design(article: str):
-    """加载文章设计"""
+    """加载文章设计(包括封面)"""
     try:
         article_path = Path(article)
         design_path = article_path.with_suffix(".design.json")
 
         if not design_path.exists():
-            return {"html": "", "css": ""}
+            return {"html": "", "css": "", "cover": ""}
 
         with open(design_path, "r", encoding="utf-8") as f:
             design_data = json.load(f)
 
-        return design_data
+        return {
+            "html": design_data.get("html", ""),
+            "css": design_data.get("css", ""),
+            "cover": design_data.get("cover", ""),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -398,38 +403,3 @@ async def get_images():
         return images
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-class SetCoverRequest(BaseModel):
-    cover_path: str
-
-
-@router.post("/config/set-cover")
-async def set_cover(request: SetCoverRequest):
-    """设置封面图片"""
-    config = Config.get_instance()
-
-    if request.cover_path:
-        if request.cover_path.startswith("/images/"):
-            filename = request.cover_path.replace("/images/", "")
-            local_path = PathManager.get_image_dir() / filename
-            config.current_preview_cover = str(local_path)
-        else:
-            config.current_preview_cover = request.cover_path
-    else:
-        config.current_preview_cover = ""
-
-    return {"status": "success"}
-
-
-@router.get("/config/get-cover")
-async def get_cover():
-    """获取当前封面"""
-    config = Config.get_instance()
-    cover_path = config.current_preview_cover
-
-    if cover_path and not cover_path.startswith("/images/"):
-        filename = Path(cover_path).name
-        cover_path = f"/images/{filename}"
-
-    return {"cover_path": cover_path or ""}

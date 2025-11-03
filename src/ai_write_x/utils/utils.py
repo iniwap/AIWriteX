@@ -13,6 +13,7 @@ from PIL import Image
 import tempfile
 import urllib.parse
 from pathlib import Path
+import json
 
 
 def copy_file(src_file, dest_file):
@@ -645,3 +646,19 @@ def format_log_message(msg: str, msg_type: str = "info") -> str:
     # 完全未格式化，添加完整格式
     timestamp = time.strftime("%H:%M:%S")
     return f"[{timestamp}] [{msg_type.upper()}]: {msg}"
+
+
+def get_cover_path(article_path):
+    cover_path = None
+
+    if article_path:
+        design_file = Path(article_path).with_suffix(".design.json")
+        if design_file.exists():
+            try:
+                with open(design_file, "r", encoding="utf-8") as f:
+                    design_data = json.load(f)
+                    cover_path = design_data.get("cover", None)
+            except Exception:
+                pass
+
+    return cover_path

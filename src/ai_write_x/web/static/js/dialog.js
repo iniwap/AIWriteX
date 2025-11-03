@@ -121,7 +121,7 @@ class DialogManager {
         // 对话框内容  
         const body = document.createElement('div');  
         body.className = 'dialog-body';  
-        body.innerHTML = `<p>${message}</p>`;  
+        body.innerHTML = `<p>${message.replace(/\n/g, '<br>')}</p>`;
           
         // 对话框底部  
         const footer = document.createElement('div');  

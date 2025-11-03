@@ -266,10 +266,33 @@ class ArticleManager {
     
     async openImageDesigner(article) {  
         try {  
-            if (!window.imageDesignerDialog) {  
-                window.imageDesignerDialog = new ImageDesignerDialog();  
+            // 检查文件扩展名  
+            const ext = article.path.toLowerCase().split('.').pop();  
+            
+            if (ext === 'md' || ext === 'markdown' || ext === 'txt') {  
+                // 显示警告对话框,让用户选择是否继续  
+                window.dialogManager.showConfirm(  
+                    `警告: ${ext.toUpperCase()} 格式文件不适合使用可视化设计器编辑。\n` +  
+                    `使用页面设计器可能会破坏原始格式,建议使用"编辑"功能进行修改。\n` +  
+                    `是否仍要继续使用页面设计器？`,  
+                    async () => {  
+                        // 用户点击确认,继续打开设计器  
+                        if (!window.imageDesignerDialog) {  
+                            window.imageDesignerDialog = new ImageDesignerDialog();  
+                        }  
+                        await window.imageDesignerDialog.open(article.path, article.title);  
+                    },  
+                    () => {  
+                        // 用户点击取消,不执行任何操作  
+                    }  
+                );  
+            } else {  
+                // HTML 文件,直接打开  
+                if (!window.imageDesignerDialog) {  
+                    window.imageDesignerDialog = new ImageDesignerDialog();  
+                }  
+                await window.imageDesignerDialog.open(article.path, article.title);  
             }  
-            await window.imageDesignerDialog.open(article.path, article.title);  
         } catch (error) {  
             this.showNotification('打开配图设计器失败: ' + error.message, 'error');  
         }  

@@ -66,7 +66,7 @@ class ImageDesignerDialog {
                                 <polyline points="17 21 17 13 7 13 7 21"/>    
                                 <polyline points="7 3 7 8 15 8"/>    
                             </svg>    
-                            保存设计    
+                            保存 (Ctrl+S)     
                         </button>    
                     </div>    
                 </div>    
@@ -329,63 +329,95 @@ class ImageDesignerDialog {
         }      
     }
       
-    async saveDesign() {  
-        const bodyHtml = this.editor.getHtml();  
-        const css = this.editor.getCss();  
+    async saveDesign() {    
+        const bodyHtml = this.editor.getHtml();    
+        const css = this.editor.getCss();    
         
-        // 使用第三方库或自定义函数内联化CSS  
-        const inlinedHtml = this.inlineCssToHtml(bodyHtml, css);  
+        // 检测原始文件格式  
+        const ext = this.currentArticle.toLowerCase().split('.').pop();  
+        const isHtmlFile = (ext === 'html' || ext === 'htm');  
         
-        const fullHtml = `<!DOCTYPE html>  
-    <html lang="zh-CN">  
-    <head>  
-        <meta charset="UTF-8">  
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    </head>  
-    <body>  
-        ${inlinedHtml}  
-    </body>  
-    </html>`; 
+        let finalContent;  
+        
+        if (isHtmlFile) {  
+            // HTML 文件: 生成完整文档  
+            const inlinedHtml = this.inlineCssToHtml(bodyHtml, css);    
             
-        try {    
-            // 1. 保存设计数据(用于设计器重新打开)  
-            const designResponse = await fetch('/api/articles/design', {    
-                method: 'POST',    
+            finalContent = `<!DOCTYPE html>    
+    <html lang="zh-CN">    
+    <head>    
+        <meta charset="UTF-8">    
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    </head>    
+    <body>    
+        ${inlinedHtml}    
+    </body>    
+    </html>`;  
+        } else {  
+            // Markdown/TXT 文件: 移除 body 标签,只保存内部内容  
+            let content = bodyHtml;  
+            
+            // 移除开头的 <body> 标签  
+            content = content.replace(/^<body[^>]*>/i, '');  
+            
+            // 移除结尾的 </body> 标签  
+            content = content.replace(/<\/body>$/i, '');  
+            
+            finalContent = content.trim();  
+        }  
+                
+        try {      
+            // 读取现有封面设置  
+            let existingCover = "";  
+            
+            try {  
+                const existingDesignResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);  
+                if (existingDesignResponse.ok) {  
+                    const existingData = await existingDesignResponse.json();  
+                    existingCover = existingData.cover || "";  
+                }  
+            } catch (e) {  
+                console.warn('读取现有封面失败,将使用空值:', e);  
+            }  
+            
+            // 保存设计数据  
+            const designResponse = await fetch('/api/articles/design', {      
+                method: 'POST',      
+                headers: { 'Content-Type': 'application/json' },      
+                body: JSON.stringify({      
+                    article: this.currentArticle,      
+                    html: bodyHtml,  
+                    css: css,  
+                    cover: existingCover  
+                })      
+            });      
+            
+            if (!designResponse.ok) {    
+                throw new Error('保存设计数据失败');    
+            }    
+            
+            // 更新原始文件  
+            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`, {    
+                method: 'PUT',    
                 headers: { 'Content-Type': 'application/json' },    
-                body: JSON.stringify({    
-                    article: this.currentArticle,    
-                    html: bodyHtml,  // 设计数据仍保存 body 内容  
-                    css: css    
+                body: JSON.stringify({     
+                    content: finalContent  // 根据格式使用不同的内容  
                 })    
             });    
             
-            if (!designResponse.ok) {  
-                throw new Error('保存设计数据失败');  
-            }  
+            if (!contentResponse.ok) {    
+                throw new Error('更新原始文件失败');    
+            }    
             
-            // 2. 更新原始 HTML 文件(保存完整文档)  
-            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`, {  
-                method: 'PUT',  
-                headers: { 'Content-Type': 'application/json' },  
-                body: JSON.stringify({   
-                    content: fullHtml  // 保存完整的 HTML 文档  
-                })  
-            });  
+            this.isDirty = false;      
+            window.app?.showNotification('设计已保存', 'success');      
             
-            if (!contentResponse.ok) {  
-                throw new Error('更新原始 HTML 失败');  
-            }  
-            
-            this.isDirty = false;    
-            window.app?.showNotification('设计已保存', 'success');    
-            
-            // 3. 刷新文章管理器的预览  
-            if (window.articleManager) {  
-                await window.articleManager.loadArticles();  
-            }  
-        } catch (error) {    
-            window.app?.showNotification('保存失败: ' + error.message, 'error');    
-        }    
+            if (window.articleManager) {    
+                await window.articleManager.loadArticles();    
+            }    
+        } catch (error) {      
+            window.app?.showNotification('保存失败: ' + error.message, 'error');      
+        }      
     }
        
     inlineCssToHtml(html, css) {  
@@ -428,12 +460,22 @@ class ImageDesignerDialog {
             this.close();  
         });  
         
-        // ESC键关闭  
-        this.keydownHandler = (e) => {  
-            if (e.key === 'Escape') {  
-                this.close();  
-            }  
-        };  
+        // ESC键关闭 + Ctrl+S保存    
+        this.keydownHandler = (e) => {    
+            // 只在对话框显示时响应    
+            if (!this.dialog || !this.dialog.classList.contains('show')) return;    
+            
+            // Ctrl+S 或 Cmd+S 保存    
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {    
+                e.preventDefault();    
+                this.saveDesign();    
+            }    
+            
+            // ESC 关闭    
+            if (e.key === 'Escape') {    
+                this.close();    
+            }    
+        };   
         document.addEventListener('keydown', this.keydownHandler);  
         
         // 点击遮罩关闭(只检查dialog本身)  
@@ -534,14 +576,17 @@ class ImageDesignerDialog {
                                 </ul>  
                             </div>  
                             
-                            <div style="display: flex; gap: 8px; margin-top: auto;">    
-                                <button class="btn btn-secondary" id="clear-cover" style="flex: 1;" ${!currentCover ? 'disabled' : ''}>    
-                                    清除封面    
+                            <div style="display: flex; gap: 8px; margin-top: auto;">          
+                                <button class="btn btn-secondary" id="clear-cover" style="flex: 1;">          
+                                    清除封面          
                                 </button>    
-                                <button class="btn btn-primary" id="confirm-cover" style="flex: 1;" disabled>    
-                                    确认设置    
-                                </button>    
-                            </div> 
+                                <button class="btn btn-secondary" id="restore-cover" style="flex: 1;">          
+                                    恢复原始          
+                                </button>          
+                                <button class="btn btn-primary" id="confirm-cover" style="flex: 1;">          
+                                    确认设置          
+                                </button>          
+                            </div>
                         </div>  
                         
                         <!-- 右侧: 图片选择区 -->  
@@ -632,228 +677,217 @@ class ImageDesignerDialog {
         }  
     }
     
-    bindCoverDialogEvents(dialog, currentCover) {  
-        // 三个关键状态  
-        const originalCover = currentCover;      // 对话框打开时的原始封面(不可变)  
-        let selectedImage = currentCover;        // 用户当前选中的图片  
-        let hasUserSelection = false;            // 标记用户是否做过选择  
+    bindCoverDialogEvents(dialog, currentCover) {          
+        // 状态管理  
+        let originalCover = currentCover;      // 对话框打开时的原始封面(不可变)          
+        let selectedImage = currentCover;        // 用户当前选中的图片(前端临时状态)          
         
-        const previewArea = dialog.querySelector('#current-cover-preview');  
-        const confirmBtn = dialog.querySelector('#confirm-cover');  
-        const clearBtn = dialog.querySelector('#clear-cover');  
+        const previewArea = dialog.querySelector('#current-cover-preview');          
+        const confirmBtn = dialog.querySelector('#confirm-cover');          
+        const clearBtn = dialog.querySelector('#clear-cover');        
+        const restoreBtn = dialog.querySelector('#restore-cover');        
         
-        // 更新预览区域的辅助函数  
-        const updatePreview = (imagePath) => {  
-            if (imagePath) {  
-                previewArea.innerHTML = `  
-                    <img src="${imagePath}" style="width: 100%; height: 100%; object-fit: cover;" />  
-                `;  
-            } else {  
-                previewArea.innerHTML = `  
-                    <div style="text-align: center; color: var(--text-secondary);">  
-                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" style="opacity: 0.3;">  
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>  
-                            <circle cx="8.5" cy="8.5" r="1.5"/>  
-                            <polyline points="21 15 16 10 5 21"/>  
-                        </svg>  
-                        <p style="margin-top: 8px; font-size: 13px;">未设置封面</p>  
-                    </div>  
-                `;  
-            }  
-        };  
+        // 更新预览区域      
+        const updatePreview = (imagePath) => {          
+            if (imagePath) {          
+                previewArea.innerHTML = `          
+                    <img src="${imagePath}" style="width: 100%; height: 100%; object-fit: cover;" />          
+                `;          
+            } else {          
+                previewArea.innerHTML = `          
+                    <div style="text-align: center; color: var(--text-secondary);">          
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" style="opacity: 0.3;">          
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>          
+                            <circle cx="8.5" cy="8.5" r="1.5"/>          
+                            <polyline points="21 15 16 10 5 21"/>          
+                        </svg>          
+                        <p style="margin-top: 8px; font-size: 13px;">未设置封面</p>          
+                    </div>          
+                `;          
+            }          
+        };          
         
-        // 更新按钮状态的辅助函数  
-        const updateButtonStates = () => {  
-            if (hasUserSelection) {  
-                // 用户做过选择  
-                clearBtn.textContent = originalCover ? '恢复原始' : '清空选择';  
-                clearBtn.disabled = false;  
-                confirmBtn.disabled = (selectedImage === originalCover);  
-            } else {  
-                // 用户未做选择  
-                clearBtn.textContent = '清除封面';  
-                clearBtn.disabled = !originalCover;  
-                confirmBtn.disabled = true;  
-            }  
-        };  
-
-        // 更新图片列表选中状态的辅助函数  
-        const updateImageSelection = (targetPath) => {  
-            dialog.querySelectorAll('.cover-option').forEach(opt => {  
-                if (opt.dataset.src === targetPath) {  
-                    opt.style.border = '1px solid var(--primary-color)';  
-                    opt.style.boxShadow = 'none';  
-                } else {  
-                    opt.style.border = '1px solid transparent';  
-                    opt.style.boxShadow = 'none';  
-                }  
-            });  
-        };  
-        
-        // 初始化按钮状态  
-        updateButtonStates();  
-        
-        // 图片选择事件  
-        dialog.querySelectorAll('.cover-option').forEach(option => {  
-            // 高亮当前封面  
-            if (option.dataset.src === currentCover) {  
-                option.style.border = '1px solid var(--primary-color)';  
-                option.style.boxShadow = 'none';  
-            }  
+        // 更新按钮状态 - 修正后的逻辑    
+        const updateButtonStates = () => {            
+            // 清除按钮: 只有当前选中的图片不为空时才启用  
+            // 逻辑: 清除的是前端显示,如果已经是空的就不需要清除  
+            clearBtn.disabled = !selectedImage;        
             
-            option.addEventListener('click', () => {  
-                selectedImage = option.dataset.src;  
-                hasUserSelection = true;  
-                
-                // 更新预览  
-                updatePreview(selectedImage);  
-                
-                // 更新选中状态  
-                updateImageSelection(selectedImage);  
-                
-                // 更新按钮状态  
-                updateButtonStates();  
-            });  
+            // 恢复按钮: 只有当前选择与原始不同时才启用    
+            // 逻辑: 如果当前选择和原始一样,恢复没有意义    
+            restoreBtn.disabled = (selectedImage === originalCover);          
             
-            // 悬停效果  
-            option.addEventListener('mouseenter', () => {  
-                if (option.dataset.src !== selectedImage) {  
-                    option.style.border = '1px solid var(--border-color)';  
-                }  
-            });  
-            option.addEventListener('mouseleave', () => {  
-                if (option.dataset.src !== selectedImage) {  
-                    option.style.border = '1px solid transparent';  
-                }  
-            });  
-        });  
+            // 确认按钮: 只有当前选择与原始不同时才启用    
+            // 逻辑: 只有修改了封面设置才需要确认保存    
+            confirmBtn.disabled = (selectedImage === originalCover);          
+        };           
         
-        // 确认按钮  
-        confirmBtn.addEventListener('click', async () => {    
-            if (!selectedImage) return;    
+        // 更新图片列表选中状态          
+        const updateImageSelection = (targetPath) => {              
+            dialog.querySelectorAll('.cover-option').forEach(opt => {            
+                const badge = opt.querySelector('.current-badge');            
+                
+                if (opt.dataset.src === targetPath) {              
+                    // 选中当前图片  
+                    opt.style.border = '1px solid var(--primary-color)';            
+                    
+                    // 关键修复: 只有当选中的图片是原始封面时才显示"当前"标志        
+                    if (targetPath === originalCover) {  
+                        if (badge) {  
+                            badge.style.display = 'block';  
+                        }  
+                    } else {  
+                        // 选中的不是原始封面,隐藏"当前"标志  
+                        if (badge) {  
+                            badge.style.display = 'none';  
+                        }  
+                    }  
+                } else {              
+                    // 未选中的图片  
+                    opt.style.border = '1px solid transparent';            
+                    
+                    // 隐藏其他图片的"当前"标志        
+                    if (badge) {            
+                        badge.style.display = 'none';            
+                    }            
+                }              
+            });              
+        };        
+                    
+        // 关键: 立即初始化按钮状态    
+        updateButtonStates();        
+        updateImageSelection(selectedImage);        
+        
+        // 图片选择事件 - 只更新前端状态,不保存          
+        dialog.querySelectorAll('.cover-option').forEach(option => {          
+            // 初始高亮当前封面      
+            if (option.dataset.src === currentCover) {          
+                option.style.border = '1px solid var(--primary-color)';        
+            }          
             
-            try {    
-                console.log('正在设置封面:', selectedImage);  // 添加日志  
+            option.addEventListener('click', () => {          
+                selectedImage = option.dataset.src;          
+                updatePreview(selectedImage);          
+                updateImageSelection(selectedImage);          
+                updateButtonStates();          
+            });          
+            
+            // 悬停效果      
+            option.addEventListener('mouseenter', () => {          
+                if (option.dataset.src !== selectedImage) {          
+                    option.style.border = '1px solid var(--border-color)';          
+                }          
+            });          
+            option.addEventListener('mouseleave', () => {          
+                if (option.dataset.src !== selectedImage) {          
+                    option.style.border = '1px solid transparent';          
+                }          
+            });          
+        });          
+        
+        // 清除按钮 - 只清空前端显示,不保存    
+        clearBtn.addEventListener('click', () => {              
+            selectedImage = null;          
+            updatePreview(null);          
+            updateImageSelection(null);  // 这会隐藏所有"当前"标志  
+            updateButtonStates();          
+            window.app?.showNotification('已清空封面选择(未保存)', 'info');          
+        });    
+        
+        // 恢复按钮 - 恢复到原始状态,不保存        
+        restoreBtn.addEventListener('click', () => {            
+            selectedImage = originalCover;            
+            updatePreview(originalCover);            
+            updateImageSelection(originalCover);  // 如果 originalCover 存在,会显示"当前"标志  
+            updateButtonStates();            
+            window.app?.showNotification(originalCover ? '已恢复到原始封面(未保存)' : '已恢复到未设置状态(未保存)', 'info');            
+        });      
+        
+        // 确认按钮 - 保存当前选择到后端        
+        confirmBtn.addEventListener('click', async () => {              
+            if (!selectedImage) return;              
+            
+            try {              
+                const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);              
+                const designResult = await designResponse.json();              
+                const designData = designResult || { html: "", css: "", cover: "" };              
                 
-                const response = await fetch('/api/articles/config/set-cover', {    
-                    method: 'POST',    
-                    headers: { 'Content-Type': 'application/json' },    
-                    body: JSON.stringify({ cover_path: selectedImage })    
-                });    
+                designData.cover = selectedImage;              
+                designData.article = this.currentArticle;              
                 
-                console.log('响应状态:', response.status, response.statusText);  // 添加日志  
+                const response = await fetch('/api/articles/design', {              
+                    method: 'POST',              
+                    headers: { 'Content-Type': 'application/json' },              
+                    body: JSON.stringify(designData)              
+                });              
                 
                 if (response.ok) {    
-                    const result = await response.json();  // 获取响应内容  
-                    console.log('设置成功:', result);  // 添加日志  
-                    window.app?.showNotification('封面设置成功', 'success');    
-                    dialog.classList.remove('show');    
-                    setTimeout(() => document.body.removeChild(dialog), 300);    
-                } else {    
-                    // 获取详细错误信息  
-                    const errorText = await response.text();    
-                    console.error('设置失败 - 状态码:', response.status);    
-                    console.error('设置失败 - 响应内容:', errorText);    
+                    // 移除所有旧的"当前"标志    
+                    dialog.querySelectorAll('.current-badge').forEach(badge => {    
+                        badge.remove();    
+                    });    
                     
-                    let errorMessage = '设置封面失败';    
-                    try {    
-                        const errorJson = JSON.parse(errorText);    
-                        errorMessage = errorJson.detail || errorJson.message || errorText;    
-                    } catch (e) {    
-                        errorMessage = errorText || `HTTP ${response.status}`;    
-                    }    
-                    
-                    throw new Error(errorMessage);    
-                }    
-            } catch (error) {    
-                console.error('设置封面异常:', error);  // 添加详细日志  
-                window.app?.showNotification('设置封面失败: ' + error.message, 'error');    
-            }    
-        }); 
-                
-        // 清除/恢复按钮  
-        clearBtn.addEventListener('click', async () => {  
-            if (hasUserSelection) {  
-                // 用户做过选择,恢复到原始状态  
-                selectedImage = originalCover;  
-                hasUserSelection = false;  
-                
-                // 更新预览  
-                updatePreview(originalCover);  
-                
-                // 更新选中状态  
-                updateImageSelection(originalCover);  
-                
-                // 更新按钮状态  
-                updateButtonStates();  
-                
-                window.app?.showNotification(originalCover ? '已恢复到原始封面' : '已清空选择', 'info');  
-            } else {  
-                // 用户未做选择,调用API清除封面  
-                try {  
-                    const response = await fetch('/api/config/set-cover', {  
-                        method: 'POST',  
-                        headers: { 'Content-Type': 'application/json' },  
-                        body: JSON.stringify({ cover_path: '' })  
-                    });  
-                    
-                    if (response.ok) {  
-                        // 更新预览区域  
-                        updatePreview(null);  
-                        
-                        // 清除所有图片的选中状态  
-                        dialog.querySelectorAll('.cover-option').forEach(opt => {  
-                            opt.style.border = '1px solid transparent';  
-                            opt.style.boxShadow = 'none';  
-                            // 移除"当前"标签  
-                            const currentBadge = opt.querySelector('.current-badge');  
-                            if (currentBadge) {  
-                                currentBadge.remove();  
-                            }  
-                        });  
-                        
-                        // 重置状态  
-                        selectedImage = null;  
-                        
-                        // 更新按钮状态  
-                        updateButtonStates();  
-                        
-                        window.app?.showNotification('封面已清除', 'success');  
-                    } else {  
-                        throw new Error('清除封面失败');  
+                    // 在新选中的图片上添加"当前"标志    
+                    if (selectedImage) {    
+                        const selectedOption = dialog.querySelector(`.cover-option[data-src="${selectedImage}"]`);    
+                        if (selectedOption && !selectedOption.querySelector('.current-badge')) {    
+                            const badge = document.createElement('div');    
+                            badge.className = 'current-badge';    
+                            badge.style.cssText = `    
+                                position: absolute;    
+                                top: 8px;    
+                                right: 8px;    
+                                background: var(--primary-color);    
+                                color: white;    
+                                border-radius: 4px;    
+                                padding: 2px 8px;    
+                                font-size: 11px;    
+                                font-weight: 600;    
+                            `;    
+                            badge.textContent = '当前';    
+                            selectedOption.appendChild(badge);    
+                        }    
                     }  
-                } catch (error) {  
-                    window.app?.showNotification('清除封面失败: ' + error.message, 'error');  
-                }  
-            }  
-        });  
+                    
+                    originalCover = selectedImage;  
+                    
+                    updateButtonStates();  
+
+                    window.app?.showNotification('封面设置成功', 'success');       
+                } else {              
+                    throw new Error('设置封面失败');              
+                }              
+            } catch (error) {              
+                console.error('设置封面异常:', error);              
+                window.app?.showNotification('设置封面失败: ' + error.message, 'error');              
+            }              
+        }); 
         
-        // 取消按钮  
-        dialog.querySelector('#cover-cancel').addEventListener('click', () => {  
-            dialog.classList.remove('show');  
-            setTimeout(() => document.body.removeChild(dialog), 300);  
-        });  
+        // 取消和 ESC 键处理    
+        dialog.querySelector('#cover-cancel').addEventListener('click', () => {          
+            dialog.classList.remove('show');          
+            setTimeout(() => document.body.removeChild(dialog), 300);          
+        });          
         
-        // ESC键关闭  
-        const escHandler = (e) => {  
-            if (e.key === 'Escape') {  
-                dialog.classList.remove('show');  
-                setTimeout(() => {  
-                    document.body.removeChild(dialog);  
-                    document.removeEventListener('keydown', escHandler);  
-                }, 300);  
-            }  
-        };  
-        document.addEventListener('keydown', escHandler);  
+        const escHandler = (e) => {          
+            if (e.key === 'Escape') {          
+                dialog.classList.remove('show');          
+                setTimeout(() => {          
+                    document.body.removeChild(dialog);          
+                    document.removeEventListener('keydown', escHandler);          
+                }, 300);          
+            }          
+        };          
+        document.addEventListener('keydown', escHandler);          
     }
 
     async getCurrentCover() {  
         try {  
             // 需要添加获取当前封面的API  
-            const response = await fetch('/api/articles/config/get-cover'); 
+            const response = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`); 
             if (response.ok) {  
                 const data = await response.json();  
-                return data.cover_path || null;  
+                return data.cover || null;  
             }  
         } catch (error) {  
             console.error('获取当前封面失败:', error);  

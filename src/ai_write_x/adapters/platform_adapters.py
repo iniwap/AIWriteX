@@ -167,6 +167,7 @@ class WeChatAdapter(PlatformAdapter):
                     appid,
                     appsecret,
                     author,
+                    cover_path=kwargs.get("cover_path", None),
                 )
                 publish_results.append(
                     {"appid": appid, "author": author, "success": success, "message": result}

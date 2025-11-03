@@ -1398,7 +1398,6 @@ class Config:
         self.reference_ratio = 0.0  # 文章借鉴比例[0-1]
         self.custom_template_category = ""  # 自定义话题时，模板分类
         self.custom_template = ""  # 自定义话题时，模板
-        self.current_preview_cover = ""  # 当前设置的封面
 
     @classmethod
     def get_instance(cls):

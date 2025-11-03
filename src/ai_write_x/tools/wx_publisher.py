@@ -408,23 +408,23 @@ class WeixinPublisher:
         return ret
 
 
-def pub2wx(title, digest, article, appid, appsecret, author):
+def pub2wx(title, digest, article, appid, appsecret, author, cover_path=None):
     publisher = WeixinPublisher(appid, appsecret, author)
     config = Config.get_instance()
 
     cropped_image_path = ""
     final_image_path = None  # 最终要上传的图片路径
 
-    if config.current_preview_cover:
-        # 解析封面图片路径
-        resolved_cover_path = utils.resolve_image_path(config.current_preview_cover)
+    if cover_path:
+        resolved_cover_path = utils.resolve_image_path(cover_path)
         cropped_image_path = utils.crop_cover_image(resolved_cover_path, (900, 384))
 
         if cropped_image_path:
-            final_image_path = cropped_image_path  # 裁剪后的路径已经是绝对路径
+            final_image_path = cropped_image_path
         else:
             final_image_path = resolved_cover_path
     else:
+        # 自动生成封面
         image_url = publisher.generate_img(
             "主题:" + title.split("|")[-1] + ",内容:" + digest,
             "900*384",
@@ -443,11 +443,7 @@ def pub2wx(title, digest, article, appid, appsecret, author):
     media_id, _, err_msg = publisher.upload_image(final_image_path)
 
     # 如果使用了临时裁剪文件，上传后删除
-    if (
-        config.current_preview_cover
-        and cropped_image_path
-        and cropped_image_path != config.current_preview_cover
-    ):
+    if cover_path and cropped_image_path and cropped_image_path != cover_path:
         try:
             os.remove(cropped_image_path)
         except Exception:

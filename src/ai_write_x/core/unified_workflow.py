@@ -1,6 +1,7 @@
 import os
 import time
 from typing import Dict, Any
+
 from src.ai_write_x.core.base_framework import (
     WorkflowConfig,
     AgentConfig,
@@ -158,6 +159,8 @@ class UnifiedContentWorkflow:
             # 4. 保存（非AI参与）
             save_result = self._save_content(transform_content, title)
             if save_result.get("success", False):
+                article_path = save_result.get("path")
+                kwargs["article_path"] = article_path
                 log.print_log(f"文章《{title}》保存成功！")
 
             # 5. 可选发布（非AI参与，开关控制）
@@ -488,6 +491,9 @@ class UnifiedContentWorkflow:
 
         if not adapter:
             return {"success": False, "message": f"不支持的平台: {publish_platform}"}
+
+        # 将 cover_path 传递给适配器
+        kwargs["cover_path"] = utils.get_cover_path(kwargs.get("article_path"))
 
         # 使用平台适配器发布
         publish_result = adapter.publish_content(content, **kwargs)
