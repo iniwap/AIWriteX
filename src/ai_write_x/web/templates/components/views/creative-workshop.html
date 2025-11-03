@@ -1,0 +1,224 @@
+<div id="creative-workshop-view" class="view-content">  
+    <div class="workshop-container">  
+          
+        <!-- 核心操作区 -->  
+        <div class="workshop-hero">  
+            <div class="hero-content">  
+                <h1 class="workshop-title">  
+                    <svg class="title-icon" viewBox="0 0 24 24">  
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>  
+                    </svg>  
+                    创意工坊  
+                </h1>  
+                <p class="workshop-subtitle">输入话题,一键生成创意内容</p>  
+                  
+                <!-- 话题输入 -->  
+                <div class="topic-input-group">  
+                    <input   
+                        type="text"   
+                        id="topic-input"   
+                        class="topic-input"   
+                        placeholder="输入创作话题,留空自动获取热搜..."  
+                        autocomplete="off"  
+                    />  
+                    <button id="generate-btn" class="btn-generate">  
+                        <svg class="btn-icon" viewBox="0 0 24 24">  
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  
+                        </svg>  
+                        <span class="btn-text">开始生成</span>  
+                    </button>  
+                </div>  
+                  
+                <!-- 快速配置入口 -->  
+                <div class="quick-config-triggers">  
+                    <button class="config-trigger" data-target="reference-mode">  
+                        <svg class="trigger-icon" viewBox="0 0 24 24">  
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>  
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>  
+                        </svg>  
+                        <span class="trigger-label">借鉴模式</span>  
+                        <span class="trigger-status">未启用</span>  
+                        <svg class="trigger-arrow" viewBox="0 0 24 24">  
+                            <polyline points="6 9 12 15 18 9"/>  
+                        </svg>  
+                    </button>  
+                </div>  
+            </div>  
+        </div>  
+          
+        <!-- 借鉴模式配置 -->  
+        <div id="reference-mode-panel" class="config-panel collapsed">  
+            <div class="panel-header">  
+                <h3 class="panel-title">  
+                    <svg class="panel-icon" viewBox="0 0 24 24">  
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>  
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>  
+                    </svg>  
+                    借鉴模式配置  
+                </h3>  
+                <button class="panel-close" data-target="reference-mode">  
+                    <span>收起</span>  
+                    <svg class="close-icon" viewBox="0 0 24 24">  
+                        <polyline points="18 15 12 9 6 15"/>  
+                    </svg>  
+                </button>  
+            </div>  
+              
+            <div class="panel-content">  
+                <!-- 启用开关 -->  
+                <div class="form-group">  
+                    <label class="checkbox-label">  
+                        <input type="checkbox" id="reference-enabled">  
+                        <span class="checkbox-custom"></span>  
+                        启用借鉴模式  
+                    </label>  
+                </div>  
+                  
+                <!-- 借鉴配置项 -->  
+                <div id="reference-options" class="reference-options hidden">  
+                    <div class="form-row">  
+                        <div class="form-group">  
+                            <label for="template-category">模板分类</label>  
+                            <select id="template-category" class="form-select">  
+                                <option value="">选择分类...</option>  
+                            </select>  
+                        </div>  
+                        <div class="form-group">  
+                            <label for="template-name">模板名称</label>  
+                            <select id="template-name" class="form-select">  
+                                <option value="">选择模板...</option>  
+                            </select>  
+                        </div>  
+                    </div>  
+                      
+                    <div class="form-group">  
+                        <label for="reference-urls">  
+                            参考链接  
+                            <span class="label-hint">(多个链接用 | 分隔)</span>  
+                        </label>  
+                        <textarea   
+                            id="reference-urls"   
+                            class="form-textarea"  
+                            placeholder="https://example.com/article1 | https://example.com/article2"  
+                            rows="3"  
+                        ></textarea>  
+                    </div>  
+                      
+                    <div class="form-group">  
+                        <label for="reference-ratio">借鉴比例</label>  
+                        <select id="reference-ratio" class="form-select">  
+                            <option value="10">10%</option>  
+                            <option value="20">20%</option>  
+                            <option value="30" selected>30%</option>  
+                            <option value="50">50%</option>  
+                            <option value="75">75%</option>  
+                        </select>  
+                    </div>  
+                </div>  
+            </div>  
+        </div>  
+          
+        <!-- 生成进度区 -->  
+        <div id="generation-progress" class="generation-progress hidden">  
+            <div class="progress-header">  
+                <h3 class="progress-title">  
+                    <span class="spinner"></span>  
+                    生成中...  
+                </h3>  
+                <button id="stop-btn" class="btn-stop">  
+                    <svg class="stop-icon" viewBox="0 0 24 24">  
+                        <rect x="6" y="6" width="12" height="12"/>  
+                    </svg>  
+                    停止生成  
+                </button>  
+            </div>  
+              
+            <div class="logs-container">  
+                <div id="logs-output" class="logs-output"></div>  
+            </div>  
+              
+            <div class="logs-actions">  
+                <button id="clear-logs-btn" class="btn-text">  
+                    <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                        <polyline points="3 6 5 6 21 6"/>  
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>  
+                    </svg>  
+                    清空日志  
+                </button>  
+                <button id="export-logs-btn" class="btn-text">  
+                    <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>  
+                        <polyline points="7 10 12 15 17 10"/>  
+                        <line x1="12" y1="15" x2="12" y2="3"/>  
+                    </svg>  
+                    导出日志  
+                </button>  
+            </div>  
+        </div>  
+          
+        <!-- 生成结果 -->  
+        <div id="generation-result" class="generation-result hidden">  
+            <div class="result-header">  
+                <div class="result-status success">  
+                    <svg class="status-icon" viewBox="0 0 24 24">  
+                        <polyline points="20 6 9 17 4 12"/>  
+                    </svg>  
+                    <span class="status-text">生成完成</span>  
+                </div>  
+                <button id="new-generation-btn" class="btn-secondary">  
+                    <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                        <line x1="12" y1="5" x2="12" y2="19"/>  
+                        <line x1="5" y1="12" x2="19" y2="12"/>  
+                    </svg>  
+                    新建生成  
+                </button>  
+            </div>  
+              
+            <div class="result-card">  
+                <div class="result-meta">  
+                    <h2 id="result-title" class="result-title"></h2>  
+                    <div class="result-stats">  
+                        <span class="stat-item">  
+                            <svg class="stat-icon" viewBox="0 0 24 24">  
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>  
+                                <polyline points="14,2 14,8 20,8"/>  
+                            </svg>  
+                            <span id="result-word-count">0</span> 字  
+                        </span>  
+                        <span class="stat-item">  
+                            <svg class="stat-icon" viewBox="0 0 24 24">  
+                                <circle cx="12" cy="12" r="10"/>  
+                                <polyline points="12 6 12 12 16 14"/>  
+                            </svg>  
+                            <span id="result-time"></span>  
+                        </span>  
+                    </div>  
+                </div>  
+                  
+                <div class="result-actions">  
+                    <button id="view-article-btn" class="btn-primary">  
+                        <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>  
+                            <circle cx="12" cy="12" r="3"/>  
+                        </svg>  
+                        查看详情  
+                    </button>  
+                    <button id="edit-article-btn" class="btn-secondary">  
+                        <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>  
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>  
+                        </svg>  
+                        编辑  
+                    </button>  
+                    <button id="publish-article-btn" class="btn-secondary">  
+                        <svg class="btn-icon-small" viewBox="0 0 24 24">  
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  
+                        </svg>  
+                        发布  
+                    </button>  
+                </div>  
+            </div>  
+        </div>  
+          
+    </div>  
+</div>
