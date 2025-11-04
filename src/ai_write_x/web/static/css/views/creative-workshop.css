@@ -1,4 +1,11 @@
 /* ========== 容器布局 ========== */  
+#creative-workshop-view {  
+    height: 100%;  
+    display: flex;  
+    flex-direction: column;  
+    overflow: hidden;  
+}
+
 .workshop-container {  
     width: 100%;  
     margin: 0 auto;  
@@ -126,15 +133,15 @@
 }  
 
 /* ========== SVG图标统一样式 ========== */  
-.btn-icon,  
-.trigger-icon,  
-.trigger-arrow,  
-.panel-icon,  
-.close-icon,  
-.stop-icon,  
-.btn-icon-small,  
-.status-icon,  
-.stat-icon {  
+#creative-workshop-view .btn-icon,  
+#creative-workshop-view .trigger-icon,  
+#creative-workshop-view .trigger-arrow,  
+#creative-workshop-view .panel-icon,  
+#creative-workshop-view .close-icon,  
+#creative-workshop-view .stop-icon,  
+#creative-workshop-view .btn-icon-small,  
+#creative-workshop-view .status-icon,  
+#creative-workshop-view .stat-icon {  
     fill: none;  
     stroke: currentColor;  
     stroke-width: 2;  
