@@ -25,7 +25,7 @@
                         <svg class="btn-icon" viewBox="0 0 24 24">  
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  
                         </svg>  
-                        <span class="btn-text">开始生成</span>  
+                        <span>开始生成</span> 
                     </button>  
                 </div>  
                   
@@ -47,63 +47,31 @@
         </div>  
           
         <!-- 借鉴模式配置 -->  
-        <div id="reference-mode-panel" class="config-panel collapsed">  
+        <div id="reference-mode-panel" class="workshop-config-panel collapsed">  
             <div class="panel-header">  
                 <h3 class="panel-title">  
                     <svg class="panel-icon" viewBox="0 0 24 24">  
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>  
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>  
                     </svg>  
-                    借鉴模式配置  
+                    借鉴模式参数设置  
                 </h3>  
-                <button class="panel-close" data-target="reference-mode">  
-                    <span>收起</span>  
-                    <svg class="close-icon" viewBox="0 0 24 24">  
-                        <polyline points="18 15 12 9 6 15"/>  
-                    </svg>  
-                </button>  
             </div>  
-              
+            
             <div class="panel-content">  
-                <!-- 启用开关 -->  
-                <div class="form-group">  
-                    <label class="checkbox-label">  
-                        <input type="checkbox" id="reference-enabled">  
-                        <span class="checkbox-custom"></span>  
-                        启用借鉴模式  
-                    </label>  
-                </div>  
-                  
-                <!-- 借鉴配置项 -->  
-                <div id="reference-options" class="reference-options hidden">  
-                    <div class="form-row">  
-                        <div class="form-group">  
-                            <label for="template-category">模板分类</label>  
-                            <select id="template-category" class="form-select">  
-                                <option value="">选择分类...</option>  
-                            </select>  
-                        </div>  
-                        <div class="form-group">  
-                            <label for="template-name">模板名称</label>  
-                            <select id="template-name" class="form-select">  
-                                <option value="">选择模板...</option>  
-                            </select>  
-                        </div>  
-                    </div>  
-                      
+                <div class="form-row">  
                     <div class="form-group">  
-                        <label for="reference-urls">  
-                            参考链接  
-                            <span class="label-hint">(多个链接用 | 分隔)</span>  
-                        </label>  
-                        <textarea   
-                            id="reference-urls"   
-                            class="form-textarea"  
-                            placeholder="https://example.com/article1 | https://example.com/article2"  
-                            rows="3"  
-                        ></textarea>  
+                        <label for="template-category">模板分类</label>  
+                        <select id="template-category" class="form-select">  
+                            <option value="">选择分类...</option>  
+                        </select>  
                     </div>  
-                      
+                    <div class="form-group">  
+                        <label for="template-name">模板名称</label>  
+                        <select id="template-name" class="form-select">  
+                            <option value="">选择模板...</option>  
+                        </select>  
+                    </div>  
                     <div class="form-group">  
                         <label for="reference-ratio">借鉴比例</label>  
                         <select id="reference-ratio" class="form-select">  
@@ -115,8 +83,22 @@
                         </select>  
                     </div>  
                 </div>  
+                
+                <!-- 参考链接单独一行 -->  
+                <div class="form-group">  
+                    <label for="reference-urls">  
+                        参考链接  
+                        <span class="label-hint">(多个链接用 | 分隔)</span>  
+                    </label>  
+                    <textarea   
+                        id="reference-urls"   
+                        class="form-textarea"  
+                        placeholder="https://example.com/article1 | https://example.com/article2"  
+                        rows="2"  
+                    ></textarea>  
+                </div>  
             </div>  
-        </div>  
+        </div> 
           
         <!-- 生成进度区 -->  
         <div id="generation-progress" class="generation-progress hidden">  
