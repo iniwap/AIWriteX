@@ -253,7 +253,7 @@ class AIWriteXConfigManager {
                 await this.updateConfig({ use_template: e.target.checked });  
                 
                 // 联动禁用逻辑  
-                const templateCategorySelect = document.getElementById('template-category');  
+                const templateCategorySelect = document.getElementById('config-template-category');  
                 const templateSelect = document.getElementById('template');  
                 if (templateCategorySelect) templateCategorySelect.disabled = !e.target.checked;  
                 if (templateSelect) templateSelect.disabled = !e.target.checked;  
@@ -261,7 +261,7 @@ class AIWriteXConfigManager {
         }  
         
         // 模板分类(修改为级联加载)  
-        const templateCategorySelect = document.getElementById('template-category');    
+        const templateCategorySelect = document.getElementById('config-template-category');    
         if (templateCategorySelect) {    
             templateCategorySelect.addEventListener('change', async (e) => {    
                 const category = e.target.value;  
@@ -860,7 +860,7 @@ class AIWriteXConfigManager {
         }  
         
         // ========== 填充模板分类 ==========    
-        const templateCategorySelect = document.getElementById('template-category');    
+        const templateCategorySelect = document.getElementById('config-template-category');    
         if (templateCategorySelect) {    
             templateCategorySelect.value = this.config.template_category || '';    
             templateCategorySelect.disabled = !this.config.use_template;  
@@ -2247,7 +2247,7 @@ class AIWriteXConfigManager {
     
     // 填充模板分类选项  
     populateTemplateCategoryOptions() {  
-        const templateCategorySelect = document.getElementById('template-category');  
+        const templateCategorySelect = document.getElementById('config-template-category');  
         if (!templateCategorySelect || !this.templateCategories) return;  
         
         // 清空现有选项  

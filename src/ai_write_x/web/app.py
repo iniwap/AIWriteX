@@ -27,6 +27,7 @@ from .api.config import router as config_router
 from .api.websocket import router as websocket_router
 from .api.templates import router as templates_router
 from .api.articles import router as articles_router
+from .api.generate import router as generate_router
 
 # 添加全局状态
 app_shutdown_event = asyncio.Event()
@@ -77,6 +78,7 @@ app.include_router(config_router)
 app.include_router(websocket_router)
 app.include_router(templates_router)
 app.include_router(articles_router)
+app.include_router(generate_router)
 
 
 @app.get("/", response_class=HTMLResponse)

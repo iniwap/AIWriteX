@@ -155,7 +155,6 @@
 #creative-workshop-view .trigger-arrow,    
 #creative-workshop-view .panel-icon,    
 #creative-workshop-view .close-icon,    
-#creative-workshop-view .stop-icon,    
 #creative-workshop-view .btn-icon-small,    
 #creative-workshop-view .status-icon,    
 #creative-workshop-view .stat-icon {    
@@ -501,31 +500,38 @@
     to { transform: rotate(360deg); }    
 }    
     
-.btn-stop {    
-    display: flex;    
-    align-items: center;    
-    gap: 6px;    
-    padding: 8px 16px;    
-    background: var(--error-color);    
-    color: white;    
-    border: none;    
-    border-radius: 6px;    
-    font-size: 14px;    
-    font-weight: 500;    
-    cursor: pointer;    
-    transition: all 0.2s ease;    
-}    
-    
-.btn-stop:hover {    
-    opacity: 0.9;    
-    transform: translateY(-1px);    
-}    
-    
-.stop-icon {    
-    width: 14px;    
-    height: 14px;    
-}    
+.btn-stop {  
+    height: 48px;  
+    padding: 0 28px;  
+    background: var(--error-color);
+    color: #ffffff;  
+    border: none;  
+    border-radius: 8px;  
+    font-size: 15px;  
+    font-weight: 500;  
+    cursor: pointer;  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    transition: all 0.2s ease;  
+    white-space: nowrap;  
+}  
   
+.btn-stop:hover {  
+    background: #dc2626;  
+    transform: translateY(-1px);  
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);  
+}  
+  
+.btn-stop:active {  
+    transform: translateY(0);  
+}  
+
+.btn-icon rect {  
+    fill: currentColor !important;  
+    stroke: none !important;  
+}
+
 /* ========== 日志容器 ========== */    
 .logs-container {    
     background: var(--surface-color);    

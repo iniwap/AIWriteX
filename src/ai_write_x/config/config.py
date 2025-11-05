@@ -1768,29 +1768,76 @@ class Config:
             return self.config
 
     def validate_config(self):
-        """验证配置，仅在 CrewAI 执行时调用"""
+        """验证配置,仅在 CrewAI 执行时调用"""
         try:
-            if self.api_key == "":
-                self.error_message = f"未配置API KEY，请打开配置填写{self.api_type}的api_key"
+            # 获取 API 配置
+            api_type = self.api_type
+            api_config = self.config["api"][api_type]
+
+            # 检查 api_key 列表
+            api_keys = api_config.get("api_key", [])
+            if not api_keys or not any(api_keys):
+                self.error_message = f"未配置API KEY，请打开配置填写{api_type}的api_key"
                 return False
 
-            if self.api_model == "":
-                self.error_message = f"未配置Model，请打开配置填写{self.api_type}的model"
+            # 检查 key_index 是否有效
+            key_index = api_config.get("key_index", 0)
+            if key_index >= len(api_keys):
+                self.error_message = f"{api_type}的key_index({key_index})超出范围，api_key列表只有{len(api_keys)}个元素"  # noqa 501
                 return False
 
+            # 检查选中的 api_key 是否为空
+            if not api_keys[key_index]:
+                self.error_message = f"未配置API KEY，请打开配置填写{api_type}的api_key"
+                return False
+
+            # 检查 model 列表
+            models = api_config.get("model", [])
+            if not models:
+                self.error_message = f"未配置Model，请打开配置填写{api_type}的model"
+                return False
+
+            # 检查 model_index 是否有效
+            model_index = api_config.get("model_index", 0)
+            if model_index >= len(models):
+                self.error_message = f"{api_type}的model_index({model_index})超出范围，model列表只有{len(models)}个元素"  # noqa 501
+                return False
+
+            # 检查选中的 model 是否为空
+            if not models[model_index]:
+                self.error_message = f"未配置Model，请打开配置填写{api_type}的model"
+                return False
+
+            # 检查图片生成配置
             if self.img_api_type != "picsum":
-                if self.img_api_key == "":
+                img_api_config = self.config["img_api"][self.img_api_type]
+                img_api_keys = img_api_config.get("api_key", [])
+                img_key_index = img_api_config.get("key_index", 0)
+
+                if (
+                    not img_api_keys
+                    or img_key_index >= len(img_api_keys)
+                    or not img_api_keys[img_key_index]
+                ):
                     self.error_message = (
                         f"未配置图片生成模型的API KEY，请打开配置填写{self.img_api_type}的api_key"
                     )
                     return False
-                elif self.img_api_model == "":
+
+                img_models = img_api_config.get("model", [])
+                img_model_index = img_api_config.get("model_index", 0)
+
+                if (
+                    not img_models
+                    or img_model_index >= len(img_models)
+                    or not img_models[img_model_index]
+                ):
                     self.error_message = (
                         f"未配置图片生成的模型，请打开配置填写{self.img_api_type}的model"
                     )
                     return False
 
-            # 只有自动发布才需要检验公众号配置
+            # 检查自动发布配置
             if self.auto_publish:
                 valid_cred = any(
                     cred["appid"] and cred["appsecret"] for cred in self.wechat_credentials
@@ -1799,7 +1846,7 @@ class Config:
                     self.error_message = "【自动发布】时，需配置微信公众号appid和appsecret"
                     return False
 
-            # 检查是否配置了aiforge api_key
+            # 检查 AIForge 配置
             if not self.aiforge_api_key:
                 log.print_log("AIForge未配置有效的llm提供商的api_key，将不使用搜索功能")
 

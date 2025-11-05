@@ -128,18 +128,22 @@ def run(inputs):
 def ai_write_x_run(config_data=None):
     """执行 AI 写作任务"""
     config = Config.get_instance()
+
     # 准备输入参数
-    log.print_log("正在初始化任务参数，请耐心等待...")
+    log.print_log("正在初始化任务参数，请耐心等待...", "status")
+
     if not config.custom_topic:
+        # 热搜模式: 自动获取热搜话题
         platform = utils.get_random_platform(config.platforms)
         topic = hotnews.select_platform_topic(platform, 5)  # 前五个热门话题根据一定权重选一个
         urls = []
-        reference_ratio = 0
+        reference_ratio = 0.0
     else:
+        # 借鉴模式: 使用自定义话题
         topic = config.custom_topic
         urls = config.urls
         reference_ratio = config.reference_ratio
-        platform = ""
+        platform = ""  # 借鉴模式下 platform 为空
 
     inputs = {
         "platform": platform,
@@ -150,7 +154,6 @@ def ai_write_x_run(config_data=None):
 
     if config_data:
         try:
-            # 创建进程间通信队列
             log_queue = multiprocessing.Queue()
             process = multiprocessing.Process(
                 target=run_crew_in_process,
