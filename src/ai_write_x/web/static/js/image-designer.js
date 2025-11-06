@@ -300,35 +300,138 @@ class ImageDesignerDialog {
         }  
     }  
         
-    async loadDesign() {      
-        try {      
-            // 1. 先尝试加载已保存的设计      
-            const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);      
-            if (designResponse.ok) {      
-                const data = await designResponse.json();      
-                if (data.html) {      
-                    // 如果有保存的设计,使用设计数据      
-                    this.editor.setComponents(data.html);      
-                    this.editor.setStyle(data.css);      
-                    this.isDirty = false;  
-                    return;      
-                }      
-            }      
+    async loadDesign() {  
+        try {  
+            // 1. 尝试加载页面设计配置  
+            let pageDesign = null;  
+            try {  
+                const configResponse = await fetch('/api/config/page-design');  
+                if (configResponse.ok) {  
+                    pageDesign = await configResponse.json();  
+                }  
+            } catch (error) {  
+                console.warn('加载页面设计配置失败,使用原始HTML样式:', error);  
+            }  
             
-            // 2. 如果没有保存的设计,加载原始 HTML      
-            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);      
-            if (contentResponse.ok) {      
-                const htmlContent = await contentResponse.text();      
-                
-                // 将原始 HTML 加载到编辑器      
-                this.editor.setComponents(htmlContent);      
+            // 2. 加载HTML内容  
+            const designResponse = await fetch(`/api/articles/design?article=${encodeURIComponent(this.currentArticle)}`);  
+            if (designResponse.ok) {  
+                const data = await designResponse.json();  
+                if (data.html) {  
+                    this.editor.setComponents(data.html);  
+                    this.editor.setStyle(data.css);  
+                    this.isDirty = false;  
+                    
+                    // 3. 只有在配置存在且未启用原始样式时才应用全局样式  
+                    if (pageDesign && !pageDesign.use_original_styles) {  
+                        this.applyGlobalStyles(pageDesign);  
+                    }  
+                    return;  
+                }  
+            }  
+            
+            // 4. 加载原始HTML  
+            const contentResponse = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);  
+            if (contentResponse.ok) {  
+                const htmlContent = await contentResponse.text();  
+                this.editor.setComponents(htmlContent);  
                 this.isDirty = false;  
-            }      
-        } catch (error) {      
-
-        }      
+                
+                // 5. 同样的逻辑:只有在配置存在且未启用原始样式时才应用  
+                if (pageDesign && !pageDesign.use_original_styles) {  
+                    this.applyGlobalStyles(pageDesign);  
+                }  
+            }  
+        } catch (error) {  
+            console.error('加载设计失败:', error);  
+        }  
     }
-      
+    
+    applyGlobalStyles(config) {  
+        const canvas = this.editor.Canvas.getDocument();  
+        if (!canvas) return;  
+        
+        const container = config.container || {};  
+        const card = config.card || {};  
+        const typography = config.typography || {};  
+        const spacing = config.spacing || {};  
+        const accent = config.accent || {};  
+        
+        // 创建或更新全局样式标签  
+        let styleTag = canvas.getElementById('page-design-global-styles');  
+        if (!styleTag) {  
+            styleTag = canvas.createElement('style');  
+            styleTag.id = 'page-design-global-styles';  
+            canvas.head.appendChild(styleTag);  
+        }  
+        
+        // 生成CSS规则  
+        styleTag.textContent = `  
+            /* 页面容器样式 */  
+            body {  
+                max-width: ${container.max_width || 750}px !important;  
+                margin: 0 auto !important;  
+                background-color: ${container.background_color || '#f8f9fa'} !important;  
+                font-size: ${typography.base_font_size || 16}px !important;  
+                line-height: ${typography.line_height || 1.6} !important;  
+                color: ${typography.text_color || '#333333'} !important;  
+            }  
+            
+            /* 卡片样式 */  
+            section {  
+                margin-left: ${container.margin_horizontal || 10}px !important;  
+                margin-right: ${container.margin_horizontal || 10}px !important;  
+                margin-top: ${spacing.section_margin || 24}px !important;  
+                margin-bottom: ${spacing.section_margin || 24}px !important;  
+                border-radius: ${card.border_radius || 12}px !important;  
+                box-shadow: ${card.box_shadow || '0 4px 16px rgba(0,0,0,0.06)'} !important;  
+                background-color: ${card.background_color || '#ffffff'} !important;  
+            }  
+            
+            /* 卡片内部padding */  
+            section > div {  
+                padding: ${card.padding || 24}px !important;  
+            }  
+            
+            /* 标题样式 */  
+            h1, h2, h3, h4, h5, h6 {  
+                color: ${typography.heading_color || '#333333'} !important;  
+            }  
+            
+            h1 {  
+                font-size: ${(typography.base_font_size || 16) * (typography.heading_scale || 1.5)}px !important;  
+            }  
+            
+            h2 {  
+                font-size: ${(typography.base_font_size || 16) * (typography.heading_scale || 1.5) * 0.9}px !important;  
+            }  
+            
+            /* 段落间距 */  
+            p {  
+                margin-bottom: ${spacing.element_margin || 16}px !important;  
+                color: ${typography.text_color || '#333333'} !important;  
+            }  
+            
+            /* 色彩强调 - 顶部色条 */  
+            section > div:first-child[style*="height: 8px"] {  
+                background-color: ${accent.primary_color || '#3a7bd5'} !important;  
+            }  
+            
+            /* SVG图标颜色 */  
+            svg {  
+                fill: ${accent.primary_color || '#3a7bd5'} !important;  
+            }  
+            
+            /* 高亮区块背景 */  
+            div[style*="background-color: #f0f7ff"],  
+            div[style*="background-color: #fff4f0"],  
+            div[style*="background-color: #f0f0ff"],  
+            div[style*="background-color: #faf5ff"] {  
+                background-color: ${accent.highlight_bg || '#f0f7ff'} !important;  
+            }  
+        `;  
+    }  
+
     async saveDesign() {    
         const bodyHtml = this.editor.getHtml();    
         const css = this.editor.getCss();    

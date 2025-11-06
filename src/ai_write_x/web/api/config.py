@@ -45,6 +45,7 @@ async def get_config():
             "format_publish": config_dict.get("format_publish", True),
             "dimensional_creative": config_dict.get("dimensional_creative", {}),
             "aiforge_config": config.aiforge_config,
+            "page_design": config_dict.get("page_design"),
         }
 
         return {"status": "success", "data": config_data}
@@ -205,18 +206,14 @@ async def get_system_messages():
     return {"status": "success", "data": system_messages}
 
 
-@router.get("/image-design")
-async def get_image_design_config():
-    """获取页面设计"""
+@router.get("/page-design")
+async def get_page_design_config():
+    """获取页面设计配置"""
     config = Config.get_instance()
-    return config.get_config().get(
-        "image_design",
-        {
-            "margin": 20,
-            "border_radius": 8,
-            "max_width": 100,
-            "auto_theme_adapt": True,
-            "light_bg_color": "#ffffff",
-            "dark_bg_color": "#1a1a1a",
-        },
-    )
+    page_design = config.get_config().get("page_design")
+
+    # 如果配置不存在,返回None,让前端使用原始HTML
+    if not page_design:
+        return None
+
+    return page_design

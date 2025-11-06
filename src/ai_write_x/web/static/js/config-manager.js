@@ -77,7 +77,6 @@ class AIWriteXConfigManager {
             // 6. 最后绑定导航事件(确保DOM已加载)    
             this.bindConfigNavigation();    
         } catch (error) {    
-            console.error('配置管理器初始化失败:', error);    
         }    
     }  
     
@@ -91,11 +90,10 @@ class AIWriteXConfigManager {
                     window.themeManager.applyTheme(e.target.value, false);    
                 }    
                 
-                // ✅ 添加按钮状态变化逻辑  
                 const saveBtn = document.getElementById('save-ui-config');    
                 if (saveBtn && !saveBtn.classList.contains('has-changes')) {    
                     saveBtn.classList.add('has-changes');    
-                    saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';    
+                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';    
                 }  
             });    
         }    
@@ -109,11 +107,10 @@ class AIWriteXConfigManager {
                     window.windowModeManager.applyMode(e.target.value);    
                 }    
                 
-                // ✅ 添加按钮状态变化逻辑  
                 const saveBtn = document.getElementById('save-ui-config');    
                 if (saveBtn && !saveBtn.classList.contains('has-changes')) {    
                     saveBtn.classList.add('has-changes');    
-                    saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';    
+                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';    
                 }  
             });    
         }  
@@ -130,7 +127,7 @@ class AIWriteXConfigManager {
                 const saveBtn = document.getElementById('save-ui-config');  
                 if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
                     saveBtn.classList.add('has-changes');  
-                    saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
+                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
                 }  
             });  
         } 
@@ -146,7 +143,7 @@ class AIWriteXConfigManager {
                     const saveBtn = document.getElementById('save-ui-config');  
                     if (saveBtn) {  
                         saveBtn.classList.remove('has-changes');  
-                        saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                        saveBtn.innerHTML = '保存设置';  
                     }  
                 }  
                 
@@ -195,7 +192,7 @@ class AIWriteXConfigManager {
                 const success = await this.saveConfig();  
                 if (success) {  
                     saveBaseConfigBtn.classList.remove('has-changes');  
-                    saveBaseConfigBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                    saveBaseConfigBtn.innerHTML = '保存设置';  
                 }  
                 window.app?.showNotification(  
                     success ? '基础设置已保存' : '保存基础设置失败',  
@@ -359,7 +356,7 @@ class AIWriteXConfigManager {
                     const saveBtn = document.getElementById('save-platforms-config');  
                     if (saveBtn) {  
                         saveBtn.classList.remove('has-changes');  
-                        saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                        saveBtn.innerHTML = '保存设置';  
                     }  
                 }  
                 
@@ -471,7 +468,7 @@ class AIWriteXConfigManager {
                 
                 if (success) {  
                     saveAPIConfigBtn.classList.remove('has-changes');  
-                    saveAPIConfigBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                    saveAPIConfigBtn.innerHTML = '保存设置';  
                 }  
                 
                 window.app?.showNotification(  
@@ -509,7 +506,7 @@ class AIWriteXConfigManager {
                 
                 if (success) {  
                     saveImgAPIConfigBtn.classList.remove('has-changes');  
-                    saveImgAPIConfigBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                    saveImgAPIConfigBtn.innerHTML = '保存设置';  
                 }  
                 
                 window.app?.showNotification(  
@@ -535,7 +532,7 @@ class AIWriteXConfigManager {
                 
                 if (success) {  
                     saveAIForgeConfigBtn.classList.remove('has-changes');  
-                    saveAIForgeConfigBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                    saveAIForgeConfigBtn.innerHTML = '保存设置';  
                 }  
                 
                 window.app?.showNotification(  
@@ -775,7 +772,7 @@ class AIWriteXConfigManager {
                 
                 if (success) {  
                     saveCreativeConfigBtn.classList.remove('has-changes');  
-                    saveCreativeConfigBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                    saveCreativeConfigBtn.innerHTML = '保存设置';  
                 }  
                 
                 window.app?.showNotification(  
@@ -804,8 +801,212 @@ class AIWriteXConfigManager {
                 }  
             });  
         }
+
+        // 页面设计配置 - 使用原始样式开关  
+        const useOriginalStylesCheckbox = document.getElementById('use-original-styles');  
+        if (useOriginalStylesCheckbox) {  
+            useOriginalStylesCheckbox.addEventListener('change', (e) => {  
+                const useOriginal = e.target.checked;  
+                
+                // 禁用/启用所有配置输入框  
+                const settingsSections = [  
+                    'page-design-settings',  
+                    'card-design-settings',  
+                    'typography-design-settings',  
+                    'spacing-design-settings',  
+                    'accent-design-settings'  
+                ];  
+                
+                settingsSections.forEach(sectionId => {  
+                    const section = document.getElementById(sectionId);  
+                    if (section) {  
+                        const inputs = section.querySelectorAll('input, select, textarea');  
+                        inputs.forEach(input => {  
+                            input.disabled = useOriginal;  
+                        });  
+                        
+                        // 添加视觉反馈  
+                        if (useOriginal) {  
+                            section.style.opacity = '0.5';  
+                            section.style.pointerEvents = 'none';  
+                        } else {  
+                            section.style.opacity = '1';  
+                            section.style.pointerEvents = 'auto';  
+                        }  
+                    }  
+                });  
+                
+                // 标记按钮状态变化  
+                const saveBtn = document.getElementById('save-page-design-config');  
+                if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
+                    saveBtn.classList.add('has-changes');  
+                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
+                }  
+            });  
+        }  
+        
+        // 页面设计配置 - 保存按钮  
+        const savePageDesignBtn = document.getElementById('save-page-design-config');  
+        if (savePageDesignBtn) {  
+            savePageDesignBtn.addEventListener('click', async () => {  
+                await this.savePageDesignConfig();  
+            });  
+        }  
+        
+        // 页面设计配置 - 恢复默认按钮  
+        const resetPageDesignBtn = document.getElementById('reset-page-design-config');  
+        if (resetPageDesignBtn) {  
+            resetPageDesignBtn.addEventListener('click', async () => {  
+                const response = await fetch(`${this.apiEndpoint}/default`);  
+                if (response.ok) {  
+                    const result = await response.json();  
+                    const defaultPageDesign = result.data.page_design;  
+                    
+                    await this.updateConfig({ page_design: defaultPageDesign });  
+                    this.populatePageDesignUI();  
+                    
+                    window.app?.showNotification('已恢复默认页面设计配置', 'info');  
+                }  
+            });  
+        }  
+        
+        // 页面设计配置 - 输入框变化监听  
+        const pageDesignInputs = [  
+            'container-max-width', 'container-margin-h', 'container-bg-color',  
+            'card-border-radius', 'card-padding', 'card-bg-color', 'card-box-shadow',  
+            'typography-font-size', 'typography-line-height', 'typography-heading-scale',  
+            'typography-text-color', 'typography-heading-color',  
+            'spacing-section-margin', 'spacing-element-margin',  
+            'accent-primary-color', 'accent-secondary-color', 'accent-highlight-bg'  
+        ];  
+        
+        pageDesignInputs.forEach(inputId => {  
+            const input = document.getElementById(inputId);  
+            if (input) {  
+                input.addEventListener('input', () => {  
+                    const saveBtn = document.getElementById('save-page-design-config');  
+                    if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
+                        saveBtn.classList.add('has-changes');  
+                        saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
+                    }  
+                });  
+            }  
+        });
     }  
     
+    // 加载页面设计配置到UI(续)  
+    populatePageDesignUI() {  
+        if (!this.config.page_design) {  
+            const useOriginalCheckbox = document.getElementById('use-original-styles');  
+            if (useOriginalCheckbox) {  
+                useOriginalCheckbox.checked = true;  
+                useOriginalCheckbox.dispatchEvent(new Event('change'));  
+            }  
+            return;  
+        }  
+        
+        const pd = this.config.page_design;  
+        
+        // 使用原始样式开关 - 修复逻辑  
+        const useOriginalCheckbox = document.getElementById('use-original-styles');  
+        if (useOriginalCheckbox) {  
+            if (pd.use_original_styles !== undefined) {  
+                useOriginalCheckbox.checked = pd.use_original_styles;  
+            } else {  
+                useOriginalCheckbox.checked = true;  
+            }  
+            
+            useOriginalCheckbox.dispatchEvent(new Event('change'));  
+        }    
+        
+        // 容器  
+        if (pd.container) {  
+            document.getElementById('container-max-width').value = pd.container.max_width || 750;  
+            document.getElementById('container-margin-h').value = pd.container.margin_horizontal || 10;  
+            document.getElementById('container-bg-color').value = pd.container.background_color || '#f8f9fa';  
+        }  
+        
+        // 卡片  
+        if (pd.card) {  
+            document.getElementById('card-border-radius').value = pd.card.border_radius || 12;  
+            document.getElementById('card-padding').value = pd.card.padding || 24;  
+            document.getElementById('card-bg-color').value = pd.card.background_color || '#ffffff';  
+            document.getElementById('card-box-shadow').value = pd.card.box_shadow || '0 4px 16px rgba(0,0,0,0.06)';  
+        }  
+        
+        // 排版  
+        if (pd.typography) {  
+            document.getElementById('typography-font-size').value = pd.typography.base_font_size || 16;  
+            document.getElementById('typography-line-height').value = pd.typography.line_height || 1.6;  
+            document.getElementById('typography-heading-scale').value = pd.typography.heading_scale || 1.5;  
+            document.getElementById('typography-text-color').value = pd.typography.text_color || '#333333';  
+            document.getElementById('typography-heading-color').value = pd.typography.heading_color || '#333333';  
+        }  
+        
+        // 间距  
+        if (pd.spacing) {  
+            document.getElementById('spacing-section-margin').value = pd.spacing.section_margin || 24;  
+            document.getElementById('spacing-element-margin').value = pd.spacing.element_margin || 16;  
+        }  
+        
+        // 色彩  
+        if (pd.accent) {  
+            document.getElementById('accent-primary-color').value = pd.accent.primary_color || '#3a7bd5';  
+            document.getElementById('accent-secondary-color').value = pd.accent.secondary_color || '#00b09b';  
+            document.getElementById('accent-highlight-bg').value = pd.accent.highlight_bg || '#f0f7ff';  
+        }  
+    }  
+    
+    // 保存页面设计配置  
+    async savePageDesignConfig() {  
+        const pageDesignConfig = {  
+            use_original_styles: document.getElementById('use-original-styles')?.checked || false,  
+            container: {  
+                max_width: parseInt(document.getElementById('container-max-width')?.value || 750),  
+                margin_horizontal: parseInt(document.getElementById('container-margin-h')?.value || 10),  
+                background_color: document.getElementById('container-bg-color')?.value || '#f8f9fa'  
+            },  
+            card: {  
+                border_radius: parseInt(document.getElementById('card-border-radius')?.value || 12),  
+                box_shadow: document.getElementById('card-box-shadow')?.value || '0 4px 16px rgba(0,0,0,0.06)',  
+                padding: parseInt(document.getElementById('card-padding')?.value || 24),  
+                background_color: document.getElementById('card-bg-color')?.value || '#ffffff'  
+            },  
+            typography: {  
+                base_font_size: parseInt(document.getElementById('typography-font-size')?.value || 16),  
+                line_height: parseFloat(document.getElementById('typography-line-height')?.value || 1.6),  
+                heading_scale: parseFloat(document.getElementById('typography-heading-scale')?.value || 1.5),  
+                text_color: document.getElementById('typography-text-color')?.value || '#333333',  
+                heading_color: document.getElementById('typography-heading-color')?.value || '#333333'  
+            },  
+            spacing: {  
+                section_margin: parseInt(document.getElementById('spacing-section-margin')?.value || 24),  
+                element_margin: parseInt(document.getElementById('spacing-element-margin')?.value || 16)  
+            },  
+            accent: {  
+                primary_color: document.getElementById('accent-primary-color')?.value || '#3a7bd5',  
+                secondary_color: document.getElementById('accent-secondary-color')?.value || '#00b09b',  
+                highlight_bg: document.getElementById('accent-highlight-bg')?.value || '#f0f7ff'  
+            }  
+        };  
+        
+        await this.updateConfig({ page_design: pageDesignConfig });  
+        const success = await this.saveConfig();  
+        
+        if (success) {  
+            const saveBtn = document.getElementById('save-page-design-config');  
+            if (saveBtn) {  
+                saveBtn.classList.remove('has-changes');  
+                saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+            }  
+        }  
+        
+        window.app?.showNotification(  
+            success ? '页面设计配置已保存' : '保存配置失败',  
+            success ? 'success' : 'error'  
+        );  
+    }
+
     toggleGrapesJSTheme(designTheme) {  
         const linkId = 'grapesjs-theme-override-link';  
         const existingLink = document.getElementById(linkId);  
@@ -960,6 +1161,9 @@ class AIWriteXConfigManager {
         this.populateAIForgeUI();
 
         this.populateCreativeUI();
+
+        // 添加页面设计UI填充  
+        this.populatePageDesignUI();  
     }
 
     // 填充热搜平台UI  
@@ -1121,10 +1325,6 @@ class AIWriteXConfigManager {
                     await this.updateAIForgeLLMProviderField(provider, field, e.target.value);  
                     return;  
                 }
-                
-                // ✅ 其他所有情况:直接调用updateConfig()  
-                // 这样新增的配置界面无需修改此方法  
-                console.warn(`未匹配的输入框ID: ${id}, 跳过更新`);  
             } else {
                 e.stopPropagation();
             }       
@@ -1254,7 +1454,7 @@ class AIWriteXConfigManager {
             const saveBtn = document.getElementById('save-wechat-config');  
             if (saveBtn) {  
                 saveBtn.classList.remove('has-changes');  
-                saveBtn.innerHTML = '<i class="icon-save"></i> 保存配置';  
+                saveBtn.innerHTML = '保存配置';  
             }  
         }  
         
@@ -2027,7 +2227,7 @@ class AIWriteXConfigManager {
             const saveBtn = document.getElementById('save-api-config');    
             if (saveBtn) {    
                 saveBtn.classList.remove('has-changes');    
-                saveBtn.innerHTML = '<i class="icon-save"></i> 保存配置';    
+                saveBtn.innerHTML = '保存配置';    
             }    
         }    
         
@@ -2058,7 +2258,6 @@ class AIWriteXConfigManager {
                     
                     window.app?.showNotification('已恢复默认API配置', 'success');  
                 } catch (error) {  
-                    console.error('恢复默认配置失败:', error);  
                     window.app?.showNotification('恢复默认配置失败', 'error');  
                 }  
             }  
@@ -2158,7 +2357,6 @@ class AIWriteXConfigManager {
                 
             return true;      
         } catch (e) {      
-            console.error('保存 UI 配置失败:', e);      
             return false;      
         }      
     }
@@ -2197,7 +2395,6 @@ class AIWriteXConfigManager {
                 
             return true;    
         } catch (error) {    
-            console.error('加载配置失败:', error);  
             return false;    
         }    
     }
@@ -2221,7 +2418,6 @@ class AIWriteXConfigManager {
                 this.populateTemplateCategoryOptions();  
             }  
         } catch (error) {  
-            console.error('加载动态选项失败:', error);  
         }  
     }  
     
@@ -2283,7 +2479,6 @@ class AIWriteXConfigManager {
             const result = await response.json();  
             return result.data || [];  
         } catch (error) {  
-            console.error('加载模板列表失败:', error);  
             return [];  
         }  
     }
@@ -2490,7 +2685,7 @@ class AIWriteXConfigManager {
             const saveBtn = document.getElementById('save-img-api-config');  
             if (saveBtn) {  
                 saveBtn.classList.remove('has-changes');  
-                saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                saveBtn.innerHTML = '保存设置';  
             }  
         }  
         
@@ -2517,7 +2712,6 @@ class AIWriteXConfigManager {
                     
                     window.app?.showNotification('已恢复默认图片API配置', 'success');  
                 } catch (error) {  
-                    console.error('恢复默认配置失败:', error);  
                     window.app?.showNotification('恢复默认配置失败', 'error');  
                 }  
             }  
@@ -3271,7 +3465,7 @@ class AIWriteXConfigManager {
             const saveBtn = document.getElementById('save-image-design-config');  
             if (saveBtn) {  
                 saveBtn.classList.remove('has-changes');  
-                saveBtn.innerHTML = '<i class="icon-save"></i> 保存设置';  
+                saveBtn.innerHTML = '保存设置';  
             }  
         }  
         
@@ -3322,13 +3516,12 @@ class AIWriteXConfigManager {
                 const saveBtn = document.getElementById(saveBtnId);  
                 if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
                     saveBtn.classList.add('has-changes');  
-                    saveBtn.innerHTML = `<i class="icon-save"></i> 保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>`;  
+                    saveBtn.innerHTML = `保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>`;  
                 }  
             }  
                 
             return true;        
         } catch (error) {        
-            console.error('更新配置失败:', error);        
             return false;        
         }        
     }
@@ -3348,7 +3541,6 @@ class AIWriteXConfigManager {
             const result = await response.json();  
             return result.status === 'success';  
         } catch (error) {  
-            console.error('保存配置失败:', error);  
             return false;  
         }  
     }  
@@ -3374,7 +3566,6 @@ class AIWriteXConfigManager {
               
             return true;  
         } catch (error) {  
-            console.error('恢复默认配置失败:', error);  
             return false;  
         }  
     }  
@@ -3405,7 +3596,6 @@ class AIWriteXConfigManager {
             await this.updateConfig(updateData);    
             return true;    
         } catch (error) {    
-            console.error(`更新配置项 ${key} 失败:`, error);    
             return false;    
         }    
     }    

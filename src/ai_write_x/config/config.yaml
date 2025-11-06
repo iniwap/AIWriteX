@@ -830,3 +830,27 @@ dimensional_creative:
           value: 切分节奏
           weight: 1
           description: 错落有致，富有变化
+page_design:
+  use_original_styles: true
+  container:
+    max_width: 750
+    margin_horizontal: 10
+    background_color: "#f8f9fa"
+  card:
+    border_radius: 12
+    box_shadow: 0 4px 16px rgba(0,0,0,0.06)
+    padding: 24
+    background_color: "#ffffff"
+  typography:
+    base_font_size: 16
+    line_height: 1.6
+    heading_scale: 1.5
+    text_color: "#333333"
+    heading_color: "#333333"
+  spacing:
+    section_margin: 24
+    element_margin: 16
+  accent:
+    primary_color: "#3a7bd5"
+    secondary_color: "#00b09b"
+    highlight_bg: "#f0f7ff"

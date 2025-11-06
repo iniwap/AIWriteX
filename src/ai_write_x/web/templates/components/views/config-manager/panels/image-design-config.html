@@ -1,58 +1,138 @@
-<div class="config-panel" id="config-image-design">  
+<div class="config-panel" id="config-image-design">   
     <div class="config-header">  
         <h2>页面设计</h2>  
-        <p class="config-description">页面设计的默认样式和行为</p>  
+        <p class="config-description">配置HTML页面的全局外观样式</p>  
     </div>  
       
     <div class="config-form">  
+        <!-- 全局开关 -->  
         <div class="config-section">  
-            <h3 class="section-title">默认样式</h3>  
-              
             <div class="form-group">  
-                <label>图片边距(px)</label>  
-                <input type="number" id="image-margin" class="form-control" value="20" min="0" max="100">  
-            </div>  
-              
-            <div class="form-group">  
-                <label>图片圆角(px)</label>  
-                <input type="number" id="image-border-radius" class="form-control" value="8" min="0" max="50">  
-            </div>  
-              
-            <div class="form-group">  
-                <label>图片最大宽度(%)</label>  
-                <input type="number" id="image-max-width" class="form-control" value="100" min="50" max="100">  
+                <label class="checkbox-label">  
+                    <input type="checkbox" id="use-original-styles">  
+                    <span class="checkbox-custom"></span>  
+                    使用原始HTML样式(不应用以下配置)  
+                </label>  
+                <p class="form-hint" style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">  
+                    勾选后，页面设计器将直接使用HTML文件的内联样式，不应用下方的全局样式配置（页面设计参数为实验性功能，请谨慎使用）  
+                </p>  
             </div>  
         </div>  
           
-        <div class="config-section">  
-            <h3 class="section-title">主题适配</h3>  
-              
-            <div class="form-group">  
-                <label class="checkbox-label">  
-                    <input type="checkbox" id="auto-theme-adapt" checked>  
-                    <span class="checkbox-custom"></span>  
-                    自动适配亮色/暗色主题  
-                </label>  
+        <!-- 页面容器 -->  
+        <div class="config-section" id="page-design-settings">  
+            <h3 class="section-title">页面容器</h3>  
+            <div class="form-row">  
+                <div class="form-group form-group-third">  
+                    <label>最大宽度(px)</label>  
+                    <input type="number" id="container-max-width" class="form-control" value="750" min="320" max="1200">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>左右外边距(px)</label>  
+                    <input type="number" id="container-margin-h" class="form-control" value="10" min="0" max="50">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>页面背景色</label>  
+                    <input type="color" id="container-bg-color" class="form-control" value="#f8f9fa">  
+                </div>  
             </div>  
-              
-            <div class="form-group">  
-                <label>亮色模式背景色</label>  
-                <input type="color" id="light-bg-color" class="form-control" value="#ffffff">  
+        </div>  
+          
+        <!-- 卡片样式 -->  
+        <div class="config-section" id="card-design-settings">  
+            <h3 class="section-title">卡片样式</h3>  
+            <div class="form-row">  
+                <div class="form-group form-group-third">  
+                    <label>圆角(px)</label>  
+                    <input type="number" id="card-border-radius" class="form-control" value="12" min="0" max="50">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>内边距(px)</label>  
+                    <input type="number" id="card-padding" class="form-control" value="24" min="8" max="50">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>背景色</label>  
+                    <input type="color" id="card-bg-color" class="form-control" value="#ffffff">  
+                </div>  
             </div>  
-              
-            <div class="form-group">  
-                <label>暗色模式背景色</label>  
-                <input type="color" id="dark-bg-color" class="form-control" value="#1a1a1a">  
+            <div class="form-row">  
+                <div class="form-group">  
+                    <label>阴影</label>  
+                    <input type="text" id="card-box-shadow" class="form-control" value="0 4px 16px rgba(0,0,0,0.06)">  
+                </div>  
+            </div>  
+        </div>  
+          
+        <!-- 排版 -->  
+        <div class="config-section" id="typography-design-settings">  
+            <h3 class="section-title">排版</h3>  
+            <div class="form-row">  
+                <div class="form-group form-group-third">  
+                    <label>基础字号(px)</label>  
+                    <input type="number" id="typography-font-size" class="form-control" value="16" min="12" max="24">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>行高倍数</label>  
+                    <input type="number" id="typography-line-height" class="form-control" value="1.6" min="1.2" max="2.5" step="0.1">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>标题字号倍数</label>  
+                    <input type="number" id="typography-heading-scale" class="form-control" value="1.5" min="1.2" max="2.0" step="0.1">  
+                </div>  
+            </div>  
+            <div class="form-row">  
+                <div class="form-group form-group-half">  
+                    <label>文本颜色</label>  
+                    <input type="color" id="typography-text-color" class="form-control" value="#333333">  
+                </div>  
+                <div class="form-group form-group-half">  
+                    <label>标题颜色</label>  
+                    <input type="color" id="typography-heading-color" class="form-control" value="#333333">  
+                </div>  
+            </div>  
+        </div>  
+          
+        <!-- 间距 -->  
+        <div class="config-section" id="spacing-design-settings">  
+            <h3 class="section-title">间距</h3>  
+            <div class="form-row">  
+                <div class="form-group form-group-half">  
+                    <label>Section间距(px)</label>  
+                    <input type="number" id="spacing-section-margin" class="form-control" value="24" min="8" max="50">  
+                </div>  
+                <div class="form-group form-group-half">  
+                    <label>元素间距(px)</label>  
+                    <input type="number" id="spacing-element-margin" class="form-control" value="16" min="8" max="32">  
+                </div>  
+            </div>  
+        </div>  
+          
+        <!-- 色彩强调 -->  
+        <div class="config-section" id="accent-design-settings">  
+            <h3 class="section-title">色彩强调</h3>  
+            <div class="form-row">  
+                <div class="form-group form-group-third">  
+                    <label>主色调</label>  
+                    <input type="color" id="accent-primary-color" class="form-control" value="#3a7bd5">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>辅助色</label>  
+                    <input type="color" id="accent-secondary-color" class="form-control" value="#00b09b">  
+                </div>  
+                <div class="form-group form-group-third">  
+                    <label>高亮背景色</label>  
+                    <input type="color" id="accent-highlight-bg" class="form-control" value="#f0f7ff">  
+                </div>  
             </div>  
         </div>  
     </div>  
       
     <div class="config-actions">  
-        <button type="button" class="btn btn-primary" id="save-image-design-config">  
+        <button type="button" class="btn btn-primary" id="save-page-design-config">  
             <i class="icon-save"></i>  
             保存设置  
         </button>  
-        <button type="button" class="btn btn-secondary" id="reset-image-design-config">  
+        <button type="button" class="btn btn-secondary" id="reset-page-design-config">  
             <i class="icon-reset"></i>  
             恢复默认  
         </button>  

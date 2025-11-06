@@ -85,7 +85,12 @@
     border-radius: 8px;      
     padding: 20px;      
     margin-bottom: 20px;      
-}      
+} 
+
+#config-platforms .config-section {  
+    padding: 16px;
+    margin-bottom: 16px;
+}
       
 .section-title {      
     display: flex;      
@@ -96,7 +101,11 @@
     color: var(--text-primary);      
     margin-bottom: 20px;      
 }      
-      
+ 
+#config-platforms .section-title {  
+    margin-bottom: 0px;  
+}  
+
 /* 统一的表单网格布局 */      
 .form-grid {      
     display: grid;      
@@ -283,7 +292,12 @@
     padding: 16px;  
     margin-top: 12px;  
 }  
-  
+
+#config-platforms .platform-list-container {  
+    margin-top: 0;  
+    padding: 8px 0; 
+} 
+
 /* 平台表格 */  
 .platform-table {  
     width: 100%;  
@@ -305,33 +319,32 @@
     border-bottom: 2px solid var(--border-color);  
 }  
   
-/* 优化的列宽设置 - 避免"启用"换行 */  
 .platform-table .col-enabled {  
-    width: 80px;  
+    width: 100px;
     text-align: center;  
 }  
   
 .platform-table .col-platform {  
-    width: 180px;  
+    width: 200px;
 }  
   
 .platform-table .col-weight {  
-    width: 200px;  
+    width: 250px;  
 }  
   
 .platform-table .col-description {  
     width: auto;  
-    min-width: 200px;  
+    min-width: 250px;  
 }  
   
 .platform-table tbody tr {  
-    background: var(--surface-color);  /* 修改:默认使用surface-color */  
+    background: var(--surface-color); 
     border-bottom: 1px solid var(--border-color);  
     transition: background-color 0.2s;  
 }  
   
 .platform-table tbody tr:hover {  
-    background: var(--background-color);  /* 修改:hover时使用background-color */  
+    background: var(--background-color);
 }  
   
 .platform-table tbody tr:last-child {  
@@ -344,9 +357,16 @@
 }  
   
 /* 启用列居中对齐 */  
+.platform-table td:first-child .checkbox-label {  
+    justify-content: center;  
+    margin: 0;  
+    width: 100%;  
+}  
+  
 .platform-table td:first-child {  
     text-align: center;  
-}  
+    vertical-align: middle;  
+} 
   
 /* 平台名称样式 */  
 .platform-table .platform-name {  
@@ -397,12 +417,12 @@
   
 @media (max-width: 800px) {  
     .platform-table .col-enabled {  
-        width: 60px;  
+        width: 80px; 
     }  
       
     .platform-table .col-platform {  
-        width: 120px;  
-    }  
+        width: 150px; 
+    }   
       
     .platform-table th,  
     .platform-table td {  

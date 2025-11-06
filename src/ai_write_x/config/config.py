@@ -1190,6 +1190,34 @@ class Config:
                     },
                 },  # 维度选项配置
             },
+            # 页面设计配置 - 默认不启用,使用原始HTML样式
+            "page_design": {
+                "use_original_styles": True,  # 默认true,不应用全局样式覆盖
+                "container": {
+                    "max_width": 750,
+                    "margin_horizontal": 10,
+                    "background_color": "#f8f9fa",
+                },
+                "card": {
+                    "border_radius": 12,
+                    "box_shadow": "0 4px 16px rgba(0,0,0,0.06)",
+                    "padding": 24,
+                    "background_color": "#ffffff",
+                },
+                "typography": {
+                    "base_font_size": 16,
+                    "line_height": 1.6,
+                    "heading_scale": 1.5,
+                    "text_color": "#333333",
+                    "heading_color": "#333333",
+                },
+                "spacing": {"section_margin": 24, "element_margin": 16},
+                "accent": {
+                    "primary_color": "#3a7bd5",
+                    "secondary_color": "#00b09b",
+                    "highlight_bg": "#f0f7ff",
+                },
+            },
         }
 
         self.default_aiforge_config = {
