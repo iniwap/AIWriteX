@@ -5,9 +5,41 @@ import time
 import traceback
 import multiprocessing
 import threading
+from datetime import datetime
 
 from src.ai_write_x.utils import comm
 from src.ai_write_x.utils import utils
+
+
+class FileLoggingHandler:
+    """统一的文件日志处理器"""
+
+    def __init__(self, log_file_path):
+        self.log_file_path = log_file_path
+        self._lock = threading.Lock()
+
+    def write_log(self, msg_dict):
+        """
+        写入日志到文件
+
+        Args:
+            msg_dict: 包含type, message, timestamp的字典
+        """
+        try:
+            with self._lock:
+                timestamp = msg_dict.get("timestamp", time.time())
+                msg_type = msg_dict.get("type", "info")
+                message = msg_dict.get("message", "")
+
+                # 统一格式化
+                log_entry = f"[{datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')}] [{msg_type.upper()}]: {message}"  # noqa 501
+
+                with open(self.log_file_path, "a", encoding="utf-8") as f:
+                    f.write(log_entry + "\n")
+                    f.flush()
+        except Exception:
+            # 静默处理文件写入错误
+            pass
 
 
 class LogManager:
@@ -27,6 +59,16 @@ class LogManager:
         # 日志系统的核心状态
         self._ui_mode = False  # 默认为命令行模式
         self._process_log_queue = None  # 进程间日志队列
+        self._file_handler = None
+
+    def set_file_handler(self, log_file_path):
+        """设置文件日志处理器"""
+
+        self._file_handler = FileLoggingHandler(log_file_path)
+
+    def get_file_handler(self):
+        """获取文件处理器"""
+        return self._file_handler
 
     @classmethod
     def get_instance(cls):

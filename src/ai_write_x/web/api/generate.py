@@ -230,21 +230,22 @@ async def get_generation_status():
 
 @router.websocket("/ws/generate/logs")
 async def websocket_logs(websocket: WebSocket):
-    """
-    WebSocket 日志流式传输
-
-    参考 PySimpleGUI 的日志队列处理:
-    src/ai_write_x/gui/MainGUI.py:638-714
-    """
     await websocket.accept()
 
     global _current_log_queue
+
+    # 初始化文件日志处理器
+    from datetime import datetime
+    from src.ai_write_x.utils.path_manager import PathManager
+
+    log_file = PathManager.get_log_dir() / f"WEB_{datetime.now().strftime('%Y-%m-%d')}.log"
+    log.LogManager.get_instance().set_file_handler(log_file)
+    file_handler = log.LogManager.get_instance().get_file_handler()
 
     try:
         while True:
             if _current_log_queue:
                 try:
-                    # 非阻塞获取日志消息
                     msg = _current_log_queue.get_nowait()
 
                     # 发送到前端
@@ -256,7 +257,11 @@ async def websocket_logs(websocket: WebSocket):
                         }
                     )
 
-                    # 检查是否是任务完成消息
+                    # 使用统一的文件处理器保存
+                    if file_handler:
+                        file_handler.write_log(msg)
+
+                    # 检查任务完成
                     if msg.get("type") == "internal":
                         if "任务执行完成" in msg.get("message", ""):
                             await websocket.send_json(
@@ -267,7 +272,6 @@ async def websocket_logs(websocket: WebSocket):
                 except queue.Empty:
                     pass
 
-            # 短暂休眠避免 CPU 占用过高
             await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
@@ -275,7 +279,11 @@ async def websocket_logs(websocket: WebSocket):
     except Exception as e:
         log.print_log(f"WebSocket 错误: {str(e)}", "error")
     finally:
-        await websocket.close()
+        if websocket.client_state.name != "DISCONNECTED":
+            try:
+                await websocket.close()
+            except RuntimeError:
+                pass
 
 
 @router.get("/hot-topics")

@@ -46,26 +46,26 @@ class CreativeWorkshopManager {
     }    
         
     // 填充模板分类选项    
-    populateTemplateCategoryOptions() {    
-        const select = document.getElementById('workshop-template-category');    
-        if (!select || !this.templateCategories) return;    
-            
-        // 清空现有选项    
-        select.innerHTML = '';    
-            
-        // 添加默认选项    
-        const defaultOption = document.createElement('option');    
-        defaultOption.value = '';    
-        defaultOption.textContent = '选择分类...';    
-        select.appendChild(defaultOption);    
-            
-        // 添加分类选项    
-        this.templateCategories.forEach(category => {    
-            const option = document.createElement('option');    
-            option.value = category;    
-            option.textContent = category;    
-            select.appendChild(option);    
-        });    
+    populateTemplateCategoryOptions() {  
+        const select = document.getElementById('workshop-template-category');  
+        if (!select || !this.templateCategories) return;  
+        
+        // 清空现有选项  
+        select.innerHTML = '';  
+        
+        // 添加"随机分类"选项 
+        const defaultOption = document.createElement('option');  
+        defaultOption.value = '';  
+        defaultOption.textContent = '随机分类';  
+        select.appendChild(defaultOption);  
+        
+        // 添加分类选项  
+        this.templateCategories.forEach(category => {  
+            const option = document.createElement('option');  
+            option.value = category;  
+            option.textContent = category;  
+            select.appendChild(option);  
+        });  
     }    
         
     // 加载指定分类的模板列表    
@@ -89,26 +89,26 @@ class CreativeWorkshopManager {
     }    
         
     // 填充模板选项    
-    populateTemplateOptions(templates) {    
-        const select = document.getElementById('workshop-template-name');    
-        if (!select) return;    
-            
-        // 清空现有选项    
-        select.innerHTML = '';    
-            
-        // 添加默认选项    
-        const defaultOption = document.createElement('option');    
-        defaultOption.value = '';    
-        defaultOption.textContent = '选择模板...';    
-        select.appendChild(defaultOption);    
-            
-        // 添加模板选项    
-        templates.forEach(template => {    
-            const option = document.createElement('option');    
-            option.value = template;    
-            option.textContent = template;    
-            select.appendChild(option);    
-        });    
+    populateTemplateOptions(templates) {  
+        const select = document.getElementById('workshop-template-name');  
+        if (!select) return;  
+        
+        // 清空现有选项  
+        select.innerHTML = '';  
+        
+        // 添加"随机模板"选项(而不是"选择模板...")  
+        const defaultOption = document.createElement('option');  
+        defaultOption.value = '';  
+        defaultOption.textContent = '随机模板';  
+        select.appendChild(defaultOption);  
+        
+        // 添加模板选项  
+        templates.forEach(template => {  
+            const option = document.createElement('option');  
+            option.value = template;  
+            option.textContent = template;  
+            select.appendChild(option);  
+        });  
     }    
       
     // ========== 事件监听器 ==========  
@@ -146,16 +146,17 @@ class CreativeWorkshopManager {
         // 模板分类选择 - 级联加载模板    
         const categorySelect = document.getElementById('workshop-template-category');    
         if (categorySelect) {    
-            categorySelect.addEventListener('change', async (e) => {    
-                const category = e.target.value;    
-                  
-                if (category) {    
-                    const templates = await this.loadTemplatesByCategory(category);    
-                    this.populateTemplateOptions(templates);    
-                } else {    
-                    // 清空模板选择    
-                    this.populateTemplateOptions([]);    
-                }    
+            categorySelect.addEventListener('change', async (e) => {  
+                const category = e.target.value;  
+                
+                if (!category) {  
+                    // 选择了"随机分类",只显示"随机模板"  
+                    this.populateTemplateOptions([]);  
+                } else {  
+                    // 选择了具体分类,加载该分类的模板  
+                    const templates = await this.loadTemplatesByCategory(category);  
+                    this.populateTemplateOptions(templates);  
+                }  
             });    
         }    
           
@@ -689,13 +690,12 @@ class CreativeWorkshopManager {
         const topicInput = document.getElementById('topic-input');  
         
         if (generateBtn) {  
-            // 切换按钮文本  
             const btnText = generateBtn.querySelector('span');  
             if (btnText) {  
                 btnText.textContent = isGenerating ? '停止生成' : '开始生成';  
             }  
             
-            // 切换按钮颜色  
+            // 切换按钮样式  
             if (isGenerating) {  
                 generateBtn.classList.remove('btn-generate');  
                 generateBtn.classList.add('btn-stop');  
@@ -704,16 +704,18 @@ class CreativeWorkshopManager {
                 generateBtn.classList.add('btn-generate');  
             }  
             
-            // 切换 SVG 图标  
+            // 修复后的图标切换逻辑  
             const btnIcon = generateBtn.querySelector('.btn-icon');  
             if (btnIcon) {  
                 if (isGenerating) {  
+                    // 停止状态:显示方块图标  
                     btnIcon.outerHTML = `  
-                        <svg class="btn-icon" viewBox="0 0 24 24" style="fill: currentColor !important; stroke: none !important;">  
-                            <rect x="6" y="6" width="12" height="12"/>  
+                        <svg class="btn-icon" viewBox="0 0 24 24">  
+                            <rect x="4" y="4" width="16" height="16" rx="2"/>  
                         </svg>  
-                    `;  
+                    `;     
                 } else {  
+                    // 开始状态:显示闪电图标  
                     btnIcon.outerHTML = `  
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">  
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  

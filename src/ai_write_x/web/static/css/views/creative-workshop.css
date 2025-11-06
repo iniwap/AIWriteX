@@ -527,10 +527,18 @@
     transform: translateY(0);  
 }  
 
-.btn-icon rect {  
-    fill: currentColor !important;  
+.btn-stop .btn-icon {  
+    fill: white !important;  
+    stroke: none !important;  
+    width: 18px;  
+    height: 18px;  
+}  
+  
+.btn-stop .btn-icon rect {  
+    fill: white !important;  
     stroke: none !important;  
 }
+
 
 /* ========== 日志容器 ========== */    
 .logs-container {    
