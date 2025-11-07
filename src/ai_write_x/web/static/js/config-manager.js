@@ -803,46 +803,19 @@ class AIWriteXConfigManager {
         }
 
         // 页面设计配置 - 使用原始样式开关  
-        const useOriginalStylesCheckbox = document.getElementById('use-original-styles');  
-        if (useOriginalStylesCheckbox) {  
-            useOriginalStylesCheckbox.addEventListener('change', (e) => {  
-                const useOriginal = e.target.checked;  
+        const useOriginalStylesCheckbox = document.getElementById('use-original-styles');    
+        if (useOriginalStylesCheckbox) {    
+            useOriginalStylesCheckbox.addEventListener('change', (e) => {    
+                const useOriginal = e.target.checked;                 
+                this.togglePageDesignSections(useOriginal);  
                 
-                // 禁用/启用所有配置输入框  
-                const settingsSections = [  
-                    'page-design-settings',  
-                    'card-design-settings',  
-                    'typography-design-settings',  
-                    'spacing-design-settings',  
-                    'accent-design-settings'  
-                ];  
-                
-                settingsSections.forEach(sectionId => {  
-                    const section = document.getElementById(sectionId);  
-                    if (section) {  
-                        const inputs = section.querySelectorAll('input, select, textarea');  
-                        inputs.forEach(input => {  
-                            input.disabled = useOriginal;  
-                        });  
-                        
-                        // 添加视觉反馈  
-                        if (useOriginal) {  
-                            section.style.opacity = '0.5';  
-                            section.style.pointerEvents = 'none';  
-                        } else {  
-                            section.style.opacity = '1';  
-                            section.style.pointerEvents = 'auto';  
-                        }  
-                    }  
-                });  
-                
-                // 标记按钮状态变化  
-                const saveBtn = document.getElementById('save-page-design-config');  
-                if (saveBtn && !saveBtn.classList.contains('has-changes')) {  
-                    saveBtn.classList.add('has-changes');  
-                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';  
-                }  
-            });  
+                // 标记按钮状态变化    
+                const saveBtn = document.getElementById('save-page-design-config');    
+                if (saveBtn && !saveBtn.classList.contains('has-changes')) {    
+                    saveBtn.classList.add('has-changes');    
+                    saveBtn.innerHTML = '保存设置 <span style="color: var(--warning-color);">(有未保存更改)</span>';    
+                }    
+            });    
         }  
         
         // 页面设计配置 - 保存按钮  
@@ -895,68 +868,96 @@ class AIWriteXConfigManager {
     }  
     
     // 加载页面设计配置到UI(续)  
-    populatePageDesignUI() {  
-        if (!this.config.page_design) {  
-            const useOriginalCheckbox = document.getElementById('use-original-styles');  
-            if (useOriginalCheckbox) {  
-                useOriginalCheckbox.checked = true;  
-                useOriginalCheckbox.dispatchEvent(new Event('change'));  
-            }  
-            return;  
-        }  
-        
-        const pd = this.config.page_design;  
-        
-        // 使用原始样式开关 - 修复逻辑  
-        const useOriginalCheckbox = document.getElementById('use-original-styles');  
-        if (useOriginalCheckbox) {  
-            if (pd.use_original_styles !== undefined) {  
-                useOriginalCheckbox.checked = pd.use_original_styles;  
-            } else {  
-                useOriginalCheckbox.checked = true;  
-            }  
-            
-            useOriginalCheckbox.dispatchEvent(new Event('change'));  
+    populatePageDesignUI() {    
+        if (!this.config.page_design) {    
+            const useOriginalCheckbox = document.getElementById('use-original-styles');    
+            if (useOriginalCheckbox) {    
+                useOriginalCheckbox.checked = true;    
+                this.togglePageDesignSections(true);  
+            }    
+            return;    
         }    
         
-        // 容器  
-        if (pd.container) {  
-            document.getElementById('container-max-width').value = pd.container.max_width || 750;  
-            document.getElementById('container-margin-h').value = pd.container.margin_horizontal || 10;  
-            document.getElementById('container-bg-color').value = pd.container.background_color || '#f8f9fa';  
-        }  
+        const pd = this.config.page_design;    
         
-        // 卡片  
-        if (pd.card) {  
-            document.getElementById('card-border-radius').value = pd.card.border_radius || 12;  
-            document.getElementById('card-padding').value = pd.card.padding || 24;  
-            document.getElementById('card-bg-color').value = pd.card.background_color || '#ffffff';  
-            document.getElementById('card-box-shadow').value = pd.card.box_shadow || '0 4px 16px rgba(0,0,0,0.06)';  
-        }  
+        // 使用原始样式开关     
+        const useOriginalCheckbox = document.getElementById('use-original-styles');    
+        if (useOriginalCheckbox) {    
+            if (pd.use_original_styles !== undefined) {    
+                useOriginalCheckbox.checked = pd.use_original_styles;    
+            } else {    
+                useOriginalCheckbox.checked = true;    
+            }    
+            
+            this.togglePageDesignSections(useOriginalCheckbox.checked);  
+        }      
         
-        // 排版  
-        if (pd.typography) {  
-            document.getElementById('typography-font-size').value = pd.typography.base_font_size || 16;  
-            document.getElementById('typography-line-height').value = pd.typography.line_height || 1.6;  
-            document.getElementById('typography-heading-scale').value = pd.typography.heading_scale || 1.5;  
-            document.getElementById('typography-text-color').value = pd.typography.text_color || '#333333';  
-            document.getElementById('typography-heading-color').value = pd.typography.heading_color || '#333333';  
-        }  
+        // 容器    
+        if (pd.container) {    
+            document.getElementById('container-max-width').value = pd.container.max_width || 750;    
+            document.getElementById('container-margin-h').value = pd.container.margin_horizontal || 10;    
+            document.getElementById('container-bg-color').value = pd.container.background_color || '#f8f9fa';    
+        }    
         
-        // 间距  
-        if (pd.spacing) {  
-            document.getElementById('spacing-section-margin').value = pd.spacing.section_margin || 24;  
-            document.getElementById('spacing-element-margin').value = pd.spacing.element_margin || 16;  
-        }  
+        // 卡片    
+        if (pd.card) {    
+            document.getElementById('card-border-radius').value = pd.card.border_radius || 12;    
+            document.getElementById('card-padding').value = pd.card.padding || 24;    
+            document.getElementById('card-bg-color').value = pd.card.background_color || '#ffffff';    
+            document.getElementById('card-box-shadow').value = pd.card.box_shadow || '0 4px 16px rgba(0,0,0,0.06)';    
+        }    
         
-        // 色彩  
-        if (pd.accent) {  
-            document.getElementById('accent-primary-color').value = pd.accent.primary_color || '#3a7bd5';  
-            document.getElementById('accent-secondary-color').value = pd.accent.secondary_color || '#00b09b';  
-            document.getElementById('accent-highlight-bg').value = pd.accent.highlight_bg || '#f0f7ff';  
-        }  
+        // 排版    
+        if (pd.typography) {    
+            document.getElementById('typography-font-size').value = pd.typography.base_font_size || 16;    
+            document.getElementById('typography-line-height').value = pd.typography.line_height || 1.6;    
+            document.getElementById('typography-heading-scale').value = pd.typography.heading_scale || 1.5;    
+            document.getElementById('typography-text-color').value = pd.typography.text_color || '#333333';    
+            document.getElementById('typography-heading-color').value = pd.typography.heading_color || '#333333';    
+        }    
+        
+        // 间距    
+        if (pd.spacing) {    
+            document.getElementById('spacing-section-margin').value = pd.spacing.section_margin || 24;    
+            document.getElementById('spacing-element-margin').value = pd.spacing.element_margin || 16;    
+        }    
+        
+        // 色彩    
+        if (pd.accent) {    
+            document.getElementById('accent-primary-color').value = pd.accent.primary_color || '#3a7bd5';    
+            document.getElementById('accent-secondary-color').value = pd.accent.secondary_color || '#00b09b';    
+            document.getElementById('accent-highlight-bg').value = pd.accent.highlight_bg || '#f0f7ff';    
+        }    
     }  
     
+    togglePageDesignSections(useOriginal) {  
+        const settingsSections = [    
+            'page-design-settings',    
+            'card-design-settings',    
+            'typography-design-settings',    
+            'spacing-design-settings',    
+            'accent-design-settings'    
+        ];    
+        
+        settingsSections.forEach(sectionId => {    
+            const section = document.getElementById(sectionId);    
+            if (section) {    
+                const inputs = section.querySelectorAll('input, select, textarea');    
+                inputs.forEach(input => {    
+                    input.disabled = useOriginal;    
+                });    
+                
+                if (useOriginal) {    
+                    section.style.opacity = '0.5';    
+                    section.style.pointerEvents = 'none';    
+                } else {    
+                    section.style.opacity = '1';    
+                    section.style.pointerEvents = 'auto';    
+                }    
+            }    
+        });    
+    }
+
     // 保存页面设计配置  
     async savePageDesignConfig() {  
         const pageDesignConfig = {  

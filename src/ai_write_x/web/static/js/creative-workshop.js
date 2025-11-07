@@ -18,7 +18,7 @@ class CreativeWorkshopManager {
         this.templates = [];  
         this.logWebSocket = null;  // WebSocket 连接  
         this.statusPollInterval = null;  // 状态轮询定时器  
-            
+        this.bottomProgress = new BottomProgressManager();
         this.init();    
     }    
         
@@ -280,6 +280,20 @@ class CreativeWorkshopManager {
     async startGeneration() {  
         if (this.isGenerating) return;  
         
+        // 检查后端是否有正在运行的任务  
+        try {  
+            const statusResponse = await fetch('/api/generate/status');  
+            if (statusResponse.ok) {  
+                const status = await statusResponse.json();  
+                if (status.status === 'running') {  
+                    window.app?.showNotification('已有任务正在运行,请稍后再试', 'warning');  
+                    return;  
+                }  
+            }  
+        } catch (error) {  
+            console.error('检查任务状态失败:', error);  
+        }  
+        
         // 立即切换按钮状态,在所有异步操作之前  
         this.isGenerating = true;  
         this.updateGenerationUI(true);  
@@ -510,39 +524,57 @@ class CreativeWorkshopManager {
         return div.innerHTML;  
     }
 
-    async stopGeneration() {    
+    async stopGeneration() {  
         if (!this.isGenerating) return;  
-          
-        try {    
-            const response = await fetch('/api/generate/stop', {    
-                method: 'POST'    
-            });    
-                
-            if (response.ok) {    
-                const result = await response.json();  
-                window.app?.showNotification(result.message || '已停止生成', 'info');    
-            }    
-        } catch (error) {    
-            console.error('停止生成失败:', error);    
-            window.app?.showNotification('停止生成失败', 'error');  
-        }    
-          
-        // 关闭 WebSocket 连接  
-        this.disconnectLogWebSocket();  
-          
-        // 停止状态轮询  
-        this.stopStatusPolling();  
+        
+        try {  
+            const response = await fetch('/api/generate/stop', {  
+                method: 'POST'  
+            });  
             
-        this.isGenerating = false;    
-        this.updateGenerationUI(false);    
-
-        // 清空输入框  
-        const topicInput = document.getElementById('topic-input');  
-        if (topicInput) {  
-            topicInput.value = '';  
-            this.currentTopic = '';  
+            if (response.ok) {  
+                const result = await response.json();  
+                
+                // 停止进度管理器  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                }  
+                
+                // 隐藏进度区域  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.add('hidden');  
+                }  
+                
+                // 重置进度管理器  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.reset();  
+                }  
+                
+                // 关闭 WebSocket 连接  
+                this.disconnectLogWebSocket();  
+                
+                // 停止状态轮询  
+                this.stopStatusPolling();  
+                
+                // 清空输入框  
+                const topicInput = document.getElementById('topic-input');  
+                if (topicInput) {  
+                    topicInput.value = '';  
+                    this.currentTopic = '';  
+                }  
+                
+                window.app?.showNotification(result.message || '已停止生成', 'info');  
+            }  
+        } catch (error) {  
+            console.error('停止生成失败:', error);  
+            window.app?.showNotification('停止失败', 'error');  
+        } finally {  
+            // 确保在任何情况下都重置状态  
+            this.isGenerating = false;  
+            this.updateGenerationUI(false);  
         }  
-    }    
+    }  
       
     // ========== WebSocket 日志流式传输 ==========  
       
@@ -551,64 +583,67 @@ class CreativeWorkshopManager {
         if (this.logWebSocket) {  
             this.logWebSocket.close();  
         }  
-          
+        
         // 构建 WebSocket URL  
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';  
         const wsUrl = `${protocol}//${window.location.host}/api/ws/generate/logs`;  
-          
+        
         try {  
             this.logWebSocket = new WebSocket(wsUrl);  
-              
+            
             this.logWebSocket.onopen = () => {  
                 console.log('日志 WebSocket 已连接');  
+                
+                // 启动底部进度管理器  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.start('init');  
+                }  
             };  
             
             this.logWebSocket.onmessage = (event) => {  
                 try {  
                     const data = JSON.parse(event.data);  
-                      
-                    // 显示日志消息  
+                    
+                    // 解析阶段和进度  
+                    const { stage, progress } = this.parseLogForProgress(data.message);  
+                    
+                    if (stage && progress !== null) {  
+                        // 更新进度管理器  
+                        if (this.bottomProgress) {  
+                            this.bottomProgress.updateProgress(stage, progress);  
+                        }  
+                    }  
+                    
+                    // 转发到全局日志面板  
                     this.appendLog(data.message, data.type);  
-                      
-                    // 检查是否完成  
+                    
+                    // 检查完成状态  
                     if (data.type === 'completed' || data.type === 'failed') {  
-                        this.updateGenerationUI(false);  
-                        this.stopStatusPolling();  
-                          
-                        if (data.type === 'completed') {  
-                            window.app?.showNotification('生成完成', 'success');  
-                        } else {  
-                            window.app?.showNotification('生成失败: ' + (data.error || '未知错误'), 'error');  
-                        }  
-                          
-                        this.logWebSocket.close(); 
-                        
-                        // 清空输入框  
-                        const topicInput = document.getElementById('topic-input');  
-                        if (topicInput) {  
-                            topicInput.value = '';  
-                            this.currentTopic = '';  
-                        }  
+                        this.handleGenerationComplete(data);  
                     }  
                 } catch (error) {  
                     console.error('解析日志消息失败:', error);  
                 }  
             };  
-              
+            
             this.logWebSocket.onerror = (error) => {  
                 console.error('WebSocket 错误:', error);  
-                window.app?.showNotification('日志连接失败', 'error');  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                }  
             };  
-              
+            
             this.logWebSocket.onclose = () => {  
                 console.log('日志 WebSocket 已关闭');  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                }  
                 this.logWebSocket = null;  
             };  
         } catch (error) {  
             console.error('创建 WebSocket 连接失败:', error);  
-            window.app?.showNotification('无法建立日志连接', 'error');  
         }  
-    }  
+    }
       
     disconnectLogWebSocket() {  
         if (this.logWebSocket) {  
@@ -616,7 +651,83 @@ class CreativeWorkshopManager {
             this.logWebSocket = null;  
         }  
     }  
-      
+    
+    /**  
+     * 解析日志获取进度信息  
+     */  
+    parseLogForProgress(message) {  
+        const stages = {  
+            init: { keywords: ['任务参数', 'API类型'], progress: 5 },  
+            // 关键修改:在阶段开始时就识别  
+            search: { keywords: ['开始执行搜索', '正在搜索', '正在连接AI服务'], progress: 20 },  
+            writing: { keywords: ['Agent: 内容创作专家', 'Task:', '撰写一篇'], progress: 50 },  
+            creative: { keywords: ['Agent: 维度化创意专家', '维度化创意变换','创意变换'], progress: 75 },  
+            template: { keywords: ['Agent: 模板调整', '模板填充适配'], progress: 90 },  
+            save: { keywords: ['保存成功', '文章《'], progress: 98 },  
+            publish: { keywords: ['发布完成'], progress: 99 }  
+        };  
+        
+        for (const [stage, config] of Object.entries(stages)) {  
+            if (config.keywords.some(kw => message.includes(kw))) {  
+                return { stage, progress: config.progress };  
+            }  
+        }  
+        
+        return { stage: null, progress: null };  
+    }  
+    
+    /**  
+     * 处理生成完成  
+     */  
+    handleGenerationComplete(data) {  
+        // 停止进度管理器  
+        if (this.bottomProgress) {  
+            this.bottomProgress.stop();  
+        }  
+        
+        // 更新进度到100%  
+        if (this.bottomProgress && data.type === 'completed') {  
+            this.bottomProgress.updateProgress('complete', 100);  
+        }  
+        
+        // 延迟隐藏进度区域  
+        setTimeout(() => {  
+            const progressEl = document.getElementById('bottom-progress');  
+            if (progressEl) {  
+                progressEl.classList.add('hidden');  
+            }  
+            
+            // 重置进度管理器  
+            if (this.bottomProgress) {  
+                this.bottomProgress.reset();  
+            }  
+        }, 2000);  
+        
+        // 更新UI状态  
+        this.updateGenerationUI(false);  
+        this.stopStatusPolling();  
+        
+        // 显示通知  
+        if (data.type === 'completed') {  
+            window.app?.showNotification('生成完成', 'success');  
+            this.loadArticles();  
+        } else {  
+            window.app?.showNotification('生成失败: ' + (data.error || '未知错误'), 'error');  
+        }  
+        
+        // 清空输入框  
+        const topicInput = document.getElementById('topic-input');  
+        if (topicInput) {  
+            topicInput.value = '';  
+            this.currentTopic = '';  
+        }  
+        
+        // 关闭 WebSocket  
+        if (this.logWebSocket) {  
+            this.logWebSocket.close();  
+        }  
+    }
+
     appendLog(message, type = 'info') {  
         // 使用全局日志面板 (main.js 中的 addLogEntry)  
         if (window.app && window.app.addLogEntry) {  

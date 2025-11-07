@@ -606,7 +606,7 @@
 /* 连接线 */  
 .history-line {  
     position: absolute;  
-    left: 20px;  
+    left: 10px;  
     top: 40px;  
     bottom: 0;  
     width: 2px;  

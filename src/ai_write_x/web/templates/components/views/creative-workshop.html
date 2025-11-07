@@ -12,22 +12,41 @@
                 </h1>  
                 <p class="workshop-subtitle">输入话题，一键生成创意内容</p>  
                   
-                <!-- 话题输入 -->  
+                <!-- 话题输入 -->    
                 <div class="topic-input-group">  
-                    <input   
-                        type="text"   
-                        id="topic-input"   
-                        class="topic-input"   
-                        placeholder="输入创作话题，留空自动获取热搜..."  
-                        autocomplete="off"  
-                    />  
-                    <button id="generate-btn" class="btn-generate">  
-                        <svg class="btn-icon" viewBox="0 0 24 24">  
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  
-                        </svg>  
-                        <span>开始生成</span> 
-                    </button>  
-                </div>  
+                    <!-- 新增容器包裹输入框和按钮 -->  
+                    <div class="input-wrapper">  
+                        <input   
+                            type="text"   
+                            id="topic-input"   
+                            class="topic-input"  
+                            placeholder="输入创作话题，留空自动获取热搜..."  
+                            autocomplete="off"  
+                        />  
+                        <button id="generate-btn" class="btn-generate">  
+                            <svg class="btn-icon" viewBox="0 0 24 24">  
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>  
+                            </svg>  
+                            <span>开始生成</span>  
+                        </button>  
+                    </div>  
+                    
+                    <!-- 进度条在容器外部 -->  
+                    <div id="bottom-progress" class="bottom-progress hidden">  
+                        <div class="progress-track">  
+                            <div class="progress-bar" style="width: 0%"></div>  
+                        </div>  
+                        <div class="progress-info">  
+                            <svg class="progress-stage-icon rotating" viewBox="0 0 24 24">  
+                                <circle cx="12" cy="12" r="10"/>  
+                                <line x1="12" y1="8" x2="12" y2="12"/>  
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                            </svg>  
+                            <span class="progress-stage">正在初始化</span>  
+                            <span class="progress-percentage">(0%)</span>  
+                        </div>  
+                    </div>  
+                </div>
                   
                 <!-- 快速配置入口 -->  
                 <div class="quick-config-triggers">  
@@ -54,7 +73,7 @@
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>  
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>  
                     </svg>  
-                    借鉴模式参数设置  
+                    参数设置  
                 </h3>  
             </div>  
             

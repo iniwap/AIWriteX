@@ -62,11 +62,6 @@
 }    
     
 /* ========== 话题输入组 ========== */    
-.topic-input-group {    
-    display: flex;    
-    gap: 12px;    
-    margin-bottom: 24px;    
-}    
     
 .topic-input {    
     flex: 1;    
@@ -885,6 +880,121 @@
     animation: spin 1s linear infinite;  
 }
 
+/* ========== 话题输入组 ========== */  
+#creative-workshop-view .topic-input-group {  
+    display: flex;  
+    flex-direction: column;  
+    gap: 0;  
+    margin-bottom: 24px;  
+    position: relative;  
+    transition: margin-bottom 0.3s ease; 
+}    
+
+/* 显示进度时减小间距 */  
+#creative-workshop-view .topic-input-group.showing-progress {  
+    margin-bottom: 12px; /* 减小到 12px */  
+}
+
+#creative-workshop-view .input-wrapper {  
+    display: flex;  
+    gap: 12px;  
+    width: 100%;   
+} 
+  
+/* ========== 底部进度条系统 ========== */  
+#creative-workshop-view .bottom-progress {    
+    position: relative;  
+    margin-top: -3px;  
+    animation: slideUp 0.3s ease;  
+    width: calc(100% - 132px);
+}   
+  
+@keyframes slideUp {  
+    from {  
+        opacity: 0;  
+        transform: translateY(3px);  
+    }  
+    to {  
+        opacity: 1;  
+        transform: translateY(0);  
+    }  
+}  
+  
+/* 进度条轨道 */  
+#creative-workshop-view .progress-track {    
+    height: 3px;  
+    background: var(--border-color);  
+    border-radius: 2px;  
+    overflow: hidden;  
+    position: relative;  
+    width: 100%;
+} 
+  
+/* 进度条填充 */  
+#creative-workshop-view .progress-bar {  
+    height: 100%;  
+    background: linear-gradient(90deg, var(--primary-color), #3b82f6);  
+    border-radius: 2px;  
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);  
+    position: relative;  
+}  
+  
+/* 进度信息*/  
+#creative-workshop-view .progress-info {  
+    display: flex;  
+    align-items: center;  
+    gap: 6px;  
+    margin-top: 6px;  
+    font-size: 12px;  
+    color: var(--text-secondary);  
+}  
+  
+/* SVG 图标 - 固定在左侧,添加旋转动画 */  
+#creative-workshop-view .progress-stage-icon {  
+    width: 14px;  
+    height: 14px;  
+    fill: none;  
+    stroke: var(--text-secondary);    
+    stroke-width: 2;  
+    stroke-linecap: round;  
+    stroke-linejoin: round;  
+    flex-shrink: 0;  
+} 
+  
+/* 旋转动画 */  
+#creative-workshop-view .progress-stage-icon.rotating {  
+    animation: rotate 2s linear infinite;  
+}  
+  
+@keyframes rotate {  
+    from {  
+        transform: rotate(0deg);  
+    }  
+    to {  
+        transform: rotate(360deg);  
+    }  
+}  
+  
+/* 阶段文字 */  
+#creative-workshop-view .progress-stage {  
+    color: var(--text-primary);  
+    font-weight: 500;  
+}  
+  
+/* 百分比 */  
+#creative-workshop-view .progress-percentage {  
+    color: var(--text-tertiary);  
+    font-weight: 400;  
+}
+
+#creative-workshop-view .bottom-progress {  
+    transition: opacity 0.5s ease;  
+}  
+  
+#creative-workshop-view .bottom-progress.fade-out {  
+    opacity: 0;  
+}
+
 /* ========== 响应式设计 ========== */    
 @media (max-width: 1024px) {    
     .workshop-container {    
@@ -932,8 +1042,8 @@
     .topic-input,    
     .btn-generate {    
         height: 44px;    
-    }    
-        
+    }     
+
     .btn-generate {    
         width: 100%;    
         justify-content: center;    
