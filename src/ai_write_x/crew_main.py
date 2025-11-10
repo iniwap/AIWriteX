@@ -147,15 +147,21 @@ def ai_write_x_run(config_data=None):
     if not config.custom_topic:
         # 热搜模式: 自动获取热搜话题
         platform = utils.get_random_platform(config.platforms)
-        topic = hotnews.select_platform_topic(platform, 5)  # 前五个热门话题根据一定权重选一个
+        topic = hotnews.select_platform_topic(platform, 5)
         urls = []
         reference_ratio = 0.0
     else:
-        # 借鉴模式: 使用自定义话题
         topic = config.custom_topic
-        urls = config.urls
-        reference_ratio = config.reference_ratio
-        platform = ""  # 借鉴模式下 platform 为空
+        if config_data and config_data.get("platform"):
+            # 热搜模式(WEB前端传入)
+            platform = config_data.get("platform")
+            urls = []
+            reference_ratio = 0.0
+        else:
+            # 借鉴模式: 使用自定义话题
+            urls = config.urls
+            reference_ratio = config.reference_ratio
+            platform = ""  # 借鉴模式下 platform 为空
 
     inputs = {
         "platform": platform,
@@ -205,7 +211,7 @@ def ai_write_x_main(config_data=None):
         log.print_log(f"配置填写有错误：{config.error_message}", "error")
         return None, None
 
-    task_model = "自定义" if config.custom_topic else "热搜随机"
+    task_model = "自定义" if not config.platform else "热搜随机"
     log.print_log(f"开始执行任务，话题模式：{task_model}")
 
     # 保存环境变量到临时文件

@@ -280,6 +280,7 @@ class CreativeWorkshopManager {
     async startGeneration() {    
         if (this.isGenerating) return;    
         
+        this._hotSearchPlatform = ''; 
         // 检查后端是否有正在运行的任务    
         try {    
             const statusResponse = await fetch('/api/generate/status');    
@@ -297,11 +298,6 @@ class CreativeWorkshopManager {
         // 立即切换按钮状态和显示进度条  
         this.isGenerating = true;    
         this.updateGenerationUI(true);  
-        
-        // 立即显示进度条并启动持续动画  
-        if (this.bottomProgress) {    
-            this.bottomProgress.start('init');    
-        }  
         
         // ========== 第一步: 系统配置校验 ==========    
         try {    
@@ -323,7 +319,34 @@ class CreativeWorkshopManager {
                 this.isGenerating = false;    
                 this.updateGenerationUI(false);    
                 return;    
-            }    
+            }
+            
+            // 获取完整配置以确定激活阶段  
+            const fullConfigResponse = await fetch('/api/config/');  
+            const configData = await fullConfigResponse.json();  
+            const config = configData.data;  
+            
+            // 构建激活阶段和进度范围  
+            const activeStages = this._buildActiveStages(config);  
+            const progressRanges = this._calculateProgressRanges(activeStages);  
+            
+            // 配置进度管理器  
+            if (this.bottomProgress) {  
+                this.bottomProgress.setActiveStages(activeStages, progressRanges);  
+            }  
+            
+            // 初始化进度状态  
+            this._progressState = {  
+                currentAgent: null,  
+                searchStarted: false,  
+                templateToolUsed: false,  
+                activeStages: activeStages  
+            };  
+            
+            // 启动进度条  
+            if (this.bottomProgress) {  
+                this.bottomProgress.start('init');  
+            } 
         } catch (error) {    
             console.error('配置验证失败:', error);  
             
@@ -422,7 +445,8 @@ class CreativeWorkshopManager {
                 const response = await fetch('/api/hot-topics');    
                 if (response.ok) {    
                     const data = await response.json();    
-                    topic = data.topic || '';    
+                    topic = data.topic || '';
+                    this._hotSearchPlatform = data.platform || '';    
                     
                     if (!topic) {  
                         // 清理进度条  
@@ -480,7 +504,8 @@ class CreativeWorkshopManager {
                     'Content-Type': 'application/json',    
                 },    
                 body: JSON.stringify({    
-                    topic: topic,    
+                    topic: topic,
+                    platform: this._hotSearchPlatform || '',    
                     reference: referenceConfig    
                 })    
             });    
@@ -655,6 +680,7 @@ class CreativeWorkshopManager {
                 // 停止状态轮询  
                 this.stopStatusPolling();  
                 
+                this._hotSearchPlatform = '';
                 // 清空输入框  
                 const topicInput = document.getElementById('topic-input');  
                 if (topicInput) {  
@@ -749,103 +775,221 @@ class CreativeWorkshopManager {
      * 解析日志获取进度信息  
      */  
     parseLogForProgress(message) {  
-        // 使用状态机模式,记录当前已经过的阶段  
         if (!this._progressState) {  
             this._progressState = {  
-                hasSeenContentAgent: false,  
-                hasSeenSearch: false,  
-                hasSeenCreativeAgent: false,  
-                hasSeenTemplateAgent: false  
+                currentAgent: null,  
+                searchStarted: false,  
+                searchCompleted: false,  
+                writingStarted: false,  
+                activeStages: ['init', 'search', 'writing', 'save', 'complete']  
             };  
         }  
         
-        const stages = {  
-            init: {   
-                keywords: ['任务参数', 'API类型'],   
-                progress: 5   
-            },  
-            
-            // 搜索阶段:明确的搜索标志  
-            search: {   
-                keywords: [  
-                    '开始执行搜索',  
-                    'AIForge]🔍 正在搜索:',  
-                    'AIForge]✅ 搜索完成'  
-                ],   
-                progress: 20   
-            },  
-            
-            // 写作阶段:内容创作专家 + 搜索已完成  
-            writing: {  
-                check: (msg, state) => {  
-                    // 记录是否看到内容创作专家  
-                    if (msg.includes('# Agent: 内容创作专家')) {  
-                        state.hasSeenContentAgent = true;  
-                    }  
-                    // 记录是否看到搜索完成  
-                    if (msg.includes('搜索完成') || msg.includes('## Tool Output:')) {  
-                        state.hasSeenSearch = true;  
-                    }  
-                    // 只有两者都满足,且看到Thought或Tool Output,才认为进入写作  
-                    return state.hasSeenContentAgent &&   
-                        state.hasSeenSearch &&   
-                        (msg.includes('## Thought:') || msg.includes('## Tool Output:'));  
-                },  
-                progress: 50  
-            },  
-            
-            // 创意阶段:维度化创意专家的Agent声明  
-            creative: {  
-                check: (msg, state) => {  
-                    if (msg.includes('# Agent: 维度化创意专家')) {  
-                        state.hasSeenCreativeAgent = true;  
-                        return true;  
-                    }  
-                    return false;  
-                },  
-                progress: 75  
-            },  
-            
-            // 模板阶段:模板专家的Agent声明  
-            template: {  
-                check: (msg, state) => {  
-                    if (msg.includes('# Agent: 模板调整') ||   
-                        msg.includes('Agent: 模板调整与内容填充专家')) {  
-                        state.hasSeenTemplateAgent = true;  
-                        return true;  
-                    }  
-                    return false;  
-                },  
-                progress: 90  
-            },  
-            
-            // 保存阶段:明确的保存日志  
-            save: {   
-                keywords: ['保存成功', '文章《'],   
-                progress: 98   
-            }  
-        };  
+        const state = this._progressState;  
+        const activeStages = state.activeStages || [];  
         
-        // 按顺序检查各阶段  
-        for (const [stage, config] of Object.entries(stages)) {  
-            if (config.keywords) {  
-                // 简单关键词匹配  
-                if (config.keywords.some(kw => message.includes(kw))) {  
-                    console.log(`[Progress] 匹配到阶段: ${stage}, 进度: ${config.progress}%`);  
-                    return { stage, progress: config.progress };  
+        // 1. 初始化 (5%)  
+        if (message.includes('任务参数') || message.includes('API类型')) {  
+            return { stage: 'init', progress: 5 };  
+        }  
+        
+        // 2. 搜索阶段 (15-27%)  
+        if (message.includes('开始执行搜索') || message.includes('AIForge]🤖 正在连接')) {  
+            state.searchStarted = true;  
+            return { stage: 'search', progress: 15 };  
+        }  
+        
+        if (state.searchStarted && !state.searchCompleted) {  
+            if (message.includes('正在搜索') || message.includes('正在尝试')) {  
+                return { stage: 'search', progress: 20 };  
+            }  
+            
+            // 搜索完成的关键标志  
+            if (message.includes('## Tool Output:') && message.includes('搜索结果')) {  
+                state.searchCompleted = true;  
+                return { stage: 'search', progress: 27 };  
+            }  
+        }  
+        
+        // 3. 写作阶段 (30-52%)  
+        if (state.searchCompleted && !state.writingStarted) {  
+            if (message.includes('## Thought:') || message.includes('## Using tool:')) {  
+                state.writingStarted = true;  
+                return { stage: 'writing', progress: 30 };  
+            }  
+        }  
+        
+        if (state.writingStarted) {  
+            // 检测文章标题(markdown一级标题)  
+            if (message.match(/^# [^#\s]/m) && !message.includes('# Agent:')) {  
+                return { stage: 'writing', progress: 42 };  
+            }  
+            
+            // 写作完成标志  
+            if (message.includes('## Final Answer:') && state.currentAgent === null) {  
+                return { stage: 'writing', progress: 52 };  
+            }  
+        }  
+        
+        // 4. 创意阶段 (55-68%) - 仅当启用时  
+        if (activeStages.includes('creative')) {  
+            if (message.includes('# Agent: 维度化创意专家')) {  
+                state.currentAgent = 'creative';  
+                return { stage: 'creative', progress: 55 };  
+            }  
+            
+            if (state.currentAgent === 'creative') {  
+                if (message.includes('## Task:')) {  
+                    return { stage: 'creative', progress: 60 };  
                 }  
-            } else if (config.check) {  
-                // 复杂逻辑检查  
-                if (config.check(message, this._progressState)) {  
-                    console.log(`[Progress] 匹配到阶段: ${stage}, 进度: ${config.progress}%`);  
-                    return { stage, progress: config.progress };  
+                if (message.includes('## Final Answer:')) {  
+                    state.currentAgent = null;  
+                    return { stage: 'creative', progress: 68 };  
                 }  
             }  
+        }  
+        
+        // 5. 模板阶段 (70-83%) - 关键修正  
+        if (activeStages.includes('template')) {  
+            // 更精确的模板阶段识别  
+            if (message.includes('# Agent: 模板调整') ||   
+                message.includes('模板调整与内容填充专家') ||  
+                message.includes('HTML内容适配任务')) {  
+                state.currentAgent = 'template';  
+                return { stage: 'template', progress: 70 };  
+            }  
+            
+            if (state.currentAgent === 'template') {  
+                if (message.includes('模板填充适配处理比较耗时')) {  
+                    return { stage: 'template', progress: 73 };  
+                }  
+                
+                if (message.includes('## Using tool: read_template_tool')) {  
+                    return { stage: 'template', progress: 76 };  
+                }  
+                
+                if (message.includes('## Tool Output:') && message.includes('HTML模板')) {  
+                    return { stage: 'template', progress: 80 };  
+                }  
+                
+                // 模板完成标志  
+                if (message.includes('## Final Answer:') && message.includes('html')) {  
+                    state.currentAgent = null;  
+                    return { stage: 'template', progress: 83 };  
+                }  
+            }  
+        }  
+        
+        // 6. 设计阶段 (70-78%) - 仅当启用时  
+        if (activeStages.includes('design')) {  
+            if (message.includes('# Agent: 微信排版专家') ||  
+                message.includes('排版设计')) {  
+                state.currentAgent = 'design';  
+                return { stage: 'design', progress: 70 };  
+            }  
+            
+            if (state.currentAgent === 'design') {  
+                if (message.includes('## Task:')) {  
+                    return { stage: 'design', progress: 74 };  
+                }  
+                if (message.includes('## Final Answer:')) {  
+                    state.currentAgent = null;  
+                    return { stage: 'design', progress: 78 };  
+                }  
+            }  
+        }  
+        
+        // 7. 保存阶段 (85-93%)  
+        if (message.includes('保存成功') || message.includes('文章《')) {  
+            return { stage: 'save', progress: 85 };  
+        }  
+        
+        // 8. 发布阶段 (95-98%) - 仅当启用时  
+        if (activeStages.includes('publish')) {  
+            if (message.includes('发布完成') || message.includes('发布结果')) {  
+                return { stage: 'publish', progress: 95 };  
+            }  
+        }  
+        
+        // 9. 完成 (100%)  
+        if (message.includes('[INTERNAL]: 任务执行完成')) {  
+            return { stage: 'complete', progress: 100 };  
         }  
         
         return { stage: null, progress: null };  
     }
     
+    /**  
+     * 根据配置构建激活的阶段列表  
+     */  
+    _buildActiveStages(config) {  
+        const stages = ['init', 'search', 'writing'];  
+        
+        // 创意阶段  
+        if (config.dimensional_creative?.enabled) {  
+            stages.push('creative');  
+        }  
+        
+        // 格式化阶段  
+        if (config.article_format?.toLowerCase() === 'html') {  
+            if (config.use_template) {  
+                stages.push('template');  
+            } else {  
+                stages.push('design');  
+            }  
+        }  
+        
+        stages.push('save');  
+        
+        // 发布阶段  
+        if (config.auto_publish) {  
+            stages.push('publish');  
+        }  
+        
+        stages.push('complete');  
+        
+        return stages;  
+    }  
+    
+    /**  
+     * 动态计算进度范围  
+     */  
+    _calculateProgressRanges(activeStages) {  
+        const ranges = {  
+            init: { start: 5, end: 10 },  
+            search: { start: 10, end: 15 },  
+            writing: { start: 15, end: 30 }  
+        };  
+        
+        let currentEnd = 30;  
+        
+        if (activeStages.includes('creative')) {  
+            ranges.creative = { start: currentEnd, end: currentEnd + 10 };  
+            currentEnd += 10;  
+        }  
+        
+        if (activeStages.includes('template')) {  
+            ranges.template = { start: currentEnd, end: currentEnd + 50 };  
+            currentEnd += 50;  
+        } else if (activeStages.includes('design')) {  
+            ranges.design = { start: currentEnd, end: currentEnd + 15 };  
+            currentEnd += 15;  
+        }  
+        
+        const saveSpace = 95 - currentEnd;  
+        ranges.save = { start: currentEnd, end: currentEnd + saveSpace };  
+        currentEnd += saveSpace;  
+        
+        if (activeStages.includes('publish')) {  
+            ranges.publish = { start: currentEnd, end: 98 };  
+            currentEnd = 98;  
+        }  
+        
+        ranges.complete = { start: 100, end: 100 };  
+        
+        return ranges;  
+    }
+
     /**  
      * 处理生成完成  
      */  
@@ -917,6 +1061,8 @@ class CreativeWorkshopManager {
             window.app?.showNotification('生成已停止', 'info');  
         }  
         
+        this._hotSearchPlatform = '';
+
         // 清空输入框  
         const topicInput = document.getElementById('topic-input');  
         if (topicInput) {  

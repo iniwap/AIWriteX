@@ -34,6 +34,7 @@ class GenerateRequest(BaseModel):
     """内容生成请求"""
 
     topic: str
+    platform: Optional[str] = ""
     reference: Optional[ReferenceConfig] = None
 
 
@@ -85,7 +86,7 @@ async def generate_content(request: GenerateRequest):
         if not config.validate_config():
             raise HTTPException(status_code=400, detail=f"配置错误: {config.error_message}")
 
-        config.custom_topic = ""
+        config.custom_topic = request.topic.strip()
         config.urls = []
         config.reference_ratio = 0.0
         config.custom_template_category = ""
@@ -93,16 +94,16 @@ async def generate_content(request: GenerateRequest):
 
         # 准备配置数据
         config_data = {
-            "custom_topic": "",
+            "custom_topic": config.custom_topic,
             "urls": [],
             "reference_ratio": 0.0,
             "custom_template_category": "",
             "custom_template": "",
+            "platform": request.platform or "",
         }
 
         # 如果启用借鉴模式,覆盖默认值
         if request.reference:
-            config_data["custom_topic"] = request.topic
             config_data["custom_template_category"] = request.reference.template_category or ""
             config_data["custom_template"] = request.reference.template_name or ""
 
