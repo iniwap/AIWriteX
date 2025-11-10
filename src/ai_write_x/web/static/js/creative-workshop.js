@@ -277,169 +277,267 @@ class CreativeWorkshopManager {
   
     // ========== 内容生成流程 ==========  
   
-    async startGeneration() {  
-        if (this.isGenerating) return;  
+    async startGeneration() {    
+        if (this.isGenerating) return;    
         
-        // 检查后端是否有正在运行的任务  
-        try {  
-            const statusResponse = await fetch('/api/generate/status');  
-            if (statusResponse.ok) {  
-                const status = await statusResponse.json();  
-                if (status.status === 'running') {  
-                    window.app?.showNotification('已有任务正在运行,请稍后再试', 'warning');  
-                    return;  
-                }  
-            }  
-        } catch (error) {  
-            console.error('检查任务状态失败:', error);  
-        }  
+        // 检查后端是否有正在运行的任务    
+        try {    
+            const statusResponse = await fetch('/api/generate/status');    
+            if (statusResponse.ok) {    
+                const status = await statusResponse.json();    
+                if (status.status === 'running') {    
+                    window.app?.showNotification('已有任务正在运行,请稍后再试', 'warning');    
+                    return;    
+                }    
+            }    
+        } catch (error) {    
+            console.error('检查任务状态失败:', error);    
+        }    
         
-        // 立即切换按钮状态,在所有异步操作之前  
-        this.isGenerating = true;  
+        // 立即切换按钮状态和显示进度条  
+        this.isGenerating = true;    
         this.updateGenerationUI(true);  
         
-        // ========== 第一步: 系统配置校验 ==========  
-        try {  
-            const configResponse = await fetch('/api/config/validate');  
-            if (!configResponse.ok) {  
-                const error = await configResponse.json();  
-                this.showConfigErrorDialog(error.detail || '系统配置错误,请检查配置');  
-                this.isGenerating = false;  
-                this.updateGenerationUI(false);  
-                return;  
-            }  
-        } catch (error) {  
-            console.error('配置验证失败:', error);  
-            this.showConfigErrorDialog('无法验证配置,请检查系统设置');  
-            this.isGenerating = false;  
-            this.updateGenerationUI(false);  
-            return;  
+        // 立即显示进度条并启动持续动画  
+        if (this.bottomProgress) {    
+            this.bottomProgress.start('init');    
         }  
         
-        // ========== 第二步: 获取话题 ==========  
-        let topic = this.currentTopic.trim();  
-        const referenceConfig = this.getReferenceConfig();  
-        
-        // 借鉴模式参数校验  
-        if (referenceConfig) {  
-            if (!topic) {  
-                window.app?.showNotification('借鉴模式下必须输入话题', 'error');  
-                this.isGenerating = false;  
-                this.updateGenerationUI(false);  
-                return;  
-            }  
-            
-            if (referenceConfig.reference_urls) {  
-                const urls = referenceConfig.reference_urls.split('|')  
-                    .map(u => u.trim())  
-                    .filter(u => u);  
+        // ========== 第一步: 系统配置校验 ==========    
+        try {    
+            const configResponse = await fetch('/api/config/validate');    
+            if (!configResponse.ok) {    
+                const error = await configResponse.json();  
                 
-                const invalidUrls = urls.filter(url => !this.isValidUrl(url));  
-                if (invalidUrls.length > 0) {  
-                    window.app?.showNotification(  
-                        '存在无效的URL,请检查输入(确保使用http://或https://)',  
-                        'error'  
-                    );  
-                    this.isGenerating = false;  
-                    this.updateGenerationUI(false);  
-                    return;  
+                // 校验失败:清理进度条  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                    const progressEl = document.getElementById('bottom-progress');  
+                    if (progressEl) {  
+                        progressEl.classList.add('hidden');  
+                    }  
+                    this.bottomProgress.reset();  
                 }  
+                
+                this.showConfigErrorDialog(error.detail || '系统配置错误,请检查配置');    
+                this.isGenerating = false;    
+                this.updateGenerationUI(false);    
+                return;    
+            }    
+        } catch (error) {    
+            console.error('配置验证失败:', error);  
+            
+            // 异常:清理进度条  
+            if (this.bottomProgress) {  
+                this.bottomProgress.stop();  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.add('hidden');  
+                }  
+                this.bottomProgress.reset();  
             }  
             
-            const category = document.getElementById('workshop-template-category')?.value;  
-            const template = document.getElementById('workshop-template-name')?.value;  
+            this.showConfigErrorDialog('无法验证配置,请检查系统设置');    
+            this.isGenerating = false;    
+            this.updateGenerationUI(false);    
+            return;    
+        }    
+        
+        // ========== 第二步: 获取话题 ==========    
+        let topic = this.currentTopic.trim();    
+        const referenceConfig = this.getReferenceConfig();    
+        
+        // 借鉴模式参数校验    
+        if (referenceConfig) {    
+            if (!topic) {  
+                // 清理进度条  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                    const progressEl = document.getElementById('bottom-progress');  
+                    if (progressEl) {  
+                        progressEl.classList.add('hidden');  
+                    }  
+                    this.bottomProgress.reset();  
+                }  
+                
+                window.app?.showNotification('借鉴模式下必须输入话题', 'error');    
+                this.isGenerating = false;    
+                this.updateGenerationUI(false);    
+                return;    
+            }    
+            
+            if (referenceConfig.reference_urls) {    
+                const urls = referenceConfig.reference_urls.split('|')    
+                    .map(u => u.trim())    
+                    .filter(u => u);    
+                
+                const invalidUrls = urls.filter(url => !this.isValidUrl(url));    
+                if (invalidUrls.length > 0) {  
+                    // 清理进度条  
+                    if (this.bottomProgress) {  
+                        this.bottomProgress.stop();  
+                        const progressEl = document.getElementById('bottom-progress');  
+                        if (progressEl) {  
+                            progressEl.classList.add('hidden');  
+                        }  
+                        this.bottomProgress.reset();  
+                    }  
+                    
+                    window.app?.showNotification(    
+                        '存在无效的URL,请检查输入(确保使用http://或https://)',    
+                        'error'    
+                    );    
+                    this.isGenerating = false;    
+                    this.updateGenerationUI(false);    
+                    return;    
+                }    
+            }    
+            
+            const category = document.getElementById('workshop-template-category')?.value;    
+            const template = document.getElementById('workshop-template-name')?.value;    
             
             if (category && !template) {  
-                window.app?.showNotification('请选择模板', 'warning');  
-                this.isGenerating = false;  
-                this.updateGenerationUI(false);  
-                return;  
-            }  
-        }  
+                // 清理进度条  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                    const progressEl = document.getElementById('bottom-progress');  
+                    if (progressEl) {  
+                        progressEl.classList.add('hidden');  
+                    }  
+                    this.bottomProgress.reset();  
+                }  
+                
+                window.app?.showNotification('请选择模板', 'warning');    
+                this.isGenerating = false;    
+                this.updateGenerationUI(false);    
+                return;    
+            }    
+        }    
         
-        // 如果没有输入话题且未启用借鉴模式,自动获取热搜  
-        if (!topic && !referenceConfig) {  
-            window.app?.showNotification('未输入话题,正在自动获取热搜...', 'info');  
+        // 如果没有输入话题且未启用借鉴模式,自动获取热搜    
+        if (!topic && !referenceConfig) {    
+            window.app?.showNotification('正在自动获取热搜...', 'info');    
             
-            try {  
-                const response = await fetch('/api/hot-topics');  
-                if (response.ok) {  
-                    const data = await response.json();  
-                    topic = data.topic || '';  
+            try {    
+                const response = await fetch('/api/hot-topics');    
+                if (response.ok) {    
+                    const data = await response.json();    
+                    topic = data.topic || '';    
                     
                     if (!topic) {  
-                        window.app?.showNotification('获取热搜失败,请手动输入话题', 'warning');  
-                        this.isGenerating = false;  
-                        this.updateGenerationUI(false);  
-                        return;  
-                    }  
+                        // 清理进度条  
+                        if (this.bottomProgress) {  
+                            this.bottomProgress.stop();  
+                            const progressEl = document.getElementById('bottom-progress');  
+                            if (progressEl) {  
+                                progressEl.classList.add('hidden');  
+                            }  
+                            this.bottomProgress.reset();  
+                        }  
+                        
+                        window.app?.showNotification('获取热搜失败,请手动输入话题', 'warning');    
+                        this.isGenerating = false;    
+                        this.updateGenerationUI(false);    
+                        return;    
+                    }    
                     
-                    const topicInput = document.getElementById('topic-input');  
-                    if (topicInput) {  
-                        topicInput.value = topic;  
-                        this.currentTopic = topic;  
-                    }  
+                    const topicInput = document.getElementById('topic-input');    
+                    if (topicInput) {    
+                        topicInput.value = topic;    
+                        this.currentTopic = topic;    
+                    }    
                     
-                    window.app?.showNotification(`已自动选取话题: ${topic}`, 'success');  
-                } else {  
-                    throw new Error('获取热搜失败');  
-                }  
-            } catch (error) {  
+                } else {    
+                    throw new Error('获取热搜失败');    
+                }    
+            } catch (error) {    
                 console.error('获取热搜失败:', error);  
-                window.app?.showNotification('获取热搜失败,请手动输入话题', 'error');  
-                this.isGenerating = false;  
-                this.updateGenerationUI(false);  
-                return;  
-            }  
-        }  
-        
-        // ========== 第三步: 启动生成 ==========  
-        this.addToHistory(topic);  
-        
-        try {  
-            const response = await fetch('/api/generate', {  
-                method: 'POST',  
-                headers: {  
-                    'Content-Type': 'application/json',  
-                },  
-                body: JSON.stringify({  
-                    topic: topic,  
-                    reference: referenceConfig  
-                })  
-            });  
-            
-            if (!response.ok) {  
-                const error = await response.json();  
                 
-                if (response.status === 400 && error.detail &&  
-                    (error.detail.includes('API KEY') ||  
-                    error.detail.includes('Model') ||  
-                    error.detail.includes('配置错误'))) {  
-                    this.showConfigErrorDialog(error.detail);  
-                } else {  
-                    window.app?.showNotification('生成失败: ' + (error.detail || '未知错误'), 'error');  
+                // 清理进度条  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.stop();  
+                    const progressEl = document.getElementById('bottom-progress');  
+                    if (progressEl) {  
+                        progressEl.classList.add('hidden');  
+                    }  
+                    this.bottomProgress.reset();  
                 }  
                 
-                this.isGenerating = false;  
-                this.updateGenerationUI(false);  
-                return;  
-            }  
+                window.app?.showNotification('获取热搜失败,请手动输入话题', 'error');    
+                this.isGenerating = false;    
+                this.updateGenerationUI(false);    
+                return;    
+            }    
+        }    
+        
+        // ========== 第三步: 启动生成 ==========    
+        this.addToHistory(topic);    
+        
+        try {    
+            const response = await fetch('/api/generate', {    
+                method: 'POST',    
+                headers: {    
+                    'Content-Type': 'application/json',    
+                },    
+                body: JSON.stringify({    
+                    topic: topic,    
+                    reference: referenceConfig    
+                })    
+            });    
             
-            const result = await response.json();  
-            window.app?.showNotification(result.message || '内容生成已开始', 'success');  
+            if (!response.ok) {    
+                const error = await response.json();    
+                
+                // 请求失败:清理进度条    
+                if (this.bottomProgress) {    
+                    this.bottomProgress.stop();    
+                    const progressEl = document.getElementById('bottom-progress');    
+                    if (progressEl) {    
+                        progressEl.classList.add('hidden');    
+                    }    
+                    this.bottomProgress.reset();    
+                }    
+                
+                if (response.status === 400 && error.detail &&    
+                    (error.detail.includes('API KEY') ||    
+                    error.detail.includes('Model') ||    
+                    error.detail.includes('配置错误'))) {    
+                    this.showConfigErrorDialog(error.detail);    
+                } else {    
+                    window.app?.showNotification('生成失败: ' + (error.detail || '未知错误'), 'error');    
+                }    
+                
+                this.isGenerating = false;    
+                this.updateGenerationUI(false);    
+                return;    
+            }    
             
-            // 连接 WebSocket 接收实时日志  
-            this.connectLogWebSocket();  
+            const result = await response.json();    
+            window.app?.showNotification(result.message || '内容生成已开始', 'success');    
             
-            // 开始轮询任务状态  
-            this.startStatusPolling();  
+            // 连接 WebSocket 接收实时日志    
+            this.connectLogWebSocket();    
             
-        } catch (error) {  
-            console.error('生成失败:', error);  
-            window.app?.showNotification('生成失败: ' + error.message, 'error');  
-            this.isGenerating = false;  
-            this.updateGenerationUI(false);  
-        }  
+            // 开始轮询任务状态    
+            this.startStatusPolling();    
+            
+        } catch (error) {    
+            console.error('生成失败:', error);    
+            
+            // 异常:清理进度条    
+            if (this.bottomProgress) {    
+                this.bottomProgress.stop();    
+                const progressEl = document.getElementById('bottom-progress');    
+                if (progressEl) {    
+                    progressEl.classList.add('hidden');    
+                }    
+                this.bottomProgress.reset();    
+            }    
+            
+            window.app?.showNotification('生成失败: ' + error.message, 'error');    
+            this.isGenerating = false;    
+            this.updateGenerationUI(false);    
+        }    
     }
     
     isValidUrl(url) {  
@@ -593,11 +691,6 @@ class CreativeWorkshopManager {
             
             this.logWebSocket.onopen = () => {  
                 console.log('日志 WebSocket 已连接');  
-                
-                // 启动底部进度管理器  
-                if (this.bottomProgress) {  
-                    this.bottomProgress.start('init');  
-                }  
             };  
             
             this.logWebSocket.onmessage = (event) => {  
@@ -656,63 +749,172 @@ class CreativeWorkshopManager {
      * 解析日志获取进度信息  
      */  
     parseLogForProgress(message) {  
+        // 使用状态机模式,记录当前已经过的阶段  
+        if (!this._progressState) {  
+            this._progressState = {  
+                hasSeenContentAgent: false,  
+                hasSeenSearch: false,  
+                hasSeenCreativeAgent: false,  
+                hasSeenTemplateAgent: false  
+            };  
+        }  
+        
         const stages = {  
-            init: { keywords: ['任务参数', 'API类型'], progress: 5 },  
-            // 关键修改:在阶段开始时就识别  
-            search: { keywords: ['开始执行搜索', '正在搜索', '正在连接AI服务'], progress: 20 },  
-            writing: { keywords: ['Agent: 内容创作专家', 'Task:', '撰写一篇'], progress: 50 },  
-            creative: { keywords: ['Agent: 维度化创意专家', '维度化创意变换','创意变换'], progress: 75 },  
-            template: { keywords: ['Agent: 模板调整', '模板填充适配'], progress: 90 },  
-            save: { keywords: ['保存成功', '文章《'], progress: 98 },  
-            publish: { keywords: ['发布完成'], progress: 99 }  
+            init: {   
+                keywords: ['任务参数', 'API类型'],   
+                progress: 5   
+            },  
+            
+            // 搜索阶段:明确的搜索标志  
+            search: {   
+                keywords: [  
+                    '开始执行搜索',  
+                    'AIForge]🔍 正在搜索:',  
+                    'AIForge]✅ 搜索完成'  
+                ],   
+                progress: 20   
+            },  
+            
+            // 写作阶段:内容创作专家 + 搜索已完成  
+            writing: {  
+                check: (msg, state) => {  
+                    // 记录是否看到内容创作专家  
+                    if (msg.includes('# Agent: 内容创作专家')) {  
+                        state.hasSeenContentAgent = true;  
+                    }  
+                    // 记录是否看到搜索完成  
+                    if (msg.includes('搜索完成') || msg.includes('## Tool Output:')) {  
+                        state.hasSeenSearch = true;  
+                    }  
+                    // 只有两者都满足,且看到Thought或Tool Output,才认为进入写作  
+                    return state.hasSeenContentAgent &&   
+                        state.hasSeenSearch &&   
+                        (msg.includes('## Thought:') || msg.includes('## Tool Output:'));  
+                },  
+                progress: 50  
+            },  
+            
+            // 创意阶段:维度化创意专家的Agent声明  
+            creative: {  
+                check: (msg, state) => {  
+                    if (msg.includes('# Agent: 维度化创意专家')) {  
+                        state.hasSeenCreativeAgent = true;  
+                        return true;  
+                    }  
+                    return false;  
+                },  
+                progress: 75  
+            },  
+            
+            // 模板阶段:模板专家的Agent声明  
+            template: {  
+                check: (msg, state) => {  
+                    if (msg.includes('# Agent: 模板调整') ||   
+                        msg.includes('Agent: 模板调整与内容填充专家')) {  
+                        state.hasSeenTemplateAgent = true;  
+                        return true;  
+                    }  
+                    return false;  
+                },  
+                progress: 90  
+            },  
+            
+            // 保存阶段:明确的保存日志  
+            save: {   
+                keywords: ['保存成功', '文章《'],   
+                progress: 98   
+            }  
         };  
         
+        // 按顺序检查各阶段  
         for (const [stage, config] of Object.entries(stages)) {  
-            if (config.keywords.some(kw => message.includes(kw))) {  
-                return { stage, progress: config.progress };  
+            if (config.keywords) {  
+                // 简单关键词匹配  
+                if (config.keywords.some(kw => message.includes(kw))) {  
+                    console.log(`[Progress] 匹配到阶段: ${stage}, 进度: ${config.progress}%`);  
+                    return { stage, progress: config.progress };  
+                }  
+            } else if (config.check) {  
+                // 复杂逻辑检查  
+                if (config.check(message, this._progressState)) {  
+                    console.log(`[Progress] 匹配到阶段: ${stage}, 进度: ${config.progress}%`);  
+                    return { stage, progress: config.progress };  
+                }  
             }  
         }  
         
         return { stage: null, progress: null };  
-    }  
+    }
     
     /**  
      * 处理生成完成  
      */  
     handleGenerationComplete(data) {  
+        
+        this.isGenerating = false; 
+
         // 停止进度管理器  
         if (this.bottomProgress) {  
             this.bottomProgress.stop();  
         }  
         
-        // 更新进度到100%  
-        if (this.bottomProgress && data.type === 'completed') {  
-            this.bottomProgress.updateProgress('complete', 100);  
-        }  
-        
-        // 延迟隐藏进度区域  
-        setTimeout(() => {  
+        if (data.type === 'completed') {  
+            // 成功:更新到100%,显示完成状态  
+            if (this.bottomProgress) {  
+                this.bottomProgress.updateProgress('complete', 100);  
+            }  
+            
+            // 延迟2秒隐藏,让用户看到100%的成功状态  
+            setTimeout(() => {  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.add('hidden');  
+                }  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.reset();  
+                }  
+            }, 2000);  
+            
+        } else if (data.type === 'failed') {  
+            // 失败:显示错误状态  
+            if (this.bottomProgress) {  
+                this.bottomProgress.showError(data.error || '未知错误');  
+            }  
+            
+            // 延迟1秒隐藏(比成功时短,因为已经有错误通知了)  
+            setTimeout(() => {  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.add('hidden');  
+                }  
+                if (this.bottomProgress) {  
+                    this.bottomProgress.reset();  
+                }  
+            }, 1000);  
+            
+        } else if (data.type === 'stopped') {  
+            // 停止:立即隐藏  
             const progressEl = document.getElementById('bottom-progress');  
             if (progressEl) {  
                 progressEl.classList.add('hidden');  
             }  
-            
-            // 重置进度管理器  
             if (this.bottomProgress) {  
                 this.bottomProgress.reset();  
             }  
-        }, 2000);  
+        }  
         
         // 更新UI状态  
         this.updateGenerationUI(false);  
         this.stopStatusPolling();  
         
-        // 显示通知  
+        // 根据状态显示不同的通知  
         if (data.type === 'completed') {  
             window.app?.showNotification('生成完成', 'success');  
             this.loadArticles();  
-        } else {  
-            window.app?.showNotification('生成失败: ' + (data.error || '未知错误'), 'error');  
+        } else if (data.type === 'failed') {  
+            window.app?.showNotification('生成失败', 'error');  
+        } else if (data.type === 'stopped') {  
+            window.app?.showNotification('生成已停止', 'info');  
         }  
         
         // 清空输入框  
@@ -742,50 +944,36 @@ class CreativeWorkshopManager {
     // ========== 状态轮询 ==========  
       
     startStatusPolling() {  
-        // 清除现有的轮询  
         this.stopStatusPolling();  
-          
-        // 每 2 秒轮询一次任务状态  
+        
         this.statusPollInterval = setInterval(async () => {  
             if (!this.isGenerating) {  
                 this.stopStatusPolling();  
                 return;  
             }  
-              
+            
             try {  
                 const response = await fetch('/api/generate/status');  
                 if (response.ok) {  
                     const result = await response.json();  
-                      
-                    // 如果任务已完成或失败,停止轮询  
+                    
                     if (result.status === 'completed' || result.status === 'failed' || result.status === 'stopped') {  
                         this.stopStatusPolling();  
-                        this.updateGenerationUI(false);  
-                          
-                        if (result.status === 'completed') {  
-                            window.app?.showNotification('生成完成', 'success');  
-                        } else if (result.status === 'failed') {  
-                            window.app?.showNotification('生成失败: ' + (result.error || '未知错误'), 'error');  
-                        } else if (result.status === 'stopped') {  
-                            window.app?.showNotification('生成已停止', 'info');  
-                        }  
-                          
+                        
+                        this.handleGenerationComplete({  
+                            type: result.status,  // 'completed', 'failed', 或 'stopped'  
+                            error: result.error  
+                        });  
+                        
                         // 关闭 WebSocket  
-                        this.disconnectLogWebSocket();
-
-                        // 清空输入框  
-                        const topicInput = document.getElementById('topic-input');  
-                        if (topicInput) {  
-                            topicInput.value = '';  
-                            this.currentTopic = '';  
-                        }  
+                        this.disconnectLogWebSocket();  
                     }  
                 }  
             } catch (error) {  
                 console.error('轮询状态失败:', error);  
             }  
         }, 2000);  
-    }  
+    }
       
     stopStatusPolling() {  
         if (this.statusPollInterval) {  

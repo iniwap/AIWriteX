@@ -934,11 +934,35 @@
 #creative-workshop-view .progress-bar {  
     height: 100%;  
     background: linear-gradient(90deg, var(--primary-color), #3b82f6);  
-    border-radius: 2px;  
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);  
+    border-radius: 2px;
     position: relative;  
+} 
+
+#creative-workshop-view .progress-bar::after {  
+    content: '';  
+    position: absolute;  
+    top: 0;  
+    left: -100%;  
+    width: 100%;  
+    height: 100%;  
+    background: linear-gradient(  
+        90deg,  
+        transparent,  
+        rgba(255, 255, 255, 0.3),  
+        transparent  
+    );  
+    animation: shimmer 2s infinite;  
 }  
-  
+
+@keyframes shimmer {  
+    0% {  
+        left: -100%;  
+    }  
+    100% {  
+        left: 100%;  
+    }  
+}
+
 /* 进度信息*/  
 #creative-workshop-view .progress-info {  
     display: flex;  

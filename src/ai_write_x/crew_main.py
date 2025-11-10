@@ -88,7 +88,19 @@ def run_crew_in_process(inputs, log_queue, config_data=None):
         )
 
     except Exception as e:
+        # 发送失败消息到队列
         log_queue.put({"type": "error", "message": str(e), "timestamp": time.time()})
+
+        # 发送internal类型的失败标记
+        log_queue.put(
+            {
+                "type": "internal",
+                "message": "任务执行失败",
+                "error": str(e),
+                "timestamp": time.time(),
+            }
+        )
+
     finally:
         # 清理环境变量文件
         if env_file_path and os.path.exists(env_file_path):
@@ -122,7 +134,7 @@ def run(inputs):
 
     except Exception as e:
         log.print_traceback("", e)
-        raise Exception(f"An error occurred while running the crew: {e}")
+        raise
 
 
 def ai_write_x_run(config_data=None):

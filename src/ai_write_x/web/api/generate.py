@@ -205,9 +205,6 @@ async def stop_generation():
 
 @router.get("/generate/status")
 async def get_generation_status():
-    """
-    获取当前生成任务状态
-    """
     global _current_process, _task_status, _current_log_queue
 
     # 检查进程状态
@@ -218,12 +215,16 @@ async def get_generation_status():
             # 进程已结束,检查退出码
             exit_code = _current_process.exitcode
             if exit_code == 0:
-                _task_status = {"status": "completed", "error": None}
+                status = {"status": "completed", "error": None}
             else:
-                _task_status = {"status": "failed", "error": f"退出码: {exit_code}"}
+                status = {"status": "failed", "error": f"退出码: {exit_code}"}
 
+            # 清理资源
             _current_process = None
             _current_log_queue = None
+            _task_status = {"status": "idle", "error": None}
+
+            return status
 
     return _task_status
 
@@ -232,7 +233,7 @@ async def get_generation_status():
 async def websocket_logs(websocket: WebSocket):
     await websocket.accept()
 
-    global _current_log_queue
+    global _current_log_queue, _current_process
 
     # 初始化文件日志处理器
     from datetime import datetime
@@ -244,6 +245,20 @@ async def websocket_logs(websocket: WebSocket):
 
     try:
         while True:
+            # 检查进程状态
+            if _current_process and not _current_process.is_alive():
+                exit_code = _current_process.exitcode
+                if exit_code != 0:
+                    # 进程异常退出,发送失败消息
+                    await websocket.send_json(
+                        {
+                            "type": "failed",
+                            "message": f"任务执行失败,退出码: {exit_code}",
+                            "error": f"进程异常退出(exitcode={exit_code})",
+                        }
+                    )
+                    break
+
             if _current_log_queue:
                 try:
                     msg = _current_log_queue.get_nowait()
@@ -257,7 +272,7 @@ async def websocket_logs(websocket: WebSocket):
                         }
                     )
 
-                    # 使用统一的文件处理器保存
+                    # 保存到文件
                     if file_handler:
                         file_handler.write_log(msg)
 
@@ -265,7 +280,21 @@ async def websocket_logs(websocket: WebSocket):
                     if msg.get("type") == "internal":
                         if "任务执行完成" in msg.get("message", ""):
                             await websocket.send_json(
-                                {"type": "completed", "message": "任务执行完成"}
+                                {
+                                    "type": "completed",
+                                    "message": "任务执行完成",
+                                    "timestamp": time.time(),
+                                }
+                            )
+                            break
+                        elif "任务执行失败" in msg.get("message", ""):
+                            await websocket.send_json(
+                                {
+                                    "type": "failed",
+                                    "message": "任务执行失败",
+                                    "error": msg.get("error", "未知错误"),
+                                    "timestamp": time.time(),
+                                }
                             )
                             break
 
