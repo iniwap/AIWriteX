@@ -261,7 +261,7 @@ class WebViewGUI:
 
             # 启动WebView
             log.print_log("正在启动用户界面...", "info")
-            webview.start(debug=False)
+            webview.start(debug=True)
         except KeyboardInterrupt:
             self.quit_application()
         except Exception as e:

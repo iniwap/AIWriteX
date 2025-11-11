@@ -137,6 +137,8 @@ class AIForgeSearchTool(BaseTool):
         config = Config.get_instance()
         original_cwd = os.getcwd()
 
+        log.print_log("[PROGRESS:SEARCH:START]", "internal")
+
         if len(urls) == 0:
             log.print_log("开始执行搜索，请耐心等待...")
             results = self._excute_search(
@@ -164,6 +166,10 @@ class AIForgeSearchTool(BaseTool):
             fmt_result = self._formatted_result(topic, urls, reference_ratio, source_type, results)
         except Exception:
             fmt_result = "未找到最新信息"
+
+        log.print_log("[PROGRESS:SEARCH:END]", "internal")
+
+        log.print_log("[PROGRESS:WRITING:START]", "internal")
 
         return fmt_result
 

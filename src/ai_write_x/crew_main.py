@@ -142,6 +142,7 @@ def ai_write_x_run(config_data=None):
     config = Config.get_instance()
 
     # 准备输入参数
+    log.print_log("[PROGRESS:INIT:START]", "internal")
     log.print_log("正在初始化任务参数，请耐心等待...", "status")
 
     if not config.custom_topic:

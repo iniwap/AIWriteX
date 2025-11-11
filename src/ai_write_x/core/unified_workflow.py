@@ -149,27 +149,36 @@ class UnifiedContentWorkflow:
             base_content = self._generate_base_content(
                 topic, publish_platform=publish_platform, **kwargs
             )
+            log.print_log("[PROGRESS:WRITING:END]", "internal")
 
             # 2. 维度化创意变换
+            log.print_log("[PROGRESS:CREATIVE:START]", "internal")
             final_content = self._apply_dimensional_creative_transformation(base_content, **kwargs)
+            log.print_log("[PROGRESS:CREATIVE:END]", "internal")
 
             # 3. 转换处理（template或design）
+
             transform_content = self._transform_content(final_content, publish_platform, **kwargs)
 
             # 4. 保存（非AI参与）
+            log.print_log("[PROGRESS:SAVE:START]", "internal")
             save_result = self._save_content(transform_content, title)
             if save_result.get("success", False):
                 article_path = save_result.get("path")
                 kwargs["article_path"] = article_path
                 log.print_log(f"文章《{title}》保存成功！")
+            log.print_log("[PROGRESS:SAVE:END]", "internal")
 
             # 5. 可选发布（非AI参与，开关控制）
+            log.print_log("[PROGRESS:PUBLISH:START]", "internal")
             publish_result = None
             if self._should_publish():
                 publish_result = self._publish_content(
                     transform_content, publish_platform, **kwargs
                 )
                 log.print_log(f"发布完成，总结：{publish_result.get('message')}")
+
+            log.print_log("[PROGRESS:PUBLISH:END]", "internal")
 
             results = {
                 "base_content": base_content,
@@ -212,6 +221,8 @@ class UnifiedContentWorkflow:
     def _apply_template_formatting(self, content: ContentResult, **kwargs) -> ContentResult:
         """Template路径：使用AI填充本地模板"""
         # 创建专门的模板处理工作流
+        log.print_log("[PROGRESS:TEMPLATE:START]", "internal")
+
         template_config = self._get_template_workflow_config(**kwargs)
         engine = ContentGenerationEngine(template_config)
 
@@ -222,6 +233,7 @@ class UnifiedContentWorkflow:
             "content_format": "html",
             **kwargs,
         }
+        log.print_log("[PROGRESS:TEMPLATE:END]", "internal")
 
         return engine.execute_workflow(input_data)
 
@@ -230,6 +242,8 @@ class UnifiedContentWorkflow:
     ) -> ContentResult:
         """Design路径：使用AI生成HTML设计"""
         # 创建专门的设计工作流
+        log.print_log("[PROGRESS:DESIGN:START]", "internal")
+
         design_config = self._get_design_workflow_config(publish_platform, **kwargs)
         engine = ContentGenerationEngine(design_config)
 
@@ -241,6 +255,8 @@ class UnifiedContentWorkflow:
             "content_format": "html",
             **kwargs,
         }
+
+        log.print_log("[PROGRESS:DESIGN:END]", "internal")
 
         return engine.execute_workflow(input_data)
 
