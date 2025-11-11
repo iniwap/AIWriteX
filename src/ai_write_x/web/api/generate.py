@@ -280,6 +280,25 @@ async def websocket_logs(websocket: WebSocket):
                     # 检查任务完成
                     if msg.get("type") == "internal":
                         if "任务执行完成" in msg.get("message", ""):
+                            # 先清空队列中剩余的消息
+                            while True:
+                                try:
+                                    remaining_msg = _current_log_queue.get_nowait()
+                                    await websocket.send_json(
+                                        {
+                                            "type": remaining_msg.get("type", "info"),
+                                            "message": remaining_msg.get("message", ""),
+                                            "timestamp": remaining_msg.get(
+                                                "timestamp", time.time()
+                                            ),
+                                        }
+                                    )
+                                    if file_handler:
+                                        file_handler.write_log(remaining_msg)
+                                except queue.Empty:
+                                    break
+
+                            # 最后发送完成消息
                             await websocket.send_json(
                                 {
                                     "type": "completed",

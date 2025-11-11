@@ -59,20 +59,26 @@ class PreviewPanelManager {
       
     show(content = null) {  
         if (!this.overlay) return;  
-          
+        
         if (content) {  
             this.setContent(content);  
         }  
-          
+        
+        // 确保移除active类,重置状态  
+        this.overlay.classList.remove('active');  
         this.overlay.style.display = 'flex';  
+        
+        // 使用双重 requestAnimationFrame 确保浏览器完成布局计算  
         requestAnimationFrame(() => {  
-            this.overlay.classList.add('active');  
+            requestAnimationFrame(() => {  
+                this.overlay.classList.add('active');  
+            });  
         });  
-          
+        
         this.isVisible = true;  
         document.body.style.overflow = 'hidden';  
-        this.updateTriggerState(); // 添加这行  
-    }  
+        this.updateTriggerState();  
+    } 
       
     hide() {  
         if (!this.overlay) return;  

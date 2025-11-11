@@ -170,15 +170,15 @@ class UnifiedContentWorkflow:
             log.print_log("[PROGRESS:SAVE:END]", "internal")
 
             # 5. 可选发布（非AI参与，开关控制）
-            log.print_log("[PROGRESS:PUBLISH:START]", "internal")
             publish_result = None
             if self._should_publish():
+                log.print_log("[PROGRESS:PUBLISH:START]", "internal")
                 publish_result = self._publish_content(
                     transform_content, publish_platform, **kwargs
                 )
                 log.print_log(f"发布完成，总结：{publish_result.get('message')}")
 
-            log.print_log("[PROGRESS:PUBLISH:END]", "internal")
+                log.print_log("[PROGRESS:PUBLISH:END]", "internal")
 
             results = {
                 "base_content": base_content,
@@ -233,9 +233,11 @@ class UnifiedContentWorkflow:
             "content_format": "html",
             **kwargs,
         }
+
+        ret = engine.execute_workflow(input_data)
         log.print_log("[PROGRESS:TEMPLATE:END]", "internal")
 
-        return engine.execute_workflow(input_data)
+        return ret
 
     def _apply_design_formatting(
         self, content: ContentResult, publish_platform: str, **kwargs
@@ -256,9 +258,10 @@ class UnifiedContentWorkflow:
             **kwargs,
         }
 
+        ret = engine.execute_workflow(input_data)
         log.print_log("[PROGRESS:DESIGN:END]", "internal")
 
-        return engine.execute_workflow(input_data)
+        return ret
 
     def _apply_dimensional_creative_transformation(
         self, base_content: ContentResult, **kwargs

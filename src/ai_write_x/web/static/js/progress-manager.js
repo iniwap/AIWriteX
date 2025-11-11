@@ -160,33 +160,49 @@ class BottomProgressManager {
         if (this.autoProgressTimer) {  
             clearInterval(this.autoProgressTimer);  
         }  
-          
+        
         this.autoProgressTimer = setInterval(() => {  
             if (!this.isRunning) {  
                 return;  
             }  
-              
+            
             const maxAllowedProgress = Math.min(this.targetProgress, this.stageMaxProgress);  
             const gap = maxAllowedProgress - this.currentProgress;  
-              
+            
             if (gap > 0.1) {  
                 let increment;  
                 const stage = this.currentStage;  
-                  
-                // 根据阶段调整速度  
+                
+                // 大幅降低CrewAI相关阶段的速度  
                 if (stage === 'template') {  
-                    // 模板阶段最慢  
-                    if (gap > 30) {  
-                        increment = 0.05;  
-                    } else if (gap > 15) {  
-                        increment = 0.03;  
+                    // 模板阶段最慢 
+                    if (gap > 10) {  
+                        increment = 0.02;
                     } else if (gap > 5) {  
-                        increment = 0.015;  
+                        increment = 0.012; 
                     } else {  
-                        increment = 0.008;  
+                        increment = 0.005; 
+                    }  
+                } else if (stage === 'writing') {  
+                    // 写作阶段较慢  
+                    if (gap > 15) {  
+                        increment = 0.08;  
+                    } else if (gap > 8) {  
+                        increment = 0.04; 
+                    } else {  
+                        increment = 0.02; 
+                    }  
+                } else if (stage === 'creative') {  
+                    // 创意阶段中速
+                    if (gap > 12) {  
+                        increment = 0.09;   
+                    } else if (gap > 6) {  
+                        increment = 0.045; 
+                    } else {  
+                        increment = 0.024;
                     }  
                 } else if (stage === 'design') {  
-                    // 设计阶段中速  
+                    // 设计阶段保持原速度  
                     if (gap > 8) {  
                         increment = 0.15;  
                     } else if (gap > 4) {  
@@ -194,26 +210,8 @@ class BottomProgressManager {
                     } else {  
                         increment = 0.04;  
                     }  
-                } else if (stage === 'writing') {  
-                    // 写作阶段较慢  
-                    if (gap > 15) {  
-                        increment = 0.25;  
-                    } else if (gap > 8) {  
-                        increment = 0.12;  
-                    } else {  
-                        increment = 0.06;  
-                    }  
-                } else if (stage === 'creative') {  
-                    // 创意阶段中速  
-                    if (gap > 12) {  
-                        increment = 0.3;  
-                    } else if (gap > 6) {  
-                        increment = 0.15;  
-                    } else {  
-                        increment = 0.08;  
-                    }  
                 } else {  
-                    // 其他阶段默认速度  
+                    // 其他阶段(init, search, save, publish)保持原速度  
                     if (gap > 20) {  
                         increment = 0.5;  
                     } else if (gap > 10) {  
@@ -224,17 +222,17 @@ class BottomProgressManager {
                         increment = 0.05;  
                     }  
                 }  
-                  
+                
                 this.currentProgress += increment;  
-                  
+                
                 if (this.currentProgress > maxAllowedProgress) {  
                     this.currentProgress = maxAllowedProgress;  
                 }  
-                  
+                
                 this.renderProgress();  
             }  
         }, 100);  
-    }  
+    }
       
     renderProgress() {  
         if (this.progressBar) {  
