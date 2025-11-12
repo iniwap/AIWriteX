@@ -702,24 +702,24 @@ class CreativeWorkshopManager {
     mapMarkerToProgress(marker) {  
         const stageMap = {  
             'INIT': { stage: 'init', start: 5, end: 5 },  
-            'SEARCH': { stage: 'search', start: 10, end: 20 },  
-            'WRITING': { stage: 'writing', start: 20, end: 50 },  
-            'CREATIVE': { stage: 'creative', start: 55, end: 68 },  
-            'TEMPLATE': { stage: 'template', start: 70, end: 83 },  
-            'DESIGN': { stage: 'design', start: 70, end: 78 },  
-            'SAVE': { stage: 'save', start: 85, end: 93 },  
-            'PUBLISH': { stage: 'publish', start: 95, end: 98 },  
+            'SEARCH': { stage: 'search', start: 10, end: 20 },      // 10%  
+            'WRITING': { stage: 'writing', start: 20, end: 35 },    // 15%  
+            'CREATIVE': { stage: 'creative', start: 35, end: 45 },  // 10%  
+            'TEMPLATE': { stage: 'template', start: 45, end: 85 },  // 40%  
+            'DESIGN': { stage: 'design', start: 45, end: 75 },      // 30%  
+            'SAVE': { stage: 'save', start: 85, end: 87 },          // 2%  
+            'PUBLISH': { stage: 'publish', start: 87, end: 98 },    // 11%  
             'COMPLETE': { stage: 'complete', start: 100, end: 100 }  
         };  
-          
+        
         const config = stageMap[marker.stage];  
         if (!config) {  
             return { stage: null, progress: null };  
         }  
-          
+        
         const progress = marker.status === 'START' ? config.start : config.end;  
         return { stage: config.stage, progress };  
-    }  
+    }
       
     // 【新增】清空消息队列  
     clearMessageQueue() {  
@@ -738,17 +738,18 @@ class CreativeWorkshopManager {
     /**      
      * 处理生成完成      
      */      
-    async handleGenerationComplete(data) {    
-        // 等待队列处理完毕    
-        while (this.isProcessingQueue) {    
-            await new Promise(resolve => setTimeout(resolve, 100));    
-        }    
+    async handleGenerationComplete(data) {  
+        // 等待队列处理完毕  
+        while (this.isProcessingQueue) {  
+            await new Promise(resolve => setTimeout(resolve, 100));  
+        }  
         
-        this.isGenerating = false;    
+        this.isGenerating = false;  
         
-        if (data.type === 'completed') {    
-            if (this.bottomProgress) {    
-                this.bottomProgress.updateProgress('complete', 100);  
+        if (data.type === 'completed') {  
+            if (this.bottomProgress) {  
+                // 【关键修复】使用complete()而不是updateProgress()  
+                this.bottomProgress.complete();  
             }  
             
             // 等待进度条动画到达100%后再停止  
@@ -766,7 +767,6 @@ class CreativeWorkshopManager {
                         this.bottomProgress.reset();  
                     }  
                     
-                    // 自动打开预览  
                     this.autoPreviewGeneratedArticle();  
                 }, 1000);  
             }, 1000);  
@@ -796,11 +796,9 @@ class CreativeWorkshopManager {
             }  
         }  
         
-        // 更新UI状态  
         this.updateGenerationUI(false);  
         this.stopStatusPolling();  
         
-        // 根据状态显示不同的通知  
         if (data.type === 'completed') {  
             window.app?.showNotification('生成完成', 'success');  
             if (window.articleManager && typeof window.articleManager.loadArticles === 'function') {  
@@ -814,14 +812,12 @@ class CreativeWorkshopManager {
         
         this._hotSearchPlatform = '';  
         
-        // 清空输入框  
         const topicInput = document.getElementById('topic-input');  
         if (topicInput) {  
             topicInput.value = '';  
             this.currentTopic = '';  
         }  
         
-        // 关闭 WebSocket  
         if (this.logWebSocket) {  
             this.logWebSocket.close();  
         }  
@@ -866,7 +862,6 @@ class CreativeWorkshopManager {
                     // 打开预览面板  
                     if (window.previewPanelManager) {  
                         window.previewPanelManager.show(htmlContent);  
-                        window.app?.showNotification('已自动打开预览', 'success');  
                     }  
                 }  
             }  

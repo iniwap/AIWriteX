@@ -21,7 +21,6 @@ class PreviewPanelManager {
         this.panel = this.overlay?.querySelector('.preview-panel');  
           
         if (!this.overlay || !this.panel) {  
-            console.warn('Preview panel elements not found');  
             return;  
         }  
           
@@ -105,12 +104,10 @@ class PreviewPanelManager {
     initTriggerButton() {  
         const triggerBtn = document.getElementById('preview-trigger');  
         if (!triggerBtn) {  
-            console.warn('Preview trigger button not found');  
             return;  
         }  
           
         triggerBtn.addEventListener('click', () => {  
-            console.log('Trigger button clicked'); // 调试日志  
             this.toggle();  
         });  
     }  
