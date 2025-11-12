@@ -1,2 +1,8 @@
 knowledge/**/*.html linguist-documentation
 # output/AIWriteX_Setup.exe filter=lfs diff=lfs merge=lfs -text
+
+# 标记项目为 Python  
+*.py linguist-detectable=true  
+*.js linguist-detectable=false  
+*.html linguist-detectable=false  
+*.css linguist-detectable=false
