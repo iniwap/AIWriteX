@@ -1,6 +1,6 @@
 # AIWriteX - 基于CrewAI的智能内容创作平台
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.60.5+-007ACC)](https://pypi.org/project/PySimpleGUI) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIForge)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIForge)
 
   
 **AIWriteX**是基于CrewAI、[AIForge](https://iniwap.github.io/AIForge)的新一代智能内容创作平台，从微信公众号自动化工具起步，正在重新定义AI辅助内容创作的边界，融合"搜索+借鉴+AI+创意"四重能力，多种超绝玩法，让内容创作充满无限可能。  
@@ -180,7 +180,6 @@ dimensional_creative:
 ```shell
 pip install uv
 uv venv
-uv pip install ./PySimpleGUI-4.60.5-py3-none-any.whl
 uv pip install -r requirements.txt
 ```
 3. 配置 `config.yaml`、`aiforge.toml`（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）

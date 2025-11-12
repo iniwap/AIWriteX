@@ -150,8 +150,6 @@ async def stop_generation():
     """
     停止当前生成任务
 
-    参考 PySimpleGUI 的进程终止逻辑:
-    src/ai_write_x/gui/MainGUI.py:853-931
     """
     global _current_process, _current_log_queue, _task_status
 
@@ -339,10 +337,6 @@ async def websocket_logs(websocket: WebSocket):
 async def get_hot_topics():
     """
     获取热搜话题
-
-    参考 PySimpleGUI 版本的热搜获取逻辑:
-    src/ai_write_x/crew_main.py:133-136
-    src/ai_write_x/tools/hotnews.py:168-189
     """
     try:
         config = Config.get_instance()

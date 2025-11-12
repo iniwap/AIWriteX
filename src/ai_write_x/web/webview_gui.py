@@ -339,14 +339,6 @@ def gui_start():
         log.print_log("用户中断程序", "info")
     except Exception as e:
         log.print_log(f"GUI启动失败: {str(e)}", "error")
-        # 如果WebView启动失败，可以回退到原有GUI
-        try:
-            log.print_log("尝试启动传统GUI界面...", "warning")
-            import src.ai_write_x.gui.MainGUI as MainGUI
-
-            MainGUI.gui_start()
-        except Exception:
-            log.print_log("传统GUI启动也失败", "error")
 
 
 if __name__ == "__main__":

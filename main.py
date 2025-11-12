@@ -11,7 +11,6 @@ import os  # noqa 841
 import webbrowser  # noqa 841
 import ctypes  # noqa 841
 import sys  # noqa 841
-import PySimpleGUI as sg  # noqa 841
 import warnings  # noqa 841
 import yaml  # noqa 841
 import re  # noqa 841
@@ -93,16 +92,6 @@ def run():
         print(f"启动失败: {str(e)}")
 
 
-def run_old():
-    """启动GUI应用程序"""
-    try:
-        import src.ai_write_x.gui.MainGUI as MainGUI
-
-        MainGUI.gui_start()
-    except Exception as fallback_error:
-        print(f"启动失败: {str(fallback_error)}")
-
-
 def admin_run():
     """以管理员权限运行（跨平台）"""
     if platform.system() == "Windows":
@@ -127,8 +116,6 @@ if __name__ == "__main__":
         # 正常启动逻辑
         if len(sys.argv) > 1:
             if sys.argv[1] == "-d":
-                run_old()
-            elif sys.argv[1] == "-dn":
                 run()
         else:
             admin_run()
