@@ -646,33 +646,31 @@ class CreativeWorkshopManager {
         }      
     }    
       
-    // 【新增】处理消息队列  
+    // 处理消息队列  
     async processMessageQueue() {  
         this.isProcessingQueue = true;  
-          
+        
         while (this.messageQueue.length > 0) {  
             const data = this.messageQueue.shift();  
-              
-            // 提取消息中的所有进度标记  
+            
             const markers = this.extractProgressMarkers(data.message);  
-              
-            // 依次处理每个标记  
+            
             for (const marker of markers) {  
                 const { stage, progress } = this.mapMarkerToProgress(marker);  
-                  
+                
                 if (stage && progress !== null) {  
                     if (this.bottomProgress) {  
                         this.bottomProgress.updateProgress(stage, progress);  
                     }  
-                      
-                    // 添加短暂延迟,让进度条有时间更新  
-                    await new Promise(resolve => setTimeout(resolve, 50));  
+                    
+                    // 【关键改进7】增加延迟,让动画有时间执行  
+                    await new Promise(resolve => setTimeout(resolve, 100)); // 从50ms增加到100ms  
                 }  
             }  
         }  
-          
+        
         this.isProcessingQueue = false;  
-    }  
+    }
       
     // 从消息中提取所有进度标记  
     extractProgressMarkers(message) {  
@@ -698,30 +696,29 @@ class CreativeWorkshopManager {
         return markers;  
     }  
       
-    // 将标记映射到进度  
-    mapMarkerToProgress(marker) {  
-        const stageMap = {  
-            'INIT': { stage: 'init', start: 5, end: 5 },  
-            'SEARCH': { stage: 'search', start: 10, end: 20 },      // 10%  
-            'WRITING': { stage: 'writing', start: 20, end: 35 },    // 15%  
-            'CREATIVE': { stage: 'creative', start: 35, end: 45 },  // 10%  
-            'TEMPLATE': { stage: 'template', start: 45, end: 85 },  // 40%  
-            'DESIGN': { stage: 'design', start: 45, end: 75 },      // 30%  
-            'SAVE': { stage: 'save', start: 85, end: 87 },          // 2%  
-            'PUBLISH': { stage: 'publish', start: 87, end: 98 },    // 11%  
-            'COMPLETE': { stage: 'complete', start: 100, end: 100 }  
-        };  
+    mapMarkerToProgress(marker) {    
+        const stageMap = {    
+            'INIT': { stage: 'init', start: 0, end: 5 }, 
+            'SEARCH': { stage: 'search', start: 5, end: 20 },
+            'WRITING': { stage: 'writing', start: 20, end: 35 },  
+            'CREATIVE': { stage: 'creative', start: 35, end: 45 },  
+            'TEMPLATE': { stage: 'template', start: 45, end: 85 },  
+            'DESIGN': { stage: 'design', start: 45, end: 75 },  
+            'SAVE': { stage: 'save', start: 85, end: 87 },  
+            'PUBLISH': { stage: 'publish', start: 87, end: 98 },  
+            'COMPLETE': { stage: 'complete', start: 100, end: 100 }    
+        };    
         
-        const config = stageMap[marker.stage];  
-        if (!config) {  
-            return { stage: null, progress: null };  
-        }  
+        const config = stageMap[marker.stage];    
+        if (!config) {    
+            return { stage: null, progress: null };    
+        }    
         
-        const progress = marker.status === 'START' ? config.start : config.end;  
-        return { stage: config.stage, progress };  
+        const progress = marker.status === 'START' ? config.start : config.end;    
+        return { stage: config.stage, progress };    
     }
       
-    // 【新增】清空消息队列  
+    // 清空消息队列  
     clearMessageQueue() {  
         this.messageQueue = [];  
         this.isProcessingQueue = false;  

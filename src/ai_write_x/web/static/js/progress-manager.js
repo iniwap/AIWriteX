@@ -134,49 +134,37 @@ class BottomProgressManager {
             console.warn('[ProgressManager] 未知阶段:', stage);  
             return;  
         }  
-  
-        // 等待前一个快速追赶动画完成  
+        
         await this.quickCatchUpPromise;  
-  
-        // 阶段切换时的处理  
+        
         if (stage !== this.currentStage) {  
             console.log('[ProgressManager] 切换阶段:', this.currentStage, '→', stage);  
-  
+            
             const prevStageConfig = this.stages?.[this.currentStage];  
             if (prevStageConfig && this.currentProgress < prevStageConfig.maxProgress) {  
                 console.log(`[ProgressManager] 快速完成前阶段: ${this.currentProgress.toFixed(2)}% → ${prevStageConfig.maxProgress.toFixed(2)}%`);  
-                this.quickCatchUpPromise = this.quickCatchUp(prevStageConfig.maxProgress, 200); // 快速追赶到前一阶段的maxProgress  
-                await this.quickCatchUpPromise; // 等待快速追赶动画完成  
+                this.quickCatchUpPromise = this.quickCatchUp(prevStageConfig.maxProgress, 500);  
+                await this.quickCatchUpPromise;  
             }  
-  
-            // 切换到新阶段  
+            
             this.currentStage = stage;  
-            this.targetProgress = progress; // 新阶段的起始值  
-            this.stageMaxProgress = stageConfig.maxProgress; // 新阶段的maxProgress  
+            this.stageMaxProgress = stageConfig.maxProgress;  
             this.updateStageDisplay(stage);  
-  
-            // 如果新阶段的起始值高于当前进度,直接设置  
+            
             if (this.currentProgress < progress) {  
                 this.currentProgress = progress;  
                 this.renderProgress();  
             }  
+            
+            // 重新启动连续进度动画  
+            this.startContinuousProgress();  
+            
             return;  
         }  
-  
-        // 同阶段内防止倒退  
-        if (progress < this.targetProgress) {  
-            console.log('[ProgressManager] 忽略同阶段内的倒退进度:', progress, '当前目标:', this.targetProgress);  
-            return;  
-        }  
-  
-        this.targetProgress = progress; // 更新当前阶段的目标进度  
-        this.stageMaxProgress = stageConfig.maxProgress;  
-  
-        console.log(`[ProgressManager] 更新进度: 阶段=${stage}, 目标=${progress}%, 当前=${this.currentProgress.toFixed(2)}%`);  
-  
-        this.updateStageDisplay(stage);  
-    }  
-  
+        
+        console.log(`[ProgressManager] 同阶段内进度更新: ${progress}%, 当前=${this.currentProgress.toFixed(2)}%`);  
+    }
+    
     /**  
      * 更新阶段显示（图标和文本）  
      * @param {string} stage - 当前阶段ID  
@@ -202,63 +190,65 @@ class BottomProgressManager {
         if (this.autoProgressTimer) {  
             clearInterval(this.autoProgressTimer);  
         }  
-  
+        
         this.autoProgressTimer = setInterval(() => {  
             if (!this.isRunning) {  
                 return;  
             }  
-  
-            // 严格限制不超过当前阶段的maxProgress  
-            const maxAllowedProgress = Math.min(this.targetProgress, this.stageMaxProgress);  
+            
+            // 直接使用stageMaxProgress作为上限,不再计算"安全边界"  
+            const maxAllowedProgress = this.stageMaxProgress;  
             const gap = maxAllowedProgress - this.currentProgress;  
-  
-            // 如果当前阶段的进度已经达到或超过目标,则停止自动增长,等待后端标记  
-            if (this.currentProgress >= maxAllowedProgress - 0.1) { // 留一点缓冲  
-                // 检查是否等待时间过长 (不超过阶段总长度的一半)  
-                const stageConfig = this.stages[this.currentStage];  
-                if (stageConfig && this.currentProgress >= stageConfig.progress + (stageConfig.maxProgress - stageConfig.progress) / 2) {  
-                    // 如果已经等待超过一半,可以考虑停止动画,避免用户感觉卡死  
-                    // 这里我们选择保持当前进度，直到收到下一个标记  
-                }  
+            
+            // 如果已经到达阶段的maxProgress,停止增长  
+            if (gap <= 0.1) {  
                 return;  
             }  
-  
-            if (gap > 0.1) {  
-                let increment;  
-                const stage = this.currentStage;  
-  
-                // 根据不同阶段调整速度  
-                if (stage === 'init') { // 初始化阶段从0到5%  
-                    increment = 0.05; // 较快动画到5%  
-                } else if (stage === 'search') { // 搜索阶段 5% -> 20%  
-                    increment = 0.03; // 缓慢动画  
-                } else if (stage === 'writing') { // 写作阶段 20% -> 35%  
-                    increment = 0.02; // 缓慢动画  
-                } else if (stage === 'creative') { // 创意阶段 35% -> 45%  
-                    increment = 0.02; // 缓慢动画  
-                } else if (stage === 'template') { // 模板阶段 45% -> 85%  
-                    increment = 0.01; // 最慢动画  
-                } else if (stage === 'design') { // 设计阶段 45% -> 75%  
-                    increment = 0.02; // 缓慢动画  
-                } else if (stage === 'save') { // 保存阶段 85% -> 87%  
-                    increment = 0.05; // 较快动画  
-                } else if (stage === 'publish') { // 发布阶段 87% -> 98%  
-                    increment = 0.03; // 缓慢动画  
-                } else {  
-                    increment = 0.05; // 默认速度  
-                }  
-  
-                this.currentProgress += increment;  
-  
-                // 确保不超过maxAllowedProgress  
-                if (this.currentProgress > maxAllowedProgress) {  
-                    this.currentProgress = maxAllowedProgress;  
-                }  
-  
-                this.renderProgress();  
+            
+            let increment;  
+            const stage = this.currentStage;  
+            
+            // 根据阶段和剩余距离动态调整速度  
+            if (stage === 'init') {  
+                increment = 0.05;  
+            } else if (stage === 'search') {  
+                increment = 0.03;  
+            } else if (stage === 'writing') {      
+                // 从20%到35% (15个百分点)    
+                if (gap > 10) increment = 0.10; 
+                else if (gap > 5) increment = 0.067; 
+                else increment = 0.033;
+            } else if (stage === 'creative') {    
+                // 从35%到45% (10个百分点)  
+                if (gap > 8) increment = 0.08;
+                else if (gap > 4) increment = 0.053; 
+                else increment = 0.033;
+            } else if (stage === 'template') {    
+                // 从45%到85% (40个百分点)  
+                if (gap > 20) increment = 0.020; 
+                else if (gap > 10) increment = 0.013; 
+                else if (gap > 5) increment = 0.009;  
+                else increment = 0.007;
+            } else if (stage === 'design') {  
+                increment = 0.02;  
+            } else if (stage === 'save') {  
+                increment = 0.05;  
+            } else if (stage === 'publish') {  
+                increment = 0.03;  
+            } else {  
+                increment = 0.05;  
             }  
+            
+            this.currentProgress += increment;  
+            
+            // 确保不超过maxAllowedProgress  
+            if (this.currentProgress > maxAllowedProgress) {  
+                this.currentProgress = maxAllowedProgress;  
+            }  
+            
+            this.renderProgress();  
         }, 100);  
-    }  
+    }
   
     /**  
      * 渲染进度条和百分比  
