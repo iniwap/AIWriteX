@@ -1,19 +1,24 @@
-# 确保 Python 文件被正确识别  
-*.py linguist-detectable=true  
+# === Python 核心代码 ===  
+*.py linguist-language=Python linguist-detectable=true  
   
-# 将文档标记为文档类型(不影响语言统计)  
+# === 排除第三方库 ===  
+src/ai_write_x/web/static/lib/** linguist-vendored=true  
+  
+# === 排除模板和静态资源 ===  
+templates/** linguist-vendored=true  
+src/ai_write_x/web/static/*.html linguist-vendored=true  
+src/ai_write_x/web/static/css/** linguist-vendored=true  
+src/ai_write_x/web/static/js/** linguist-vendored=true  
+  
+# === 排除文档 ===  
 *.md linguist-documentation=true  
 README.md linguist-documentation=true  
   
-# 将配置文件正确分类  
+# === 配置文件 ===  
 *.yaml linguist-language=YAML  
 *.toml linguist-language=TOML  
-
-# 排除第三方 JavaScript 库(Monaco Editor)  
-src/ai_write_x/web/static/lib/** linguist-vendored=true  
-
-knowledge/**/*.html linguist-documentation
-# output/AIWriteX_Setup.exe filter=lfs diff=lfs merge=lfs -text
-
-# 如果不想让测试文件影响统计  
-tests/* linguist-vendored=false
+*.json linguist-language=JSON  
+  
+# === 排除图片和其他资源 ===  
+images/** linguist-vendored=true  
+image/** linguist-vendored=true
