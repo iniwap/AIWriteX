@@ -12,5 +12,8 @@ README.md linguist-documentation=true
 # 排除第三方 JavaScript 库(Monaco Editor)  
 src/ai_write_x/web/static/lib/** linguist-vendored=true  
 
+knowledge/**/*.html linguist-documentation
+# output/AIWriteX_Setup.exe filter=lfs diff=lfs merge=lfs -text
+
 # 如果不想让测试文件影响统计  
 tests/* linguist-vendored=false
