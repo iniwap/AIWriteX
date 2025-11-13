@@ -1,6 +1,16 @@
-knowledge/**/*.html linguist-documentation
-# output/AIWriteX_Setup.exe filter=lfs diff=lfs merge=lfs -text
+# 确保 Python 文件被正确识别  
+*.py linguist-detectable=true  
+  
+# 将文档标记为文档类型(不影响语言统计)  
+*.md linguist-documentation=true  
+README.md linguist-documentation=true  
+  
+# 将配置文件正确分类  
+*.yaml linguist-language=YAML  
+*.toml linguist-language=TOML  
 
-# 标记项目为 Python  
-src/ai_write_x/web/static/** linguist-documentation
-src/ai_write_x/web/templates/** linguist-documentation
+# 排除第三方 JavaScript 库(Monaco Editor)  
+src/ai_write_x/web/static/lib/** linguist-vendored=true  
+
+# 如果不想让测试文件影响统计  
+tests/* linguist-vendored=false
