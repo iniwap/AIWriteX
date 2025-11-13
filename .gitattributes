@@ -5,7 +5,8 @@
 src/ai_write_x/web/static/lib/** linguist-vendored=true  
   
 # === 排除模板和静态资源 ===  
-templates/** linguist-vendored=true  
+templates/** linguist-vendored=true
+knowledge/**/*.html linguist-documentation  
 src/ai_write_x/web/static/*.html linguist-vendored=true  
 src/ai_write_x/web/static/css/** linguist-vendored=true  
 src/ai_write_x/web/static/js/** linguist-vendored=true  
