@@ -13,6 +13,6 @@ knowledge/**/*.html linguist-vendored=true
 *.json linguist-language=JSON  
   
 # === 为了标记为Python项目，忽略部分js代码 ===
-src/ai_write_x/web/static/js/config-manager.js linguist-skip
-src/ai_write_x/web/static/js/article-manager.js linguist-skip
+src/ai_write_x/web/static/js/config-manager.js linguist-vendored=true
+src/ai_write_x/web/static/js/article-manager.js linguist-vendored=true
   
