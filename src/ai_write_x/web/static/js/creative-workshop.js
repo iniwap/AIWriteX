@@ -137,24 +137,41 @@ class CreativeWorkshopManager {
             });  
         }  
         
-        // 【新增】借鉴模式按钮事件  
+        //  借鉴模式按钮事件  
         const referenceModeBtn = document.getElementById('reference-mode-btn');  
         if (referenceModeBtn) {  
             referenceModeBtn.addEventListener('click', () => {  
                 this.toggleReferenceMode();  
             });  
-        }  
+        }    
         
-        // 【新增】日志按钮事件 - 切换进度条显示  
-        const logProgressBtn = document.getElementById('log-progress-btn');  
-        if (logProgressBtn) {  
-            logProgressBtn.addEventListener('click', () => {  
-                const progressEl = document.getElementById('bottom-progress');  
-                if (progressEl) {  
-                    progressEl.classList.toggle('hidden');  
-                }  
+        const logProgressBtn = document.getElementById('log-progress-btn');    
+        if (logProgressBtn) {    
+            logProgressBtn.addEventListener('click', () => {    
+                const logPanel = document.getElementById('generation-progress');    
+                if (logPanel) {    
+                    // 切换collapsed类,而不是hidden类  
+                    logPanel.classList.toggle('collapsed');  
+                }    
+            });    
+        } 
+        
+        const exportLogsBtn = document.getElementById('export-logs-btn');  
+        if (exportLogsBtn) {  
+            exportLogsBtn.addEventListener('click', () => {  
+                this.exportLogs();  
             });  
         }  
+        
+        const clearLogsBtn = document.getElementById('clear-logs-btn');  
+        if (clearLogsBtn) {  
+            clearLogsBtn.addEventListener('click', () => {  
+                const logsOutput = document.getElementById('logs-output');  
+                if (logsOutput) {  
+                    logsOutput.innerHTML = '';  
+                }  
+            });  
+        }
         
         const categorySelect = document.getElementById('workshop-template-category');  
         if (categorySelect) {  
@@ -914,16 +931,38 @@ class CreativeWorkshopManager {
             // 静默失败,不影响用户体验  
         }  
     }
-    appendLog(message, type = 'info') {  
-        // 使用全局日志面板 (main.js 中的 addLogEntry)  
-        if (window.app && window.app.addLogEntry) {  
-            window.app.addLogEntry({  
-                type: type,  
-                message: message,  
-                timestamp: Date.now() / 1000  
-            });  
+
+    appendLog(message, type = 'info') {    
+        // 使用全局日志面板 (main.js 中的 addLogEntry)    
+        if (window.app && window.app.addLogEntry) {    
+            window.app.addLogEntry({    
+                type: type,    
+                message: message,    
+                timestamp: Date.now() / 1000    
+            });    
         }  
-    }  
+        
+        // 【新增】同时添加到日志详情面板  
+        const logsOutput = document.getElementById('logs-output');  
+        if (logsOutput) {  
+            const entry = document.createElement('div');  
+            entry.className = `log-entry ${type}`;  
+            
+            const timestamp = new Date().toLocaleTimeString();  
+            entry.innerHTML = `  
+                <span class="log-timestamp" style="color: var(--text-tertiary); margin-right: 8px;">[${timestamp}]</span>  
+                <span class="log-message">${this.escapeHtml(message)}</span>  
+            `;  
+            
+            logsOutput.appendChild(entry);  
+            
+            // 自动滚动到底部  
+            const logsContainer = logsOutput.parentElement;  
+            if (logsContainer) {  
+                logsContainer.scrollTop = logsContainer.scrollHeight;  
+            }  
+        }  
+    }
       
     // ========== 状态轮询 ==========  
       
@@ -1069,4 +1108,29 @@ class CreativeWorkshopManager {
         div.textContent = text;  
         return div.innerHTML;  
     }  
+
+    async exportLogs() {  
+        try {  
+            // 从后端获取最新的日志文件  
+            const response = await fetch('/api/logs/latest');  
+            if (!response.ok) {  
+                throw new Error('获取日志失败');  
+            }  
+            
+            const blob = await response.blob();  
+            const url = window.URL.createObjectURL(blob);  
+            const a = document.createElement('a');  
+            a.href = url;  
+            a.download = `generation_log_${new Date().toISOString().slice(0, 10)}.log`;  
+            document.body.appendChild(a);  
+            a.click();  
+            document.body.removeChild(a);  
+            window.URL.revokeObjectURL(url);  
+            
+            window.app?.showNotification('日志导出成功', 'success');  
+        } catch (error) {  
+            console.error('导出日志失败:', error);  
+            window.app?.showNotification('导出日志失败: ' + error.message, 'error');  
+        }  
+    }
 }

@@ -441,117 +441,126 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;  
 }  
   
-/* ========== 生成进度区 ========== */  
-.generation-progress {  
-    background: var(--card-background);  
-    border: 1px solid var(--border-color);  
-    border-radius: 12px;  
-    padding: 20px;  
-    margin: 0 0 24px;  
-    width: 100%;  
-    animation: fadeIn 0.3s ease;  
+/* ========== 日志面板样式 ========== */  
+  
+/* 面板间隔 */  
+#generation-progress {  
+    margin: 16px 0;  
 }  
   
-@keyframes fadeIn {  
-    from { opacity: 0; }  
-    to { opacity: 1; }  
-}  
-  
-.progress-header {  
-    display: flex;  
-    justify-content: space-between;  
-    align-items: center;  
-    margin-bottom: 16px;  
-}  
-  
-.progress-title {  
-    display: flex;  
-    align-items: center;  
-    gap: 10px;  
-    margin: 0;  
-    font-size: 16px;  
-    font-weight: 600;  
-    color: var(--text-primary);  
-}  
-  
-.spinner {  
-    width: 18px;  
-    height: 18px;  
-    border: 2px solid var(--border-color);  
-    border-top-color: var(--primary-color);  
-    border-radius: 50%;  
-    animation: spin 0.8s linear infinite;  
-}  
-  
-@keyframes spin {  
-    to { transform: rotate(360deg); }  
-}  
-
-/* ========== 日志容器 ========== */  
-.logs-container {  
-    background: var(--surface-color);  
-    border: 1px solid var(--border-color);  
-    border-radius: 8px;  
+/* 日志容器 - 有背景框,左右无间隔 */  
+#generation-progress .logs-container {      
+    min-height: calc(100vh - var(--header-height) - var(--footer-height) - 400px);  
+    max-height: calc(100vh - var(--header-height) - var(--footer-height) - 400px);  
+    overflow-y: auto;      
+    margin: 16px 0;  
     padding: 16px;  
-    max-height: 400px;  
-    overflow-y: auto;  
-    margin-bottom: 12px;  
-}  
-  
-.logs-output {  
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;  
-    font-size: 13px;  
-    line-height: 1.6;  
-    color: var(--text-secondary);  
-}  
-  
-.logs-output .log-entry {  
-    padding: 4px 0;  
-    word-wrap: break-word;  
-}  
-  
-.logs-output .log-entry.info {  
-    color: var(--text-primary);  
-}  
-  
-.logs-output .log-entry.success {  
-    color: var(--success-color);  
-}  
-  
-.logs-output .log-entry.warning {  
-    color: var(--warning-color);  
-}  
-  
-.logs-output .log-entry.error {  
-    color: var(--error-color);  
-}  
-  
-.logs-actions {  
+    background: var(--surface-color);  
+    border-top: 1px solid var(--border-color);  
+    border-bottom: 1px solid var(--border-color);  
+    border-left: none;  
+    border-right: none;  
+    border-radius: 0;  
     display: flex;  
-    gap: 12px;  
-    justify-content: flex-end;  
+    flex-direction: column;  
+}    
+  
+/* 日志输出区域 */  
+#generation-progress .logs-output {      
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;      
+    font-size: 13px;      
+    line-height: 1.6;      
+    color: var(--text-secondary);  
+    min-height: 100%;  
 }  
   
-.btn-text {  
+/* 空状态提示 */  
+#generation-progress .logs-output:empty::before {  
+    content: '暂无日志';  
+    color: var(--text-tertiary);  
     display: flex;  
     align-items: center;  
-    gap: 6px;  
-    padding: 6px 12px;  
-    background: transparent;  
-    border: 1px solid var(--border-color);  
-    border-radius: 6px;  
-    color: var(--text-secondary);  
-    font-size: 13px;  
-    cursor: pointer;  
-    transition: all 0.2s ease;  
+    justify-content: center;  
+    height: 100%;  
+    font-size: 14px;  
 }  
   
-.btn-text:hover {  
-    background: var(--hover-background);  
-    border-color: var(--primary-color);  
-    color: var(--text-primary);  
+#generation-progress .logs-output .log-entry {      
+    padding: 4px 0;      
+    word-wrap: break-word;      
+}      
+      
+#generation-progress .logs-output .log-entry.info {      
+    color: var(--text-primary);      
+}      
+      
+#generation-progress .logs-output .log-entry.success {      
+    color: var(--success-color);      
+}      
+      
+#generation-progress .logs-output .log-entry.warning {      
+    color: var(--warning-color);      
+}      
+      
+#generation-progress .logs-output .log-entry.error {      
+    color: var(--error-color);      
+}      
+  
+/* 日志操作按钮区域 */  
+#generation-progress .logs-actions {      
+    display: flex;      
+    gap: 12px;      
+    justify-content: flex-end;  
+    padding: 0 16px 16px;  
 }  
   
+/* 按钮样式 */  
+#creative-workshop-view .btn-text {      
+    display: flex;      
+    align-items: center;      
+    gap: 6px;      
+    padding: 6px 12px;      
+    background: transparent;      
+    border: 1px solid var(--border-color);      
+    border-radius: 6px;      
+    color: var(--text-secondary);      
+    font-size: 13px;      
+    cursor: pointer;      
+    transition: all 0.2s ease;      
+}      
+      
+#creative-workshop-view .btn-text:hover {      
+    background: var(--hover-background);      
+    border-color: var(--primary-color);      
+    color: var(--text-primary);      
+}  
+  
+/* SVG图标统一线条粗细 */  
+#creative-workshop-view .panel-icon {  
+    width: 20px;  
+    height: 20px;  
+    stroke-width: 2;  
+}  
+  
+/* 滚动条样式 */  
+#generation-progress .logs-container::-webkit-scrollbar {  
+    width: 8px;  
+}  
+  
+#generation-progress .logs-container::-webkit-scrollbar-track {  
+    background: var(--surface-color);  
+    border-radius: 4px;  
+}  
+  
+#generation-progress .logs-container::-webkit-scrollbar-thumb {  
+    background: var(--border-color);  
+    border-radius: 4px;  
+}  
+  
+#generation-progress .logs-container::-webkit-scrollbar-thumb:hover {  
+    background: var(--text-tertiary);  
+}
+
 /* ========== 生成结果区 ========== */  
 .generation-result {  
     background: var(--card-background);  
@@ -633,7 +642,11 @@
     gap: 12px;  
     flex-wrap: wrap;  
 }  
-  
+
+.hidden {  
+    display: none !important;  
+}
+
 /* ========== 响应式设计 ========== */  
 @media (max-width: 1024px) {  
     .workshop-container {  

@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 import asyncio
@@ -354,3 +355,21 @@ async def get_hot_topics():
     except Exception as e:
         log.print_log(f"获取热搜失败: {str(e)}", "error")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/logs/latest")
+async def get_latest_log():
+    """获取最新的日志文件"""
+    from src.ai_write_x.utils.path_manager import PathManager
+
+    log_dir = PathManager.get_log_dir()
+    if not log_dir.exists():
+        return {"error": "日志目录不存在"}
+
+    # 查找最新的WEB_*.log文件
+    log_files = sorted(log_dir.glob("WEB_*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not log_files:
+        return {"error": "没有找到日志文件"}
+
+    latest_log = log_files[0]
+    return FileResponse(path=str(latest_log), filename=latest_log.name, media_type="text/plain")
