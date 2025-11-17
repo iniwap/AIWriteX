@@ -109,96 +109,93 @@ class CreativeWorkshopManager {
           
     // ========== 事件监听器 ==========      
             
-    bindEventListeners() {        
-        const topicInput = document.getElementById('topic-input');        
-        if (topicInput) {        
-            topicInput.addEventListener('input', (e) => {        
-                this.currentTopic = e.target.value;        
-            });        
-                  
-            topicInput.addEventListener('keydown', (e) => {        
-                if (e.key === 'Enter' && !e.shiftKey) {        
-                    e.preventDefault();        
-                    if (!this.isGenerating) {      
-                        this.startGeneration();      
-                    }      
-                }        
-            });        
-        }        
-              
-        const generateBtn = document.getElementById('generate-btn');        
-        if (generateBtn) {        
-            generateBtn.addEventListener('click', () => {      
-                if (this.isGenerating) {      
-                    this.stopGeneration();      
-                } else {      
-                    this.startGeneration();      
-                }      
-            });        
-        }    
-              
-        const categorySelect = document.getElementById('workshop-template-category');        
-        if (categorySelect) {        
-            categorySelect.addEventListener('change', async (e) => {      
-                const category = e.target.value;      
-                    
-                if (!category) {      
-                    this.populateTemplateOptions([]);      
-                } else {      
-                    const templates = await this.loadTemplatesByCategory(category);      
-                    this.populateTemplateOptions(templates);      
-                }      
-            });        
-        }        
-              
-        document.querySelectorAll('.config-trigger').forEach(trigger => {        
-            trigger.addEventListener('click', (e) => {        
-                this.toggleReferenceMode(e.currentTarget);        
-            });        
-        });       
-    }       
+    bindEventListeners() {  
+        const topicInput = document.getElementById('topic-input');  
+        if (topicInput) {  
+            topicInput.addEventListener('input', (e) => {  
+                this.currentTopic = e.target.value;  
+            });  
+            
+            topicInput.addEventListener('keydown', (e) => {  
+                if (e.key === 'Enter' && !e.shiftKey) {  
+                    e.preventDefault();  
+                    if (!this.isGenerating) {  
+                        this.startGeneration();  
+                    }  
+                }  
+            });  
+        }  
+        
+        const generateBtn = document.getElementById('generate-btn');  
+        if (generateBtn) {  
+            generateBtn.addEventListener('click', () => {  
+                if (this.isGenerating) {  
+                    this.stopGeneration();  
+                } else {  
+                    this.startGeneration();  
+                }  
+            });  
+        }  
+        
+        // 【新增】借鉴模式按钮事件  
+        const referenceModeBtn = document.getElementById('reference-mode-btn');  
+        if (referenceModeBtn) {  
+            referenceModeBtn.addEventListener('click', () => {  
+                this.toggleReferenceMode();  
+            });  
+        }  
+        
+        // 【新增】日志按钮事件 - 切换进度条显示  
+        const logProgressBtn = document.getElementById('log-progress-btn');  
+        if (logProgressBtn) {  
+            logProgressBtn.addEventListener('click', () => {  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.toggle('hidden');  
+                }  
+            });  
+        }  
+        
+        const categorySelect = document.getElementById('workshop-template-category');  
+        if (categorySelect) {  
+            categorySelect.addEventListener('change', async (e) => {  
+                const category = e.target.value;  
+                if (!category) {  
+                    this.populateTemplateOptions([]);  
+                } else {  
+                    const templates = await this.loadTemplatesByCategory(category);  
+                    this.populateTemplateOptions(templates);  
+                }  
+            });  
+        }  
+    }   
       
     // ========== 借鉴模式管理 ==========      
       
-    async toggleReferenceMode(trigger) {        
-        const targetId = trigger.dataset.target;        
-        const panel = document.getElementById(`${targetId}-panel`);        
-              
-        if (!panel) {        
-            console.error(`Panel not found: ${targetId}-panel`);        
-            return;        
-        }        
-              
-        const isCollapsed = panel.classList.contains('collapsed');        
-        const status = trigger.querySelector('.trigger-status');        
-              
-        if (isCollapsed) {        
-            panel.classList.remove('collapsed');        
-            trigger.classList.add('active');        
-                  
-            if (status) {        
-                status.textContent = '已启用';        
-                status.classList.add('enabled');        
-            }        
-                  
-            await this.resetReferenceForm();        
-            this.setReferenceFormState(false);        
-                  
-            setTimeout(() => {        
-                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });        
-            }, 100);        
-        } else {        
-            panel.classList.add('collapsed');        
-            trigger.classList.remove('active');        
-                  
-            if (status) {        
-                status.textContent = '未启用';        
-                status.classList.remove('enabled');        
-            }        
-                  
-            this.setReferenceFormState(true);        
-        }        
-    }        
+    toggleReferenceMode() {  
+        const panel = document.getElementById('reference-mode-panel');  
+        const referenceModeBtn = document.getElementById('reference-mode-btn');  
+        
+        if (!panel || !referenceModeBtn) return;  
+        
+        if (panel.classList.contains('collapsed')) {  
+            // 展开面板  
+            panel.classList.remove('collapsed');  
+            referenceModeBtn.classList.add('active');  
+            this.resetReferenceForm();  
+            this.setReferenceFormState(false);  
+            
+            // 滚动到视图  
+            setTimeout(() => {  
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });  
+            }, 100);  
+        } else {  
+            // 收起面板  
+            panel.classList.add('collapsed');  
+            referenceModeBtn.classList.remove('active');  
+            this.setReferenceFormState(true);  
+        }  
+    }     
       
     async resetReferenceForm() {        
         const categorySelect = document.getElementById('workshop-template-category');        
@@ -291,10 +288,17 @@ class CreativeWorkshopManager {
                 return;        
             }    
     
-            // 启动进度条      
-            if (this.bottomProgress) {      
-                this.bottomProgress.start('init');      
-            }     
+            // 启动进度条  
+            if (this.bottomProgress) {  
+                this.bottomProgress.start('init');  
+                const progressEl = document.getElementById('bottom-progress');  
+                if (progressEl) {  
+                    progressEl.classList.remove('hidden');  // 显式移除hidden类  
+                }  
+            } 
+            
+            // 【新增】初始化日志按钮显示  
+            this.updateLogButtonProgress('init', 0);  
         } catch (error) {        
             console.error('配置验证失败:', error);      
                 
@@ -451,16 +455,16 @@ class CreativeWorkshopManager {
     }    
         
     // 清理进度条的辅助方法    
-    cleanupProgress() {    
-        if (this.bottomProgress) {    
-            this.bottomProgress.stop();    
-            const progressEl = document.getElementById('bottom-progress');    
-            if (progressEl) {    
-                progressEl.classList.add('hidden');    
-            }    
-            this.bottomProgress.reset();    
-        }    
-    }    
+    cleanupProgress() {  
+        if (this.bottomProgress) {  
+            this.bottomProgress.stop();  
+            const progressEl = document.getElementById('bottom-progress');  
+            if (progressEl) {  
+                progressEl.classList.add('hidden');
+            }  
+            this.bottomProgress.reset();  
+        }  
+    }   
         
     isValidUrl(url) {      
         try {      
@@ -541,48 +545,66 @@ class CreativeWorkshopManager {
         return div.innerHTML;      
     }    
   
-    async stopGeneration() {        
-        if (!this.isGenerating) return;        
+    async stopGeneration() {  
+        if (!this.isGenerating) return;  
+        
+        try {  
+            const response = await fetch('/api/generate/stop', {  
+                method: 'POST'  
+            });  
             
-        try {        
-            const response = await fetch('/api/generate/stop', {        
-                method: 'POST'        
-            });        
+            if (response.ok) {  
+                const result = await response.json();  
                 
-            if (response.ok) {        
-                const result = await response.json();        
-                
-                // 先等待队列处理完毕  
-                while (this.isProcessingQueue) {    
-                    await new Promise(resolve => setTimeout(resolve, 100));    
+                // 等待队列处理完毕  
+                while (this.isProcessingQueue) {  
+                    await new Promise(resolve => setTimeout(resolve, 100));  
                 }  
                 
-                // 再清空队列  
+                // 清空队列  
                 this.clearMessageQueue();  
                 
-                // 最后清理进度条  
+                // 清理进度条  
                 this.cleanupProgress();  
-                this.disconnectLogWebSocket();        
-                this.stopStatusPolling();        
-                    
-                this._hotSearchPlatform = '';    
-                const topicInput = document.getElementById('topic-input');      
-                if (topicInput) {      
-                    topicInput.value = '';      
-                    this.currentTopic = '';      
-                }      
-                    
-                window.app?.showNotification(result.message || '已停止生成', 'info');      
-            }      
-        } catch (error) {      
-            console.error('停止生成失败:', error);      
-            window.app?.showNotification('停止失败', 'error');      
-        } finally {      
-            this.isGenerating = false;      
-            this.updateGenerationUI(false);      
-        }      
-    }      
-          
+                
+                // 【新增】重置日志按钮  
+                this.resetLogButton();  
+                
+                this.disconnectLogWebSocket();  
+                this.stopStatusPolling();  
+                
+                this._hotSearchPlatform = '';  
+                const topicInput = document.getElementById('topic-input');  
+                if (topicInput) {  
+                    topicInput.value = '';  
+                    this.currentTopic = '';  
+                }  
+                
+                window.app?.showNotification(result.message || '已停止生成', 'info');  
+            }  
+        } catch (error) {  
+            console.error('停止生成失败:', error);  
+            window.app?.showNotification('停止失败', 'error');  
+        } finally {  
+            this.isGenerating = false;  
+            this.updateGenerationUI(false);  
+        }  
+    }     
+      
+    resetLogButton() {  
+        const progressText = document.getElementById('progress-text');  
+        const btnIcon = document.querySelector('#log-progress-btn .btn-icon');  
+        
+        if (progressText) {  
+            progressText.textContent = '日志';  
+        }  
+        
+        if (btnIcon) {  
+            // 恢复默认图标  
+            btnIcon.innerHTML = '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>';  
+            btnIcon.classList.remove('rotating');  
+        }  
+    }
     // ========== WebSocket 日志流式传输 ==========      
           
     connectLogWebSocket() {      
@@ -652,7 +674,6 @@ class CreativeWorkshopManager {
         
         while (this.messageQueue.length > 0) {  
             const data = this.messageQueue.shift();  
-            
             const markers = this.extractProgressMarkers(data.message);  
             
             for (const marker of markers) {  
@@ -661,17 +682,35 @@ class CreativeWorkshopManager {
                 if (stage && progress !== null) {  
                     if (this.bottomProgress) {  
                         this.bottomProgress.updateProgress(stage, progress);  
+                        
+                        this.updateLogButtonProgress(stage, progress);  
                     }  
                     
-                    // 【关键改进7】增加延迟,让动画有时间执行  
-                    await new Promise(resolve => setTimeout(resolve, 100)); // 从50ms增加到100ms  
+                    await new Promise(resolve => setTimeout(resolve, 100));  
                 }  
             }  
         }  
         
         this.isProcessingQueue = false;  
     }
-      
+   
+    updateLogButtonProgress(stage, progress) {  
+        const progressText = document.getElementById('progress-text');  
+        const btnIcon = document.querySelector('#log-progress-btn .btn-icon');  
+        
+        if (!progressText || !btnIcon || !this.bottomProgress) return;  
+        
+        const stageConfig = this.bottomProgress.stages[stage];  
+        if (!stageConfig) return;  
+        
+        const currentProgress = Math.round(this.bottomProgress.currentProgress);  
+        progressText.textContent = `${stageConfig.name} ${currentProgress}%`;  
+        
+        // 更新SVG图标并添加旋转动画  
+        btnIcon.innerHTML = stageConfig.icon;  
+        btnIcon.classList.add('rotating');  
+    }
+
     // 从消息中提取所有进度标记  
     extractProgressMarkers(message) {  
         const markers = [];  
@@ -745,7 +784,6 @@ class CreativeWorkshopManager {
         
         if (data.type === 'completed') {  
             if (this.bottomProgress) {  
-                // 【关键修复】使用complete()而不是updateProgress()  
                 this.bottomProgress.complete();  
             }  
             
@@ -754,6 +792,9 @@ class CreativeWorkshopManager {
                 if (this.bottomProgress) {  
                     this.bottomProgress.stop();  
                 }  
+                
+                // 【新增】重置日志按钮  
+                this.resetLogButton();  
                 
                 setTimeout(() => {  
                     const progressEl = document.getElementById('bottom-progress');  
@@ -773,6 +814,9 @@ class CreativeWorkshopManager {
                 this.bottomProgress.showError(data.error || '未知错误');  
             }  
             
+            // 【新增】重置日志按钮  
+            this.resetLogButton();  
+            
             setTimeout(() => {  
                 const progressEl = document.getElementById('bottom-progress');  
                 if (progressEl) {  
@@ -791,10 +835,13 @@ class CreativeWorkshopManager {
             if (this.bottomProgress) {  
                 this.bottomProgress.reset();  
             }  
+            
+            // 【新增】重置日志按钮  
+            this.resetLogButton();  
         }  
         
         this.updateGenerationUI(false);  
-        this.stopStatusPolling();  
+        this.stopStatusPolling();   
         
         if (data.type === 'completed') {  
             window.app?.showNotification('生成完成', 'success');  
