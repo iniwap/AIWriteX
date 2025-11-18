@@ -45,7 +45,7 @@
                             <path d="M12 20h9"/>  
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>  
                         </svg>  
-                        <span id="progress-text">日志</span>  
+                        <span id="progress-text">运行日志</span>  
                     </button>  
                 </div>  
                   
@@ -119,39 +119,36 @@
           
         <!-- 生成进度区 -->    
         <div id="generation-progress" class="workshop-config-panel collapsed">    
-            <div class="panel-header">    
-                <h3 class="panel-title">    
-                    <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">    
-                        <path d="M12 20h9"/>    
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>    
-                    </svg>    
-                    日志详情    
-                </h3>    
+            <div class="panel-header">      
+                <h3 class="panel-title">      
+                    <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">      
+                        <path d="M12 20h9"/>      
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>      
+                    </svg>      
+                    日志详情      
+                </h3>  
+                
+                <!-- 新增:标题栏右侧按钮组 -->  
+                <div class="panel-header-actions">  
+                    <button id="clear-logs-btn" class="icon-btn" title="清空日志">      
+                        <svg class="btn-icon-small" viewBox="0 0 24 24">      
+                            <polyline points="3 6 5 6 21 6"/>      
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>      
+                        </svg>      
+                    </button>      
+                    <button id="export-logs-btn" class="icon-btn" title="导出日志">      
+                        <svg class="btn-icon-small" viewBox="0 0 24 24">      
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>      
+                            <polyline points="7 10 12 15 17 10"/>      
+                            <line x1="12" y1="15" x2="12" y2="3"/>      
+                        </svg>      
+                    </button>  
+                </div>  
             </div>    
             
-            <div class="panel-content">    
-                <div class="logs-container">    
-                    <div id="logs-output" class="logs-output"></div>    
-                </div>    
-                
-                <div class="logs-actions">    
-                    <button id="clear-logs-btn" class="btn-text">    
-                        <svg class="btn-icon-small" viewBox="0 0 24 24">    
-                            <polyline points="3 6 5 6 21 6"/>    
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>    
-                        </svg>    
-                        清空日志    
-                    </button>    
-                    <button id="export-logs-btn" class="btn-text">    
-                        <svg class="btn-icon-small" viewBox="0 0 24 24">    
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>    
-                            <polyline points="7 10 12 15 17 10"/>    
-                            <line x1="12" y1="15" x2="12" y2="3"/>    
-                        </svg>    
-                        导出日志    
-                    </button>    
-                </div>    
-            </div>    
+            <div class="panel-content">      
+                <div id="logs-output" class="logs-output"></div>      
+            </div>   
         </div>
           
         <!-- 生成结果 -->  

@@ -145,15 +145,25 @@ class CreativeWorkshopManager {
             });  
         }    
         
-        const logProgressBtn = document.getElementById('log-progress-btn');    
-        if (logProgressBtn) {    
-            logProgressBtn.addEventListener('click', () => {    
-                const logPanel = document.getElementById('generation-progress');    
-                if (logPanel) {    
-                    // 切换collapsed类,而不是hidden类  
+        const logProgressBtn = document.getElementById('log-progress-btn');      
+        if (logProgressBtn) {      
+            logProgressBtn.addEventListener('click', () => {      
+                const logPanel = document.getElementById('generation-progress');  
+                const refPanel = document.getElementById('reference-mode-panel');  // 新增  
+                const referenceModeBtn = document.getElementById('reference-mode-btn');  // 新增  
+                
+                if (logPanel) {  
+                    // 展开日志面板前,先关闭借鉴面板  
+                    if (refPanel && !refPanel.classList.contains('collapsed')) {  
+                        refPanel.classList.add('collapsed');  
+                        if (referenceModeBtn) {  
+                            referenceModeBtn.classList.remove('active');  
+                        }  
+                    }  
+                    
                     logPanel.classList.toggle('collapsed');  
-                }    
-            });    
+                }      
+            });      
         } 
         
         const exportLogsBtn = document.getElementById('export-logs-btn');  
@@ -192,27 +202,30 @@ class CreativeWorkshopManager {
     toggleReferenceMode() {  
         const panel = document.getElementById('reference-mode-panel');  
         const referenceModeBtn = document.getElementById('reference-mode-btn');  
+        const logPanel = document.getElementById('generation-progress');  // 新增  
         
         if (!panel || !referenceModeBtn) return;  
         
         if (panel.classList.contains('collapsed')) {  
-            // 展开面板  
+            // 展开借鉴面板前,先关闭日志面板  
+            if (logPanel && !logPanel.classList.contains('collapsed')) {  
+                logPanel.classList.add('collapsed');  
+            }  
+            
             panel.classList.remove('collapsed');  
             referenceModeBtn.classList.add('active');  
             this.resetReferenceForm();  
             this.setReferenceFormState(false);  
             
-            // 滚动到视图  
             setTimeout(() => {  
                 panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });  
             }, 100);  
         } else {  
-            // 收起面板  
             panel.classList.add('collapsed');  
             referenceModeBtn.classList.remove('active');  
             this.setReferenceFormState(true);  
         }  
-    }     
+    }    
       
     async resetReferenceForm() {        
         const categorySelect = document.getElementById('workshop-template-category');        

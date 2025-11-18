@@ -157,7 +157,7 @@
     0% { left: -100%; }  
     100% { left: 100%; }  
 }  
-
+  
 #log-progress-btn .btn-icon.rotating {  
     animation: rotate 2s linear infinite;  
 }  
@@ -165,8 +165,8 @@
 @keyframes rotate {  
     from { transform: rotate(0deg); }  
     to { transform: rotate(360deg); }  
-}
-
+}  
+  
 /* ========== 底部工具栏 ========== */  
 .input-toolbar {  
     display: flex;  
@@ -338,17 +338,16 @@
     stroke: white;  
 }  
   
-/* ========== 配置面板 ========== */  
+/* ========== 配置面板基类 ========== */  
 .workshop-config-panel {  
     background: var(--card-background);  
     border: 1px solid var(--border-color);  
     border-radius: 12px;  
-    margin: 12px auto;  
-    width: 92%;  
-    max-width: 800px;  
+    margin: 0 0 8px 0;  
+    width: 100%;  
+    max-width: 800px; 
     overflow: hidden;  
     transition: all 0.3s ease;  
-    max-height: calc(100vh - 400px);  
     opacity: 1;  
 }  
   
@@ -359,11 +358,19 @@
     border: none;  
 }  
   
+/* ========== 统一两个面板的高度 ========== */  
+#reference-mode-panel,  
+#generation-progress {  
+    max-height: calc(100vh - var(--header-height) - var(--footer-height) - 520px) !important;  
+} 
+  
+/* ========== 面板标题栏 ========== */  
 #creative-workshop-view .panel-header {  
     display: flex;  
-    justify-content: flex-start;  
+    justify-content: space-between;  
     align-items: center;  
-    padding: 6px 20px;  
+    padding: 8px 16px;  
+    min-height: 40px;  
     border-bottom: 1px solid var(--border-color);  
     background: var(--surface-color);  
 }  
@@ -376,17 +383,56 @@
     font-size: 13px;  
     font-weight: 500;  
     color: var(--text-primary);  
+    line-height: 1.5;  
 }  
   
 .panel-icon {  
     width: 20px;  
     height: 20px;  
     stroke: var(--primary-color);  
+    flex-shrink: 0;  
 }  
   
-#creative-workshop-view .panel-content {  
-    padding: 12px;  
+/* 标题栏右侧按钮组 */  
+.panel-header-actions {  
+    display: flex;  
+    gap: 4px;  
+    align-items: center;  
 }  
+  
+/* 图标按钮样式 */  
+.icon-btn {  
+    width: 28px;  
+    height: 28px;  
+    padding: 0;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    background: transparent;  
+    border: 1px solid transparent;  
+    border-radius: 6px;  
+    color: var(--text-secondary);  
+    cursor: pointer;  
+    transition: all 0.2s ease;  
+}  
+  
+.icon-btn:hover {  
+    background: var(--hover-background);  
+    border-color: var(--border-color);  
+    color: var(--text-primary);  
+}  
+  
+.icon-btn .btn-icon-small {  
+    width: 16px;  
+    height: 16px;  
+}  
+  
+/* ========== 面板内容区域 - 统一布局 ========== */  
+#creative-workshop-view .panel-content {    
+    padding: 12px;    
+    max-height: calc(100% - 40px);    
+    overflow-y: auto;    
+}     
   
 /* ========== 表单元素 ========== */  
 #creative-workshop-view .form-group {  
@@ -441,38 +487,20 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;  
 }  
   
-/* ========== 日志面板样式 ========== */  
-  
-/* 面板间隔 */  
-#generation-progress {  
-    margin: 16px 0;  
-}  
-  
-/* 日志容器 - 有背景框,左右无间隔 */  
-#generation-progress .logs-container {      
-    min-height: calc(100vh - var(--header-height) - var(--footer-height) - 400px);  
-    max-height: calc(100vh - var(--header-height) - var(--footer-height) - 400px);  
-    overflow-y: auto;      
-    margin: 16px 0;  
-    padding: 16px;  
-    background: var(--surface-color);  
-    border-top: 1px solid var(--border-color);  
-    border-bottom: 1px solid var(--border-color);  
-    border-left: none;  
-    border-right: none;  
-    border-radius: 0;  
-    display: flex;  
-    flex-direction: column;  
-}    
-  
-/* 日志输出区域 */  
-#generation-progress .logs-output {      
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;      
-    font-size: 13px;      
-    line-height: 1.6;      
-    color: var(--text-secondary);  
-    min-height: 100%;  
-}  
+/* ========== 日志面板特殊样式 ========== */     
+    
+#generation-progress .logs-output {        
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;        
+    font-size: 13px;        
+    line-height: 1.6;        
+    color: var(--text-secondary);        
+    padding-right: 8px;        
+    overflow-wrap: break-word;    
+    min-height: 100px;  
+    max-height: 100%;  /* 关键:限制最大高度 */  
+    overflow-y: auto;  /* 关键:允许滚动 */  
+    display: block;   
+}
   
 /* 空状态提示 */  
 #generation-progress .logs-output:empty::before {  
@@ -485,82 +513,50 @@
     font-size: 14px;  
 }  
   
-#generation-progress .logs-output .log-entry {      
-    padding: 4px 0;      
-    word-wrap: break-word;      
-}      
-      
-#generation-progress .logs-output .log-entry.info {      
-    color: var(--text-primary);      
-}      
-      
-#generation-progress .logs-output .log-entry.success {      
-    color: var(--success-color);      
-}      
-      
-#generation-progress .logs-output .log-entry.warning {      
-    color: var(--warning-color);      
-}      
-      
-#generation-progress .logs-output .log-entry.error {      
-    color: var(--error-color);      
-}      
-  
-/* 日志操作按钮区域 */  
-#generation-progress .logs-actions {      
-    display: flex;      
-    gap: 12px;      
-    justify-content: flex-end;  
-    padding: 0 16px 16px;  
+#generation-progress .logs-output .log-entry {  
+    padding: 4px 0;  
+    word-wrap: break-word;  
 }  
   
-/* 按钮样式 */  
-#creative-workshop-view .btn-text {      
-    display: flex;      
-    align-items: center;      
-    gap: 6px;      
-    padding: 6px 12px;      
-    background: transparent;      
-    border: 1px solid var(--border-color);      
-    border-radius: 6px;      
-    color: var(--text-secondary);      
-    font-size: 13px;      
-    cursor: pointer;      
-    transition: all 0.2s ease;      
-}      
-      
-#creative-workshop-view .btn-text:hover {      
-    background: var(--hover-background);      
-    border-color: var(--primary-color);      
-    color: var(--text-primary);      
+#generation-progress .logs-output .log-entry.info {  
+    color: var(--text-primary);  
 }  
   
-/* SVG图标统一线条粗细 */  
-#creative-workshop-view .panel-icon {  
-    width: 20px;  
-    height: 20px;  
-    stroke-width: 2;  
+#generation-progress .logs-output .log-entry.success {  
+    color: var(--success-color);  
 }  
   
-/* 滚动条样式 */  
-#generation-progress .logs-container::-webkit-scrollbar {  
-    width: 8px;  
+#generation-progress .logs-output .log-entry.warning {  
+    color: var(--warning-color);  
 }  
   
-#generation-progress .logs-container::-webkit-scrollbar-track {  
-    background: var(--surface-color);  
-    border-radius: 4px;  
+#generation-progress .logs-output .log-entry.error {  
+    color: var(--error-color);  
 }  
   
-#generation-progress .logs-container::-webkit-scrollbar-thumb {  
-    background: var(--border-color);  
-    border-radius: 4px;  
-}  
-  
-#generation-progress .logs-container::-webkit-scrollbar-thumb:hover {  
-    background: var(--text-tertiary);  
+/* ========== 统一滚动条样式 ========== */    
+#reference-mode-panel .panel-content::-webkit-scrollbar,    
+#generation-progress .panel-content::-webkit-scrollbar {    
+    width: 8px;    
+}    
+    
+#reference-mode-panel .panel-content::-webkit-scrollbar-track,    
+#generation-progress .panel-content::-webkit-scrollbar-track {    
+    background: var(--surface-color);    
+    border-radius: 4px;    
+}    
+    
+#reference-mode-panel .panel-content::-webkit-scrollbar-thumb,    
+#generation-progress .panel-content::-webkit-scrollbar-thumb {    
+    background: var(--border-color);    
+    border-radius: 4px;    
+}    
+    
+#reference-mode-panel .panel-content::-webkit-scrollbar-thumb:hover,    
+#generation-progress .panel-content::-webkit-scrollbar-thumb:hover {    
+    background: var(--text-tertiary);    
 }
-
+  
 /* ========== 生成结果区 ========== */  
 .generation-result {  
     background: var(--card-background);  
@@ -642,11 +638,11 @@
     gap: 12px;  
     flex-wrap: wrap;  
 }  
-
+  
 .hidden {  
     display: none !important;  
-}
-
+}  
+  
 /* ========== 响应式设计 ========== */  
 @media (max-width: 1024px) {  
     .workshop-container {  
@@ -718,10 +714,6 @@
         grid-template-columns: 1fr;  
     }  
   
-    .logs-container {  
-        max-height: 300px;  
-    }  
-  
     .result-actions {  
         flex-direction: column;  
     }  
@@ -744,15 +736,6 @@
   
     .workshop-config-panel {  
         border-radius: 8px;  
-    }  
-  
-    .logs-container {  
-        padding: 12px;  
-        max-height: 250px;  
-    }  
-  
-    .logs-output {  
-        font-size: 12px;  
     }  
 }  
   
@@ -788,25 +771,6 @@
     .workshop-config-panel {  
         max-width: 1400px;  
     }  
-}  
-  
-/* ========== 滚动条样式 ========== */  
-.logs-container::-webkit-scrollbar {  
-    width: 8px;  
-}  
-  
-.logs-container::-webkit-scrollbar-track {  
-    background: var(--surface-color);  
-    border-radius: 4px;  
-}  
-  
-.logs-container::-webkit-scrollbar-thumb {  
-    background: var(--border-color);  
-    border-radius: 4px;  
-}  
-  
-.logs-container::-webkit-scrollbar-thumb:hover {  
-    background: var(--text-tertiary);  
 }  
   
 /* ========== 深色主题适配 ========== */  
