@@ -6,22 +6,26 @@
     overflow: hidden;  
 }  
   
-.workshop-container {  
-    width: 100%;  
-    max-width: 900px;  
-    margin: 0 auto;  
-    padding: 60px 20px 40px;  
-    display: flex;  
-    flex-direction: column;  
-    align-items: center;  
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));  
-}  
+.workshop-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    min-height: 0;
+    padding: 60px 20px 0;    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start !important; 
+    overflow-y: hidden; 
+} 
   
 /* ========== LOGO和标题区域 ========== */  
 .workshop-header {  
     text-align: center;  
     margin-bottom: 32px;  
-}  
+    flex-shrink: 0; 
+} 
   
 .logo-container {  
     width: 80px;  
@@ -69,7 +73,8 @@
     padding: 0;  
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);  
     overflow: hidden;  
-    margin-bottom: 8px;  
+    margin-bottom: 16px; 
+    flex-shrink: 0; 
 }  
   
 /* ========== 话题输入框 ========== */  
@@ -347,8 +352,10 @@
     width: 100%;  
     max-width: 800px; 
     overflow: hidden;  
-    transition: all 0.3s ease;  
     opacity: 1;  
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s ease,
+                margin-bottom 0.3s ease;
 }  
   
 .workshop-config-panel.collapsed {  
@@ -359,10 +366,27 @@
 }  
   
 /* ========== 统一两个面板的高度 ========== */  
-#reference-mode-panel,  
-#generation-progress {  
-    max-height: calc(100vh - var(--header-height) - var(--footer-height) - 520px) !important;  
-} 
+#reference-mode-panel:not(.collapsed) {
+    width: 100%;
+    margin-bottom: 16px;
+    flex-shrink: 0; 
+    height: auto !important;
+    min-height: 100px;
+    max-height: 40vh !important; 
+}
+
+#generation-progress:not(.collapsed) {
+    width: 100%;
+    flex: 1; 
+    margin-top: 0;
+    margin-bottom: 16px;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 200px; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
   
 /* ========== 面板标题栏 ========== */  
 #creative-workshop-view .panel-header {  
@@ -428,11 +452,11 @@
 }  
   
 /* ========== 面板内容区域 - 统一布局 ========== */  
-#creative-workshop-view .panel-content {    
-    padding: 12px;    
-    max-height: calc(100% - 40px);    
-    overflow-y: auto;    
-}     
+#creative-workshop-view .panel-content {
+    padding: 12px;
+    height: calc(100% - 45px); 
+    overflow: hidden;
+}    
   
 /* ========== 表单元素 ========== */  
 #creative-workshop-view .form-group {  
@@ -497,9 +521,10 @@
     padding-right: 8px;        
     overflow-wrap: break-word;    
     min-height: 100px;  
-    max-height: 100%;  /* 关键:限制最大高度 */  
-    overflow-y: auto;  /* 关键:允许滚动 */  
-    display: block;   
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    box-sizing: border-box;  
 }
   
 /* 空状态提示 */  
