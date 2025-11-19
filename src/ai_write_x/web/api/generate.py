@@ -9,6 +9,8 @@ import asyncio
 import time
 import queue
 
+from ..state import get_app_state
+
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.crew_main import ai_write_x_main
 from src.ai_write_x.tools import hotnews
@@ -231,6 +233,7 @@ async def get_generation_status():
 
 @router.websocket("/ws/generate/logs")
 async def websocket_logs(websocket: WebSocket):
+    """WebSocket日志连接 - 统一处理主进程和子进程日志"""
     await websocket.accept()
 
     global _current_log_queue, _current_process
@@ -239,13 +242,14 @@ async def websocket_logs(websocket: WebSocket):
     from datetime import datetime
     from src.ai_write_x.utils.path_manager import PathManager
 
+    app_state = get_app_state()
     log_file = PathManager.get_log_dir() / f"WEB_{datetime.now().strftime('%Y-%m-%d')}.log"
     log.LogManager.get_instance().set_file_handler(log_file)
     file_handler = log.LogManager.get_instance().get_file_handler()
 
     try:
         while True:
-            # 检查进程状态
+            # 1. 检查子进程状态
             if _current_process and not _current_process.is_alive():
                 exit_code = _current_process.exitcode
                 if exit_code != 0:
@@ -259,6 +263,7 @@ async def websocket_logs(websocket: WebSocket):
                     )
                     break
 
+            # 2. 检查子进程日志队列
             if _current_log_queue:
                 try:
                     msg = _current_log_queue.get_nowait()
@@ -320,6 +325,27 @@ async def websocket_logs(websocket: WebSocket):
                 except queue.Empty:
                     pass
 
+            # 3. 检查主进程日志队列
+            if app_state.log_queue:
+                try:
+                    main_msg = app_state.log_queue.get_nowait()
+
+                    # 发送到前端
+                    await websocket.send_json(
+                        {
+                            "type": main_msg.get("type", "info"),
+                            "message": main_msg.get("message", ""),
+                            "timestamp": main_msg.get("timestamp", time.time()),
+                        }
+                    )
+
+                    # 保存到文件
+                    if file_handler:
+                        file_handler.write_log(main_msg)
+
+                except queue.Empty:
+                    pass
+
             await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
@@ -348,7 +374,7 @@ async def get_hot_topics():
         # 选择平台话题 - 前5个热门话题根据权重选一个
         topic = hotnews.select_platform_topic(platform, 5)
 
-        log.print_log(f"获取热搜话题: 平台={platform}, 话题={topic}", "info")
+        log.print_log(f"获取到热搜话题: 平台={platform}, 话题={topic}", "info")
 
         return {"status": "success", "platform": platform, "topic": topic}
 

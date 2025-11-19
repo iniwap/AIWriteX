@@ -515,6 +515,7 @@ class UnifiedContentWorkflow:
         kwargs["cover_path"] = utils.get_cover_path(kwargs.get("article_path"))
 
         # 使用平台适配器发布
+        # 适配器内部会自动保存发布记录
         publish_result = adapter.publish_content(content, **kwargs)
 
         return {

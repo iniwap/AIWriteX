@@ -143,7 +143,6 @@ def ai_write_x_run(config_data=None):
 
     # 准备输入参数
     log.print_log("[PROGRESS:INIT:START]", "internal")
-    log.print_log("正在初始化任务参数，请耐心等待...", "status")
 
     if not config.custom_topic:
         # 热搜模式: 自动获取热搜话题

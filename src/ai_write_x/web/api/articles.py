@@ -184,18 +184,46 @@ async def publish_articles(request: PublishRequest):
                         # 如果message包含权限回收提示,添加到warning_details
                         if message and "草稿箱" in message:
                             warning_details.append(f"{cred.get('author', '未命名')}: {message}")
+
                         save_publish_record(
-                            article_path, cred, True, message if "草稿箱" in message else None
+                            article_path=article_path,
+                            platform="wechat",
+                            account_info={
+                                "appid": cred["appid"],
+                                "author": cred.get("author", ""),
+                                "account_type": "wechat_official",
+                            },
+                            success=True,
+                            error=message if "草稿箱" in message else None,
                         )
                     else:
                         fail_count += 1
-                        save_publish_record(article_path, cred, False, message)
-                        error_details.append(f"{cred.get('author', '未命名')}: {message}")
+                        save_publish_record(
+                            article_path=article_path,
+                            platform="wechat",
+                            account_info={
+                                "appid": cred["appid"],
+                                "author": cred.get("author", ""),
+                                "account_type": "wechat_official",
+                            },
+                            success=False,
+                            error=message,
+                        )
 
                 except Exception as e:
                     fail_count += 1
                     error_msg = str(e)
-                    save_publish_record(article_path, cred, False, error_msg)
+                    save_publish_record(
+                        article_path=article_path,
+                        platform="wechat",
+                        account_info={
+                            "appid": cred["appid"],
+                            "author": cred.get("author", ""),
+                            "account_type": "wechat_official",
+                        },
+                        success=False,
+                        error=error_msg,
+                    )
                     error_details.append(f"{cred.get('author', '未命名')}: {error_msg}")
 
         return {
@@ -228,8 +256,10 @@ def get_publish_status(title: str) -> str:
         return "unpublished"
 
 
-def save_publish_record(article_path: str, credential: dict, success: bool, error: Optional[str]):
-    """保存发布记录"""
+def save_publish_record(
+    article_path: str, platform: str, account_info: dict, success: bool, error: Optional[str]
+):
+    """保存发布记录 - 新的通用格式"""
     records_file = PathManager.get_article_dir() / "publish_records.json"
 
     title = Path(article_path).stem.replace("_", "|")
@@ -247,10 +277,10 @@ def save_publish_record(article_path: str, credential: dict, success: bool, erro
     records[title].append(
         {
             "timestamp": datetime.now().isoformat(),
-            "account": credential.get("author", ""),
-            "appid": credential["appid"],
+            "platform": platform,
             "success": success,
             "error": error,
+            "account_info": account_info,
         }
     )
 

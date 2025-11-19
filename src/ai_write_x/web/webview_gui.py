@@ -167,11 +167,11 @@ class WebViewGUI:
             self.server_thread.start()
 
             # 等待服务器启动
-            log.print_log("正在启动Web服务器...", "info")
+            log.print_log("正在启动Web服务器...", "info", False)
             if not self.check_server_ready():
                 raise Exception("Web服务器启动超时")
 
-            log.print_log("Web服务器启动成功", "info")
+            log.print_log("Web服务器启动成功", "info", False)
 
             # 读取窗口模式设置（首次启动时使用默认值）
             window_config = self.get_window_config()
@@ -260,7 +260,7 @@ class WebViewGUI:
             threading.Thread(target=delayed_tray_creation, daemon=True).start()
 
             # 启动WebView
-            log.print_log("正在启动用户界面...", "info")
+            log.print_log("正在启动用户界面...", "info", False)
             webview.start(debug=False)
         except KeyboardInterrupt:
             self.quit_application()

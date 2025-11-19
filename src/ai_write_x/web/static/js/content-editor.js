@@ -798,56 +798,86 @@ class ContentEditorDialog {
         }    
     }    
         
-    async saveContent() {    
-        const content = this.editor.getValue();      
-        const saveBtn = this.dialog.querySelector('#save-template');      
+    async saveContent() {      
+        const content = this.editor.getValue();        
+        const saveBtn = this.dialog.querySelector('#save-template');        
                 
-        try {      
-            saveBtn.disabled = true;      
-            saveBtn.textContent = '保存中...';      
+        try {        
+            saveBtn.disabled = true;        
+            saveBtn.textContent = '保存中...';        
                 
-            // 修改为查询参数格式  
-            const apiPath = this.contentType === 'article'     
-                ? `/api/articles/content?path=${encodeURIComponent(this.currentTemplate)}`    
-                : `/api/templates/content/${encodeURIComponent(this.currentTemplate)}`;    
+            // 修改为查询参数格式    
+            const apiPath = this.contentType === 'article'       
+                ? `/api/articles/content?path=${encodeURIComponent(this.currentTemplate)}`      
+                : `/api/templates/content/${encodeURIComponent(this.currentTemplate)}`;      
                     
-            const response = await fetch(apiPath, {      
-                method: 'PUT',      
-                headers: { 'Content-Type': 'application/json' },      
-                body: JSON.stringify({ content })      
-            });      
+            const response = await fetch(apiPath, {        
+                method: 'PUT',        
+                headers: { 'Content-Type': 'application/json' },        
+                body: JSON.stringify({ content })        
+            });        
                     
-            if (response.ok) {      
-                this.originalContent = content;    
-                this.isDirty = false;      
+            if (response.ok) {        
+                this.originalContent = content;      
+                this.isDirty = false;        
                     
-                const successMsg = this.contentType === 'article' ? '文章已保存' : '模板已保存';    
-                window.app?.showNotification(successMsg, 'success');      
+                const successMsg = this.contentType === 'article' ? '文章已保存' : '模板已保存';      
+                window.app?.showNotification(successMsg, 'success');        
                         
-                if (this.contentType === 'article' && window.articleManager) {      
-                    await window.articleManager.loadArticles();      
-                } else if (this.contentType === 'template' && window.templateManager) {      
-                    await window.templateManager.loadTemplates(window.templateManager.currentCategory);      
-                    window.templateManager.renderTemplateGrid();      
-                }      
-            } else {      
-                const error = await response.json();   
-                window.dialogManager?.showAlert('保存失败: ' + (error.detail || '未知错误'), 'error');      
-            }      
-        } catch (error) {      
-            window.dialogManager?.showAlert('保存失败: ' + error.message, 'error');      
-        } finally {      
-            saveBtn.disabled = false;      
-            saveBtn.innerHTML = `      
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">      
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>      
-                    <polyline points="17 21 17 13 7 13 7 21"/>      
-                    <polyline points="7 3 7 8 15 8"/>      
-                </svg>      
-                保存 (Ctrl+S)      
-            `;      
-        }     
-    }   
+                // 刷新列表视图  
+                if (this.contentType === 'article' && window.articleManager) {        
+                    await window.articleManager.loadArticles();        
+                } else if (this.contentType === 'template' && window.templateManager) {        
+                    await window.templateManager.loadTemplates(window.templateManager.currentCategory);        
+                    window.templateManager.renderTemplateGrid();        
+                }  
+                
+                // 自动刷新预览面板(如果预览面板打开且有文章信息)  
+                if (window.previewPanelManager &&   
+                    window.previewPanelManager.isVisible &&   
+                    window.previewPanelManager.currentArticleInfo) {  
+                    
+                    try {  
+                        // 重新获取保存后的内容  
+                        const contentResponse = await fetch(apiPath);  
+                        if (contentResponse.ok) {  
+                            const updatedContent = await contentResponse.text();  
+                            
+                            // 根据文件类型处理内容  
+                            const ext = this.currentTemplate.toLowerCase().split('.').pop();  
+                            let htmlContent = updatedContent;  
+                            
+                            if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {  
+                                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
+                                htmlContent = window.markdownRenderer.renderWithStyles(updatedContent, isDark);  
+                            }  
+                            
+                            // 刷新预览内容(不改变 currentArticleInfo)  
+                            window.previewPanelManager.setContent(htmlContent);  
+                        }  
+                    } catch (error) {  
+                        console.error('刷新预览失败:', error);  
+                        // 静默失败,不影响保存流程  
+                    }  
+                }  
+            } else {        
+                const error = await response.json();     
+                window.dialogManager?.showAlert('保存失败: ' + (error.detail || '未知错误'), 'error');        
+            }        
+        } catch (error) {        
+            window.dialogManager?.showAlert('保存失败: ' + error.message, 'error');        
+        } finally {        
+            saveBtn.disabled = false;        
+            saveBtn.innerHTML = `        
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">        
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>        
+                    <polyline points="17 21 17 13 7 13 7 21"/>        
+                    <polyline points="7 3 7 8 15 8"/>        
+                </svg>        
+                保存 (Ctrl+S)        
+            `;        
+        }       
+    }
           
     close() {        
         // 防止重入        

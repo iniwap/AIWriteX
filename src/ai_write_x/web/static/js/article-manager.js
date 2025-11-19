@@ -344,51 +344,63 @@ class ArticleManager {
                             </div>  
                         ` : `  
                             <div class="history-timeline">  
-                                ${records.map((record, index) => `  
-                                    <div class="history-item ${record.success ? 'success' : 'failed'}">  
-                                        <div class="history-icon">  
-                                            ${record.success ? `  
-                                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>  
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>  
-                                                </svg>  
-                                            ` : `  
-                                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
-                                                    <circle cx="12" cy="12" r="10"/>  
-                                                    <line x1="15" y1="9" x2="9" y2="15"/>  
-                                                    <line x1="9" y1="9" x2="15" y2="15"/>  
-                                                </svg>  
-                                            `}  
-                                        </div>  
-                                        <div class="history-content">  
-                                            <div class="history-header">  
-                                                <span class="history-account">${this.escapeHtml(record.account || '未知账号')}</span>  
-                                                <span class="history-appid">AppID: ${this.escapeHtml(record.appid || 'N/A')}</span>  
-                                            </div>  
-                                            <div class="history-time">${this.formatHistoryTime(record.timestamp)}</div>  
-                                            ${record.error ? `  
-                                                <div class="history-${record.success ? 'warning' : 'error'}">  
-                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">  
-                                                        ${record.success ? `  
-                                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>  
-                                                            <line x1="12" y1="9" x2="12" y2="13"/>  
-                                                            <line x1="12" y1="17" x2="12.01" y2="17"/>  
-                                                        ` : `  
-                                                            <circle cx="12" cy="12" r="10"/>  
-                                                            <line x1="12" y1="8" x2="12" y2="12"/>  
-                                                            <line x1="12" y1="16" x2="12.01" y2="16"/>  
-                                                        `}  
+                                ${records.map((record, index) => {  
+                                    // 【修改】从 account_info 中提取信息  
+                                    const accountInfo = record.account_info || {};  
+                                    const platform = record.platform || 'unknown';  
+                                    const platformName = {  
+                                        'wechat': '微信公众号',  
+                                        'xiaohongshu': '小红书',  
+                                        'douyin': '抖音'  
+                                    }[platform] || platform;  
+                                    
+                                    return `  
+                                        <div class="history-item ${record.success ? 'success' : 'failed'}">  
+                                            <div class="history-icon">  
+                                                ${record.success ? `  
+                                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>  
+                                                        <polyline points="22 4 12 14.01 9 11.01"/>  
                                                     </svg>  
-                                                    <span>${this.escapeHtml(this.truncateError(record.error))}</span>  
+                                                ` : `  
+                                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">  
+                                                        <circle cx="12" cy="12" r="10"/>  
+                                                        <line x1="15" y1="9" x2="9" y2="15"/>  
+                                                        <line x1="9" y1="9" x2="15" y2="15"/>  
+                                                    </svg>  
+                                                `}  
+                                            </div>  
+                                            <div class="history-content">  
+                                                <div class="history-header">  
+                                                    <span class="history-platform">${this.escapeHtml(platformName)}</span>  
+                                                    <span class="history-account">${this.escapeHtml(accountInfo.author || '未知账号')}</span>  
+                                                    ${accountInfo.appid ? `<span class="history-appid">AppID: ${this.escapeHtml(accountInfo.appid)}</span>` : ''}  
                                                 </div>  
-                                            ` : ''}  
+                                                <div class="history-time">${this.formatHistoryTime(record.timestamp)}</div>  
+                                                ${record.error ? `  
+                                                    <div class="history-${record.success ? 'warning' : 'error'}">  
+                                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor">  
+                                                            ${record.success ? `  
+                                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>  
+                                                                <line x1="12" y1="9" x2="12" y2="13"/>  
+                                                                <line x1="12" y1="17" x2="12.01" y2="17"/>  
+                                                            ` : `  
+                                                                <circle cx="12" cy="12" r="10"/>  
+                                                                <line x1="12" y1="8" x2="12" y2="12"/>  
+                                                                <line x1="12" y1="16" x2="12.01" y2="16"/>  
+                                                            `}  
+                                                        </svg>  
+                                                        <span>${this.escapeHtml(this.truncateError(record.error))}</span>  
+                                                    </div>  
+                                                ` : ''}  
+                                            </div>  
+                                            ${index < records.length - 1 ? '<div class="history-line"></div>' : ''}  
                                         </div>  
-                                        ${index < records.length - 1 ? '<div class="history-line"></div>' : ''}  
-                                    </div>  
-                                `).join('')}  
+                                    `;  
+                                }).join('')}  
                             </div>  
                         `}  
-                    </div>
+                    </div>  
                 </div>  
             </div>  
         `;  

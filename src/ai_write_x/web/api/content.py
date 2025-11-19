@@ -55,11 +55,6 @@ async def generate_content(request: ContentRequest):
             # 启动进程
             app_state.current_process.start()
 
-            # 启动日志监控任务
-            from ..api.websocket import start_log_monitoring
-
-            asyncio.create_task(start_log_monitoring())
-
             return ContentResponse(
                 status="success", message="任务启动成功", task_id=str(app_state.current_process.pid)
             )

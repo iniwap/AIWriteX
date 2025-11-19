@@ -84,6 +84,26 @@ class PlatformAdapter(ABC):
         """发布内容"""
         pass
 
+    def save_publish_record(self, article_path: str, publish_result: PublishResult, **kwargs):
+        """保存发布记录 - 每个平台可以自定义实现"""
+        from src.ai_write_x.web.api.articles import save_publish_record as save_record
+
+        # 构建平台特定的账号信息
+        account_info = self._build_account_info(**kwargs)
+
+        save_record(
+            article_path=article_path,
+            platform=self.get_platform_name(),
+            account_info=account_info,
+            success=publish_result.success,
+            error=publish_result.message if not publish_result.success else None,
+        )
+
+    @abstractmethod
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建平台特定的账号信息"""
+        pass
+
     def supports_html(self) -> bool:
         """是否支持HTML格式"""
         return False
@@ -129,31 +149,41 @@ class WeChatAdapter(PlatformAdapter):
             else:
                 return content_result.content
 
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建微信账号信息"""
+        # 从 kwargs 中提取微信特定信息
+        credential = kwargs.get("credential", {})
+        return {
+            "appid": credential.get("appid", ""),
+            "author": credential.get("author", ""),
+            "account_type": "wechat_official",
+        }
+
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """发布到微信公众号"""
 
         config = Config.get_instance()
-        # 获取所有有效的微信凭据
         valid_credentials = [
             cred
             for cred in config.wechat_credentials
             if cred.get("appid") and cred.get("appsecret")
         ]
 
-        # 冗余检查
         if not valid_credentials:
             return PublishResult(
                 success=False,
-                message="未找到有效的微信公众号凭据，请在配置中填写 appid 和 appsecret",
+                message="未找到有效的微信公众号凭据",
                 platform_id=PlatformType.WECHAT.value,
                 error_code="MISSING_CREDENTIALS",
             )
 
-        # 循环向所有账号发布
         publish_results = []
         success_count = 0
-        # 微信不支持markdown，需要生成简单的html
         content = self.format_content(content_result)
+
+        # 导入 save_publish_record
+        from src.ai_write_x.web.api.articles import save_publish_record
+
         for credential in valid_credentials:
             appid = credential["appid"]
             appsecret = credential["appsecret"]
@@ -169,22 +199,47 @@ class WeChatAdapter(PlatformAdapter):
                     author,
                     cover_path=kwargs.get("cover_path", None),
                 )
+
                 publish_results.append(
                     {"appid": appid, "author": author, "success": success, "message": result}
                 )
+
+                # 保存发布记录
+                if hasattr(content_result, "file_path") and content_result.file_path:
+                    save_publish_record(
+                        article_path=content_result.file_path,
+                        platform="wechat",
+                        account_info={
+                            "appid": appid,
+                            "author": author,
+                            "account_type": "wechat_official",
+                        },
+                        success=success,
+                        error=result if not success or "草稿箱" in result else None,
+                    )
 
                 if success:
                     success_count += 1
 
             except Exception as e:
+                error_msg = f"发布异常: {str(e)}"
                 publish_results.append(
-                    {
-                        "appid": appid,
-                        "author": author,
-                        "success": False,
-                        "message": f"发布异常: {str(e)}",
-                    }
+                    {"appid": appid, "author": author, "success": False, "message": error_msg}
                 )
+
+                # 【新增】保存失败记录
+                if hasattr(content_result, "file_path") and content_result.file_path:
+                    save_publish_record(
+                        article_path=content_result.file_path,
+                        platform="wechat",
+                        account_info={
+                            "appid": appid,
+                            "author": author,
+                            "account_type": "wechat_official",
+                        },
+                        success=False,
+                        error=error_msg,
+                    )
 
         # 生成汇总结果
         total_count = len(valid_credentials)
@@ -194,21 +249,8 @@ class WeChatAdapter(PlatformAdapter):
             summary_message = f"成功发布到所有 {total_count} 个微信公众号"
         elif success_count > 0:
             summary_message = f"部分发布成功：{success_count}/{total_count} 个账号发布成功"
-            # 添加失败详情
-            failed_accounts = [r for r in publish_results if not r["success"]]
-            if failed_accounts:
-                summary_message += "\n失败账号："
-                for failed in failed_accounts:
-                    summary_message += (
-                        f"\n- {failed['author']}({failed['appid'][-4:]}): {failed['message']}"
-                    )
         else:
             summary_message = f"发布失败：所有 {total_count} 个账号都发布失败"
-            # 添加所有失败详情
-            for failed in publish_results:
-                summary_message += (
-                    f"\n- {failed['author']}({failed['appid'][-4:]}): {failed['message']}"
-                )
 
         return PublishResult(
             success=overall_success,
@@ -249,11 +291,20 @@ class XiaohongshuAdapter(PlatformAdapter):
 
         return formatted
 
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建小红书账号信息"""
+        return {
+            "user_id": kwargs.get("user_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "xiaohongshu",
+        }
+
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """小红书发布（待开发）"""
+        # 未来实现时,也会调用 self.save_publish_record()
         return PublishResult(
             success=False,
-            message="小红书发布功能待开发 - 需要接入小红书开放平台API",
+            message="小红书发布功能待开发",
             platform_id=PlatformType.XIAOHONGSHU.value,
             error_code="NOT_IMPLEMENTED",
         )
@@ -293,11 +344,19 @@ class DouyinAdapter(PlatformAdapter):
 
         return script
 
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建抖音账号信息"""
+        return {
+            "open_id": kwargs.get("open_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "douyin",
+        }
+
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """抖音发布（待开发）"""
         return PublishResult(
             success=False,
-            message="抖音发布功能待开发 - 需要接入抖音开放平台API",
+            message="抖音发布功能待开发",
             platform_id=PlatformType.DOUYIN.value,
             error_code="NOT_IMPLEMENTED",
         )
@@ -342,6 +401,14 @@ class ToutiaoAdapter(PlatformAdapter):
         formatted += "*如果觉得内容有价值，请点赞支持一下～*"
 
         return formatted
+
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建抖音账号信息"""
+        return {
+            "open_id": kwargs.get("open_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "douyin",
+        }
 
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """今日头条发布（待开发）"""
@@ -427,6 +494,14 @@ class BaijiahaoAdapter(PlatformAdapter):
             return first_paragraph[:50] + "等核心要点"
         return "该话题的多个重要方面"
 
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建抖音账号信息"""
+        return {
+            "open_id": kwargs.get("open_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "douyin",
+        }
+
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """百家号发布（待开发）"""
         return PublishResult(
@@ -486,6 +561,14 @@ class ZhihuAdapter(PlatformAdapter):
         formatted += "**🔔 关注我，获取更多深度内容分析**"
 
         return formatted
+
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建抖音账号信息"""
+        return {
+            "open_id": kwargs.get("open_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "douyin",
+        }
 
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """知乎发布（待开发）"""
@@ -547,6 +630,14 @@ class DoubanAdapter(PlatformAdapter):
         formatted += "📚 *更多思考和分享，欢迎关注我的豆瓣*"
 
         return formatted
+
+    def _build_account_info(self, **kwargs) -> dict:
+        """构建抖音账号信息"""
+        return {
+            "open_id": kwargs.get("open_id", ""),
+            "nickname": kwargs.get("nickname", ""),
+            "account_type": "douyin",
+        }
 
     def publish_content(self, content_result: ContentResult, **kwargs) -> PublishResult:
         """豆瓣发布（待开发）"""

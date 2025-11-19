@@ -426,14 +426,20 @@ def setup_logging(log_name, queue):
 # ==================== 统一日志接口 ====================
 
 
-def print_log(msg, msg_type="status"):
+def print_log(msg, msg_type="status", show_in_ui=True):
     """
     统一日志接口函数 - 不再需要外部传参，自动从 LogManager 获取状态
 
     Args:
         msg: 日志消息
         msg_type: 消息类型
+        show_in_ui: False 表示只输出到终端/文件,不发送到 UI
     """
+    if not show_in_ui:
+        # 只输出到终端
+        print(utils.format_log_message(msg, msg_type))
+        return
+
     # 从日志管理器获取当前状态
     ui_mode = _log_manager.get_ui_mode()
     process_log_queue = _log_manager.get_process_log_queue()

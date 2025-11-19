@@ -265,6 +265,42 @@
     }  
 }
 
+/* 预览面板操作按钮组 */  
+.preview-actions {  
+    display: flex;  
+    gap: 4px;  
+    align-items: center;  
+    margin-right: 8px;  
+}  
+  
+/* 复用创意工坊的 icon-btn 样式 */  
+.preview-actions .icon-btn {  
+    width: 28px;  
+    height: 28px;  
+    padding: 0;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    background: transparent;  
+    border: 1px solid transparent;  
+    border-radius: 6px;  
+    color: var(--text-secondary);  
+    cursor: pointer;  
+    transition: all 0.2s ease;  
+}  
+  
+.preview-actions .icon-btn:hover {  
+    background: var(--hover-background);  
+    border-color: var(--border-color);  
+    color: var(--text-primary);  
+}  
+  
+.preview-actions .btn-icon-small {  
+    width: 16px;  
+    height: 16px;  
+    stroke-width: 2;  
+}
+
 [data-theme="light"] .preview-placeholder,  
 [data-theme="dark"] .preview-placeholder {  
     background: transparent;  

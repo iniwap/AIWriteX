@@ -16,7 +16,6 @@ import uvicorn
 
 from src.ai_write_x.utils.path_manager import PathManager
 from src.ai_write_x.config.config import Config
-from src.ai_write_x.utils import log
 
 # 导入状态管理
 from .state import app_state
@@ -24,7 +23,6 @@ from .state import app_state
 # 导入API路由
 from .api.content import router as content_router
 from .api.config import router as config_router
-from .api.websocket import router as websocket_router
 from .api.templates import router as templates_router
 from .api.articles import router as articles_router
 from .api.generate import router as generate_router
@@ -35,19 +33,33 @@ app_shutdown_event = asyncio.Event()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 启动时执行
     try:
+        import queue
+        from src.ai_write_x.utils import comm, log
+
+        # 初始化主进程日志队列
+        app_state.log_queue = queue.Queue()
+        app_state.is_running = True
+
+        # 初始化 UI 模式
+        log.init_ui_mode()
+
+        # 连接 comm 到队列
+        comm.set_log_queue(app_state.log_queue)
+
+        # 其他初始化...
         app_state.config = Config.get_instance()
         if not app_state.config.load_config():
             log.print_log("配置加载失败，使用默认配置", "warning")
+
     except Exception as e:
         log.print_log(f"Web服务启动失败: {str(e)}", "error")
 
     yield
 
     # 关闭时执行
+    app_state.is_running = False
     log.print_log("AIWriteX Web服务正在关闭", "info")
-    app_shutdown_event.set()
 
 
 # 创建FastAPI应用，使用lifespan
@@ -75,7 +87,6 @@ templates = Jinja2Templates(directory=str(templates_path))
 # 注册API路由
 app.include_router(content_router)
 app.include_router(config_router)
-app.include_router(websocket_router)
 app.include_router(templates_router)
 app.include_router(articles_router)
 app.include_router(generate_router)

@@ -23,7 +23,6 @@ class CreativeWorkshopManager {
           
         this.messageQueue = [];  // 消息队列  
         this.isProcessingQueue = false;  // 是否正在处理队列  
-        this._globalLogsObserver = null; 
 
         this.init();        
     }        
@@ -33,74 +32,14 @@ class CreativeWorkshopManager {
         this.loadHistory();        
         this.initKeyboardShortcuts();        
         await this.loadTemplateCategories();      
-        setTimeout(() => {  
-            this.observeGlobalLogs();  
-        }, 100);  
     }        
     
     destroy() {  
-        // 断开观察者,防止内存泄漏  
-        if (this._globalLogsObserver) {  
-            this._globalLogsObserver.disconnect();  
-            this._globalLogsObserver = null;  
-        }  
-        
         // 断开 WebSocket  
         this.disconnectLogWebSocket();  
         
         // 停止状态轮询  
         this.stopStatusPolling();  
-    }
-
-    observeGlobalLogs() {      
-        const globalLogPanel = document.getElementById('log-panel');      
-        if (!globalLogPanel) {    
-            // 如果全局日志面板还未加载,1秒后重试  
-            setTimeout(() => this.observeGlobalLogs(), 1000);    
-            return;    
-        }    
-        
-        // 如果已经有观察者,先断开避免重复  
-        if (this._globalLogsObserver) {  
-            this._globalLogsObserver.disconnect();  
-        }  
-        
-        // 先同步已有的日志条目  
-        const existingEntries = globalLogPanel.querySelectorAll('.log-entry');    
-        existingEntries.forEach((node) => {    
-            const messageEl = node.querySelector('.log-message');  
-            
-            // 提取类型(更健壮的方式)  
-            const classList = Array.from(node.classList);  
-            const type = classList.find(cls => cls !== 'log-entry') || 'info';  
-            
-            if (messageEl) {    
-                const message = messageEl.textContent;  
-                // skipGlobal=true 避免循环调用  
-                this.appendLog(message, type, true);   
-            }    
-        });    
-        
-        // 创建 MutationObserver 监听新日志条目      
-        this._globalLogsObserver = new MutationObserver((mutations) => {      
-            mutations.forEach((mutation) => {      
-                mutation.addedNodes.forEach((node) => {      
-                    if (node.classList && node.classList.contains('log-entry')) {      
-                        const messageEl = node.querySelector('.log-message');  
-                        
-                        const classList = Array.from(node.classList);  
-                        const type = classList.find(cls => cls !== 'log-entry') || 'info';  
-                        
-                        if (messageEl) {      
-                            const message = messageEl.textContent;  
-                            this.appendLog(message, type, true);   
-                        }      
-                    }      
-                });      
-            });      
-        });      
-        
-        this._globalLogsObserver.observe(globalLogPanel, { childList: true });    
     }
 
     // ========== 模板数据加载 ==========      
@@ -353,7 +292,7 @@ class CreativeWorkshopManager {
             
         this._hotSearchPlatform = '';     
           
-        // 【关键】清空消息队列,开始新的任务  
+        // 清空消息队列,开始新的任务  
         this.messageQueue = [];  
         this.isProcessingQueue = false;  
             
@@ -451,10 +390,12 @@ class CreativeWorkshopManager {
             }        
         }        
             
-        // 自动获取热搜        
+        // 自动获取热搜 
+        const taskMode = referenceConfig ? '借鉴模式' : '热搜模式';  
+        this.appendLog(`🚀 开始生成任务 (${taskMode})`, 'status', false, Date.now() / 1000);        
         if (!topic && !referenceConfig) {        
-            window.app?.showNotification('正在自动获取热搜...', 'info');        
-                
+            window.app?.showNotification('正在自动获取热搜...', 'info');
+
             try {        
                 const response = await fetch('/api/hot-topics');        
                 if (response.ok) {        
@@ -493,7 +434,7 @@ class CreativeWorkshopManager {
         // ========== 启动生成 ==========        
         this.addToHistory(topic);        
           
-        // 【新增】清空消息队列,准备新任务  
+        // 清空消息队列,准备新任务  
         this.clearMessageQueue();  
             
         try {        
@@ -724,14 +665,9 @@ class CreativeWorkshopManager {
                 try {      
                     const data = JSON.parse(event.data);      
                       
-                    if (data.message && data.message.includes('[PROGRESS:')) {  
-                        console.log('🔵 [Progress Marker Detected]', data.message);  
-                        
-                        // 【关键调试点3】提取所有进度标记  
-                        const progressMarkers = data.message.match(/\[PROGRESS:[^\]]+\]/g);  
-                        if (progressMarkers) {  
-                            console.log('📊 [All Progress Markers in this message]', progressMarkers);  
-                        }  
+                    if (data.message && data.message.includes('[PROGRESS:')) {                          
+                        // 提取所有进度标记  
+                        const progressMarkers = data.message.match(/\[PROGRESS:[^\]]+\]/g); 
                     }  
                     // 将消息加入队列而不是直接处理  
                     this.messageQueue.push(data);  
@@ -742,7 +678,7 @@ class CreativeWorkshopManager {
                     }  
                         
                     // 转发到全局日志面板      
-                    this.appendLog(data.message, data.type);      
+                    this.appendLog(data.message, data.type, false, data.timestamp);  
                         
                     // 检查完成状态      
                     if (data.type === 'completed' || data.type === 'failed') {      
@@ -758,7 +694,6 @@ class CreativeWorkshopManager {
             };      
                 
             this.logWebSocket.onclose = () => {      
-                console.log('日志 WebSocket 已关闭');          
                 this.logWebSocket = null;      
             };      
         } catch (error) {      
@@ -859,7 +794,6 @@ class CreativeWorkshopManager {
     clearMessageQueue() {  
         this.messageQueue = [];  
         this.isProcessingQueue = false;  
-        console.log('[Queue] 消息队列已清空');  
     }  
           
     disconnectLogWebSocket() {      
@@ -968,81 +902,122 @@ class CreativeWorkshopManager {
     /**  
      * 自动预览最新生成的文章  
      */  
-    async autoPreviewGeneratedArticle() {  
-        try {  
-            // 获取最新生成的文章  
-            const response = await fetch('/api/articles');  
-            if (!response.ok) {  
-                console.error('获取文章列表失败');  
+    async autoPreviewGeneratedArticle() {    
+        try {    
+            const response = await fetch('/api/articles');    
+            if (!response.ok) {    
+                console.error('获取文章列表失败');    
+                return;    
+            }    
+            
+            const result = await response.json();    
+            if (result.status === 'success' && result.data && result.data.length > 0) {    
+                const articles = result.data.sort((a, b) => {    
+                    return new Date(b.create_time) - new Date(a.create_time);    
+                });    
+                const latestArticle = articles[0];    
+                
+                const contentResponse = await fetch(    
+                    `/api/articles/content?path=${encodeURIComponent(latestArticle.path)}`    
+                );    
+                if (contentResponse.ok) {    
+                    const content = await contentResponse.text();    
+                    
+                    const ext = latestArticle.path.toLowerCase().split('.').pop();    
+                    let htmlContent = content;    
+                    
+                    if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {    
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';    
+                        htmlContent = window.markdownRenderer.renderWithStyles(content, isDark);    
+                    }    
+                    
+                    // 【关键修改】使用 showWithActions 并传递文章信息  
+                    if (window.previewPanelManager) {    
+                        window.previewPanelManager.showWithActions(htmlContent, {  
+                            path: latestArticle.path,  
+                            title: latestArticle.title  
+                        });    
+                    }    
+                }    
+            }    
+        } catch (error) {    
+            console.error('自动预览失败:', error);    
+        }    
+    }
+
+    appendLog(message, type = 'info', skipGlobal = false, timestamp = null) {  
+        // 过滤 internal 类型  
+        if (type === 'internal') {  
+            const progressOnlyPattern = /^\[PROGRESS:\w+:(START|END)\]$/;  
+            if (progressOnlyPattern.test(message.trim())) {  
+                return;  
+            }  
+        }  
+        
+        // 【步骤2】过滤合并消息中的纯进度标记行  
+        if (message.includes('\n')) {  
+            const lines = message.split('\n');  
+            const filteredLines = lines.filter(line => {  
+                const trimmedLine = line.trim();  
+                if (!trimmedLine) return false;  
+                const progressOnlyPattern = /^\[PROGRESS:\w+:(START|END)\]$/;  
+                const internalPattern = /^\[\d{2}:\d{2}:\d{2}\] \[INTERNAL\]: \[PROGRESS:\w+:(START|END)\]$/;  
+                return !progressOnlyPattern.test(trimmedLine) && !internalPattern.test(trimmedLine);  
+            });  
+            
+            if (filteredLines.length === 0) {  
                 return;  
             }  
             
-            const result = await response.json();  
-            if (result.status === 'success' && result.data && result.data.length > 0) {  
-                // 按创建时间排序,获取最新的文章  
-                const articles = result.data.sort((a, b) => {  
-                    return new Date(b.create_time) - new Date(a.create_time);  
-                });  
-                const latestArticle = articles[0];  
-                
-                // 获取文章内容  
-                const contentResponse = await fetch(  
-                    `/api/articles/content?path=${encodeURIComponent(latestArticle.path)}`  
-                );  
-                if (contentResponse.ok) {  
-                    const content = await contentResponse.text();  
-                    
-                    // 根据文件类型处理内容  
-                    const ext = latestArticle.path.toLowerCase().split('.').pop();  
-                    let htmlContent = content;  
-                    
-                    if ((ext === 'md' || ext === 'markdown') && window.markdownRenderer) {  
-                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';  
-                        htmlContent = window.markdownRenderer.renderWithStyles(content, isDark);  
-                    }  
-                    
-                    // 打开预览面板  
-                    if (window.previewPanelManager) {  
-                        window.previewPanelManager.show(htmlContent);  
-                    }  
-                }  
-            }  
-        } catch (error) {  
-            console.error('自动预览失败:', error);  
-            // 静默失败,不影响用户体验  
+            // 【关键修改】将过滤后的行重新组合,移除空行  
+            message = filteredLines.filter(line => line.trim()).join('\n');  
         }  
-    }
-
-    appendLog(message, type = 'info', skipGlobal = false) {        
-        // 只在非同步模式下才发送到全局日志面板    
-        if (!skipGlobal && window.app && window.app.addLogEntry) {        
-            window.app.addLogEntry({        
-                type: type,        
-                message: message,        
-                timestamp: Date.now() / 1000        
-            });        
-        }    
         
-        // 添加到日志详情面板    
-        const logsOutput = document.getElementById('logs-output');      
-        if (logsOutput) {      
-            const entry = document.createElement('div');      
-            entry.className = `log-entry ${type}`;      
+        // 只在非同步模式下才发送到全局日志面板  
+        if (!skipGlobal && window.app && window.app.addLogEntry) {  
+            window.app.addLogEntry({  
+                type: type,  
+                message: message,  
+                timestamp: timestamp || Date.now() / 1000  
+            });  
+        }  
+        
+        // 添加到日志详情面板  
+        const logsOutput = document.getElementById('logs-output');  
+        if (logsOutput) {  
+            const entry = document.createElement('div');  
+            entry.className = `log-entry ${type}`;  
             
-            // 保留换行符,只压缩空格和制表符  
-            const cleanedMessage = message.replace(/[ \t]+/g, ' ');  
+            // 检测时间戳  
+            const hasTimestamp = /^\[\d{2}:\d{2}:\d{2}\]/.test(message);  
             
-            // 直接显示后端发来的完整消息,不需要内联样式  
-            entry.innerHTML = `<span class="log-message">${this.escapeHtml(cleanedMessage)}</span>`;    
+            let finalMessage = message;  
+            if (!hasTimestamp && timestamp) {  
+                const time = new Date(timestamp * 1000);  
+                const timeStr = time.toLocaleTimeString('zh-CN', {  
+                    hour: '2-digit',  
+                    minute: '2-digit',  
+                    second: '2-digit',  
+                    hour12: false  
+                });  
+                finalMessage = `[${timeStr}] ${message}`;  
+            }  
             
-            logsOutput.appendChild(entry);    
+            // 【关键修改】清理多余空格和多个连续换行符  
+            const cleanedMessage = finalMessage  
+                .replace(/[ \t]+/g, ' ')  // 压缩空格和制表符  
+                .replace(/\n{2,}/g, '\n')  // 将多个连续换行符压缩为单个  
+                .trimEnd();  // 移除末尾空白  
             
-            // 自动滚动到底部  
-            const logsContainer = logsOutput.parentElement;    
-            if (logsContainer) {    
-                logsContainer.scrollTop = logsContainer.scrollHeight;    
-            }    
-        }    
+            entry.innerHTML = `<span class="log-message">${this.escapeHtml(cleanedMessage)}</span>`;  
+            
+            logsOutput.appendChild(entry);  
+            
+            const logsContainer = logsOutput.parentElement;  
+            if (logsContainer) {  
+                logsContainer.scrollTop = logsContainer.scrollHeight;  
+            }  
+        }  
     }
       
     // ========== 状态轮询 ==========  
@@ -1230,7 +1205,6 @@ class CreativeWorkshopManager {
                 window.app?.showNotification('日志已下载到默认下载目录', 'success');  
             }  
         } catch (error) {  
-            console.error('导出日志失败:', error);  
             window.app?.showNotification('导出日志失败: ' + error.message, 'error');  
         }  
     }

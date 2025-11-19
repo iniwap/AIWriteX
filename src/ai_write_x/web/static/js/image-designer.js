@@ -517,7 +517,24 @@ class ImageDesignerDialog {
             
             if (window.articleManager) {    
                 await window.articleManager.loadArticles();    
-            }    
+            }   
+
+            // 刷新预览面板  
+            if (window.previewPanelManager && window.previewPanelManager.isVisible) {  
+                try {  
+                    // 重新获取文章内容  
+                    const response = await fetch(`/api/articles/content?path=${encodeURIComponent(this.currentArticle)}`);  
+                    if (response.ok) {  
+                        const htmlContent = await response.text();  
+                        
+                        // 使用 setContent() 而不是 show(),避免重置面板状态  
+                        window.previewPanelManager.setContent(htmlContent);  
+                    }  
+                } catch (error) {  
+                    console.error('刷新预览失败:', error);  
+                    // 静默失败,不影响保存流程  
+                }  
+            }  
         } catch (error) {      
             window.app?.showNotification('保存失败: ' + error.message, 'error');      
         }      
