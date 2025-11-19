@@ -512,13 +512,18 @@
 }  
   
 /* ========== 日志面板特殊样式 ========== */     
-    
+#generation-progress .panel-content {
+    padding: 0 2px 12px 12px;
+    height: calc(100% - 45px); 
+    overflow: hidden;
+}  
+
 #generation-progress .logs-output {        
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;        
     font-size: 13px;        
     line-height: 1.6;        
     color: var(--text-secondary);        
-    padding-right: 8px;        
+    padding-right: 0;        
     overflow-wrap: break-word;    
     min-height: 100px;  
     height: 100%;
@@ -540,7 +545,8 @@
   
 #generation-progress .logs-output .log-entry {  
     padding: 4px 0;  
-    word-wrap: break-word;  
+    white-space: pre-wrap;
+    word-wrap: break-word; 
 }  
   
 #generation-progress .logs-output .log-entry.info {  

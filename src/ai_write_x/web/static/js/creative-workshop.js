@@ -21,10 +21,10 @@ class CreativeWorkshopManager {
         this.bottomProgress = new BottomProgressManager();    
         this._hotSearchPlatform = '';    
           
-        // 【新增】消息队列相关  
         this.messageQueue = [];  // 消息队列  
         this.isProcessingQueue = false;  // 是否正在处理队列  
-          
+        this._globalLogsObserver = null; 
+
         this.init();        
     }        
             
@@ -33,8 +33,76 @@ class CreativeWorkshopManager {
         this.loadHistory();        
         this.initKeyboardShortcuts();        
         await this.loadTemplateCategories();      
+        setTimeout(() => {  
+            this.observeGlobalLogs();  
+        }, 100);  
     }        
+    
+    destroy() {  
+        // 断开观察者,防止内存泄漏  
+        if (this._globalLogsObserver) {  
+            this._globalLogsObserver.disconnect();  
+            this._globalLogsObserver = null;  
+        }  
+        
+        // 断开 WebSocket  
+        this.disconnectLogWebSocket();  
+        
+        // 停止状态轮询  
+        this.stopStatusPolling();  
+    }
+
+    observeGlobalLogs() {      
+        const globalLogPanel = document.getElementById('log-panel');      
+        if (!globalLogPanel) {    
+            // 如果全局日志面板还未加载,1秒后重试  
+            setTimeout(() => this.observeGlobalLogs(), 1000);    
+            return;    
+        }    
+        
+        // 如果已经有观察者,先断开避免重复  
+        if (this._globalLogsObserver) {  
+            this._globalLogsObserver.disconnect();  
+        }  
+        
+        // 先同步已有的日志条目  
+        const existingEntries = globalLogPanel.querySelectorAll('.log-entry');    
+        existingEntries.forEach((node) => {    
+            const messageEl = node.querySelector('.log-message');  
             
+            // 提取类型(更健壮的方式)  
+            const classList = Array.from(node.classList);  
+            const type = classList.find(cls => cls !== 'log-entry') || 'info';  
+            
+            if (messageEl) {    
+                const message = messageEl.textContent;  
+                // skipGlobal=true 避免循环调用  
+                this.appendLog(message, type, true);   
+            }    
+        });    
+        
+        // 创建 MutationObserver 监听新日志条目      
+        this._globalLogsObserver = new MutationObserver((mutations) => {      
+            mutations.forEach((mutation) => {      
+                mutation.addedNodes.forEach((node) => {      
+                    if (node.classList && node.classList.contains('log-entry')) {      
+                        const messageEl = node.querySelector('.log-message');  
+                        
+                        const classList = Array.from(node.classList);  
+                        const type = classList.find(cls => cls !== 'log-entry') || 'info';  
+                        
+                        if (messageEl) {      
+                            const message = messageEl.textContent;  
+                            this.appendLog(message, type, true);   
+                        }      
+                    }      
+                });      
+            });      
+        });      
+        
+        this._globalLogsObserver.observe(globalLogPanel, { childList: true });    
+    }
+
     // ========== 模板数据加载 ==========      
           
     async loadTemplateCategories() {        
@@ -945,36 +1013,36 @@ class CreativeWorkshopManager {
         }  
     }
 
-    appendLog(message, type = 'info') {    
-        // 使用全局日志面板 (main.js 中的 addLogEntry)    
-        if (window.app && window.app.addLogEntry) {    
-            window.app.addLogEntry({    
-                type: type,    
-                message: message,    
-                timestamp: Date.now() / 1000    
-            });    
-        }  
+    appendLog(message, type = 'info', skipGlobal = false) {        
+        // 只在非同步模式下才发送到全局日志面板    
+        if (!skipGlobal && window.app && window.app.addLogEntry) {        
+            window.app.addLogEntry({        
+                type: type,        
+                message: message,        
+                timestamp: Date.now() / 1000        
+            });        
+        }    
         
-        // 【新增】同时添加到日志详情面板  
-        const logsOutput = document.getElementById('logs-output');  
-        if (logsOutput) {  
-            const entry = document.createElement('div');  
-            entry.className = `log-entry ${type}`;  
+        // 添加到日志详情面板    
+        const logsOutput = document.getElementById('logs-output');      
+        if (logsOutput) {      
+            const entry = document.createElement('div');      
+            entry.className = `log-entry ${type}`;      
             
-            const timestamp = new Date().toLocaleTimeString();  
-            entry.innerHTML = `  
-                <span class="log-timestamp" style="color: var(--text-tertiary); margin-right: 8px;">[${timestamp}]</span>  
-                <span class="log-message">${this.escapeHtml(message)}</span>  
-            `;  
+            // 保留换行符,只压缩空格和制表符  
+            const cleanedMessage = message.replace(/[ \t]+/g, ' ');  
             
-            logsOutput.appendChild(entry);  
+            // 直接显示后端发来的完整消息,不需要内联样式  
+            entry.innerHTML = `<span class="log-message">${this.escapeHtml(cleanedMessage)}</span>`;    
+            
+            logsOutput.appendChild(entry);    
             
             // 自动滚动到底部  
-            const logsContainer = logsOutput.parentElement;  
-            if (logsContainer) {  
-                logsContainer.scrollTop = logsContainer.scrollHeight;  
-            }  
-        }  
+            const logsContainer = logsOutput.parentElement;    
+            if (logsContainer) {    
+                logsContainer.scrollTop = logsContainer.scrollHeight;    
+            }    
+        }    
     }
       
     // ========== 状态轮询 ==========  
@@ -1124,23 +1192,43 @@ class CreativeWorkshopManager {
 
     async exportLogs() {  
         try {  
-            // 从后端获取最新的日志文件  
+            // 从后端获取日志文件  
             const response = await fetch('/api/logs/latest');  
             if (!response.ok) {  
                 throw new Error('获取日志失败');  
             }  
             
             const blob = await response.blob();  
-            const url = window.URL.createObjectURL(blob);  
-            const a = document.createElement('a');  
-            a.href = url;  
-            a.download = `generation_log_${new Date().toISOString().slice(0, 10)}.log`;  
-            document.body.appendChild(a);  
-            a.click();  
-            document.body.removeChild(a);  
-            window.URL.revokeObjectURL(url);  
+            const filename = `generation_log_${new Date().toISOString().slice(0, 10)}.log`;  
             
-            window.app?.showNotification('日志导出成功', 'success');  
+            // 使用 File System Access API 让用户选择保存位置  
+            if ('showSaveFilePicker' in window) {  
+                const handle = await window.showSaveFilePicker({  
+                    suggestedName: filename,  
+                    types: [{  
+                        description: '日志文件',  
+                        accept: {'text/plain': ['.log']},  
+                    }],  
+                });  
+                
+                const writable = await handle.createWritable();  
+                await writable.write(blob);  
+                await writable.close();  
+                
+                window.app?.showNotification('日志导出成功', 'success');  
+            } else {  
+                // 降级方案:使用传统下载方式  
+                const url = window.URL.createObjectURL(blob);  
+                const a = document.createElement('a');  
+                a.href = url;  
+                a.download = filename;  
+                document.body.appendChild(a);  
+                a.click();  
+                document.body.removeChild(a);  
+                window.URL.revokeObjectURL(url);  
+                
+                window.app?.showNotification('日志已下载到默认下载目录', 'success');  
+            }  
         } catch (error) {  
             console.error('导出日志失败:', error);  
             window.app?.showNotification('导出日志失败: ' + error.message, 'error');  
