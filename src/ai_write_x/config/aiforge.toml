@@ -13,6 +13,14 @@ base_url = "https://openrouter.ai/api/v1"
 timeout = 60
 max_tokens = 8192
 
+[llm.deepseek]
+type = "deepseek"
+model = "deepseek-chat"
+api_key = ""
+base_url = "https://api.deepseek.com"
+timeout = 60
+max_tokens = 8192
+
 [llm.grok]
 type = "grok"
 model = "xai/grok-3"
@@ -42,14 +50,6 @@ type = "ollama"
 model = "llama3"
 api_key = ""
 base_url = "http://localhost:11434"
-timeout = 60
-max_tokens = 8192
-
-[llm.deepseek]
-type = "deepseek"
-model = "deepseek-chat"
-api_key = ""
-base_url = "https://api.deepseek.com"
 timeout = 60
 max_tokens = 8192
 

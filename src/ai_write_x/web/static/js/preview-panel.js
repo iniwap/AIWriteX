@@ -75,7 +75,7 @@ class PreviewPanelManager {
                         window.contentEditorDialog = new ContentEditorDialog();  
                     }  
                     
-                    this.hide();  
+                    // this.hide();  
                     await window.contentEditorDialog.open(  
                         this.currentArticleInfo.path,  
                         this.currentArticleInfo.title,  
@@ -101,7 +101,7 @@ class PreviewPanelManager {
                         window.imageDesignerDialog = new ImageDesignerDialog();  
                     }  
                     
-                    this.hide();  
+                    // this.hide();  
                     await window.imageDesignerDialog.open(this.currentArticleInfo.path);  
                 } catch (error) {  
                     window.app?.showNotification('打开设计器失败: ' + error.message, 'error');  
@@ -131,7 +131,7 @@ class PreviewPanelManager {
                     }  
                     
                     // 关闭预览面板  
-                    this.hide();  
+                    // this.hide();  
                     
                     // 打开发布对话框  
                     await window.articleManager.showPublishDialog(this.currentArticleInfo.path);  

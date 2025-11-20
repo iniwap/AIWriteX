@@ -21,47 +21,162 @@
 } 
   
 /* ========== LOGO和标题区域 ========== */  
-.workshop-header {  
-    text-align: center;  
-    margin-bottom: 32px;  
-    flex-shrink: 0; 
-} 
-  
-.logo-container {  
-    width: 80px;  
-    height: 80px;  
-    margin: 0 auto 24px;  
-    background: var(--primary-color);  
-    border-radius: 20px;  
-    display: flex;  
-    align-items: center;  
-    justify-content: center;  
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);  
-}  
-  
-.logo-icon {  
-    width: 40px;  
-    height: 40px;  
-    fill: none;  
-    stroke: white;  
-    stroke-width: 2;  
-    stroke-linecap: round;  
-    stroke-linejoin: round;  
-}  
-  
-.workshop-title {  
-    font-size: 32px;  
-    font-weight: 600;  
-    margin: 0 0 12px 0;  
-    color: var(--text-primary);  
-}  
-  
-.workshop-subtitle {  
-    font-size: 18px;  
-    color: var(--text-secondary);  
-    margin: 0;  
-    font-weight: 400;  
-}  
+/* ========== AIWriteX 高科技头部样式 ========== */
+
+/* 保持原有容器布局，确保不撑开高度 */
+.workshop-header {
+    text-align: center;
+    margin-bottom: 32px;
+    flex-shrink: 0;
+    /* 使用 flex 布局确保垂直居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* --- LOGO 容器：神秘的能量黑盒 --- */
+.logo-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    /* 深色磨砂玻璃质感背景 */
+    background: linear-gradient(145deg, #1a1f35, #252b46);
+    border-radius: 24px; /* 稍微圆润一点 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* 高级投影 */
+    box-shadow: 
+        0 10px 25px rgba(37, 99, 235, 0.3),
+        inset 0 0 15px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: visible; /* 允许光晕溢出 */
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-container:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
+}
+
+/* 容器背后的脉冲光晕 */
+.logo-container::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(66, 153, 225, 0.4) 0%, transparent 70%);
+    opacity: 0;
+    z-index: -1;
+    animation: energy-pulse 3s infinite ease-in-out;
+    border-radius: 50%;
+}
+
+/* --- SVG 图标样式 --- */
+.logo-icon {
+    width: 48px; /*稍微加大一点图标占比*/
+    height: 48px;
+    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.5));
+}
+
+/* 内部路径动画 */
+.orbit-path {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transform-origin: center;
+}
+
+.orbit-1 {
+    stroke: #00e5ff; /* 青色 */
+    animation: spin-cw 4s linear infinite;
+    stroke-dasharray: 60; /* 虚线效果 */
+}
+
+.orbit-2 {
+    stroke: #bd00ff; /* 紫色 */
+    animation: spin-ccw 5s linear infinite;
+    stroke-dasharray: 40;
+    opacity: 0.8;
+}
+
+.core-x {
+    fill: url(#grad-core);
+    animation: breathe 2.5s infinite ease-in-out;
+}
+
+/* --- 标题文字：渐变流光 --- */
+.workshop-title {
+    font-size: 32px;
+    font-weight: 800; /* 更粗的字体 */
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+    /* 渐变文字裁切 */
+    background: linear-gradient(135deg, #2c3e50 0%, #2563eb 50%, #d946ef 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* 简单的入场动画 */
+    animation: fade-up 0.8s ease-out;
+}
+
+/* --- 副标题：打字机光标效果 --- */
+.workshop-subtitle {
+    font-size: 16px;
+    color: #64748b; /* 更加柔和的灰色 */
+    margin: 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px; /* 锁定高度防止跳动 */
+}
+
+.subtitle-text {
+    position: relative;
+}
+
+/* 闪烁的光标 */
+.cursor-blink {
+    display: inline-block;
+    width: 2px;
+    height: 16px;
+    background-color: #2563eb;
+    animation: blink 1s step-end infinite;
+}
+
+/* --- 动画关键帧 --- */
+@keyframes spin-cw {
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-ccw {
+    100% { transform: rotate(-360deg); }
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.9); opacity: 0.8; }
+}
+
+@keyframes energy-pulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.6; transform: scale(1); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
   
 /* ========== 主输入卡片 ========== */  
 .workshop-card {  

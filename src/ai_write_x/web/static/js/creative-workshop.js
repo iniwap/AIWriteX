@@ -152,26 +152,28 @@ class CreativeWorkshopManager {
             });  
         }    
         
-        const logProgressBtn = document.getElementById('log-progress-btn');      
-        if (logProgressBtn) {      
-            logProgressBtn.addEventListener('click', () => {      
+        const logProgressBtn = document.getElementById('log-progress-btn');  
+        if (logProgressBtn) {  
+            logProgressBtn.addEventListener('click', () => {  
                 const logPanel = document.getElementById('generation-progress');  
-                const refPanel = document.getElementById('reference-mode-panel');  // 新增  
-                const referenceModeBtn = document.getElementById('reference-mode-btn');  // 新增  
+                const refPanel = document.getElementById('reference-mode-panel');  
+                const referenceModeBtn = document.getElementById('reference-mode-btn');  
                 
                 if (logPanel) {  
                     // 展开日志面板前,先关闭借鉴面板  
                     if (refPanel && !refPanel.classList.contains('collapsed')) {  
                         refPanel.classList.add('collapsed');  
-                        if (referenceModeBtn) {  
+                        
+                        // 只有在非生成状态下才移除 active 类  
+                        if (referenceModeBtn && !this.isGenerating) {  
                             referenceModeBtn.classList.remove('active');  
                         }  
                     }  
                     
                     logPanel.classList.toggle('collapsed');  
-                }      
-            });      
-        } 
+                }  
+            });  
+        }
         
         const exportLogsBtn = document.getElementById('export-logs-btn');  
         if (exportLogsBtn) {  
@@ -213,6 +215,11 @@ class CreativeWorkshopManager {
         
         if (!panel || !referenceModeBtn) return;  
         
+        if (this.isGenerating) {  
+            window.app?.showNotification('生成过程中无法切换借鉴模式', 'warning');  
+            return;  
+        }  
+
         if (panel.classList.contains('collapsed')) {  
             // 展开借鉴面板前,先关闭日志面板  
             if (logPanel && !logPanel.classList.contains('collapsed')) {  
@@ -287,212 +294,186 @@ class CreativeWorkshopManager {
       
     // ========== 内容生成流程 ==========      
       
-    async startGeneration() {        
-        if (this.isGenerating) return;        
-            
-        this._hotSearchPlatform = '';     
-          
-        // 清空消息队列,开始新的任务  
+    async startGeneration() {  
+        // ========== 阶段 1: 前置检查 ==========  
+        if (this.isGenerating) return;  
+        
+        this._hotSearchPlatform = '';  
         this.messageQueue = [];  
         this.isProcessingQueue = false;  
-            
-        try {        
-            const statusResponse = await fetch('/api/generate/status');        
-            if (statusResponse.ok) {        
-                const status = await statusResponse.json();        
-                if (status.status === 'running') {        
-                    window.app?.showNotification('已有任务正在运行,请稍后再试', 'warning');        
-                    return;        
-                }        
-            }        
-        } catch (error) {        
-            console.error('检查任务状态失败:', error);        
-        }        
-            
-        this.isGenerating = true;        
-        this.updateGenerationUI(true);      
-            
-        // ========== 系统配置校验 ==========        
-        try {        
-            const configResponse = await fetch('/api/config/validate');        
-            if (!configResponse.ok) {        
-                const error = await configResponse.json();      
-                    
-                this.cleanupProgress();    
-                this.showConfigErrorDialog(error.detail || '系统配置错误,请检查配置');        
-                this.isGenerating = false;        
-                this.updateGenerationUI(false);        
-                return;        
-            }    
-    
-            // 启动进度条  
-            if (this.bottomProgress) {  
-                this.bottomProgress.start('init');  
-                const progressEl = document.getElementById('bottom-progress');  
-                if (progressEl) {  
-                    progressEl.classList.remove('hidden');  // 显式移除hidden类  
+        
+        try {  
+            const statusResponse = await fetch('/api/generate/status');  
+            if (statusResponse.ok) {  
+                const status = await statusResponse.json();  
+                if (status.status === 'running') {  
+                    window.app?.showNotification('已有任务正在运行,请稍后再试', 'warning');  
+                    return;  
                 }  
-            } 
+            }  
+        } catch (error) {  
+            console.error('检查任务状态失败:', error);  
+        }  
+        
+        // ========== 阶段 2: 系统配置校验 ==========  
+        try {  
+            const configResponse = await fetch('/api/config/validate');  
+            if (!configResponse.ok) {  
+                const error = await configResponse.json();  
+                this.showConfigErrorDialog(error.detail || '系统配置错误,请检查配置');  
+                return; 
+            }  
+        } catch (error) {  
+            console.error('配置验证失败:', error);  
+            this.showConfigErrorDialog('无法验证配置,请检查系统设置');  
+            return;  
+        }  
+        
+        // ========== 阶段 3: 获取话题 ==========  
+        let topic = this.currentTopic.trim();  
+        const referenceConfig = this.getReferenceConfig();  
+        
+        // 借鉴模式参数校验  
+        if (referenceConfig) {  
+            if (!topic) {  
+                window.app?.showNotification('借鉴模式下必须输入话题', 'error');  
+                return; 
+            }  
             
-            // 【新增】初始化日志按钮显示  
-            this.updateLogButtonProgress('init', 0);  
-        } catch (error) {        
-            console.error('配置验证失败:', error);      
+            if (referenceConfig.reference_urls) {  
+                const urls = referenceConfig.reference_urls.split('|')  
+                    .map(u => u.trim())  
+                    .filter(u => u);  
                 
-            this.cleanupProgress();    
-            this.showConfigErrorDialog('无法验证配置,请检查系统设置');        
-            this.isGenerating = false;        
-            this.updateGenerationUI(false);        
-            return;        
-        }        
+                const invalidUrls = urls.filter(url => !this.isValidUrl(url));  
+                if (invalidUrls.length > 0) {  
+                    window.app?.showNotification(  
+                        '存在无效的URL,请检查输入(确保使用http://或https://)',  
+                        'error'  
+                    );  
+                    return;  
+                }  
+            }  
+        }  
+        
+        // 自动获取热搜  
+        if (!topic && !referenceConfig) {  
+            window.app?.showNotification('正在自动获取热搜...', 'info');  
             
-        // ========== 获取话题 ==========        
-        let topic = this.currentTopic.trim();        
-        const referenceConfig = this.getReferenceConfig();        
-            
-        // 借鉴模式参数校验        
-        if (referenceConfig) {        
-            if (!topic) {      
-                this.cleanupProgress();    
-                window.app?.showNotification('借鉴模式下必须输入话题', 'error');        
-                this.isGenerating = false;        
-                this.updateGenerationUI(false);        
-                return;        
-            }        
-                
-            if (referenceConfig.reference_urls) {        
-                const urls = referenceConfig.reference_urls.split('|')        
-                    .map(u => u.trim())        
-                    .filter(u => u);        
+            try {  
+                const response = await fetch('/api/hot-topics');  
+                if (response.ok) {  
+                    const data = await response.json();  
+                    topic = data.topic || '';  
+                    this._hotSearchPlatform = data.platform || '';  
                     
-                const invalidUrls = urls.filter(url => !this.isValidUrl(url));        
-                if (invalidUrls.length > 0) {      
-                    this.cleanupProgress();    
-                    window.app?.showNotification(        
-                        '存在无效的URL,请检查输入(确保使用http://或https://)',        
-                        'error'        
-                    );        
-                    this.isGenerating = false;        
-                    this.updateGenerationUI(false);        
-                    return;        
-                }        
-            }        
-                
-            const category = document.getElementById('workshop-template-category')?.value;        
-            const template = document.getElementById('workshop-template-name')?.value;        
-                
-            if (category && !template) {      
-                this.cleanupProgress();    
-                window.app?.showNotification('请选择模板', 'warning');        
-                this.isGenerating = false;        
-                this.updateGenerationUI(false);        
-                return;        
-            }        
-        }        
-            
-        // 自动获取热搜 
+                    if (!topic) {  
+                        window.app?.showNotification('获取热搜失败,请手动输入话题', 'warning');  
+                        return;  
+                    }  
+                    
+                    const topicInput = document.getElementById('topic-input');  
+                    if (topicInput) {  
+                        topicInput.value = topic;  
+                        this.currentTopic = topic;  
+                    }  
+                } else {  
+                    throw new Error('获取热搜失败');  
+                }  
+            } catch (error) {  
+                console.error('获取热搜失败:', error);  
+                window.app?.showNotification('获取热搜失败,请手动输入话题', 'error');  
+                return;  
+            }  
+        }  
+        
+        // ========== 阶段 4: 所有校验通过,启动生成 ==========  
+        
+        // 在这里才设置生成状态  
+        this.isGenerating = true;  
+        this.updateGenerationUI(true);  
+        
+        // 添加到历史记录  
+        this.addToHistory(topic);  
+        
+        // 记录日志  
         const taskMode = referenceConfig ? '借鉴模式' : '热搜模式';  
-        this.appendLog(`🚀 开始生成任务 (${taskMode})`, 'status', false, Date.now() / 1000);        
-        if (!topic && !referenceConfig) {        
-            window.app?.showNotification('正在自动获取热搜...', 'info');
-
-            try {        
-                const response = await fetch('/api/hot-topics');        
-                if (response.ok) {        
-                    const data = await response.json();        
-                    topic = data.topic || '';    
-                    this._hotSearchPlatform = data.platform || '';        
-                        
-                    if (!topic) {      
-                        this.cleanupProgress();    
-                        window.app?.showNotification('获取热搜失败,请手动输入话题', 'warning');        
-                        this.isGenerating = false;        
-                        this.updateGenerationUI(false);        
-                        return;        
-                    }        
-                        
-                    const topicInput = document.getElementById('topic-input');        
-                    if (topicInput) {        
-                        topicInput.value = topic;        
-                        this.currentTopic = topic;        
-                    }        
-                        
-                } else {        
-                    throw new Error('获取热搜失败');        
-                }        
-            } catch (error) {        
-                console.error('获取热搜失败:', error);      
-                    
-                this.cleanupProgress();    
-                window.app?.showNotification('获取热搜失败,请手动输入话题', 'error');        
-                this.isGenerating = false;        
-                this.updateGenerationUI(false);        
-                return;        
-            }        
-        }
-                
-        // ========== 启动生成 ==========        
-        this.addToHistory(topic);        
-          
+        this.appendLog(`🚀 开始生成任务 (${taskMode})`, 'status', false, Date.now() / 1000);  
+        
+        // 启动进度条  
+        if (this.bottomProgress) {  
+            this.bottomProgress.start('init');  
+            const progressEl = document.getElementById('bottom-progress');  
+            if (progressEl) {  
+                progressEl.classList.remove('hidden');  
+            }  
+        }  
+        
+        // 初始化日志按钮显示  
+        this.updateLogButtonProgress('init', 0);  
+        
         // 清空消息队列,准备新任务  
         this.clearMessageQueue();  
+        
+        // ========== 阶段 5: 发起生成请求 ==========  
+        try {  
+            const response = await fetch('/api/generate', {  
+                method: 'POST',  
+                headers: {  
+                    'Content-Type': 'application/json',  
+                },  
+                body: JSON.stringify({  
+                    topic: topic,  
+                    platform: this._hotSearchPlatform || '',  
+                    reference: referenceConfig  
+                })  
+            });  
             
-        try {        
-            const response = await fetch('/api/generate', {        
-                method: 'POST',        
-                headers: {        
-                    'Content-Type': 'application/json',        
-                },        
-                body: JSON.stringify({        
-                    topic: topic,    
-                    platform: this._hotSearchPlatform || '',        
-                    reference: referenceConfig        
-                })        
-            });        
+            if (!response.ok) {  
+                const error = await response.json();  
                 
-            if (!response.ok) {        
-                const error = await response.json();        
-                    
                 // 请求失败:清理进度条和队列  
                 this.cleanupProgress();  
-                this.clearMessageQueue();  // 清空队列  
-                    
-                if (response.status === 400 && error.detail &&        
-                    (error.detail.includes('API KEY') ||        
-                    error.detail.includes('Model') ||        
-                    error.detail.includes('配置错误'))) {        
-                    this.showConfigErrorDialog(error.detail);        
-                } else {        
-                    window.app?.showNotification('生成失败: ' + (error.detail || '未知错误'), 'error');        
-                }        
-                    
-                this.isGenerating = false;        
-                this.updateGenerationUI(false);        
-                return;        
-            }        
+                this.resetLogButton(); 
+                this.clearMessageQueue();  
                 
-            const result = await response.json();        
-            window.app?.showNotification(result.message || '内容生成已开始', 'success');        
+                if (response.status === 400 && error.detail &&  
+                    (error.detail.includes('API KEY') ||  
+                    error.detail.includes('Model') ||  
+                    error.detail.includes('配置错误'))) {  
+                    this.showConfigErrorDialog(error.detail);  
+                } else {  
+                    window.app?.showNotification('生成失败: ' + (error.detail || '未知错误'), 'error');  
+                }  
                 
-            // 连接 WebSocket 接收实时日志        
-            this.connectLogWebSocket();        
-                
-            // 开始轮询任务状态        
-            this.startStatusPolling();        
-                
-        } catch (error) {        
-            console.error('生成失败:', error);        
-                
+                this.isGenerating = false;  
+                this.updateGenerationUI(false);  
+                return;  
+            }  
+            
+            const result = await response.json();  
+            window.app?.showNotification(result.message || '内容生成已开始', 'success');  
+            
+            // 连接 WebSocket 接收实时日志  
+            this.connectLogWebSocket();  
+            
+            // 开始轮询任务状态  
+            this.startStatusPolling();  
+            
+        } catch (error) {  
+            console.error('生成失败:', error);  
+            
             // 异常:清理进度条和队列  
             this.cleanupProgress();  
-            this.clearMessageQueue();  // 清空队列  
-                
-            window.app?.showNotification('生成失败: ' + error.message, 'error');        
-            this.isGenerating = false;        
-            this.updateGenerationUI(false);        
-        }        
-    }    
-        
+            this.resetLogButton();  // 重置日志按钮  
+            this.clearMessageQueue();  
+            
+            window.app?.showNotification('生成失败: ' + error.message, 'error');  
+            this.isGenerating = false;  
+            this.updateGenerationUI(false);  
+        }  
+    }
+            
     // 清理进度条的辅助方法    
     cleanupProgress() {  
         if (this.bottomProgress) {  
@@ -813,7 +794,23 @@ class CreativeWorkshopManager {
         }  
         
         this.isGenerating = false;  
+        // 智能恢复借鉴按钮状态  
+        const refPanel = document.getElementById('reference-mode-panel');  
+        const logPanel = document.getElementById('generation-progress');  
+        const referenceModeBtn = document.getElementById('reference-mode-btn');  
         
+        if (refPanel && logPanel && referenceModeBtn) {  
+            const refPanelCollapsed = refPanel.classList.contains('collapsed');  
+            const logPanelCollapsed = logPanel.classList.contains('collapsed');  
+            
+            // 情况1: 借鉴面板折叠 + 日志面板展开 → 用户切换到了日志视图,移除 active  
+            // 情况2: 两个面板都折叠 → 用户关闭了所有面板,移除 active  
+            // 情况3: 借鉴面板展开 → 保持 active 状态  
+            if (refPanelCollapsed) {  
+                referenceModeBtn.classList.remove('active');  
+            }  
+        }   
+
         if (data.type === 'completed') {  
             if (this.bottomProgress) {  
                 this.bottomProgress.complete();  
@@ -951,7 +948,11 @@ class CreativeWorkshopManager {
             const progressOnlyPattern = /^\[PROGRESS:\w+:(START|END)\]$/;  
             if (progressOnlyPattern.test(message.trim())) {  
                 return;  
-            }  
+            }
+            
+            if (message.includes('任务执行完成')) {  
+                return;  
+            }    
         }  
         
         // 【步骤2】过滤合并消息中的纯进度标记行  
@@ -1066,7 +1067,8 @@ class CreativeWorkshopManager {
     updateGenerationUI(isGenerating) {  
         const generateBtn = document.getElementById('generate-btn');  
         const topicInput = document.getElementById('topic-input');  
-          
+            const referenceModeBtn = document.getElementById('reference-mode-btn');
+  
         if (generateBtn) {  
             const btnText = generateBtn.querySelector('span');  
             if (btnText) {  
@@ -1107,6 +1109,15 @@ class CreativeWorkshopManager {
             topicInput.disabled = isGenerating;  
             topicInput.style.opacity = isGenerating ? '0.6' : '1';  
             topicInput.style.cursor = isGenerating ? 'not-allowed' : 'text';  
+        }  
+
+        // 禁用/启用借鉴按钮  
+        if (referenceModeBtn) {  
+            referenceModeBtn.disabled = isGenerating;  
+            referenceModeBtn.style.opacity = isGenerating ? '0.5' : '1';  
+            referenceModeBtn.style.cursor = isGenerating ? 'not-allowed' : 'pointer';
+            
+            this.setReferenceFormState(isGenerating);
         }  
     }  
       

@@ -204,10 +204,11 @@ class WeChatAdapter(PlatformAdapter):
                     {"appid": appid, "author": author, "success": success, "message": result}
                 )
 
-                # 保存发布记录
-                if hasattr(content_result, "file_path") and content_result.file_path:
+                # 从 kwargs 获取文章路径
+                article_path = kwargs.get("article_path")
+                if article_path:
                     save_publish_record(
-                        article_path=content_result.file_path,
+                        article_path=article_path,
                         platform="wechat",
                         account_info={
                             "appid": appid,
@@ -227,10 +228,11 @@ class WeChatAdapter(PlatformAdapter):
                     {"appid": appid, "author": author, "success": False, "message": error_msg}
                 )
 
-                # 【新增】保存失败记录
-                if hasattr(content_result, "file_path") and content_result.file_path:
+                # 从 kwargs 获取文章路径
+                article_path = kwargs.get("article_path")
+                if article_path:
                     save_publish_record(
-                        article_path=content_result.file_path,
+                        article_path=article_path,
                         platform="wechat",
                         account_info={
                             "appid": appid,
