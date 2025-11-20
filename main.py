@@ -1,66 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import copy  # noqa 841
-import asyncio  # noqa 841
-import shutil  # noqa 841
-from collections import deque  # noqa 841
-import threading  # noqa 841
-import queue  # noqa 841
-import os  # noqa 841
-import webbrowser  # noqa 841
-import ctypes  # noqa 841
-import sys  # noqa 841
-import warnings  # noqa 841
-import yaml  # noqa 841
-import re  # noqa 841
-import random  # noqa 841
-from bs4 import BeautifulSoup  # noqa 841
-import requests  # noqa 841
-import time  # noqa 841
-from typing import Optional, List, Dict  # noqa 841
-from dataclasses import dataclass  # noqa 841
-from enum import Enum  # noqa 841
-from datetime import datetime, timedelta  # noqa 841
-from io import BytesIO  # noqa 841
-from http import HTTPStatus  # noqa 841
-from urllib.parse import urlparse, unquote  # noqa 841
-from pathlib import PurePosixPath  # noqa 841
-from dashscope import ImageSynthesis  # noqa 841
-import mimetypes  # noqa 841
-import json  # noqa 841
-import logging  # noqa 841
-from enum import Enum  # noqa 841
-import unicodedata  # noqa 841
-from urllib.parse import quote  # noqa 841
-from dateutil.relativedelta import relativedelta  # noqa 841
-import html  # noqa 841
-import concurrent.futures  # noqa 841
-import markdown  # noqa 841
-from PIL import Image  # noqa 841
-import tempfile  # noqa 841
-import subprocess  # noqa 841
-import hashlib  # noqa 841
-from peewee import CharField, DoubleField, IntegerField, Model, TextField, Case  # noqa 841
-from playhouse.sqlite_ext import SqliteExtDatabase  # noqa 841
-from crewai.tools import BaseTool  # noqa 841
-from crewai_tools import SeleniumScrapingTool  # noqa 841
-from typing import Type  # noqa 841
-from pydantic import BaseModel, Field  # noqa 841
-import glob  # noqa 841
-from crewai import Agent, Crew, Process, Task  # noqa 841
-from crewai.project import CrewBase, agent, crew, task  # noqa 841
-import importlib.util  # noqa 841
-from pathlib import Path  # noqa 841
-import tomlkit  # noqa 841
-from rich.console import Console  # noqa 841
 import platform
 import multiprocessing
+import sys
+import os
+import ctypes
 
 # 设置环境变量
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
-from aiforge import AIForgeEngine  # noqa 841
+from aiforge import AIForgeEngine  # noqa
 
 
 def is_admin():
@@ -81,12 +31,12 @@ def is_admin():
 def run():
     """启动GUI应用程序"""
     try:
-        # 导入新的WebView GUI
-        from src.ai_write_x.web.webview_gui import gui_start
+        # 调用授权模块接口
+        from src.ai_write_x.license import check_license_and_start
 
-        gui_start()
+        check_license_and_start()
+
     except KeyboardInterrupt:
-        # 捕获Ctrl+C，优雅退出
         sys.exit(0)
     except Exception as e:
         print(f"启动失败: {str(e)}")

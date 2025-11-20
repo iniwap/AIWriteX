@@ -17,6 +17,106 @@
     color: var(--primary-color);  
     display: flex;  
     align-items: center;  
+    gap: 12px;  
+    height: 24px;  
+}  
+  
+/* 文字容器 - 确保垂直居中 */  
+.title-text-wrapper {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    height: 100%;  
+}  
+  
+/* 主标题 */  
+.title-main {  
+    font-size: 18px;  
+    font-weight: 600;  
+    line-height: 1;  
+    display: flex;  
+    align-items: center;  
+}  
+  
+/* Logo 容器 */  
+.app-header .header-logo-container {  
+    width: 24px;  
+    height: 24px;  
+    background: linear-gradient(145deg, #1a1f35, #252b46);  
+    border-radius: 6px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    position: relative;  
+    box-shadow:   
+        0 2px 8px rgba(37, 99, 235, 0.2),  
+        inset 0 0 8px rgba(255, 255, 255, 0.05);  
+    border: 1px solid rgba(255, 255, 255, 0.1);  
+    flex-shrink: 0;  
+    transition: transform 0.3s ease;  
+}  
+  
+.app-header .header-logo-container:hover {  
+    transform: translateY(-2px) scale(1.05);  
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);  
+}  
+  
+/* SVG 图标 */  
+.app-header .logo-icon {  
+    width: 16px;  
+    height: 16px;  
+    filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.3));  
+}  
+  
+/* 轨道路径 */  
+.app-header .orbit-path {  
+    fill: none;  
+    stroke-width: 2;  
+    stroke-linecap: round;  
+    transform-origin: center;  
+}  
+  
+.app-header .orbit-1 {  
+    stroke: #00e5ff;  
+    animation: spin-cw 4s linear infinite;  
+    stroke-dasharray: 60;  
+}  
+  
+.app-header .orbit-2 {  
+    stroke: #bd00ff;  
+    animation: spin-ccw 5s linear infinite;  
+    stroke-dasharray: 40;  
+    opacity: 0.8;  
+}  
+  
+.app-header .core-x {  
+    animation: breathe 2.5s infinite ease-in-out;  
+}  
+  
+/* 动画定义 */  
+@keyframes spin-cw {  
+    from { transform: rotate(0deg); }  
+    to { transform: rotate(360deg); }  
+}  
+  
+@keyframes spin-ccw {  
+    from { transform: rotate(360deg); }  
+    to { transform: rotate(0deg); }  
+}  
+  
+@keyframes breathe {  
+    0%, 100% { transform: scale(1); }  
+    50% { transform: scale(0.95); }  
+}  
+  
+/* 副标题 */  
+.app-subtitle {  
+    font-size: 12px;  
+    font-weight: 400;  
+    color: var(--text-secondary);  
+    line-height: 1;  
+    display: flex;  
+    align-items: center;  
 }  
   
 .app-status {  
@@ -44,7 +144,7 @@
     background: currentColor;  
     animation: headerPulse 2s infinite;  
 }  
-
+  
 .app-title-link {  
     text-decoration: none;  
     color: inherit;  
@@ -54,7 +154,7 @@
 .app-title-link:hover .app-title {  
     color: var(--primary-color);  
     opacity: 0.8;  
-}
+}  
   
 @keyframes headerPulse {  
     0%, 100% { opacity: 1; }  
