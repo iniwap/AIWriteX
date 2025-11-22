@@ -1,151 +1,184 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CrewAI 排版配置指南</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: #333; line-height: 1.6; font-size: 16px; min-height: 100vh;">
+
+<body
+  style="margin: 0; padding: 0; font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: #333; line-height: 1.6; font-size: 16px; min-height: 100vh;">
 
   <!-- 顶部标题区域 -->
-  <section style="padding: 0; background-color: #246EB9; color: white; text-align: center; margin-bottom: 25px; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+  <section
+    style="padding: 0; background-color: #246EB9; color: white; text-align: center; margin-bottom: 25px; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
     <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">CrewAI 排版配置指南</h1>
     <p style="margin: 8px 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">专业智能代理框架的最佳实践</p>
   </section>
 
   <!-- 引言卡片 -->
-  <section style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); overflow: hidden;">
-    <div style="float: right; width: 80px; height: 80px; margin: -25px -25px 0 0;">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); overflow: hidden;">
+    <section style="float: right; width: 80px; height: 80px; margin: -25px -25px 0 0;">
       <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
         <circle cx="100" cy="0" r="80" fill="#F5F7FA" />
         <circle cx="100" cy="0" r="60" fill="#E4ECF7" />
         <circle cx="100" cy="0" r="40" fill="#D4E0F4" />
       </svg>
-    </div>
-    <div style="margin-right: 60px;">
+    </section>
+    <section style="margin-right: 60px;">
       <h2 style="margin: 0 0 15px; font-size: 22px; font-weight: 700; color: #246EB9;">为什么排版配置如此重要？</h2>
-      <p style="margin: 0; font-size: 16px; line-height: 1.7;">在使用 CrewAI 构建智能代理系统时，排版配置的位置直接影响代码的可读性和可维护性。明智的配置安排可以使代码逻辑更清晰，同时提高开发效率。</p>
-    </div>
+      <p style="margin: 0; font-size: 16px; line-height: 1.7;">在使用 CrewAI
+        构建智能代理系统时，排版配置的位置直接影响代码的可读性和可维护性。明智的配置安排可以使代码逻辑更清晰，同时提高开发效率。</p>
+    </section>
   </section>
 
   <!-- 核心问题卡片 -->
-  <section style="margin: 0 0 25px; padding: 25px; background-color: #F8FAFC; border-radius: 18px; border-left: 5px solid #246EB9; box-shadow: 0 8px 16px rgba(0,0,0,0.05);">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: #F8FAFC; border-radius: 18px; border-left: 5px solid #246EB9; box-shadow: 0 8px 16px rgba(0,0,0,0.05);">
     <h2 style="margin: 0 0 15px; font-size: 22px; font-weight: 600; color: #246EB9;">核心问题</h2>
-    <div style="padding: 15px; background-color: #EDF2F7; border-radius: 12px; margin-bottom: 15px;">
-      <p style="margin: 0; font-weight: 500; font-size: 17px; line-height: 1.6; color: #2D3748;">使用CrewAI时，排版要求是放在agents配置中好，还是放在对应的task配置中好？</p>
-    </div>
+    <section style="padding: 15px; background-color: #EDF2F7; border-radius: 12px; margin-bottom: 15px;">
+      <p style="margin: 0; font-weight: 500; font-size: 17px; line-height: 1.6; color: #2D3748;">
+        使用CrewAI时，排版要求是放在agents配置中好，还是放在对应的task配置中好？</p>
+    </section>
     <p style="margin: 0; font-size: 16px; line-height: 1.7;">这是一个关于代码组织和设计模式的问题，关系到系统架构的整体清晰度和维护性。我们需要分析两种方式的优缺点。</p>
   </section>
 
   <!-- 选项对比 -->
   <section style="margin: 0 0 25px; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-    
+
     <!-- 选项1 -->
-    <div style="padding: 20px; background-color: white; border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;">
-      <h3 style="margin: 0 0 12px; font-size: 19px; font-weight: 600; color: #246EB9; display: flex; align-items: center;">
-        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background-color: #246EB9; color: white; border-radius: 50%; margin-right: 10px; font-size: 15px;">1</span>
+    <section
+      style="padding: 20px; background-color: white; border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;">
+      <h3
+        style="margin: 0 0 12px; font-size: 19px; font-weight: 600; color: #246EB9; display: flex; align-items: center;">
+        <span
+          style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background-color: #246EB9; color: white; border-radius: 50%; margin-right: 10px; font-size: 15px;">1</span>
         在 Agents 配置中设置排版要求
       </h3>
-      <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.7; padding-left: 38px;">将排版要求放在agent的配置中，意味着这些要求将成为代理的固有特性。</p>
-      
-      <div style="margin-top: 15px; padding-left: 38px;">
+      <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.7; padding-left: 38px;">
+        将排版要求放在agent的配置中，意味着这些要求将成为代理的固有特性。</p>
+
+      <section style="margin-top: 15px; padding-left: 38px;">
         <p style="margin: 0 0 8px; font-weight: 600; font-size: 16px;">优点：</p>
         <ul style="margin: 0 0 15px; padding-left: 20px; list-style-type: none;">
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             所有任务自动继承相同的排版风格
           </li>
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             代码更简洁，避免在每个任务中重复定义
           </li>
           <li style="margin-bottom: 0; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             确保代理的输出风格一致性
           </li>
         </ul>
-        
+
         <p style="margin: 0 0 8px; font-weight: 600; font-size: 16px;">缺点：</p>
         <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             降低灵活性，所有任务被迫使用相同格式
           </li>
           <li style="margin-bottom: 0; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             可能与特定任务的专业需求冲突
           </li>
         </ul>
-      </div>
-    </div>
-    
+      </section>
+    </section>
+
     <!-- 选项2 -->
-    <div style="padding: 20px; background-color: white; border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;">
-      <h3 style="margin: 0 0 12px; font-size: 19px; font-weight: 600; color: #246EB9; display: flex; align-items: center;">
-        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background-color: #246EB9; color: white; border-radius: 50%; margin-right: 10px; font-size: 15px;">2</span>
+    <section
+      style="padding: 20px; background-color: white; border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;">
+      <h3
+        style="margin: 0 0 12px; font-size: 19px; font-weight: 600; color: #246EB9; display: flex; align-items: center;">
+        <span
+          style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background-color: #246EB9; color: white; border-radius: 50%; margin-right: 10px; font-size: 15px;">2</span>
         在 Task 配置中设置排版要求
       </h3>
-      <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.7; padding-left: 38px;">将排版要求放在具体任务的配置中，使每个任务可以有独特的格式需求。</p>
-      
-      <div style="margin-top: 15px; padding-left: 38px;">
+      <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.7; padding-left: 38px;">
+        将排版要求放在具体任务的配置中，使每个任务可以有独特的格式需求。</p>
+
+      <section style="margin-top: 15px; padding-left: 38px;">
         <p style="margin: 0 0 8px; font-weight: 600; font-size: 16px;">优点：</p>
         <ul style="margin: 0 0 15px; padding-left: 20px; list-style-type: none;">
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             高度灵活，可根据任务需求定制格式
           </li>
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             符合关注点分离原则，任务与格式耦合
           </li>
           <li style="margin-bottom: 0; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #246EB9; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             可以为不同类型的输出优化格式
           </li>
         </ul>
-        
+
         <p style="margin: 0 0 8px; font-weight: 600; font-size: 16px;">缺点：</p>
         <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
           <li style="margin-bottom: 8px; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             代码冗余，相同格式要求需重复定义
           </li>
           <li style="margin-bottom: 0; padding-left: 15px;">
-            <span style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
+            <span
+              style="display: inline-block; width: 6px; height: 6px; background-color: #EB4C60; border-radius: 50%; vertical-align: middle; margin-right: 9px;"></span>
             可能导致系统输出风格不一致
           </li>
         </ul>
-      </div>
-    </div>
+      </section>
+    </section>
   </section>
 
   <!-- 最佳实践建议 -->
-  <section style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #E2E8F0;">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #E2E8F0;">
     <h2 style="margin: 0 0 15px; font-size: 22px; font-weight: 700; color: #246EB9;">最佳实践建议</h2>
-    <p style="margin: 0 0 15px; font-size: 17px; line-height: 1.7; font-weight: 500; color: #2D3748;">结合两种方法，采用<span style="color: #246EB9; border-bottom: 2px solid #246EB9; padding-bottom: 2px;">层级继承模式</span>获得最佳效果：</p>
-    
-    <div style="padding: 20px; background-color: #F7FAFC; border-radius: 12px; margin-bottom: 20px;">
+    <p style="margin: 0 0 15px; font-size: 17px; line-height: 1.7; font-weight: 500; color: #2D3748;">结合两种方法，采用<span
+        style="color: #246EB9; border-bottom: 2px solid #246EB9; padding-bottom: 2px;">层级继承模式</span>获得最佳效果：</p>
+
+    <section style="padding: 20px; background-color: #F7FAFC; border-radius: 12px; margin-bottom: 20px;">
       <h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 600; color: #2D3748;">1. 基础排版风格放在 Agents 配置中</h3>
       <p style="margin: 0; font-size: 16px; line-height: 1.7;">在agent配置中定义通用的排版要求，如字体、基本布局风格和品牌标识等。这确保了所有输出的基本一致性。</p>
-    </div>
-    
-    <div style="padding: 20px; background-color: #F7FAFC; border-radius: 12px; margin-bottom: 20px;">
+    </section>
+
+    <section style="padding: 20px; background-color: #F7FAFC; border-radius: 12px; margin-bottom: 20px;">
       <h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 600; color: #2D3748;">2. 特定格式要求放在 Tasks 配置中</h3>
-      <p style="margin: 0; font-size: 16px; line-height: 1.7;">在任务配置中添加针对该任务独特的排版要求，如特定内容的展示方式、专业术语的格式等，这些会覆盖或补充基础样式。</p>
-    </div>
-    
-    <div style="padding: 20px; background-color: #F7FAFC; border-radius: 12px;">
+      <p style="margin: 0; font-size: 16px; line-height: 1.7;">在任务配置中添加针对该任务独特的排版要求，如特定内容的展示方式、专业术语的格式等，这些会覆盖或补充基础样式。
+      </p>
+    </section>
+
+    <section style="padding: 20px; background-color: #F7FAFC; border-radius: 12px;">
       <h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 600; color: #2D3748;">3. 使用配置继承简化代码</h3>
       <p style="margin: 0; font-size: 16px; line-height: 1.7;">创建一个格式配置库，允许在不同级别引用和扩展配置，避免代码重复，同时保持灵活性和一致性。</p>
-    </div>
+    </section>
   </section>
 
   <!-- 代码示例 -->
-  <section style="margin: 0 0 25px; padding: 25px; background-color: #1A202C; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: #1A202C; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
     <h2 style="margin: 0 0 15px; font-size: 22px; font-weight: 600; color: white;">代码示例</h2>
-    <div style="background-color: #2D3748; border-radius: 8px; padding: 15px; overflow-x: auto;">
-      <div style="float: right; background-color: #246EB9; color: white; font-size: 12px; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px;">Python</div>
-      <pre style="margin: 0; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.5; color: #E2E8F0; white-space: pre-wrap;"><code># Agent 配置中的基础排版设置
+    <section style="background-color: #2D3748; border-radius: 8px; padding: 15px; overflow-x: auto;">
+      <section
+        style="float: right; background-color: #246EB9; color: white; font-size: 12px; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px;">
+        Python</section>
+      <pre
+        style="margin: 0; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.5; color: #E2E8F0; white-space: pre-wrap;"><code># Agent 配置中的基础排版设置
 formatting_base = """
 - 使用中文回答
 - 保持简洁清晰的格式
@@ -171,19 +204,22 @@ report_task = Task(
     - 关键结论用粗体标记
     """
 )</code></pre>
-    </div>
+    </section>
   </section>
 
   <!-- 结论与建议 -->
-  <section style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #E2E8F0;">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #E2E8F0;">
     <h2 style="margin: 0 0 15px; font-size: 22px; font-weight: 700; color: #246EB9;">结论</h2>
-    
-    <div style="padding: 15px; margin-bottom: 20px; background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #246EB9;">
-      <p style="margin: 0; font-size: 17px; line-height: 1.7; font-weight: 500;">在实际项目中，应根据团队规模和项目复杂度选择适合的配置方案。核心原则是<span style="color: #246EB9;">平衡一致性与灵活性</span>。</p>
-    </div>
-    
+
+    <section
+      style="padding: 15px; margin-bottom: 20px; background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #246EB9;">
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; font-weight: 500;">
+        在实际项目中，应根据团队规模和项目复杂度选择适合的配置方案。核心原则是<span style="color: #246EB9;">平衡一致性与灵活性</span>。</p>
+    </section>
+
     <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.7;">对于大多数中等规模的 CrewAI 项目，建议采用分层配置方法：</p>
-    
+
     <ol style="margin: 0; padding-left: 25px;">
       <li style="margin-bottom: 10px; font-size: 16px; line-height: 1.7;">
         在代理配置中定义<strong style="color: #246EB9;">通用格式标准</strong>，确保品牌一致性
@@ -198,48 +234,54 @@ report_task = Task(
   </section>
 
   <!-- 互动元素 -->
-  <section style="margin: 0 0 25px; padding: 20px; background-color: #F0F4F8; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;">
+  <section
+    style="margin: 0 0 25px; padding: 20px; background-color: #F0F4F8; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;">
     <h3 style="margin: 0 0 20px; font-size: 20px; font-weight: 600; color: #246EB9;">你的 CrewAI 项目是什么规模？</h3>
-    <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-      <div style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
+    <section style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+      <section
+        style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
         <span style="margin-right: 8px;">📈</span>小型项目
-      </div>
-      <div style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
+      </section>
+      <section
+        style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
         <span style="margin-right: 8px;">🏢</span>中型项目
-      </div>
-      <div style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
+      </section>
+      <section
+        style="padding: 12px 20px; background: linear-gradient(135deg, #246EB9 0%, #4299E1 100%); color: white; border-radius: 10px; font-size: 16px; font-weight: 500; flex: 1; min-width: 100px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0.95;">
         <span style="margin-right: 8px;">🌐</span>大型企业项目
-      </div>
-    </div>
+      </section>
+    </section>
   </section>
 
-  <section style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); text-align: center;">
+  <section
+    style="margin: 0 0 25px; padding: 25px; background-color: white; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); text-align: center;">
     <h2 style="margin: 0 0 20px; font-size: 22px; font-weight: 700; color: #246EB9;">CrewAI 排版配置模式</h2>
     <svg viewBox="0 0 400 200" style="width: 100%; height: auto; max-width: 400px;">
       <!-- 背景 -->
       <rect x="0" y="0" width="400" height="200" fill="#F8FAFC" rx="10" ry="10" />
-      
+
       <!-- Agent 配置区域 -->
       <rect x="30" y="30" width="340" height="60" fill="#246EB9" rx="8" ry="8" opacity="0.9" />
       <text x="200" y="56" fill="white" font-size="16" font-weight="bold" text-anchor="middle">Agent 配置 - 基础排版风格</text>
       <text x="200" y="76" fill="white" font-size="12" text-anchor="middle">通用格式、品牌标识、一致性要求</text>
-      
+
       <!-- 箭头 -->
       <path d="M200,90 L200,120" stroke="#2D3748" stroke-width="2" fill="none" />
       <polygon points="200,130 195,120 205,120" fill="#2D3748" />
-      
+
       <!-- Task 配置区域 -->
       <rect x="100" y="130" width="200" height="50" fill="#4299E1" rx="8" ry="8" opacity="0.9" />
       <text x="200" y="153" fill="white" font-size="14" font-weight="bold" text-anchor="middle">Task 配置 - 特定需求</text>
       <text x="200" y="171" fill="white" font-size="11" text-anchor="middle">专业展示、特定格式</text>
-      
+
       <!-- 点缀圆圈 -->
       <circle cx="60" cy="160" r="20" fill="#246EB9" opacity="0.2" />
       <circle cx="330" cy="140" r="15" fill="#246EB9" opacity="0.2" />
       <circle cx="320" cy="170" r="10" fill="#246EB9" opacity="0.2" />
       <circle cx="40" cy="120" r="8" fill="#246EB9" opacity="0.2" />
     </svg>
-</section>
+  </section>
 
 </body>
+
 </html>

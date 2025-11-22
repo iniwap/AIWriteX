@@ -217,6 +217,7 @@ uv pip install -r requirements.txt
 
 | 类别       | 模板名称 | 预览链接                       | 适用话题                      |
 |------------|----------|------------------------------|--------------------------|
+| **经典展示**   | t1       | [点击预览](https://mp.weixin.qq.com/s/KhKVRLGxbXceuHShnaUpOg) | **Gemini3通过一篇文章生成连环画**|
 | 科技数码   | t1       | [点击预览](https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ) | 科技前沿与数码评测       |
 | 财经投资   | t1       | [点击预览](https://mp.weixin.qq.com/s/uTfYVXUG3_bjqSZ-uuJKeg) | 投资趋势与财经资讯       |
 | 教育学习   | t1       | [点击预览](https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g) | 学习方法与教育资讯       |
