@@ -12,6 +12,8 @@ import os
 import mimetypes
 import json
 import time
+import re
+from bs4 import BeautifulSoup  # ✅ 新增：导入 BeautifulSoup
 
 from src.ai_write_x.utils import utils
 from src.ai_write_x.config.config import Config
@@ -19,6 +21,7 @@ from src.ai_write_x.utils import log
 from src.ai_write_x.utils.path_manager import PathManager
 
 
+# ... (PublishStatus, PublishResult 类保持不变) ...
 class PublishStatus(Enum):
     PENDING = "pending"
     PUBLISHED = "published"
@@ -39,6 +42,7 @@ class PublishResult:
 class WeixinPublisher:
     BASE_URL = "https://api.weixin.qq.com/cgi-bin"
 
+    # ... (__init__, is_verified, _ensure_access_token 等方法保持不变) ...
     def __init__(self, app_id: str, app_secret: str, author: str):
         # 获取配置数据，只能使用确定的配置，微信配置是循环发布的，需要传递
         config = Config.get_instance()
@@ -407,11 +411,167 @@ class WeixinPublisher:
 
         return ret
 
+    def _replace_div_with_section(self, content):
+        """
+        强制将所有 <div> 标签转换为 <section>
+        微信公众号后台对 section 的兼容性更好，且能避免部分 div 样式丢失问题。
+        """
+        if not content:
+            return ""
+
+        try:
+            # 使用 html.parser 解析
+            soup = BeautifulSoup(content, "html.parser")
+
+            # 查找所有 div 标签并直接修改其 name 属性
+            # 这比正则替换更安全，不会误伤文本内容
+            for tag in soup.find_all("div"):
+                tag.name = "section"
+
+            # 只要把 tag.name 改了，输出时就会变成 <section>...</section>
+            return str(soup)
+
+        except Exception as e:
+            log.print_log(f"Div转Section失败(bs4): {e}")
+            return content
+
+    def _compress_html(self, content, use_compress=True):
+        """
+        智能压缩HTML（正则版）：
+        只负责“清洗”工作：去除换行符和标签间的幽灵空格，防止微信排版错乱。
+        """
+        if not use_compress or not content:
+            return content
+
+        # 1. 移除注释
+        content = re.sub(r"<!--.*?-->", "", content, flags=re.DOTALL)
+
+        # 2. 核心修复：只移除“标签 > 后的【换行符+缩进空格】”
+        # 逻辑：编辑器里的换行+缩进是多余的，删掉。
+        content = re.sub(r">[\n\r]+\s*", ">", content)
+
+        # 3. 移除标签结尾 < 前面的换行和缩进
+        content = re.sub(r"\s+<", "<", content)
+
+        # 4. 移除标签之间的纯空白
+        content = re.sub(r">\s+<", "><", content)
+
+        # 5. 清理剩余换行符
+        content = content.replace("\n", "").replace("\r", "")
+
+        return content
+
+    def _inject_indent(self, content):
+        """
+        智能注入首行缩进（BS4 终极版）：
+        给正文段落添加 text-indent: 2em。
+        升级：
+        1. 向上查找5层祖先，彻底排除卡片、提示框、嵌套布局。
+        2. 增加 box-shadow (阴影) 检测，这是识别卡片的关键。
+        3. 排除短文本和特殊符号开头的段落（如注释、列表）。
+        """
+        if not content:
+            return ""
+
+        try:
+            soup = BeautifulSoup(content, "html.parser")
+
+            for p in soup.find_all("p"):
+                # --- 文本内容检查 (新功能) ---
+                text = p.get_text().strip()
+
+                # 1. 空段落或极短段落跳过 (通常是标题、按钮文字或装饰性文字)
+                if not text or len(text) < 30:
+                    continue
+
+                # 2. 特殊符号开头跳过 (代码注释、伪列表、引用)
+                # 您的截图中 "//" 开头的注释就会在这里被豁免
+                if text.startswith(
+                    ("/", "●", "-", ">", "•", "*", "1.", "2.", "3.", "4.", "5.", "#")
+                ):
+                    continue
+
+                should_skip = False
+
+                # --- 🛡️ 深度豁免扫描 (查自己 + 往上查5代) ---
+                # 检查列表包含：当前标签 p，以及它的父级...
+                check_list = [p] + list(p.parents)[:5]
+
+                for node in check_list:
+                    if not hasattr(node, "name"):
+                        continue
+
+                    # 1.【结构豁免】列表、引用、表格、代码块、按钮
+                    if node.name in [
+                        "li",
+                        "blockquote",
+                        "th",
+                        "td",
+                        "figcaption",
+                        "pre",
+                        "code",
+                        "dt",
+                        "dd",
+                        "button",
+                        "a",
+                    ]:
+                        should_skip = True
+                        break
+
+                    # 获取样式
+                    style = node.get("style", "").lower()
+
+                    # 2.【对齐豁免】
+                    if "text-align" in style and ("center" in style or "right" in style):
+                        should_skip = True
+                        break
+
+                    # 3.【布局豁免】Flex / Grid / Inline-Block
+                    if "display" in style and (
+                        "flex" in style or "grid" in style or "inline-block" in style
+                    ):
+                        should_skip = True
+                        break
+
+                    # 4.【装饰豁免】有背景色、边框、**阴影(关键)**
+                    # 只要祖先里有 box-shadow，说明这是个卡片，坚决不缩进
+                    if "background" in style or "border" in style or "box-shadow" in style:
+                        should_skip = True
+                        break
+
+                if should_skip:
+                    continue
+
+                # 5.【自身检查】
+                p_style = p.get("style", "").lower()
+                if "text-indent" in p_style:
+                    continue
+
+                # --- 注入样式 ---
+                current_style = p.get("style", "")
+                new_style = f"text-indent: 2em; {current_style}".strip()
+                p["style"] = new_style
+
+            return str(soup)
+
+        except Exception as e:
+            log.print_log(f"HTML样式注入失败(bs4): {e}，将使用原始排版")
+            return content
+
 
 def pub2wx(title, digest, article, appid, appsecret, author, cover_path=None):
     publisher = WeixinPublisher(appid, appsecret, author)
     config = Config.get_instance()
 
+    # 1. 结构标准化：强制 Div -> Section
+    # 这是处理的第一步，确保所有容器都是微信友好的 <section>
+    article = publisher._replace_div_with_section(article)
+
+    # 2. 样式注入：首行缩进
+    # 在 div 变成 section 之后再注入样式，虽然主要针对 p 标签，但层级结构可能变了，所以放在结构调整后
+    article = publisher._inject_indent(article)
+
+    # 3. 再处理正文图片URL替换 (bs4 处理后的 html 结构标准，利于正则提取)
     cropped_image_path = ""
     final_image_path = None  # 最终要上传的图片路径
 
@@ -486,6 +646,9 @@ def pub2wx(title, digest, article, appid, appsecret, author, cover_path=None):
                     log.print_log(f"下载图片失败:{image_url}")
     except Exception as e:
         log.print_log(f"上传配图出错,影响阅读,可继续发布文章:{e}")
+
+    # 4. 在上传给微信前，把所有换行符、缩进空格统统干掉，解决“幽灵空隙”
+    article = publisher._compress_html(article)
 
     # 账号是否认证
     if not publisher.is_verified:
