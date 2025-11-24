@@ -40,30 +40,36 @@
                             </svg>      
                         </button>      
                     </div>      
-                          
-                    <button class="btn btn-secondary" id="batch-mode-toggle" style="display: none;">      
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">      
-                            <path d="M9 11l3 3L22 4"/>      
-                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>      
-                        </svg>      
-                        批量操作      
-                    </button>      
-                          
-                    <button class="btn btn-danger" id="batch-delete" style="display: none;">      
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">      
-                            <polyline points="3 6 5 6 21 6"/>      
-                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>      
-                        </svg>      
-                        批量删除      
-                    </button>      
-                          
-                    <button class="btn btn-primary" id="batch-publish" style="display: none;">      
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">      
-                            <path d="M22 2L11 13"/>      
-                            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>      
-                        </svg>      
-                        批量发布      
-                    </button>      
+
+                    <!-- 批量操作按钮组 -->  
+                    <div class="batch-actions-group">  
+                        <button class="btn btn-secondary" id="batch-mode-toggle">  
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                                <path d="M9 11l3 3L22 4"/>  
+                                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>  
+                            </svg>  
+                            <span class="batch-mode-text">批量操作</span>  
+                            <span class="batch-count" style="display: none;">(已选 0)</span>  
+                        </button>  
+                        
+                        <!-- 子按钮容器 -->  
+                        <div class="batch-sub-actions" style="display: none;">  
+                            <button class="btn btn-primary" id="batch-publish">  
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                                    <path d="M22 2L11 13"/>  
+                                    <path d="M22 2l-7 20-4-9-9-4 20-7z"/>  
+                                </svg>  
+                                批量发布  
+                            </button>  
+                            <button class="btn btn-danger" id="batch-delete">  
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor">  
+                                    <polyline points="3 6 5 6 21 6"/>  
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>  
+                                </svg>  
+                                批量删除  
+                            </button>  
+                        </div>  
+                    </div>      
                 </div>      
             </div>      
                   

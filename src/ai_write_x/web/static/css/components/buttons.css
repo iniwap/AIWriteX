@@ -2,8 +2,8 @@
 .btn {  
     display: inline-flex;  
     align-items: center;  
-    gap: 8px;  
-    padding: 10px 20px;  
+    gap: 6px;  
+    padding: 8px 16px;  
     border: none;  
     border-radius: 6px;  
     font-size: 14px;  
@@ -13,7 +13,12 @@
     text-decoration: none;  
     justify-content: center;  
 }  
-  
+
+.btn svg {  
+    flex-shrink: 0;  
+    margin: 0;  
+}
+
 .btn-primary {  
     background: var(--primary-color);    
     color: white;    

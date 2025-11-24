@@ -1,21 +1,93 @@
 /* ========== 文章管理特有样式 ========== */  
-  
-/* 批量选择复选框 */  
+    
+/* 隐藏原生复选框 */  
 .article-card .batch-checkbox {  
     position: absolute;  
-    top: 8px;  
-    left: 8px;  
-    width: 20px;  
-    height: 20px;  
+    opacity: 0;  
+    width: 0;  
+    height: 0;  
+    pointer-events: none;  
+}   
+  
+/* 复选框包装器 */  
+.article-card .checkbox-wrapper {  
+    position: absolute;  
+    top: 12px;  
+    right: 12px;  
     z-index: 10;  
-    cursor: pointer;  
     display: none;  
-}  
+    cursor: pointer;  
+    width: 18px; 
+    height: 18px; 
+} 
   
-.article-card.batch-mode .batch-checkbox {  
+/* 批量模式下显示 */  
+.article-card.batch-mode .checkbox-wrapper {  
     display: block;  
+}   
+  
+/* 自定义复选框样式 */  
+.article-card .checkbox-custom {  
+    width: 18px;  
+    height: 18px;  
+    border: 2px solid var(--border-color);  
+    border-radius: 4px;  
+    position: relative;  
+    transition: all 0.2s ease;  
+    background: var(--background-color);  
+    cursor: pointer;  
+    box-sizing: border-box;  
+} 
+  
+/* 选中状态 */  
+.article-card .batch-checkbox:checked + .checkbox-custom {  
+    background: var(--primary-color);  
+    border-color: var(--primary-color);  
 }  
   
+/* 对号图标 - 使用✓字符 */  
+.article-card .batch-checkbox:checked + .checkbox-custom::after {  
+    content: '✓';  
+    position: absolute;  
+    top: -2px;  
+    left: 2px;  
+    color: white;  
+    font-size: 14px;  
+    font-weight: bold;  
+}
+  
+/* ========== 批量操作按钮组 ========== */  
+  
+.batch-actions-group {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    position: relative;  
+}  
+  
+.batch-sub-actions {  
+    display: flex;  
+    gap: 8px;  
+    animation: slideIn 0.2s ease-out;  
+}  
+  
+@keyframes slideIn {  
+    from {  
+        opacity: 0;  
+        transform: translateX(-10px);  
+    }  
+    to {  
+        opacity: 1;  
+        transform: translateX(0);  
+    }  
+}  
+  
+.batch-count {  
+    font-size: 12px;  
+    color: var(--text-tertiary);  
+    margin-left: 4px;  
+}  
+
 /* 文件格式徽章 */  
 .format-badge {  
     padding: 2px 8px;  

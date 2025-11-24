@@ -206,7 +206,10 @@ class ArticleManager {
         };  
         
         card.innerHTML = `  
-            <input type="checkbox" class="batch-checkbox" ${this.selectedArticles.has(article.path) ? 'checked' : ''}>  
+            <label class="checkbox-wrapper">  
+                <input type="checkbox" class="batch-checkbox" ${this.selectedArticles.has(article.path) ? 'checked' : ''}>  
+                <span class="checkbox-custom"></span>  
+            </label>  
             <div class="card-preview">  
                 <iframe sandbox="allow-same-origin allow-scripts"   
                         loading="lazy"   
@@ -704,17 +707,17 @@ class ArticleManager {
         });    
         
         // 卡片复选框变化    
-        document.addEventListener('change', (e) => {    
-            if (e.target.classList.contains('batch-checkbox')) {    
-                const card = e.target.closest('.article-card');    
-                const path = card.dataset.path;    
-                if (e.target.checked) {    
-                    this.selectedArticles.add(path);    
-                } else {    
-                    this.selectedArticles.delete(path);    
-                }    
-                this.updateBatchButtons();    
-            }    
+        document.addEventListener('change', (e) => {  
+            if (e.target.classList.contains('batch-checkbox')) {  
+                const card = e.target.closest('.article-card');  
+                const path = card.dataset.path;  
+                if (e.target.checked) {  
+                    this.selectedArticles.add(path);  
+                } else {  
+                    this.selectedArticles.delete(path);  
+                }  
+                this.updateBatchCount();
+            }  
         });
         
         // 平台选择变化  
@@ -767,17 +770,58 @@ class ArticleManager {
     toggleBatchMode() {  
         this.batchMode = !this.batchMode;  
         
-        document.querySelectorAll('.article-card').forEach(card => {  
-            if (this.batchMode) {  
-                card.classList.add('batch-mode');  
-            } else {  
-                card.classList.remove('batch-mode');  
-            }  
-        });  
+        const toggleBtn = document.getElementById('batch-mode-toggle');  
+        const subActions = document.querySelector('.batch-sub-actions');  
+        const batchCount = toggleBtn.querySelector('.batch-count');  
+        const batchText = toggleBtn.querySelector('.batch-mode-text');  
         
-        this.updateBatchButtons();  
+        if (this.batchMode) {  
+            // 进入批量模式  
+            toggleBtn.classList.add('active');  
+            batchText.textContent = '退出批量';  
+            batchCount.style.display = 'inline';  
+            subActions.style.display = 'flex';  
+            
+            // 只更新卡片class,不重新渲染  
+            document.querySelectorAll('.article-card').forEach(card => {  
+                card.classList.add('batch-mode');  
+            });  
+        } else {  
+            // 退出批量模式  
+            toggleBtn.classList.remove('active');  
+            batchText.textContent = '批量操作';  
+            batchCount.style.display = 'none';  
+            subActions.style.display = 'none';  
+            
+            // 清空选中状态  
+            this.selectedArticles.clear();  
+            
+            // 只更新卡片class,不重新渲染  
+            document.querySelectorAll('.article-card').forEach(card => {  
+                card.classList.remove('batch-mode');  
+                const checkbox = card.querySelector('.batch-checkbox');  
+                if (checkbox) checkbox.checked = false;  
+            });  
+        }  
+        
+        this.updateBatchCount();  
     }  
-    
+
+    updateBatchCount() {  
+        const count = this.selectedArticles.size;  
+        const batchCount = document.querySelector('.batch-count');  
+        const batchPublish = document.getElementById('batch-publish');  
+        const batchDelete = document.getElementById('batch-delete');  
+        
+        if (batchCount) {  
+            batchCount.textContent = `(已选 ${count})`;  
+        }  
+        
+        // 根据选中数量启用/禁用子按钮  
+        if (batchPublish) batchPublish.disabled = count === 0;  
+        if (batchDelete) batchDelete.disabled = count === 0;  
+    } 
+
     // 更新批量操作按钮状态  
     updateBatchButtons() {  
         const batchDelete = document.getElementById('batch-delete');  
@@ -1190,7 +1234,28 @@ class ArticleManager {
                 }  
                 
                 await this.loadArticles();  
-                this.renderStatusTree();  
+                this.renderStatusTree(); 
+                // 更新已发布文章的状态徽章,不重新渲染整个卡片  
+                articlePaths.forEach(path => {  
+                    const card = document.querySelector(`.article-card[data-path="${path}"]`);  
+                    if (card) {  
+                        const statusBadge = card.querySelector('.status-badge');  
+                        const article = this.articles.find(a => a.path === path);  
+                        if (statusBadge && article) {  
+                            statusBadge.className = `status-badge ${article.status}`;  
+                            statusBadge.textContent = {  
+                                'published': '已发布',  
+                                'failed': '发布失败',  
+                                'unpublished': '未发布'  
+                            }[article.status] || '未发布';  
+                        }  
+                    }  
+                });  
+                
+                // 退出批量模式  
+                this.selectedArticles.clear();  
+                this.batchMode = false;  
+                this.toggleBatchMode();  
             } else {  
                 throw new Error('发布请求失败');  
             }  
@@ -1504,20 +1569,29 @@ class ArticleManager {
                         const response = await fetch(`/api/articles/${encodeURIComponent(path)}`, {  
                             method: 'DELETE'  
                         });  
-                        if (response.ok) successCount++;  
+                        if (response.ok) {  
+                            successCount++;  
+                            const card = document.querySelector(`.article-card[data-path="${path}"]`);  
+                            if (card) card.remove();  
+                        }  
                     } catch (error) {  
                         console.error('删除失败:', path, error);  
                     }  
                 }  
                 
                 this.showNotification(`删除完成: ${successCount}/${count}`, 'success');  
+                
+                // 更新数据  
+                await this.loadArticles();  
+                this.renderStatusTree();  
+                
+                // 退出批量模式  
                 this.selectedArticles.clear();  
                 this.batchMode = false;  
-                await this.loadArticles();  
-                this.renderStatusTree();
+                this.toggleBatchMode(); 
             }  
         );  
-    }
+    }  
     
     // HTML转义  
     escapeHtml(text) {  
