@@ -467,7 +467,9 @@ class ArticleManager {
 
             // 卡片点击预览  
             card.addEventListener('click', (e) => {  
-                if (!e.target.closest('.card-actions') && !e.target.closest('.batch-checkbox')) {  
+                if (!e.target.closest('.card-actions') &&   
+                    !e.target.closest('.batch-checkbox') &&   
+                    !e.target.closest('.checkbox-wrapper')) {
                     const path = card.dataset.path;  
                     const article = this.articles.find(a => a.path === path);  
                     if (article) {  

@@ -19,6 +19,7 @@
     cursor: pointer;  
     width: 18px; 
     height: 18px; 
+    box-sizing: border-box;
 } 
   
 /* 批量模式下显示 */  
@@ -28,6 +29,7 @@
   
 /* 自定义复选框样式 */  
 .article-card .checkbox-custom {  
+    display: inline-block; 
     width: 18px;  
     height: 18px;  
     border: 2px solid var(--border-color);  
@@ -37,7 +39,7 @@
     background: var(--background-color);  
     cursor: pointer;  
     box-sizing: border-box;  
-} 
+}
   
 /* 选中状态 */  
 .article-card .batch-checkbox:checked + .checkbox-custom {  
