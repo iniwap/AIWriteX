@@ -53,8 +53,11 @@ async def list_categories():
     template_dir = PathManager.get_template_dir()
     categories = []
 
+    # 排除的目录名称
+    excluded_dirs = {"components", "__pycache__", ".git"}
+
     for item in template_dir.iterdir():
-        if item.is_dir():
+        if item.is_dir() and item.name not in excluded_dirs:
             template_count = len(list(item.glob("*.html")))
             categories.append(
                 {"name": item.name, "path": str(item), "template_count": template_count}

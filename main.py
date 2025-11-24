@@ -1,71 +1,59 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import platform
 import multiprocessing
 import sys
 import os
-import ctypes
 
-# 设置环境变量
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 from aiforge import AIForgeEngine  # noqa
 
-
-def is_admin():
-    """检查是否具有管理员权限（跨平台）"""
-    try:
-        if platform.system() == "Windows":
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        elif platform.system() == "Darwin":  # macOS
-            return True
-        elif platform.system() == "Linux":
-            return os.getuid() == 0
-        else:
-            return True
-    except Exception:
-        return False
+# 帮助 PyInstaller 检测依赖 (永远不会执行)
+if False:
+    import fastapi  # noqa
+    import uvicorn  # noqa
+    import webview  # noqa
+    import jinja2  # noqa
+    import pystray  # noqa
+    import yaml  # noqa
+    import tomlkit  # noqa
+    import peewee  # noqa
+    from playhouse.sqlite_ext import SqliteExtDatabase  # noqa
+    from src.ai_write_x.web import webview_gui  # noqa
+    from src.ai_write_x.web import app  # noqa
+    from src.ai_write_x.config import config  # noqa
+    from src.ai_write_x import crew_main  # noqa
+    import bs4  # noqa
+    import requests  # noqa
+    from PIL import Image  # noqa
+    import markdown  # noqa
+    from crewai import Agent, Crew, Process, Task  # noqa
+    from crewai.project import CrewBase, agent, crew, task  # noqa
+    import chromadb  # noqa
+    import onnxruntime  # noqa
+    from rich.console import Console  # noqa
 
 
 def run():
     """启动GUI应用程序"""
     try:
-        # 调用授权模块接口
         from src.ai_write_x.license import check_license_and_start
 
         check_license_and_start()
-
     except KeyboardInterrupt:
         sys.exit(0)
-    except Exception as e:
-        print(f"启动失败: {str(e)}")
-
-
-def admin_run():
-    """以管理员权限运行（跨平台）"""
-    if platform.system() == "Windows":
-        if is_admin():
-            run()
-        else:
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 0)
-    else:
-        run()
+    except Exception:
+        raise
 
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     multiprocessing.set_start_method("spawn", force=True)
 
-    # 检查是否为AIForge子进程，传递执行环境
     if AIForgeEngine.handle_sandbox_subprocess(
         globals_dict=globals().copy(), sys_path=sys.path.copy()
     ):
         sys.exit(0)
     else:
-        # 正常启动逻辑
-        if len(sys.argv) > 1:
-            if sys.argv[1] == "-d":
-                run()
-        else:
-            admin_run()
+        run()

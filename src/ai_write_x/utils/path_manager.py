@@ -111,16 +111,21 @@ class PathManager:
         """动态获取所有分类文件夹名称"""
         template_dir = str(PathManager.get_template_dir())
         categories = []
+        excluded_dirs = {"components", "__pycache__", ".git"}
 
-        # 添加默认分类（确保存在）
-        default_categories = list(default_template_categories.values())  # 使用中文名
+        # 添加默认分类
+        default_categories = list(default_template_categories.values())
         categories.extend(default_categories)
 
         # 扫描实际存在的文件夹
         if os.path.exists(template_dir):
             for item in os.listdir(template_dir):
                 item_path = os.path.join(template_dir, item)
-                if os.path.isdir(item_path) and item not in categories:
+                if (
+                    os.path.isdir(item_path)
+                    and item not in categories
+                    and item not in excluded_dirs
+                ):
                     categories.append(item)
 
         return sorted(categories)

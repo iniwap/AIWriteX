@@ -184,7 +184,7 @@ uv pip install -r requirements.txt
 ```
 3. 配置 `config.yaml`、`aiforge.toml`（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
 4. 运行：
-    - 有UI界面：`python .\main.py -d` (**推荐**)
+    - 有UI界面：`python .\main.py` (**推荐**)
     - 无UI界面：`python -m src.ai_write_x.crew_main` （**不支持文章、模板、配图管理**）
 
 ### 软件模式

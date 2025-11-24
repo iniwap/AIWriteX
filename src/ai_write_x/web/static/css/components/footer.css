@@ -69,6 +69,34 @@
     font-weight: 500;  
 }
 
+.footer-brand {  
+    font-size: 13px;  
+    font-weight: 500;  
+    color: var(--text-secondary);  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+}  
+  
+.version-text {  
+    font-weight: 500; 
+    color: var(--text-secondary); 
+}  
+  
+.copyright-text {  
+    font-size: 11px;  
+    opacity: 0.7;  
+    font-weight: 400;  
+}  
+  
+.footer-brand-link:hover .version-text {  
+    color: var(--primary-color);  
+}  
+  
+.footer-brand-link:hover .copyright-text {  
+    opacity: 1;  
+}
+
 @keyframes marquee-scroll {    
     0% {    
         transform: translateX(var(--start-pos, 100%));  

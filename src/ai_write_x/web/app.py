@@ -16,6 +16,7 @@ import uvicorn
 
 from src.ai_write_x.utils.path_manager import PathManager
 from src.ai_write_x.config.config import Config
+from src.ai_write_x.utils import utils
 
 # 导入状态管理
 from .state import app_state
@@ -71,7 +72,12 @@ app = FastAPI(
 )
 
 # 获取Web模块路径
-web_path = Path(__file__).parent
+# 获取Web模块路径
+if utils.get_is_release_ver():
+    web_path = Path(utils.get_res_path("web"))
+else:
+    web_path = Path(__file__).parent
+
 static_path = web_path / "static"
 templates_path = web_path / "templates"
 
