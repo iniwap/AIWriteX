@@ -140,6 +140,9 @@ async def list_templates(category: str = None):
     templates = []
     template_dir = PathManager.get_template_dir()
 
+    # 排除的目录名称
+    excluded_dirs = {"components", "__pycache__", ".git"}
+
     if category:
         category_path = template_dir / category
         if category_path.exists():
@@ -156,9 +159,9 @@ async def list_templates(category: str = None):
                     }
                 )
     else:
-        # 返回所有分类的模板
+        # 返回所有分类的模板 - 添加过滤
         for category_dir in template_dir.iterdir():
-            if category_dir.is_dir():
+            if category_dir.is_dir() and category_dir.name not in excluded_dirs:  # 添加过滤条件
                 for file in category_dir.glob("*.html"):
                     templates.append(
                         {

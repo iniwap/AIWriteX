@@ -160,3 +160,81 @@
     0%, 100% { opacity: 1; }  
     50% { opacity: 0.5; }  
 }
+
+.app-status {  
+    display: flex;  
+    align-items: center;  
+    gap: 15px;  
+    margin-left: auto; /* 推到右侧 */  
+}  
+  
+/* 店铺徽章样式 */  
+.shop-badge {  
+    display: flex;  
+    align-items: center;  
+    gap: 6px;  
+    padding: 6px 14px;  
+    background: linear-gradient(135deg, #FF6600 0%, #FF8C00 100%);  
+    color: white;  
+    border-radius: 20px;  
+    font-size: 13px;  
+    font-weight: 600;  
+    text-decoration: none;  
+    box-shadow: 0 4px 12px rgba(255, 102, 0, 0.35);  
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);  
+    position: relative;  
+    overflow: visible;  
+}  
+  
+.shop-badge:hover {  
+    transform: translateY(-3px) scale(1.05);  
+    box-shadow: 0 6px 20px rgba(255, 102, 0, 0.5);  
+}  
+  
+/* 购物车图标 */  
+.shop-cart-icon {  
+    width: 16px;  
+    height: 16px;  
+    stroke: white;  
+    stroke-width: 2;  
+}  
+  
+/* HOT 徽章 */  
+.shop-badge-hot {  
+    position: absolute;  
+    top: -8px;  
+    right: -8px;  
+    background: #FF3B30;  
+    color: white;  
+    font-size: 10px;  
+    padding: 2px 6px;  
+    border-radius: 8px;  
+    font-weight: 700;  
+    animation: badgePulse 1.5s infinite;  
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);  
+}  
+  
+/* HOT 徽章脉冲动画 */  
+@keyframes badgePulse {  
+    0%, 100% {   
+        transform: scale(1);  
+        box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);  
+    }  
+    50% {   
+        transform: scale(1.1);  
+        box-shadow: 0 0 0 4px rgba(255, 59, 48, 0);  
+    }  
+}  
+  
+/* 状态指示器保持原样式 */  
+.status-indicator {  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+    padding: 6px 12px;  
+    background: var(--success-color);  
+    color: white;  
+    border-radius: 20px;  
+    font-size: 12px;  
+    font-weight: 500;  
+}

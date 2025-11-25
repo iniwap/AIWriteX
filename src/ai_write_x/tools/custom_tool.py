@@ -61,13 +61,20 @@ class ReadTemplateTool(BaseTool):
 
         # 需要随机选择模板
         if random_template:
+            # 排除的目录
+            excluded_dirs = {"components", "__pycache__", ".git"}
+
             # 如果指定了分类且不是随机分类
             if template_category and template_category != "":
                 category_dir = os.path.join(template_dir_abs, template_category)
                 template_files_abs = glob.glob(os.path.join(category_dir, "*.html"))
             else:
                 # 随机分类或未指定分类，从所有分类的模板中选择
-                template_files_abs = glob.glob(os.path.join(template_dir_abs, "*", "*.html"))
+                template_files_abs = []
+                for category_dir in os.listdir(template_dir_abs):
+                    category_path = os.path.join(template_dir_abs, category_dir)
+                    if os.path.isdir(category_path) and category_dir not in excluded_dirs:
+                        template_files_abs.extend(glob.glob(os.path.join(category_path, "*.html")))
 
             if not template_files_abs:
                 log.print_log(

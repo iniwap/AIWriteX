@@ -163,3 +163,23 @@
         font-size: 12px;  
     }
 }
+
+.footer-promo-link {  
+    margin-left: 16px;  
+    padding: 0;  
+    background: none;  
+    color: #FF6600;  
+    font-size: 12px;  
+    font-weight: 500;  
+    text-decoration: underline;  
+    text-decoration-color: rgba(255, 102, 0, 0.3);  
+    text-underline-offset: 3px;  
+    transition: all 0.3s ease;  
+    white-space: nowrap;  
+}  
+  
+.footer-promo-link:hover {  
+    color: #FF8C00;  
+    text-decoration-color: #FF8C00;  
+    transform: translateX(2px);  
+}
