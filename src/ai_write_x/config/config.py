@@ -1427,6 +1427,29 @@ class Config:
         self.custom_template_category = ""  # 自定义话题时，模板分类
         self.custom_template = ""  # 自定义话题时，模板
 
+        self._license_edition = "basic"  # 默认基础版
+        self._license_custom_features = []
+
+    @property
+    def license_edition(self):
+        """获取授权版本类型"""
+        with self._lock:
+            return getattr(self, "_license_edition", "basic")
+
+    @property
+    def license_custom_features(self):
+        """获取定制版功能列表"""
+        with self._lock:
+            return getattr(self, "_license_custom_features", [])
+
+    def is_premium_or_higher(self):
+        """是否为高级版或更高版本"""
+        return self.license_edition in ["premium", "custom"]
+
+    def has_custom_feature(self, feature_name):
+        """检查是否有特定的定制功能"""
+        return feature_name in self.license_custom_features
+
     @classmethod
     def get_instance(cls):
         with cls._lock:
