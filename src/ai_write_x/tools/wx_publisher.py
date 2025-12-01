@@ -593,7 +593,7 @@ def pub2wx(title, digest, article, appid, appsecret, author, cover_path=None):
         if image_url is None:
             log.print_log("生成图片出错,使用默认图片")
             default_image = utils.get_res_path(
-                os.path.join("UI", "bg.png"), os.path.dirname(__file__) + "/../gui/"
+                os.path.join("UI", "bg.png"), os.path.dirname(__file__) + "/../assets/"
             )
             final_image_path = utils.resolve_image_path(default_image)
         else:

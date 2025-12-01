@@ -15,7 +15,7 @@ class WindowIconManager:
 
     def _get_icon_path(self):
         """获取适合当前平台的图标文件路径"""
-        gui_dir = Path(__file__).parent.parent / "gui"
+        gui_dir = Path(__file__).parent.parent / "assets"
 
         if platform.system() == "Windows":
             return utils.get_res_path("UI/icon.ico", str(gui_dir))

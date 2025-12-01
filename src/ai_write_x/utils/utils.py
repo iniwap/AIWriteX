@@ -569,7 +569,7 @@ def get_gui_icon():
     import base64
     from pathlib import Path
 
-    gui_dir = Path(__file__).parent.parent / "gui"
+    gui_dir = Path(__file__).parent.parent / "assets"
 
     # 创建图标资源管理器
     class IconManager:

@@ -1685,14 +1685,6 @@ class Config:
                 "api_key"
             ]
 
-    @property
-    def license(self):
-        """授权配置"""
-        with self._lock:
-            if not self.config:
-                raise ValueError("配置未加载")
-            return self.config.get("license", {})
-
     def __get_config_path(self, file_name="config.yaml"):
         """获取配置文件路径并确保文件存在"""
 

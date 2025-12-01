@@ -31,7 +31,7 @@ class TrayManager:
             pass
 
         # 回退到默认路径
-        gui_dir = Path(__file__).parent.parent / "gui"
+        gui_dir = Path(__file__).parent.parent / "assets"
         default_icon = utils.get_res_path("UI/icon.ico", str(gui_dir))
         return Path(default_icon) if Path(default_icon).exists() else None
 

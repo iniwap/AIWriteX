@@ -5,6 +5,7 @@ __pycache__/
 logs/*.log
 make_exe/
 make_app/
+tools/
 image/*
 !image/preview/
 aiforge_work/
@@ -23,3 +24,4 @@ AIWriteX.app
 AIWriteX.dmg
 .qoder
 license.dat
+build_secrets.json
