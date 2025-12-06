@@ -1,74 +1,994 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIWriteX - 微信公众号自动生成工具</title>
+    <title>AIWriteX - 智能内容创作平台 | 官方网站</title>
+    <meta name="description" content="AIWriteX 是一款融合搜索、借鉴、AI与创意的智能内容创作平台，专为微信公众号打造的高效写作神器。">
+    <meta name="keywords" content="AI写作, 公众号助手, 智能创作, AIWriteX, 墨智工坊">
+    <link rel="icon" type="image/svg+xml" href="static/icons/favicon.svg">
+
+    <!-- 引入字体图标库 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
+        /* ========== 全局设置 ========== */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --primary: #00e5ff;
+            --secondary: #bd00ff;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glass-blur: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Helvetica Neue', sans-serif;
-            max-width: 960px;
-            margin: 40px auto;
-            color: #333;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             line-height: 1.6;
-        }
-
-        h1,
-        h2 {
-            color: #111;
-        }
-
-        pre {
-            background: #f4f4f4;
-            padding: 10px;
-            overflow-x: auto;
+            overflow-x: hidden;
         }
 
         a {
-            color: #1976d2;
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
         }
 
-        img {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
+        ul {
+            list-style: none;
+        }
+
+        /* ========== 导航栏 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 导航栏LOGO容器布局 */
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            /* 图标和文字的间距 */
+            cursor: pointer;
+        }
+
+        /* [修改] 导航栏使用 SVG 样式，保持统一 */
+        .nav-icon-svg {
+            width: 36px;
+            /* 稍微加大一点尺寸以适应背景框 */
+            height: 36px;
+            /* 整体微发光，增加层次感 */
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            transition: transform 0.3s ease;
+        }
+
+        .nav-logo:hover .nav-icon-svg {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+        }
+
+        .nav-logo .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        .nav-btn-buy {
+            background: linear-gradient(90deg, var(--secondary), #d946ef);
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: white !important;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
+        }
+
+        .nav-btn-buy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(189, 0, 255, 0.5);
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* ========== Hero 区域 ========== */
+        .hero-section {
+            padding: 140px 20px 80px;
+            /* 增加顶部内边距避开导航 */
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 背景光晕 */
+        .hero-bg-glow {
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Logo 容器 */
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(145deg, #1a1f35, #252b46);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            right: -10%;
+            bottom: -10%;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, transparent 70%);
+            z-index: -1;
+            border-radius: 50%;
+            animation: energy-pulse 3s infinite ease-in-out;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+        }
+
+        .orbit-path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            transform-origin: center;
+        }
+
+        .orbit-1 {
+            stroke: var(--primary);
+            animation: spin-cw 4s linear infinite;
+            stroke-dasharray: 60;
+        }
+
+        .orbit-2 {
+            stroke: var(--secondary);
+            animation: spin-ccw 5s linear infinite;
+            stroke-dasharray: 40;
+            opacity: 0.8;
+        }
+
+        .core-x {
+            fill: none;
+            stroke: url(#grad-core);
+            stroke-width: 6;
+            stroke-linecap: round;
+            animation: breathe 2.5s infinite ease-in-out;
+        }
+
+        /* 标题样式 */
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .workshop-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            min-height: 30px;
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 3px;
+            height: 24px;
+            background-color: var(--primary);
+            animation: blink 1s step-end infinite;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+        }
+
+        /* 按钮组 */
+        .hero-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #2563eb);
+            color: #0f172a;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .glow-effect:hover {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .os-support {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* ========== 通用 Section 样式 ========== */
+        section {
+            padding: 80px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+        }
+
+        /* ========== 功能网格 ========== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 20px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.2);
+        }
+
+        .feature-card .icon-box {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            background: rgba(0, 229, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* ========== 价格/授权方案 ========== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            align-items: center;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .pricing-card.pro {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .popular-tag {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(90deg, var(--secondary), #d946ef);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 20px;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .price-sub {
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .features-list {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .features-list li {
+            margin-bottom: 12px;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        .features-list li i {
+            margin-right: 10px;
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .features-list li.disabled {
+            color: #64748b;
+            text-decoration: line-through;
+        }
+
+        .features-list li.disabled i {
+            color: #64748b;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            color: white;
+            width: 100%;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ========== 下载区域 ========== */
+        .download-section {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #1e1b4b 100%);
+            text-align: center;
+        }
+
+        .download-content h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .download-content p {
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .download-btns {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 15px 40px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-large i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .btn-win {
+            border-color: #0078d4;
+            background: rgba(0, 120, 212, 0.1);
+        }
+
+        .btn-win:hover {
+            background: rgba(0, 120, 212, 0.2);
+            transform: scale(1.05);
+        }
+
+        .btn-mac.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .btn-info {
+            font-size: 0.8rem;
+            font-weight: normal;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .download-note {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        /* ========== Footer ========== */
+        footer {
+            border-top: 1px solid var(--border-color);
+            background: #0b1120;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            padding: 40px 20px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-logo {
+            font-weight: bold;
+            color: white;
+        }
+
+        .footer-logo p {
+            font-weight: normal;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .footer-links a {
+            margin: 0 15px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-contact {
+            text-align: right;
+        }
+
+        /* ========== 动画关键帧 ========== */
+        @keyframes spin-cw {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-ccw {
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes energy-pulse {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+                color: white;
+            }
+
+            .pricing-card.pro {
+                transform: scale(1);
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-contact {
+                text-align: center;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>🚀 AIWriteX - 微信公众号自动生成工具</h1>
-    <p><strong>AIWriteX</strong> 是一款结合 AIPy 与 CrewAI 的强大工具，可自动获取抖音、微博等热点话题，并借助 AI 实时生成高质量图文内容，支持酷炫排版并一键发布到微信公众号。</p>
 
-    <img src="assets/logo.jpeg" alt="AIWriteX Logo">
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- [修改] 导航栏LOGO部分：使用新设计的静态图标（带圆角矩形背景） -->
+            <div class="nav-logo" onclick="window.scrollTo(0,0)">
+                <svg class="nav-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#bd00ff;stop-opacity:1" />
+                        </linearGradient>
+                        <!-- 背景渐变：暗夜蓝 -->
+                        <linearGradient id="grad-bg-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
 
-    <h2>📌 功能亮点</h2>
-    <ul>
-        <li>📈 实时热点获取</li>
-        <li>🤖 AI 高质量写作</li>
-        <li>📤 一键图文发布</li>
-        <li>🧩 支持多种模板 & 图文管理</li>
-    </ul>
+                    <!-- 背景：圆角矩形 (Squircle) -->
+                    <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#grad-bg-icon)"
+                        stroke="rgba(255,255,255,0.1)" stroke-width="1" />
 
-    <h2>🛠️ 快速开始</h2>
-    <pre>
-git clone https://github.com/iniwap/AIWriteX.git
-pip install -r requirements.txt
-python main.py -d
-    </pre>
+                    <!-- 外圆：静态断开圆弧 (Cyan) - 旋转后定格 -->
+                    <!-- r=24, dasharray模拟缺口 -->
+                    <circle cx="32" cy="32" r="24" stroke="var(--primary)" stroke-width="2.5" fill="none"
+                        stroke-dasharray="110 200" stroke-linecap="round" transform="rotate(140 32 32)" opacity="1" />
 
-    <h2>🖼️ 界面预览</h2>
-    <div style="display: flex; justify-content: space-between;">
-        <img src="assets/left.jpg" width="51%">
-        <img src="assets/right.jpg" width="48%">
-    </div>
+                    <!-- 内圆：静态断开圆弧 (Purple) - 互补角度 -->
+                    <!-- r=16 -->
+                    <circle cx="32" cy="32" r="16" stroke="var(--secondary)" stroke-width="2.5" fill="none"
+                        stroke-dasharray="75 200" stroke-linecap="round" transform="rotate(315 32 32)" opacity="1" />
 
-    <h2>📎 更多信息</h2>
-    <ul>
-        <li><a href="https://github.com/iniwap/AIWriteX" target="_blank">GitHub 项目主页</a></li>
-        <li><a href="https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ" target="_blank">文章模板预览</a></li>
-    </ul>
+                    <!-- 核心 X：静态渐变 -->
+                    <path d="M26 26 L38 38 M38 26 L26 38" stroke="url(#grad-nav)" stroke-width="4"
+                        stroke-linecap="round" fill="none" />
+
+                    <!-- 中心光点 -->
+                    <circle cx="32" cy="32" r="2.5" fill="white" filter="drop-shadow(0 0 2px white)" opacity="0.9" />
+                </svg>
+                <span class="logo-text">AIWriteX</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#features">核心功能</a></li>
+                <li><a href="#versions">授权方案</a></li>
+                <li><a href="#faq">常见问题</a></li>
+                <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy ">前往购买</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 头部 Hero 区域 -->
+    <header class="hero-section">
+        <div class="hero-bg-glow"></div>
+        <div class="container">
+            <!-- 您的 Logo 代码 (保持原样 SVG 动画) -->
+            <div class="logo-container">
+                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#bd00ff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="orbit-path orbit-1" cx="32" cy="32" r="28" />
+                    <circle class="orbit-path orbit-2" cx="32" cy="32" r="20" />
+                    <path class="core-x" d="M24 24 L40 40 M40 24 L24 40" stroke="url(#grad-core)" stroke-width="6"
+                        stroke-linecap="round" />
+                    <circle cx="32" cy="32" r="4" fill="white">
+                        <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+
+            <h1 class="hero-title">AIWriteX <span class="gradient-text">Pro</span></h1>
+
+            <div class="workshop-subtitle">
+                <span class="subtitle-text" id="typewriter-text"></span><span class="cursor-blink"></span>
+            </div>
+
+            <p class="hero-desc">
+                融合 "搜索 + 借鉴 + AI + 创意" 四重能力。<br>
+                不仅仅是写作工具，更是您的灵感引擎。
+            </p>
+
+            <div class="hero-actions">
+                <a href="#download" class="btn btn-primary glow-effect">
+                    <i class="fab fa-windows"></i> 立即下载 (Windows)
+                </a>
+                <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-secondary">
+                    <i class="fas fa-shopping-cart"></i> 获取授权码
+                </a>
+            </div>
+
+            <p class="os-support">支持 Windows 10及以上 | macOS 版本敬请期待</p>
+        </div>
+    </header>
+
+    <!-- 功能亮点 -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title">重新定义 <span class="gradient-text">写作体验</span></h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-fire"></i></div>
+                    <h3>热搜追踪</h3>
+                    <p>自动监控微博、知乎热榜，一键生成爆款选题，让您永远不缺写作灵感。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-magic"></i></div>
+                    <h3>创意重塑</h3>
+                    <p>独特的维度化创意变换，李白风格、赛博朋克背景...15种维度任意组合。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-copy"></i></div>
+                    <h3>智能借鉴</h3>
+                    <p>不仅仅是洗稿。深度分析参考文章逻辑与风格，生成既有深度又具原创性的内容。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fab fa-weixin"></i></div>
+                    <h3>一键发布</h3>
+                    <p>无缝对接微信公众号，从生成到排版再到发布，全流程自动化处理。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 授权方案对比 -->
+    <section id="versions" class="pricing-section">
+        <div class="container">
+            <h2 class="section-title">选择您的 <span class="gradient-text">创作引擎</span></h2>
+            <div class="pricing-grid">
+                <!-- 基础版 -->
+                <div class="pricing-card basic">
+                    <div class="card-header">
+                        <h3>基础版</h3>
+                        <div class="price">¥19.9 <span>/ 永久</span></div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 所有基础功能</li>
+                        <li><i class="fas fa-check"></i> 基础版本问题修复</li>
+                        <li class="disabled"><i class="fas fa-times"></i> 未来发布的新功能</li>
+                        <li class="disabled"><i class="fas fa-times"></i> 可升级为定制版本</li>
+                        <li class="disabled"><i class="fas fa-times"></i> 专属技术支持</li>
+                    </ul>
+                    <a href="#download" class="btn btn-outline">尝鲜体验</a>
+                </div>
+
+                <!-- 高级版 (推荐) -->
+                <div class="pricing-card pro popular">
+                    <div class="popular-tag">店长推荐</div>
+                    <div class="card-header">
+                        <h3>高级版 (Pro)</h3>
+                        <div class="price">¥199 <span>/ 永久</span></div>
+                        <p class="price-sub">超值划算</p>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> <strong>解锁所有高级功能</strong></li>
+                        <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
+                        <li><i class="fas fa-check"></i> 可升级定制版本</li>
+                        <li><i class="fas fa-check"></i> 专属 1对1 售后支持</li>
+                    </ul>
+                    <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-primary glow-effect">立即购买</a>
+                </div>
+
+                <!-- 定制版 -->
+                <div class="pricing-card custom">
+                    <div class="card-header">
+                        <h3>定制版</h3>
+                        <div class="price">按需 <span>报价</span></div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 包含 Pro 版所有功能</li>
+                        <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
+                        <li><i class="fas fa-check"></i> <strong>定制功能独享</strong></li>
+                        <li><i class="fas fa-check"></i> 7x24小时 极速响应</li>
+                    </ul>
+                    <a href="tencent://message/?uin=522765228" class="btn btn-outline">联系定制</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="download" class="download-section">
+        <div class="container download-container">
+            <div class="download-content">
+                <h2>准备好释放创造力了吗？</h2>
+                <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
+                <div class="download-btns">
+                    <!-- 请替换为真实的百度网盘链接 -->
+                    <a href="https://pan.baidu.com/s/1tALycrUn36j5DdlFvH7c4A?pwd=iy1q" target="_blank"
+                        class="btn btn-large btn-win">
+                        <i class="fab fa-windows"></i> 下载 Windows 版
+                        <span class="btn-info">适用于 Win10 / Win11 (64位)</span>
+                    </a>
+                    <button class="btn btn-large btn-mac disabled" onclick="alert('Mac 版本正在锐意开发中，敬请期待！')">
+                        <i class="fab fa-apple"></i> 下载 macOS 版
+                        <span class="btn-info">即将推出</span>
+                    </button>
+                </div>
+                <p class="download-note">* 下载即同意《用户服务协议》。软件保证绿色安全。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常见问题 -->
+    <section id="faq" class="features-section" style="background: rgba(30, 41, 59, 0.3);">
+        <div class="container">
+            <h2 class="section-title">常见 <span class="gradient-text">问题</span></h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>生成文章需要多久？</h3>
+                    <p>通常需要2-5分钟。系统需要实时搜索网络资讯、分析内容并进行AI深度创作，好内容值得等待。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>支持哪些大模型？</h3>
+                    <p>目前完美支持 DeepSeek、OpenRouter 等主流接口，您可以在设置中自由切换和配置 API Key。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>如何购买授权码？</h3>
+                    <p>点击“获取授权码”跳转至淘宝店铺购买。购买后打开软件输入订单+手机尾号后4位，在软件内输入即可激活。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>更换电脑怎么办？</h3>
+                    <p>授权码与机器绑定。如需更换设备，请联系售后客服进行解绑重置（高级版用户享有此服务）。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-logo">
+                AIWriteX
+                <p>输入话题，唤醒无限创意</p>
+            </div>
+            <div class="footer-links">
+                <a href="#features">功能</a>
+                <a href="#faq">帮助</a>
+                <a href="https://aiforge.taobao.com" target="_blank">淘宝店铺</a>
+            </div>
+            <div class="footer-contact">
+                <p>技术支持 QQ: 522765228</p>
+                <p>© 2025 墨智工坊 (AIForge). All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 打字机效果 (输入话题，唤醒无限创意)
+            const textElement = document.getElementById('typewriter-text');
+            const textToType = "输入话题，唤醒无限创意...";
+            let charIndex = 0;
+
+            function typeWriter() {
+                if (charIndex < textToType.length) {
+                    textElement.textContent += textToType.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 100); // 打字速度
+                } else {
+                    // 打完停顿后删除重打，或者保持
+                    setTimeout(deleteText, 3000);
+                }
+            }
+
+            function deleteText() {
+                if (charIndex > 0) {
+                    textElement.textContent = textToType.substring(0, charIndex - 1);
+                    charIndex--;
+                    setTimeout(deleteText, 50);
+                } else {
+                    setTimeout(typeWriter, 500);
+                }
+            }
+
+            typeWriter();
+
+            // 2. 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // 3. 简单的 Navbar 滚动效果
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+                    navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+                } else {
+                    navbar.style.background = 'rgba(15, 23, 42, 0.8)';
+                    navbar.style.boxShadow = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
