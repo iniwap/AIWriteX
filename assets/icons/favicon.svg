@@ -19,7 +19,7 @@
     
     <circle cx="32" cy="32" r="16" stroke="#bd00ff" stroke-width="2.5" fill="none"
         stroke-dasharray="75 200" stroke-linecap="round"
-        transform="rotate(136 32 32)" opacity="1" />
+        transform="rotate(137 32 32)" opacity="1" />
     
     <path d="M26 26 L38 38 M38 26 L26 38" stroke="url(#grad-nav)" stroke-width="4"
         stroke-linecap="round" fill="none" />
