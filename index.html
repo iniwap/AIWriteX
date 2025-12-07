@@ -145,15 +145,15 @@
             overflow: hidden;
         }
 
-        /* 背景光晕 */
+        /* [修改] 修复背景光晕产生的横线问题 */
         .hero-bg-glow {
             position: absolute;
-            top: -50%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0; /* 改为从顶部开始 */
+            left: 0;
             width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            height: 100%; /* 铺满整个区域，消除边缘断层 */
+            /* 将光晕中心点定位在顶部中间 (50% 0%)，保持原有的视觉效果 */
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
             z-index: -1;
             pointer-events: none;
         }
