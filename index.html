@@ -145,14 +145,12 @@
             overflow: hidden;
         }
 
-        /* [修改] 修复背景光晕产生的横线问题 */
         .hero-bg-glow {
             position: absolute;
-            top: 0; /* 改为从顶部开始 */
+            top: 0;
             left: 0;
             width: 100%;
-            height: 100%; /* 铺满整个区域，消除边缘断层 */
-            /* 将光晕中心点定位在顶部中间 (50% 0%)，保持原有的视觉效果 */
+            height: 100%; 
             background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
             z-index: -1;
             pointer-events: none;
@@ -220,7 +218,7 @@
             animation: breathe 2.5s infinite ease-in-out;
         }
 
-        /* 标题样式 - 已修改 */
+        /* 标题样式 */
         .hero-title {
             font-size: 4rem;
             font-weight: 800;
@@ -229,7 +227,7 @@
             letter-spacing: -1px;
         }
 
-        /* 新增：流动的渐变文字特效 */
+        /* 流动的渐变文字特效 */
         .gradient-animate {
             background: linear-gradient(
                 90deg, 
@@ -245,7 +243,6 @@
             animation: text-shine 4s linear infinite;
         }
         
-        /* 仍然保留基础渐变类，供其他地方使用 */
         .gradient-text {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
@@ -670,20 +667,22 @@
                 flex-direction: column;
             }
 
-            /* 移动端菜单样式优化 */
             .nav-menu {
                 display: none; /* 默认隐藏 */
                 position: absolute;
-                top: 100%; /* 在导航栏下方显示 */
+                top: 100%; 
                 left: 0;
                 width: 100%;
-                background-color: rgba(15, 23, 42, 0.95);
-                backdrop-filter: blur(15px); /* 背景磨砂 */
+                background-color: rgba(15, 23, 42, 0.98);
+                backdrop-filter: blur(20px);
                 flex-direction: column;
-                padding: 20px;
+                padding: 30px;
                 text-align: center;
                 border-top: 1px solid var(--border-color);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+                z-index: 999;
             }
 
             /* 添加 active 类时显示 */
@@ -693,14 +692,39 @@
             }
 
             .nav-menu li {
-                margin: 15px 0;
+                margin: 0;
                 width: 100%;
             }
             
             .nav-menu a {
                 display: block;
                 width: 100%;
-                padding: 10px;
+                padding: 15px 0;
+                font-size: 1.1rem;
+                color: var(--text-main);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                transition: 0.2s;
+            }
+
+            .nav-menu a:hover {
+                color: var(--primary);
+                background: rgba(255,255,255,0.02);
+            }
+
+            .nav-menu li:last-child a:not(.nav-btn-buy) {
+                border-bottom: none;
+            }
+
+            .nav-btn-buy {
+                margin-top: 25px !important;
+                display: inline-block !important;
+                width: 100%;
+                text-align: center;
+                padding: 12px 0 !important;
+                background: linear-gradient(90deg, var(--secondary), #d946ef);
+                border-radius: 12px;
+                border-bottom: none !important;
+                box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
             }
 
             .menu-toggle {
@@ -741,7 +765,6 @@
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <!-- [修改] 导航栏LOGO部分：使用新设计的静态图标（带圆角矩形背景） -->
             <div class="nav-logo" onclick="window.scrollTo(0,0)">
                 <svg class="nav-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -777,7 +800,7 @@
                 <li><a href="#features">产品功能</a></li>
                 <li><a href="#versions">价格方案</a></li>
                 <li><a href="#faq">常见问题</a></li>
-                <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy ">前往购买</a></li>
+                <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy">前往购买</a></li>
             </ul>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
@@ -789,7 +812,6 @@
     <header class="hero-section">
         <div class="hero-bg-glow"></div>
         <div class="container">
-            <!-- 您的 Logo 代码 (保持原样 SVG 动画) -->
             <div class="logo-container">
                 <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -808,7 +830,6 @@
                 </svg>
             </div>
 
-            <!-- 修改后的标题：去掉了 Pro，为 AIWriteX 增加了流光渐变动画 -->
             <h1 class="hero-title"><span class="gradient-animate">AIWriteX</span></h1>
 
             <div class="workshop-subtitle">
@@ -816,13 +837,11 @@
             </div>
 
             <p class="hero-desc">
-                融合 "AI + 创意 + 搜索 + 借鉴 " 四重能力。<br>
+                融合 "AI + 创意 + 搜索 + 借鉴" 四重能力。<br>
                 不仅仅是写作工具，更是您的灵感引擎。
             </p>
 
             <div class="hero-actions">
-                <!-- [修改] 修复下载链接 Forbidden 问题：改用 GitHub Releases 官方 Latest 跳转链接 -->
-                <!-- 注意：请确保您在 GitHub 仓库的 "Releases" (发行版) 页面上传了名为 AIWriteX_Setup.exe 的附件，而不是只传在代码列表里 -->
                 <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" class="btn btn-primary glow-effect">
                     <i class="fab fa-windows"></i> 立即下载 (Windows)
                 </a>
@@ -947,7 +966,6 @@
                 <h2>准备好释放创造力了吗？</h2>
                 <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
                 <div class="download-btns">
-                    <!-- [修改] 底部下载按钮同步修复链接 -->
                     <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" target="_blank"
                         class="btn btn-large btn-win">
                         <i class="fab fa-windows"></i> 下载 Windows 版
@@ -1062,7 +1080,7 @@
                 }
             });
 
-            // 4. [新增] 移动端菜单切换逻辑
+            // 4. 移动端菜单切换逻辑
             const menuToggle = document.querySelector('.menu-toggle');
             const navMenu = document.querySelector('.nav-menu');
 
