@@ -699,26 +699,20 @@
                         </linearGradient>
                     </defs>
 
-                    <!-- 背景：圆角矩形 (Squircle) -->
-                    <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#grad-bg-icon)"
-                        stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-
-                    <!-- 外圆：静态断开圆弧 (Cyan) - 旋转后定格 -->
-                    <!-- r=24, dasharray模拟缺口 -->
-                    <circle cx="32" cy="32" r="24" stroke="var(--primary)" stroke-width="2.5" fill="none"
-                        stroke-dasharray="110 200" stroke-linecap="round" transform="rotate(270 32 32)" opacity="1" />
-
-                    <!-- 内圆：静态断开圆弧 (Purple) - 互补角度 -->
-                    <!-- r=16 -->
-                    <circle cx="32" cy="32" r="16" stroke="var(--secondary)" stroke-width="2.5" fill="none"
-                        stroke-dasharray="75 200" stroke-linecap="round" transform="rotate(90 32 32)" opacity="1" />
-
-                    <!-- 核心 X：静态渐变 -->
+                    <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#grad-bg-icon)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                    
+                    <circle cx="32" cy="32" r="24" stroke="#00e5ff" stroke-width="2.5" fill="none"
+                        stroke-dasharray="110 200" stroke-linecap="round"
+                        transform="rotate(138.7 32 32)" opacity="1" />
+                    
+                    <circle cx="32" cy="32" r="16" stroke="#bd00ff" stroke-width="2.5" fill="none"
+                        stroke-dasharray="75 200" stroke-linecap="round"
+                        transform="rotate(315.68 32 32)" opacity="1" />
+                    
                     <path d="M26 26 L38 38 M38 26 L26 38" stroke="url(#grad-nav)" stroke-width="4"
                         stroke-linecap="round" fill="none" />
-
-                    <!-- 中心光点 -->
-                    <circle cx="32" cy="32" r="2.5" fill="white" filter="drop-shadow(0 0 2px white)" opacity="0.9" />
+                    
+                    <circle cx="32" cy="32" r="2.5" fill="white" opacity="0.9" />
                 </svg>
                 <span class="logo-text">AIWriteX</span>
             </div>
