@@ -80,12 +80,10 @@
             cursor: pointer;
         }
 
-        /* [修改] 导航栏使用 SVG 样式，保持统一 */
+        /* 导航栏 SVG 样式 */
         .nav-icon-svg {
             width: 36px;
-            /* 稍微加大一点尺寸以适应背景框 */
             height: 36px;
-            /* 整体微发光，增加层次感 */
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
             transition: transform 0.3s ease;
         }
@@ -142,7 +140,6 @@
         /* ========== Hero 区域 ========== */
         .hero-section {
             padding: 140px 20px 80px;
-            /* 增加顶部内边距避开导航 */
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -223,14 +220,32 @@
             animation: breathe 2.5s infinite ease-in-out;
         }
 
-        /* 标题样式 */
+        /* 标题样式 - 已修改 */
         .hero-title {
             font-size: 4rem;
             font-weight: 800;
             margin-bottom: 10px;
             line-height: 1.1;
+            letter-spacing: -1px;
         }
 
+        /* 新增：流动的渐变文字特效 */
+        .gradient-animate {
+            background: linear-gradient(
+                90deg, 
+                var(--primary) 0%, 
+                var(--secondary) 30%, 
+                #ffffff 50%, 
+                var(--secondary) 70%, 
+                var(--primary) 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-shine 4s linear infinite;
+        }
+        
+        /* 仍然保留基础渐变类，供其他地方使用 */
         .gradient-text {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
@@ -605,13 +620,10 @@
         }
 
         @keyframes breathe {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: scale(1);
                 opacity: 1;
             }
-
             50% {
                 transform: scale(0.9);
                 opacity: 0.8;
@@ -619,13 +631,10 @@
         }
 
         @keyframes energy-pulse {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 0.2;
                 transform: scale(0.8);
             }
-
             50% {
                 opacity: 0.6;
                 transform: scale(1);
@@ -633,14 +642,21 @@
         }
 
         @keyframes blink {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0;
+            }
+        }
+
+        /* 新增：文字流光动画 */
+        @keyframes text-shine {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 200% 50%;
             }
         }
 
@@ -654,8 +670,37 @@
                 flex-direction: column;
             }
 
+            /* 移动端菜单样式优化 */
             .nav-menu {
-                display: none;
+                display: none; /* 默认隐藏 */
+                position: absolute;
+                top: 100%; /* 在导航栏下方显示 */
+                left: 0;
+                width: 100%;
+                background-color: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(15px); /* 背景磨砂 */
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            }
+
+            /* 添加 active 类时显示 */
+            .nav-menu.active {
+                display: flex;
+                animation: fadeInDown 0.3s ease forwards;
+            }
+
+            .nav-menu li {
+                margin: 15px 0;
+                width: 100%;
+            }
+            
+            .nav-menu a {
+                display: block;
+                width: 100%;
+                padding: 10px;
             }
 
             .menu-toggle {
@@ -674,6 +719,18 @@
 
             .footer-contact {
                 text-align: center;
+            }
+        }
+
+        /* 简单的下拉动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
@@ -751,7 +808,8 @@
                 </svg>
             </div>
 
-            <h1 class="hero-title">AIWriteX <span class="gradient-text">Pro</span></h1>
+            <!-- 修改后的标题：去掉了 Pro，为 AIWriteX 增加了流光渐变动画 -->
+            <h1 class="hero-title"><span class="gradient-animate">AIWriteX</span></h1>
 
             <div class="workshop-subtitle">
                 <span class="subtitle-text" id="typewriter-text"></span><span class="cursor-blink"></span>
@@ -763,7 +821,9 @@
             </p>
 
             <div class="hero-actions">
-                <a href="https://cdn.jsdelivr.net/gh/iniwap/AIWriteX@latest/AIWriteX_Setup.exe" class="btn btn-primary glow-effect">
+                <!-- [修改] 修复下载链接 Forbidden 问题：改用 GitHub Releases 官方 Latest 跳转链接 -->
+                <!-- 注意：请确保您在 GitHub 仓库的 "Releases" (发行版) 页面上传了名为 AIWriteX_Setup.exe 的附件，而不是只传在代码列表里 -->
+                <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" class="btn btn-primary glow-effect">
                     <i class="fab fa-windows"></i> 立即下载 (Windows)
                 </a>
                 <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-secondary">
@@ -771,7 +831,7 @@
                 </a>
             </div>
 
-            <p class="os-support">支持 Windows 10及以上 | macOS 版本敬请期待</p>
+            <p class="os-support"> Windows 10 或更高版本 | macOS 版本敬请期待</p>
         </div>
     </header>
 
@@ -867,8 +927,8 @@
                 <h2>准备好释放创造力了吗？</h2>
                 <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
                 <div class="download-btns">
-                    <!-- 请替换为真实的百度网盘链接 -->
-                    <a href="https://cdn.jsdelivr.net/gh/iniwap/AIWriteX@latest/AIWriteX_Setup.exe" target="_blank"
+                    <!-- [修改] 底部下载按钮同步修复链接 -->
+                    <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" target="_blank"
                         class="btn btn-large btn-win">
                         <i class="fab fa-windows"></i> 下载 Windows 版
                         <span class="btn-info">适用于 Win10 / Win11 (64位)</span>
@@ -913,7 +973,7 @@
         <div class="container footer-content">
             <div class="footer-logo">
                 AIWriteX
-                <p>输入话题，唤醒无限创意</p>
+                <p>智能内容创作平台</p>
             </div>
             <div class="footer-links">
                 <a href="#features">功能</a>
@@ -981,6 +1041,24 @@
                     navbar.style.boxShadow = 'none';
                 }
             });
+
+            // 4. [新增] 移动端菜单切换逻辑
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+
+            if (menuToggle && navMenu) {
+                // 点击汉堡按钮，切换菜单显示状态
+                menuToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                });
+                
+                // 点击菜单内的任何链接，自动收起菜单
+                document.querySelectorAll('.nav-menu a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
         });
     </script>
 </body>
