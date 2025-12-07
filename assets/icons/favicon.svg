@@ -11,23 +11,18 @@
         </linearGradient>
     </defs>
 
-    <!-- 背景：圆角矩形 -->
     <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#grad-bg-icon)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-
-    <!-- 外圈：缺口朝正下（6点钟） -->
+    
     <circle cx="32" cy="32" r="24" stroke="#00e5ff" stroke-width="2.5" fill="none"
         stroke-dasharray="110 200" stroke-linecap="round"
-        transform="rotate(270 32 32)" opacity="1" />
-
-    <!-- 内圈：缺口朝正上（12点钟） -->
+        transform="rotate(315 32 32)" opacity="1" />
+    
     <circle cx="32" cy="32" r="16" stroke="#bd00ff" stroke-width="2.5" fill="none"
         stroke-dasharray="75 200" stroke-linecap="round"
-        transform="rotate(90 32 32)" opacity="1" />
-
-    <!-- 核心 X -->
+        transform="rotate(135 32 32)" opacity="1" />
+    
     <path d="M26 26 L38 38 M38 26 L26 38" stroke="url(#grad-nav)" stroke-width="4"
         stroke-linecap="round" fill="none" />
-
-    <!-- 中心光点 -->
+    
     <circle cx="32" cy="32" r="2.5" fill="white" opacity="0.9" />
 </svg>
