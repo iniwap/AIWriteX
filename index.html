@@ -292,6 +292,7 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             transition: all 0.3s ease;
         }
@@ -647,7 +648,7 @@
             }
         }
 
-        /* 新增：文字流光动画 */
+        /* 文字流光动画 */
         @keyframes text-shine {
             0% {
                 background-position: 0% 50%;
@@ -668,24 +669,22 @@
             }
 
             .nav-menu {
-                display: none; /* 默认隐藏 */
+                display: none; 
                 position: absolute;
                 top: 100%; 
                 left: 0;
                 width: 100%;
+                height: 100vh; 
                 background-color: rgba(15, 23, 42, 0.98);
                 backdrop-filter: blur(20px);
                 flex-direction: column;
-                padding: 30px;
+                padding: 40px 30px;
                 text-align: center;
                 border-top: 1px solid var(--border-color);
-                border-bottom-left-radius: 20px;
-                border-bottom-right-radius: 20px;
-                box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+                box-shadow: none;
                 z-index: 999;
             }
 
-            /* 添加 active 类时显示 */
             .nav-menu.active {
                 display: flex;
                 animation: fadeInDown 0.3s ease forwards;
@@ -699,7 +698,7 @@
             .nav-menu a {
                 display: block;
                 width: 100%;
-                padding: 15px 0;
+                padding: 20px 0;
                 font-size: 1.1rem;
                 color: var(--text-main);
                 border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -716,15 +715,18 @@
             }
 
             .nav-btn-buy {
-                margin-top: 25px !important;
-                display: inline-block !important;
+                margin-top: 40px !important; 
+                display: inline-flex !important;
+                justify-content: center;
+                align-items: center;
                 width: 100%;
-                text-align: center;
-                padding: 12px 0 !important;
+                padding: 15px 0 !important;
                 background: linear-gradient(90deg, var(--secondary), #d946ef);
-                border-radius: 12px;
+                border-radius: 50px; 
                 border-bottom: none !important;
                 box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
+                font-size: 1.1rem !important;
+                letter-spacing: 1px;
             }
 
             .menu-toggle {
@@ -746,7 +748,6 @@
             }
         }
 
-        /* 简单的下拉动画 */
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -772,7 +773,6 @@
                             <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#bd00ff;stop-opacity:1" />
                         </linearGradient>
-                        <!-- 背景渐变：暗夜蓝 -->
                         <linearGradient id="grad-bg-icon" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
@@ -966,6 +966,7 @@
                 <h2>准备好释放创造力了吗？</h2>
                 <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
                 <div class="download-btns">
+                    <!-- [修改] 底部下载按钮同步修复链接 -->
                     <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" target="_blank"
                         class="btn btn-large btn-win">
                         <i class="fab fa-windows"></i> 下载 Windows 版
@@ -976,7 +977,7 @@
                         <span class="btn-info">即将推出</span>
                     </button>
                 </div>
-                <p class="download-note">* 下载即同意《用户服务协议》。软件保证绿色安全。</p>
+                <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
             </div>
         </div>
     </section>
@@ -1036,9 +1037,8 @@
                 if (charIndex < textToType.length) {
                     textElement.textContent += textToType.charAt(charIndex);
                     charIndex++;
-                    setTimeout(typeWriter, 100); // 打字速度
+                    setTimeout(typeWriter, 100);
                 } else {
-                    // 打完停顿后删除重打，或者保持
                     setTimeout(deleteText, 3000);
                 }
             }
@@ -1085,12 +1085,10 @@
             const navMenu = document.querySelector('.nav-menu');
 
             if (menuToggle && navMenu) {
-                // 点击汉堡按钮，切换菜单显示状态
                 menuToggle.addEventListener('click', () => {
                     navMenu.classList.toggle('active');
                 });
                 
-                // 点击菜单内的任何链接，自动收起菜单
                 document.querySelectorAll('.nav-menu a').forEach(link => {
                     link.addEventListener('click', () => {
                         navMenu.classList.remove('active');
