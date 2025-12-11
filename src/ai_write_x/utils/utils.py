@@ -41,17 +41,42 @@ def mkdir(path, clean=False):
 
 
 def get_is_release_ver():
-    if getattr(sys, "frozen", None):
+    """
+    检测是否为打包版本
+    注意：Nuitka 打包后 sys.frozen 也会是 True，所以 hasattr(sys, "frozen") 能同时检测两者
+    """
+    if hasattr(sys, "frozen"):
         return True
-    else:
-        return False
+    if "__compiled__" in globals():
+        return True
+    return False
 
 
-def get_res_path(file_name, basedir=""):
+def get_res_path(relative_path, basedir=""):
+    """
+    获取资源文件的绝对路径
+    兼容：IDE运行、PyInstaller打包、Nuitka打包
+    Args:
+        relative_path: 相对路径，例如 "resources/UI/icon.ico"
+        basedir: 开发环境下的基准路径（可选）
+    """
     if get_is_release_ver():
-        return os.path.join(sys._MEIPASS, file_name)  # type: ignore
+        # 1. PyInstaller 专有逻辑 (解压到临时目录 _MEIPASS)
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
 
-    return os.path.join(basedir, file_name)
+        # 2. Nuitka (Standalone) 或 PyInstaller (Onedir) 逻辑
+        # 资源文件位于可执行文件同级目录下
+        exe_dir = os.path.dirname(sys.executable)
+        return os.path.join(exe_dir, relative_path)
+
+    # 3. 开发环境 (IDE)
+    # 默认使用当前文件的目录，或者传入的 basedir
+    # 如果 basedir 为空，尝试自动定位到项目根目录（假设 main.py 在根目录）
+    if not basedir:
+        basedir = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(basedir, relative_path)
 
 
 def get_random_platform(platforms):

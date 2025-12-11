@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
 import multiprocessing
@@ -8,31 +7,6 @@ import os
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 from aiforge import AIForgeEngine  # noqa
-
-# 帮助 PyInstaller 检测依赖 (永远不会执行)
-if False:
-    import fastapi  # noqa
-    import uvicorn  # noqa
-    import webview  # noqa
-    import jinja2  # noqa
-    import pystray  # noqa
-    import yaml  # noqa
-    import tomlkit  # noqa
-    import peewee  # noqa
-    from playhouse.sqlite_ext import SqliteExtDatabase  # noqa
-    from src.ai_write_x.web import webview_gui  # noqa
-    from src.ai_write_x.web import app  # noqa
-    from src.ai_write_x.config import config  # noqa
-    from src.ai_write_x import crew_main  # noqa
-    import bs4  # noqa
-    import requests  # noqa
-    from PIL import Image  # noqa
-    import markdown  # noqa
-    from crewai import Agent, Crew, Process, Task  # noqa
-    from crewai.project import CrewBase, agent, crew, task  # noqa
-    import chromadb  # noqa
-    import onnxruntime  # noqa
-    from rich.console import Console  # noqa
 
 
 def run():
