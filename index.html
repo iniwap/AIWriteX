@@ -496,6 +496,107 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
+        /* ========== 路线图/开发计划样式 (NEW) ========== */
+        .roadmap-section {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #172033 100%);
+            position: relative;
+        }
+        
+        .roadmap-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: -40px auto 50px;
+            color: var(--text-muted);
+        }
+
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            position: relative;
+        }
+
+        /* 简单的连接线效果 (PC端) */
+        @media (min-width: 992px) {
+            .roadmap-grid::before {
+                content: '';
+                position: absolute;
+                top: 25px;
+                left: 10%;
+                right: 10%;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                opacity: 0.3;
+                z-index: 0;
+            }
+        }
+
+        .roadmap-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 30px 25px;
+            border-radius: 16px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        .roadmap-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .roadmap-card.active .step-badge {
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .roadmap-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .roadmap-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .status-dot {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #64748b;
+        }
+
+        .status-dot.pulsing {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: blink 2s infinite;
+        }
+
+        .status-dot.future {
+            background: var(--secondary);
+        }
+
         /* ========== 下载区域 ========== */
         .download-section {
             background: linear-gradient(180deg, var(--bg-dark) 0%, #1e1b4b 100%);
@@ -800,6 +901,7 @@
             <ul class="nav-menu">
                 <li><a href="#features">产品功能</a></li>
                 <li><a href="#versions">价格方案</a></li>
+                <li><a href="#roadmap">未来计划</a></li>
                 <li><a href="#faq">常见问题</a></li>
                 <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy">前往购买</a></li>
             </ul>
@@ -955,6 +1057,49 @@
                         <li><i class="fas fa-check"></i> 7x24小时 极速响应</li>
                     </ul>
                     <a href="tencent://message/?uin=522765228" class="btn btn-outline">联系定制</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- [新增] 未来开发计划 (Roadmap) -->
+    <section id="roadmap" class="roadmap-section">
+        <div class="container">
+            <h2 class="section-title">未来 <span class="gradient-text">无限可能</span></h2>
+            <p class="roadmap-intro">高级版用户永久免费享受以下所有未来更新。您的支持是我们持续进化的动力。</p>
+            
+            <div class="roadmap-grid">
+                <!-- 阶段一：当前/下个版本 -->
+                <div class="roadmap-card active">
+                    <div class="status-dot pulsing"></div>
+                    <span class="step-badge">开发中 - 2025 Q4</span>
+                    <!-- [占位符] 请在此处填写您下一个具体的开发计划 -->
+                    <h3>V2.3+ 平台功能升级</h3>
+                    <p>支持导入模板、文章；增加帮助页面；界面重构完全重构，更加符合视觉美学。</p>
+                </div>
+
+                <!-- 阶段二：短期计划 -->
+                <div class="roadmap-card">
+                    <div class="status-dot future"></div>
+                    <span class="step-badge">规划中 - 2026 Q1</span>
+                    <h3>跨平台矩阵引擎</h3>
+                    <p>打破公众号壁垒。一键适配<strong>小红书、知乎、头条号</strong>等平台的排版与语风。一次生成，多平台分发，构建您的全网内容矩阵。</p>
+                </div>
+
+                <!-- 阶段三：中期愿景 -->
+                <div class="roadmap-card">
+                    <div class="status-dot future"></div>
+                    <span class="step-badge">规划中 - 2026 Q3</span>
+                    <h3>数字孪生 (Digital Twin)</h3>
+                    <p>AI 将深度学习您的历史文章数据，完美克隆您的<strong>个人文风与价值观</strong>。打造专属于您的“数字分身”，让每一篇 AI 文章都像您亲手所写。</p>
+                </div>
+
+                <!-- 阶段四：长期展望 -->
+                <div class="roadmap-card">
+                    <div class="status-dot future"></div>
+                    <span class="step-badge">远期展望</span>
+                    <h3>视听多维融合</h3>
+                    <p>从文字向图片、视频等多模态领域进军。一键将文章转化为<strong>短视频脚本、AI配音播客</strong>甚至自动生成配套视频素材。让 AIWriteX 成为您的全媒体制作中心。</p>
                 </div>
             </div>
         </div>
