@@ -496,56 +496,44 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        /* ========== 路线图/开发计划样式 (NEW) ========== */
+        /* ========== 路线图/开发计划样式 (升级版) ========== */
         .roadmap-section {
             background: linear-gradient(180deg, var(--bg-dark) 0%, #172033 100%);
             position: relative;
+            overflow: hidden; /* 防止光束溢出 */
         }
         
         .roadmap-intro {
             text-align: center;
             max-width: 700px;
-            margin: -40px auto 50px;
+            margin: -40px auto 60px;
             color: var(--text-muted);
         }
 
         .roadmap-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px; /* 卡片间距 */
             position: relative;
-        }
-
-        /* 简单的连接线效果 (PC端) */
-        @media (min-width: 992px) {
-            .roadmap-grid::before {
-                content: '';
-                position: absolute;
-                top: 25px;
-                left: 10%;
-                right: 10%;
-                height: 2px;
-                background: linear-gradient(90deg, var(--primary), var(--secondary));
-                opacity: 0.3;
-                z-index: 0;
-            }
         }
 
         .roadmap-card {
             background: rgba(30, 41, 59, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 30px 25px;
+            padding: 35px 30px;
             border-radius: 16px;
             position: relative;
-            z-index: 1;
+            z-index: 2; /* 确保卡片在连线上方 */
             backdrop-filter: blur(10px);
             transition: 0.3s;
+            height: 100%;
         }
 
         .roadmap-card:hover {
             border-color: var(--secondary);
             transform: translateY(-5px);
             background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .step-badge {
@@ -566,35 +554,201 @@
         }
 
         .roadmap-card h3 {
-            font-size: 1.15rem;
-            margin-bottom: 10px;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
             color: #fff;
         }
 
         .roadmap-card p {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
+        /* 状态点 */
         .status-dot {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 8px;
-            height: 8px;
+            top: 25px;
+            right: 25px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #64748b;
         }
 
         .status-dot.pulsing {
             background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            animation: blink 2s infinite;
+            box-shadow: 0 0 12px var(--primary);
+            animation: dot-pulse 2s infinite;
         }
 
         .status-dot.future {
             background: var(--secondary);
+        }
+
+        /* ========== 宽屏下的蛇形连线与布局 ========== */
+        @media (min-width: 992px) {
+            .roadmap-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 60px 80px; /* 增加水平间距以放下连线 */
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            /* 调整卡片顺序以形成蛇形视觉流:
+               [1] -> [2]
+                       |
+               [4] <- [3]
+            */
+            
+            /* 第1个: 左上 (默认) */
+            .roadmap-card:nth-child(1) {
+                grid-column: 1 / 2;
+                grid-row: 1 / 2;
+            }
+            
+            /* 第2个: 右上 (默认) */
+            .roadmap-card:nth-child(2) {
+                grid-column: 2 / 3;
+                grid-row: 1 / 2;
+            }
+
+            /* 第3个: 视觉上放右下 (逻辑顺序3) */
+            .roadmap-card:nth-child(3) {
+                grid-column: 2 / 3;
+                grid-row: 2 / 3;
+            }
+
+            /* 第4个: 视觉上放左下 (逻辑顺序4) */
+            .roadmap-card:nth-child(4) {
+                grid-column: 1 / 2;
+                grid-row: 2 / 3;
+            }
+
+            /* === 连线设计 (使用伪元素) === */
+            
+            /* 通用连线样式 */
+            .roadmap-card::after {
+                content: '';
+                position: absolute;
+                z-index: -1;
+                /* 默认隐藏，特定卡片开启 */
+                display: none; 
+                /* 渐变流光动画背景 */
+                background: linear-gradient(90deg, 
+                    rgba(255, 255, 255, 0.05) 0%, 
+                    rgba(255, 255, 255, 0.05) 40%, 
+                    var(--primary) 50%, 
+                    rgba(255, 255, 255, 0.05) 60%, 
+                    rgba(255, 255, 255, 0.05) 100%
+                );
+                background-size: 200% 100%;
+                animation: scanning 3s linear infinite;
+                border-radius: 4px;
+            }
+
+            /* 连接点光晕 */
+            .roadmap-card::before {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: var(--primary);
+                border-radius: 50%;
+                box-shadow: 0 0 10px var(--primary);
+                z-index: 3;
+                display: none;
+            }
+
+            /* 连线 1 -> 2 (水平向右) */
+            .roadmap-card:nth-child(1)::after {
+                display: block;
+                height: 4px;
+                width: 100px; /* 跨越间隙 */
+                top: 50%;
+                right: -90px; /* 延伸到右侧卡片 */
+                transform: translateY(-50%);
+            }
+            /* 节点 1-2 */
+            .roadmap-card:nth-child(1)::before {
+                display: block;
+                top: 50%;
+                right: -4px;
+                transform: translateY(-50%);
+            }
+
+            /* 连线 2 -> 3 (垂直向下) */
+            .roadmap-card:nth-child(2)::after {
+                display: block;
+                width: 4px;
+                height: 100px; /* 跨越垂直间隙 */
+                left: 50%;
+                bottom: -80px; /* 延伸到下方卡片 */
+                transform: translateX(-50%);
+                background: linear-gradient(180deg, 
+                    rgba(255, 255, 255, 0.05) 0%, 
+                    var(--primary) 50%, 
+                    rgba(255, 255, 255, 0.05) 100%
+                );
+                background-size: 100% 200%;
+                animation: scanning-v 3s linear infinite;
+            }
+            /* 节点 2-3 */
+            .roadmap-card:nth-child(2)::before {
+                display: block;
+                bottom: -4px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            /* 连线 3 -> 4 (水平向左 - 视觉回流) */
+            .roadmap-card:nth-child(3)::after {
+                display: block;
+                height: 4px;
+                width: 100px;
+                top: 50%;
+                left: -90px; /* 延伸到左侧卡片 */
+                transform: translateY(-50%);
+                /* 反向流动 */
+                animation-direction: reverse; 
+            }
+            /* 节点 3-4 */
+            .roadmap-card:nth-child(3)::before {
+                display: block;
+                top: 50%;
+                left: -4px;
+                transform: translateY(-50%);
+            }
+        }
+
+        /* 移动端: 垂直时间轴 */
+        @media (max-width: 991px) {
+            .roadmap-grid {
+                padding-left: 20px;
+                border-left: 2px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .roadmap-card {
+                margin-bottom: 30px;
+            }
+
+            .roadmap-card::before {
+                content: '';
+                position: absolute;
+                left: -26px; /* 对齐左侧线条 */
+                top: 40px;
+                width: 10px;
+                height: 10px;
+                background: var(--bg-dark);
+                border: 2px solid var(--primary);
+                border-radius: 50%;
+                z-index: 10;
+            }
+
+            .roadmap-card.active::before {
+                background: var(--primary);
+                box-shadow: 0 0 10px var(--primary);
+            }
         }
 
         /* ========== 下载区域 ========== */
@@ -760,6 +914,25 @@
             }
         }
 
+        /* 状态点脉冲 */
+        @keyframes dot-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+        }
+
+        /* 连线扫描动画 (水平) */
+        @keyframes scanning {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* 连线扫描动画 (垂直) */
+        @keyframes scanning-v {
+            0% { background-position: 0 100%; }
+            100% { background-position: 0 -100%; }
+        }
+
         /* 响应式适配 */
         @media (max-width: 768px) {
             .hero-title {
@@ -901,7 +1074,7 @@
             <ul class="nav-menu">
                 <li><a href="#features">产品功能</a></li>
                 <li><a href="#versions">价格方案</a></li>
-                <li><a href="#roadmap">未来计划</a></li>
+                <li><a href="#roadmap">产品路线</a></li>
                 <li><a href="#faq">常见问题</a></li>
                 <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy">前往购买</a></li>
             </ul>
@@ -1099,7 +1272,7 @@
                     <div class="status-dot future"></div>
                     <span class="step-badge">远期展望</span>
                     <h3>视听多维融合</h3>
-                    <p>从文字向图片、视频等多模态领域进军。一键将文章转化为<strong>短视频脚本、AI配音播客</strong>甚至自动生成配套视频素材。让 AIWriteX 成为您的全媒体制作中心。</p>
+                    <p>从文字向视频进军。一键将文章转化为<strong>短视频脚本、AI配音播客</strong>甚至自动生成配套视频素材。让 AIWriteX 成为您的全媒体制作中心。</p>
                 </div>
             </div>
         </div>
