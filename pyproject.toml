@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "ai_write_x using crewAI"
 authors = [{ name = "iniwap", email = "iniwaper@gmail.com" }]
 requires-python = ">=3.10,<3.13"
-dependencies = ["crewai[tools]>=0.102.0,<1.0.0"]
+dependencies = ["crewai>=0.102.0,<1.0.0"]
 
 [project.scripts]
 ai_write_x = "ai_write_x.main:run"

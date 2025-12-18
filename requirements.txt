@@ -8,7 +8,6 @@ Requests==2.32.3
 setuptools==65.5.0
 tomlkit==0.13.2
 aiforge-engine>=0.0.19
-crewai_tools
 rich
 python_dateutil==2.8.2
 markdown==3.8.2
@@ -21,3 +20,4 @@ uvicorn>=0.30.0
 pywin32>=306; sys_platform == "win32"
 python-multipart>=0.0.6  
 jinja2>=3.1.0  
+cryptography

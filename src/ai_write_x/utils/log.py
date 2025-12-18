@@ -136,7 +136,7 @@ class ProcessLoggingHandler(logging.Handler):
     def emit(self, record):
         try:
             # 过滤掉不需要的日志
-            if record.name in ["litellm", "httpx", "httpcore", "openai"]:
+            if record.name in ["httpx", "httpcore", "openai"]:
                 return
 
             msg = self.format(record)
@@ -292,7 +292,6 @@ def setup_process_logging(process_queue: multiprocessing.Queue):
     logging.getLogger("httpx").setLevel(logging.ERROR)
     logging.getLogger("httpcore").setLevel(logging.ERROR)
     logging.getLogger("openai").setLevel(logging.ERROR)
-    logging.getLogger("litellm").setLevel(logging.ERROR)  # 完全禁用 LiteLLM 日志
 
     # 4. 设置 CrewAI 特定日志记录器
     crewai_logger = logging.getLogger("crewai")
@@ -313,7 +312,7 @@ class QueueLoggingHandler(logging.Handler):
     def emit(self, record):
         try:
             # 过滤掉不需要的日志
-            if record.name in ["litellm", "httpx", "httpcore", "openai"]:
+            if record.name in ["httpx", "httpcore", "openai"]:
                 return
 
             msg = self.format(record)

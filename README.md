@@ -3,10 +3,10 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIWriteX)
 
   
-**AIWriteX**是基于CrewAI、[AIForge](https://iniwap.github.io/AIForge)的新一代智能内容创作平台，从微信公众号自动化工具起步，正在重新定义AI辅助内容创作的边界，融合"搜索+借鉴+AI+创意"四重能力，多种超绝玩法，让内容创作充满无限可能。  
+[<u>AIWriteX</u>](https://aiwritex.voidai.cc/)是基于CrewAI、AIForge的新一代智能内容创作平台，从微信公众号自动化工具起步，正在重新定义AI辅助内容创作的边界，融合"搜索+借鉴+AI+创意"四重能力，多种超绝玩法，让内容创作充满无限可能。  
 
-> **想先看看效果？** 👉 [文章预览](#-微信公众号模板效果预览)  
-> **心动不如行动？** 👉 [马上开始](#-快速开始)  
+> **想先看看效果？** 👉 [实例预览](#绝美排版实例预览)
+> **想用商业稳定版？** 👉 [前往官网](https://aiwritex.voidai.cc/)  
 > **喜欢这个项目？** ⭐ 点个 Star 支持一下吧！  
 
 <img src="image/preview/preview.jpg" width="100%">
@@ -173,6 +173,12 @@ dimensional_creative:
 > *2、⚠️ 微信公众号AppID/AppSecret、大模型提供商的API KEY是必填项，其他均可默认*  
 
 ## 🚀 快速开始
+
+### 软件模式
+1. **请下载使用官方正版**：[点击下载](https://aiwritex.voidai.cc/)
+2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
+3. 点击`开始执行`
+
 ### 开发模式
 1. 克隆仓库：
     - `git clone https://github.com/iniwap/AIWriteX.git`
@@ -187,19 +193,6 @@ uv pip install -r requirements.txt
     - 有UI界面：`python .\main.py` (**推荐**)
     - 无UI界面：`python -m src.ai_write_x.crew_main` （**不支持文章、模板、配图管理**）
 
-### 软件模式
-1. 请从网盘下载`AIWriteX_云盘版_Setup.exe` 👇，并安装
-
-| 网盘类型                     | 下载链接                                                                                              | 提取码  | 版本    |是否最新     |
-|-----------------------------|-------------------------------------------------------------------------------------------------------|--------|---------|------------|
-| **百度网盘**                 |[Win](https://pan.baidu.com/s/1tALycrUn36j5DdlFvH7c4A?pwd=iy1q) / [Mac](https://pan.baidu.com/s/1R7IJXdqLVL23yDHPOVyYiw?pwd=v32x) |iy1q / v32x   |V2.2.1    |✅ |
-| **移动云盘**                 |[Win](https://yun.139.com/shareweb/#/w/i/2pU918rU9Ln0e) / [Mac](https://yun.139.com/shareweb/#/w/i/2pU91bs7oT780)                         |6mdn / 0dy3   |V2.2.1    |✅ |
-| **Google Drive**            |[Win](https://drive.google.com/file/d/1rXohuAa0ZA9rUqqySIWm5OEPpbzxXREr/view?usp=sharing)              |/      |V2.2.1    |✅         |
-| **Microsoft OneDrive**      |[Win](https://1drv.ms/u/c/c831e3cc9be11110/EVlmFdF8zWJPi7F0PS8i7JEBxXTZa1ett7YaKzgdhmHSFg?e=i4Vuzi)    |/      |V2.2.1    |✅         |
-
-2. 打开软件，进行必须要配置（*微信公众号AppID/AppSecret、大模型提供商的API KEY*）
-3. 点击`开始执行`
-
 ## 🔍 问题定位
 
 遇到问题时，请根据运行模式查看日志并提交 [Issues](https://github.com/iniwap/AIWriteX/issues)
@@ -207,9 +200,24 @@ uv pip install -r requirements.txt
 ### 常见问题
 请查看`close`(已关闭)的[Issues](https://github.com/iniwap/AIWriteX/issues?q=is%3Aissue%20state%3Aclosed)，以便了解大家常遇到且已经解决的问题。
 
-## 🔮 微信公众号模板效果预览
+## 🔮 微信公众号视觉风格设计预览
 
 以下是精心微调、适配并发布的微信公众号模板，涵盖多个话题分类，欢迎预览！
+
+### **绝美排版实例预览**
+
+| 类别       | 风格分类   | 预览链接                     | 示例来源（公众号）                     |
+|------------|------------|------------------------------|--------------------------|
+|经典案例        | 美食文化  | [点击预览](https://mp.weixin.qq.com/s/-RIunPVHAIni4f4zO51Gvg) | AI夜航员     |
+|经典案例        | 涂鸦笔记  | [点击预览](https://mp.weixin.qq.com/s/2_zLwmuY_veug8t7xTxi4w) | AI夜航员     |
+|经典案例        | 漫画照片  | [点击预览](https://mp.weixin.qq.com/s/Z7vaed9yQBnD-Hw9JUXYwg) | AI夜航员     |
+|经典案例        | 风景杂志  | [点击预览](https://mp.weixin.qq.com/s/z1QFrGToSIvBXJxgcP-vNg) | AI夜航员    |
+|经典案例        | 广角摄影  | [点击预览](https://mp.weixin.qq.com/s/kgqcfsP5LZ8zRFv9qe6gDg) | AI夜航员     |
+|经典案例        | 电商样片  | [点击预览](https://mp.weixin.qq.com/s/9eyZMDgb0BTtCaa2_LG8Jg) | AI夜航员     |
+|经典案例        | ins信息流  | [点击预览](https://mp.weixin.qq.com/s/NjXLavDbdUzMEhmS8qk0rw) | AI夜航员     |
+|经典案例        | 视觉杂志  | [点击预览](https://mp.weixin.qq.com/s/Gv0v9SlORXBHdXpcoK1c4w) | AI夜航员    |
+|经典案例        | 旅行摄影  | [点击预览](https://mp.weixin.qq.com/s/kWWZ8DuCdxWaPAh3PQHc-Q) | AI夜航员     |
+|经典案例        | 商业大片 | [点击预览](https://mp.weixin.qq.com/s/KSfXKtNaC0WUgFCT90woQA) | AI夜航员     |
 
 ### 内置本地模板列表
 
@@ -217,7 +225,6 @@ uv pip install -r requirements.txt
 
 | 类别       | 模板名称 | 预览链接                       | 适用话题                      |
 |------------|----------|------------------------------|--------------------------|
-| **经典展示**   | t1       | [点击预览](https://mp.weixin.qq.com/s/KhKVRLGxbXceuHShnaUpOg) | **Gemini3通过一篇文章生成连环画**|
 | 科技数码   | t1       | [点击预览](https://mp.weixin.qq.com/s/UCjBHaZ_EZVBdEaSEH-6mQ) | 科技前沿与数码评测       |
 | 财经投资   | t1       | [点击预览](https://mp.weixin.qq.com/s/uTfYVXUG3_bjqSZ-uuJKeg) | 投资趋势与财经资讯       |
 | 教育学习   | t1       | [点击预览](https://mp.weixin.qq.com/s/DOr7sSBQ2sYSqu4WmlH__g) | 学习方法与教育资讯       |
@@ -228,21 +235,6 @@ uv pip install -r requirements.txt
 | 情感心理   | t1       | [点击预览](https://mp.weixin.qq.com/s/2j-C1tBWkpYIQhhR6tOwSg) | 情感故事与心理洞察       |
 | 娱乐八卦   | t1       | [点击预览](https://mp.weixin.qq.com/s/3YeEH2Nvhsw8JqHIV0tftQ) | 最新娱乐圈动态速递       |
 | 新闻时事   | t1       | [点击预览](https://mp.weixin.qq.com/s/M_l2LCJjiGmCWRvSm7lYvA) | 全球热点与时事分析       |
-
-- 其他模板
-
-| 类别       | 模板名称   | 预览链接                     | 适用话题                     |
-|------------|------------|------------------------------|--------------------------|
-|其他        | template1  | [点击预览](https://mp.weixin.qq.com/s/9MoMFXgY7ieEMW0kqBqfvQ) | 通用模板，无风格限定     |
-|其他        | template2  | [点击预览](https://mp.weixin.qq.com/s/0vCNvgbHfilSS77wKzM6Dg) | 通用模板，无风格限定     |
-|其他        | template3  | [点击预览](https://mp.weixin.qq.com/s/ygroULs7dx5Q54FkR8P0uA) | 通用模板，无风格限定     |
-|其他        | template4  | [点击预览](https://mp.weixin.qq.com/s/-SexfJ1yUcgNDtWay3eLnA) | 通用模板，无风格限定     |
-|其他        | template5  | [点击预览](https://mp.weixin.qq.com/s/pDPkktE_5KnkQkJ1x2-y9Q) | 通用模板，无风格限定     |
-|其他        | template6  | [点击预览](https://mp.weixin.qq.com/s/7F_Qdho-hzxeVV6NrsPmhQ) | 通用模板，无风格限定     |
-|其他        | template7  | [点击预览](https://mp.weixin.qq.com/s/ug7NseZDziDMWBVwe3s1pw) | 通用模板，无风格限定     |
-|其他        | template8  | [点击预览](https://mp.weixin.qq.com/s/uDjKVrWop4XNrM-csQ-IKw) | 通用模板，无风格限定     |
-|其他        | template9  | [点击预览](https://mp.weixin.qq.com/s/EVhL67x8w35IuNnoxI1IEA) | 通用模板，无风格限定     |
-|其他        | template10 | [点击预览](https://mp.weixin.qq.com/s/pDN5rgCgz0CbA8Q92CugYw) | 通用模板，无风格限定     |
 
 ### 全自动发文效果预览
 
@@ -260,7 +252,6 @@ uv pip install -r requirements.txt
 | 手动发文       | 浅色     | [点击预览](https://mp.weixin.qq.com/s/GOiOxGiym1dgqA77wrrFLw) |浏览器最佳模板，但在手机上边距显得过大         |
 | 手动发文       | 浅色     | [点击预览](https://mp.weixin.qq.com/s/MFKPQIBdldyC_dxcpooOSw) |统一调整边距后的效果，手机上看着更紧凑些，但丢失原来设计效果   |
 | 手动发文       | 暗色     | [点击预览](https://mp.weixin.qq.com/s/jOWDpRSAw9twSptzZbBODg) |原版为暗色，发到微信被强转（很难看），反而在浅色模式下正常显示   |
-
 
 > *1、已适配模板可以比较好的显示在微信公众号上，有兴趣的可以继续微调内置模板（如边距等）*  
 > *2、目前仅**尚未适配**下的模板未适配，需要适配才能完美显示（配置**分类随机**可能会随机到未适配模板）*  

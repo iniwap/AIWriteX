@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import html
 from typing import List, Dict, Any
-from crewai_tools import SeleniumScrapingTool
+# from crewai_tools import SeleniumScrapingTool
 
 
 def validate_search_result(result, min_results=1, search_type="local"):
@@ -844,6 +844,7 @@ def extract_urls_content(urls: List[str], topic="") -> Dict[str, Any]:
             page_soup, pub_time = extract_page_content(url, get_common_headers())
 
             # 如果普通方法无法获取有效内容，使用Selenium
+            '''
             if not page_soup or not _has_meaningful_content(page_soup):
                 selenium_tool = SeleniumScrapingTool(
                     website_url=url, wait_time=15, return_html=True
@@ -852,7 +853,7 @@ def extract_urls_content(urls: List[str], topic="") -> Dict[str, Any]:
                 if page_content:
                     page_soup = BeautifulSoup(page_content, "html.parser")
                     pub_time = _extract_publish_time(page_soup)
-
+            '''
             if page_soup:
                 title = _extract_title_from_page(page_soup)
                 full_content = _extract_full_article_content(page_soup)
@@ -876,7 +877,6 @@ def extract_urls_content(urls: List[str], topic="") -> Dict[str, Any]:
                         "url": url,
                     }
                 )
-
         except Exception as e:
             # 捕获到异常，记录错误信息，但不影响整体success
             overall_success = False
