@@ -292,7 +292,7 @@ uv pip install -r requirements.txt
 - 👉**最近发现有人偷卖本项目，请尊重知识产权，本项目禁止用于商业用途，仅限个人使用。**
 
 本项目采用 [Apache License 2.0](./LICENSE) 开源，并附带额外使用限制，详见 [NOTICE](./NOTICE) 文件。
-
+```markdown
 📜 AIWriteX 附加使用条款  
 版本 1.2，2025年7月15日  
 版权所有 © 2025 iniwap  
@@ -340,3 +340,4 @@ uv pip install -r requirements.txt
 
 ## 6. 法律声明
 本条款不构成法律建议。如您不确定是否符合使用条件，请联系版权所有人进一步确认。
+```
