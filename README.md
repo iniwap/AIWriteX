@@ -9,7 +9,7 @@
 > **想用商业稳定版？** 👉 [前往官网](https://aiwritex.voidai.cc/)  
 > **喜欢这个项目？** ⭐ 点个 Star 支持一下吧！  
 
-<img src="image/preview/preview.jpg" width="100%">
+<img src="preview.jpg" width="100%">
 
 ## 💎 基本功能
 - **自动获取热门话题**：从各大平台实时抓取热门话题，确保文章标题及内容紧跟潮流
