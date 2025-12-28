@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIWriteX)
 
   
-[<u>AIWriteX</u>](https://aiwritex.voidai.cc/)是基于CrewAI、AIForge的新一代智能内容创作平台，从微信公众号自动化工具起步，正在重新定义AI辅助内容创作的边界，融合"搜索+借鉴+AI+创意"四重能力，多种超绝玩法，让内容创作充满无限可能。  
+[<u>AIWriteX</u>](https://aiwritex.voidai.cc/)是基于CrewAI、AIForge的新一代智能内容创作平台，从微信公众号自动化工具起步，正在重新定义AI辅助内容创作的边界，融合"AI+创意+搜索+借鉴"四重能力，多种超绝玩法，让内容创作充满无限可能。  
 
 > **想先看看效果？** 👉 [实例预览](#绝美排版实例预览)  
 > **想用商业稳定版？** 👉 [前往官网](https://aiwritex.voidai.cc/)  
@@ -289,7 +289,7 @@ uv pip install -r requirements.txt
 如需了解配置详情或扩展、定制功能、商业授权，请联系QQ 522765228
 
 ## 📜 许可证 / License
-- 👉**最近发现有人偷卖本项目，请尊重知识产权，本项目禁止用于商业用途，仅限个人使用。**
+- 👉**最近发现有人偷卖本项目，请认准官方淘宝店[墨智工坊](https://aiforge.taobao.com/)，请尊重知识产权，本项目禁止用于商业用途，仅限个人使用。**
 
 本项目采用 [Apache License 2.0](./LICENSE) 开源，并附带额外使用限制，详见 [NOTICE](./NOTICE) 文件。
 ```markdown
