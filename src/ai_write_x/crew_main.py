@@ -22,7 +22,7 @@ os.environ["OTEL_SDK_DISABLED"] = "true"
 os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
 
 
-def run_crew_in_process(inputs, log_queue, config_data=None):
+def run_crew_in_process(inputs, log_queue, base_config, aiforge_config, config_data=None):
     """在独立进程中运行 CrewAI 工作流"""
 
     env_file_path = ""
@@ -60,6 +60,8 @@ def run_crew_in_process(inputs, log_queue, config_data=None):
 
         # 获取子进程的 Config 实例
         config = Config.get_instance()
+        config.config = base_config
+        config.aiforge_config = aiforge_config
 
         # 同步主进程的配置数据到子进程
         if config_data:
@@ -67,9 +69,6 @@ def run_crew_in_process(inputs, log_queue, config_data=None):
                 # 跳过环境文件路径，这个不是配置属性
                 if key != "env_file_path":
                     setattr(config, key, value)
-
-        # 重新加载配置文件以确保基础配置正确
-        config.load_config()
 
         # 添加调试信息
         log.print_log(f"任务参数：API类型={config.api_type}，模型={config.api_model} ", "status")
@@ -175,7 +174,7 @@ def ai_write_x_run(config_data=None):
             log_queue = multiprocessing.Queue()
             process = multiprocessing.Process(
                 target=run_crew_in_process,
-                args=(inputs, log_queue, config_data),
+                args=(inputs, log_queue, config.get_config(), config.aiforge_config, config_data),
                 daemon=False,
             )
             return process, log_queue
@@ -196,20 +195,19 @@ def ai_write_x_run(config_data=None):
 def ai_write_x_main(config_data=None):
     """主入口函数"""
     config = Config.get_instance()
-
-    # 统一的配置加载和验证
-    if not config.load_config():
-        log.print_log("加载配置失败，请检查是否有配置！", "error")
-        return None, None
-
     # 如果是 UI 启动会传递配置数据，应用到当前进程
     if config_data:
         for key, value in config_data.items():
             setattr(config, key, value)
-    # 非UI启动，不传递config_data，需要验证配置
-    elif not config.validate_config():
-        log.print_log(f"配置填写有错误：{config.error_message}", "error")
-        return None, None
+    else:
+        # 非UI启动，不传递config_data，需要验证配置
+        if not config.load_config():
+            log.print_log("加载配置失败，请检查是否有配置！", "error")
+            return None, None
+
+        if not config.validate_config():
+            log.print_log(f"配置填写有错误：{config.error_message}", "error")
+            return None, None
 
     task_model = "自定义" if not config.platform else "热搜随机"
     log.print_log(f"开始执行任务，话题模式：{task_model}")
