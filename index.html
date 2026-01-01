@@ -393,6 +393,7 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             align-items: center;
+            position: relative; 
         }
 
         .pricing-card {
@@ -401,8 +402,9 @@
             border-radius: 24px;
             padding: 40px 30px;
             text-align: center;
-            transition: 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
+            z-index: 1; 
         }
 
         .pricing-card.pro {
@@ -410,79 +412,138 @@
             border: 1px solid var(--secondary);
             box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
             transform: scale(1.05);
-            z-index: 2;
-            /* 确保提示框在卡片上方 */
+            z-index: 2; /* 默认比普通卡片高 */
             overflow: visible; 
         }
 
-        /* --- [新增] 高级版悬停提示框样式 --- */
+        /* [关键优化] 悬停时层级最高，保证提示框遮盖相邻卡片 */
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            z-index: 50 !important; 
+        }
+        
+        /* Pro 卡片保持放大比例 */
+        .pricing-card.pro:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        /* --- [悬停提示框] 统一组件样式 --- */
         .pro-hover-detail {
             position: absolute;
-            bottom: 100%; /* 显示在卡片正上方 */
-            left: 50%;
-            transform: translateX(-50%) translateY(10px); /* 初始位置略低，配合动画 */
-            width: 100%;
-            min-width: 280px; /* 保证手机上也不会太窄 */
-            background: rgba(20, 25, 45, 0.95);
+            top: 20px; /* 顶部对齐略向下 */
+            width: 260px;
+            background: rgba(15, 23, 42, 0.95); /* 深色背景 */
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--secondary);
-            border-radius: 16px;
-            padding: 20px;
+            border: 1px solid;
+            border-radius: 12px;
+            padding: 16px;
             text-align: left;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(189, 0, 255, 0.2);
-            pointer-events: none; /* 防止遮挡下方点击 */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
         }
 
-        /* 小箭头 */
-        .pro-hover-detail::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 8px 8px 0;
-            border-style: solid;
-            border-color: var(--secondary) transparent transparent transparent;
-        }
-
-        /* 悬停时显示 */
-        .pricing-card.pro:hover .pro-hover-detail {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(-15px); /* 向上浮动显示 */
-        }
-
+        /* 标题样式 */
         .pro-hover-detail h4 {
-            color: var(--secondary);
-            font-size: 1rem;
-            margin-bottom: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 6px;
             padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .pro-hover-detail p {
-            color: #e2e8f0;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            line-height: 1.5;
+        /* 列表/段落样式 */
+        .pro-hover-detail ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
         }
         
-        .pro-hover-detail p:last-child {
-            margin-bottom: 0;
+        .pro-hover-detail p, .pro-hover-detail li {
+            color: #cbd5e1;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            line-height: 1.4;
         }
-        
+
         .pro-hover-detail strong {
-            color: var(--primary);
+            color: white;
+            font-weight: 600;
         }
-        /* --- [新增结束] --- */
+
+        /* --- [箭头通用] 使用伪元素制作三角形箭头 --- */
+        .pro-hover-detail::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: inherit; /* 继承背景色 */
+            border: inherit;     /* 继承边框 */
+            top: 30px;           /* 箭头垂直位置 */
+            transform: rotate(45deg);
+            z-index: -1;         /* 放在内容层之下 */
+        }
+
+        /* --- [位置变体] --- */
+
+        /* 1. 基础版 (Basic): 显示在右侧，向左重叠 */
+        .pricing-card.basic .pro-hover-detail {
+            left: 85%; /* 重叠位置 */
+            border-color: rgba(0, 229, 255, 0.3); /* 青色边框 */
+            transform: translateX(-10px); /* 初始位移 */
+        }
+        .pricing-card.basic .pro-hover-detail h4 { color: var(--primary); }
+        
+        /* 基础版箭头：在左侧 */
+        .pricing-card.basic .pro-hover-detail::before {
+            left: -6px;
+            border-right-color: transparent;
+            border-top-color: transparent;
+        }
+
+        /* 2. 高级版 (Pro): 显示在右侧，向左重叠 */
+        .pricing-card.pro .pro-hover-detail {
+            left: 85%;
+            border-color: rgba(189, 0, 255, 0.3); /* 紫色边框 */
+            transform: translateX(-10px);
+        }
+        .pricing-card.pro .pro-hover-detail h4 { color: var(--secondary); }
+
+        /* 高级版箭头：在左侧 */
+        .pricing-card.pro .pro-hover-detail::before {
+            left: -6px;
+            border-right-color: transparent;
+            border-top-color: transparent;
+        }
+
+        /* 3. 定制版 (Custom): 显示在左侧，向右重叠 (防止溢出屏幕) */
+        .pricing-card.custom .pro-hover-detail {
+            right: 85%; /* 重叠位置 */
+            left: auto;
+            border-color: rgba(244, 63, 94, 0.3); /* 红色边框 */
+            transform: translateX(10px);
+        }
+        .pricing-card.custom .pro-hover-detail h4 { color: #f43f5e; }
+
+        /* 定制版箭头：在右侧 */
+        .pricing-card.custom .pro-hover-detail::before {
+            right: -6px;
+            border-left-color: transparent;
+            border-bottom-color: transparent;
+        }
+
+        /* --- [触发动画] --- */
+        .pricing-card:hover .pro-hover-detail {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0); /* 回归原位 */
+        }
 
 
         .popular-tag {
@@ -847,7 +908,7 @@
             .footer-contact { text-align: center; }
             
             /* 手机端隐藏悬浮提示，或点击显示（这里简单隐藏，避免遮挡） */
-            .pro-hover-detail { display: none; }
+            .pro-hover-detail { display: none !important; }
         }
     </style>
 </head>
@@ -1002,6 +1063,17 @@
             <div class="pricing-grid">
                 <!-- 基础版 -->
                 <div class="pricing-card basic">
+                    <!-- [新增] 基础版悬停提示 (左边卡片，向右弹出) -->
+                    <div class="pro-hover-detail">
+                        <h4><i class="fas fa-gift"></i> <strong>基础+</strong> (v2.3.3)更新
+                        <ul>
+                            <li>💡 支持输入文章写作要求</li>
+                            <li>💡 支持导入文章、模板</li>
+                            <li>💡 新增版本更新相关提醒</li>
+                            <li>💡 其他问题修复与功能升级优化</li>
+                        </ul>
+                    </div>
+
                     <div class="card-header">
                         <h3>基础版</h3>
                         <div class="price">¥99 <span>/ 永久</span></div>
@@ -1019,7 +1091,7 @@
 
                 <!-- 高级版 (推荐) -->
                 <div class="pricing-card pro popular">
-                    <!-- [新增] 悬停提示框 -->
+                    <!-- [新增] 高级版悬停提示 (中间卡片，向右弹出) -->
                     <div class="pro-hover-detail">
                         <h4><i class="fas fa-crown"></i> Pro+专享</h4>
                         <p>💡 <strong>批量生成</strong>：支持设置一个话题生成多篇文章，根据喜好选择性发布</p>
@@ -1044,10 +1116,12 @@
 
                 <!-- 定制版 -->
                 <div class="pricing-card custom">
+                    <!-- [修复] 定制版悬停提示 (右边卡片，向左弹出) -->
                     <div class="pro-hover-detail">
-                        <h4><i class="fas fa-crown"></i> Pro+专享</h4>
+                        <h4><i class="fas fa-gem"></i> 定制服务</h4>
                         <p>💡 <strong>热点雷达</strong>：基于全网大数据的爆款操盘手。拒绝同质化、科学蹭热点、主编级策略</p>
                     </div>
+
                     <div class="card-header">
                         <h3>定制版</h3>
                         <div class="price">按需 <span>报价</span></div>
