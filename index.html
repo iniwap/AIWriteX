@@ -411,7 +411,79 @@
             box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
             transform: scale(1.05);
             z-index: 2;
+            /* 确保提示框在卡片上方 */
+            overflow: visible; 
         }
+
+        /* --- [新增] 高级版悬停提示框样式 --- */
+        .pro-hover-detail {
+            position: absolute;
+            bottom: 100%; /* 显示在卡片正上方 */
+            left: 50%;
+            transform: translateX(-50%) translateY(10px); /* 初始位置略低，配合动画 */
+            width: 100%;
+            min-width: 280px; /* 保证手机上也不会太窄 */
+            background: rgba(20, 25, 45, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--secondary);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(189, 0, 255, 0.2);
+            pointer-events: none; /* 防止遮挡下方点击 */
+        }
+
+        /* 小箭头 */
+        .pro-hover-detail::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: var(--secondary) transparent transparent transparent;
+        }
+
+        /* 悬停时显示 */
+        .pricing-card.pro:hover .pro-hover-detail {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-15px); /* 向上浮动显示 */
+        }
+
+        .pro-hover-detail h4 {
+            color: var(--secondary);
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+
+        .pro-hover-detail p {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .pro-hover-detail p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .pro-hover-detail strong {
+            color: var(--primary);
+        }
+        /* --- [新增结束] --- */
+
 
         .popular-tag {
             position: absolute;
@@ -517,13 +589,65 @@
             position: relative;
         }
 
+        /* PC端/宽屏优化：强制双列布局，增加卡片宽度 */
+        @media (min-width: 992px) {
+            .roadmap-grid {
+                grid-template-columns: repeat(2, 1fr); /* 宽屏下每行显示两个 */
+                gap: 60px 80px; /* 增加水平间距以放下连线 */
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            /* 调整卡片顺序以形成蛇形视觉流 */
+            .roadmap-card:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
+            .roadmap-card:nth-child(2) { grid-column: 2 / 3; grid-row: 1 / 2; }
+            .roadmap-card:nth-child(3) { grid-column: 2 / 3; grid-row: 2 / 3; }
+            .roadmap-card:nth-child(4) { grid-column: 1 / 2; grid-row: 2 / 3; }
+
+            /* === 连线设计 (使用伪元素) === */
+            .roadmap-card::after {
+                content: '';
+                position: absolute;
+                z-index: -1;
+                display: none; 
+                background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 40%, var(--primary) 50%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.05) 100%);
+                background-size: 200% 100%;
+                animation: scanning 3s linear infinite;
+                border-radius: 4px;
+            }
+
+            .roadmap-card::before {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: var(--primary);
+                border-radius: 50%;
+                box-shadow: 0 0 10px var(--primary);
+                z-index: 3;
+                display: none;
+            }
+
+            /* 1->2 */
+            .roadmap-card:nth-child(1)::after { display: block; height: 4px; width: 100px; top: 50%; right: -90px; transform: translateY(-50%); }
+            .roadmap-card:nth-child(1)::before { display: block; top: 50%; right: -4px; transform: translateY(-50%); }
+
+            /* 2->3 */
+            .roadmap-card:nth-child(2)::after { display: block; width: 4px; height: 100px; left: 50%; bottom: -80px; transform: translateX(-50%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, var(--primary) 50%, rgba(255, 255, 255, 0.05) 100%); background-size: 100% 200%; animation: scanning-v 3s linear infinite; }
+            .roadmap-card:nth-child(2)::before { display: block; bottom: -4px; left: 50%; transform: translateX(-50%); }
+
+            /* 3->4 */
+            .roadmap-card:nth-child(3)::after { display: block; height: 4px; width: 100px; top: 50%; left: -90px; transform: translateY(-50%); animation-direction: reverse; }
+            .roadmap-card:nth-child(3)::before { display: block; top: 50%; left: -4px; transform: translateY(-50%); }
+        }
+
         .roadmap-card {
             background: rgba(30, 41, 59, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 35px 30px;
             border-radius: 16px;
             position: relative;
-            z-index: 2; /* 确保卡片在连线上方 */
+            z-index: 2;
             backdrop-filter: blur(10px);
             transition: 0.3s;
             height: 100%;
@@ -565,7 +689,6 @@
             line-height: 1.6;
         }
 
-        /* 状态点 */
         .status-dot {
             position: absolute;
             top: 25px;
@@ -584,165 +707,6 @@
 
         .status-dot.future {
             background: var(--secondary);
-        }
-
-        /* ========== 宽屏下的蛇形连线与布局 ========== */
-        @media (min-width: 992px) {
-            .roadmap-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 60px 80px; /* 增加水平间距以放下连线 */
-                max-width: 1000px;
-                margin: 0 auto;
-            }
-            
-            /* 第1个: 左上 (默认) */
-            .roadmap-card:nth-child(1) {
-                grid-column: 1 / 2;
-                grid-row: 1 / 2;
-            }
-            
-            /* 第2个: 右上 (默认) */
-            .roadmap-card:nth-child(2) {
-                grid-column: 2 / 3;
-                grid-row: 1 / 2;
-            }
-
-            /* 第3个: 视觉上放右下 (逻辑顺序3) */
-            .roadmap-card:nth-child(3) {
-                grid-column: 2 / 3;
-                grid-row: 2 / 3;
-            }
-
-            /* 第4个: 视觉上放左下 (逻辑顺序4) */
-            .roadmap-card:nth-child(4) {
-                grid-column: 1 / 2;
-                grid-row: 2 / 3;
-            }
-
-            /* === 连线设计 (使用伪元素) === */
-            
-            /* 通用连线样式 */
-            .roadmap-card::after {
-                content: '';
-                position: absolute;
-                z-index: -1;
-                /* 默认隐藏，特定卡片开启 */
-                display: none; 
-                /* 渐变流光动画背景 */
-                background: linear-gradient(90deg, 
-                    rgba(255, 255, 255, 0.05) 0%, 
-                    rgba(255, 255, 255, 0.05) 40%, 
-                    var(--primary) 50%, 
-                    rgba(255, 255, 255, 0.05) 60%, 
-                    rgba(255, 255, 255, 0.05) 100%
-                );
-                background-size: 200% 100%;
-                animation: scanning 3s linear infinite;
-                border-radius: 4px;
-            }
-
-            /* 连接点光晕 */
-            .roadmap-card::before {
-                content: '';
-                position: absolute;
-                width: 8px;
-                height: 8px;
-                background: var(--primary);
-                border-radius: 50%;
-                box-shadow: 0 0 10px var(--primary);
-                z-index: 3;
-                display: none;
-            }
-
-            /* 连线 1 -> 2 (水平向右) */
-            .roadmap-card:nth-child(1)::after {
-                display: block;
-                height: 4px;
-                width: 100px; /* 跨越间隙 */
-                top: 50%;
-                right: -90px; /* 延伸到右侧卡片 */
-                transform: translateY(-50%);
-            }
-            /* 节点 1-2 */
-            .roadmap-card:nth-child(1)::before {
-                display: block;
-                top: 50%;
-                right: -4px;
-                transform: translateY(-50%);
-            }
-
-            /* 连线 2 -> 3 (垂直向下) */
-            .roadmap-card:nth-child(2)::after {
-                display: block;
-                width: 4px;
-                height: 100px; /* 跨越垂直间隙 */
-                left: 50%;
-                bottom: -80px; /* 延伸到下方卡片 */
-                transform: translateX(-50%);
-                background: linear-gradient(180deg, 
-                    rgba(255, 255, 255, 0.05) 0%, 
-                    var(--primary) 50%, 
-                    rgba(255, 255, 255, 0.05) 100%
-                );
-                background-size: 100% 200%;
-                animation: scanning-v 3s linear infinite;
-            }
-            /* 节点 2-3 */
-            .roadmap-card:nth-child(2)::before {
-                display: block;
-                bottom: -4px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            /* 连线 3 -> 4 (水平向左 - 视觉回流) */
-            .roadmap-card:nth-child(3)::after {
-                display: block;
-                height: 4px;
-                width: 100px;
-                top: 50%;
-                left: -90px; /* 延伸到左侧卡片 */
-                transform: translateY(-50%);
-                /* 反向流动 */
-                animation-direction: reverse; 
-            }
-            /* 节点 3-4 */
-            .roadmap-card:nth-child(3)::before {
-                display: block;
-                top: 50%;
-                left: -4px;
-                transform: translateY(-50%);
-            }
-        }
-
-        /* 移动端: 垂直时间轴 */
-        @media (max-width: 991px) {
-            .roadmap-grid {
-                padding-left: 20px;
-                border-left: 2px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            .roadmap-card {
-                margin-bottom: 30px;
-            }
-
-            .roadmap-card::before {
-                content: '';
-                position: absolute;
-                left: -26px; /* 对齐左侧线条 */
-                top: 40px;
-                width: 10px;
-                height: 10px;
-                background: var(--bg-dark);
-                border: 2px solid var(--primary);
-                border-radius: 50%;
-                z-index: 10;
-            }
-
-            .roadmap-card.active::before {
-                background: var(--primary);
-                box-shadow: 0 0 10px var(--primary);
-            }
         }
 
         /* ========== 下载区域 ========== */
@@ -855,177 +819,35 @@
         }
 
         /* ========== 动画关键帧 ========== */
-        @keyframes spin-cw {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes spin-ccw {
-            100% {
-                transform: rotate(-360deg);
-            }
-        }
-
-        @keyframes breathe {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(0.9);
-                opacity: 0.8;
-            }
-        }
-
-        @keyframes energy-pulse {
-            0%, 100% {
-                opacity: 0.2;
-                transform: scale(0.8);
-            }
-            50% {
-                opacity: 0.6;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes blink {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0;
-            }
-        }
-
-        /* 文字流光动画 */
-        @keyframes text-shine {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 200% 50%;
-            }
-        }
-
-        /* 状态点脉冲 */
-        @keyframes dot-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
-        }
-
-        /* 连线扫描动画 (水平) */
-        @keyframes scanning {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
-        }
-
-        /* 连线扫描动画 (垂直) */
-        @keyframes scanning-v {
-            0% { background-position: 0 100%; }
-            100% { background-position: 0 -100%; }
-        }
+        @keyframes spin-cw { 100% { transform: rotate(360deg); } }
+        @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.9); opacity: 0.8; } }
+        @keyframes energy-pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 0.6; transform: scale(1); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes text-shine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); } }
+        @keyframes scanning { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+        @keyframes scanning-v { 0% { background-position: 0 100%; } 100% { background-position: 0 -100%; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 响应式适配 */
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-            }
-
-            .nav-menu {
-                display: none; 
-                position: absolute;
-                top: 100%; 
-                left: 0;
-                width: 100%;
-                height: 100vh; 
-                background-color: rgba(15, 23, 42, 0.98);
-                backdrop-filter: blur(20px);
-                flex-direction: column;
-                padding: 40px 30px;
-                text-align: center;
-                border-top: 1px solid var(--border-color);
-                box-shadow: none;
-                z-index: 999;
-            }
-
-            .nav-menu.active {
-                display: flex;
-                animation: fadeInDown 0.3s ease forwards;
-            }
-
-            .nav-menu li {
-                margin: 0;
-                width: 100%;
-            }
+            .hero-title { font-size: 2.5rem; }
+            .hero-actions { flex-direction: column; }
+            .nav-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; height: 100vh; background-color: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); flex-direction: column; padding: 40px 30px; text-align: center; border-top: 1px solid var(--border-color); box-shadow: none; z-index: 999; }
+            .nav-menu.active { display: flex; animation: fadeInDown 0.3s ease forwards; }
+            .nav-menu li { margin: 0; width: 100%; }
+            .nav-menu a { display: block; width: 100%; padding: 20px 0; font-size: 1.1rem; color: var(--text-main); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+            .nav-menu a:hover { color: var(--primary); background: rgba(255,255,255,0.02); }
+            .nav-menu li:last-child a:not(.nav-btn-buy) { border-bottom: none; }
+            .nav-btn-buy { margin-top: 40px !important; display: inline-flex !important; justify-content: center; align-items: center; width: 100%; padding: 15px 0 !important; background: linear-gradient(90deg, var(--secondary), #d946ef); border-radius: 50px; border-bottom: none !important; box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3); font-size: 1.1rem !important; letter-spacing: 1px; }
+            .menu-toggle { display: block; color: white; }
+            .pricing-card.pro { transform: scale(1); }
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-contact { text-align: center; }
             
-            .nav-menu a {
-                display: block;
-                width: 100%;
-                padding: 20px 0;
-                font-size: 1.1rem;
-                color: var(--text-main);
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-                transition: 0.2s;
-            }
-
-            .nav-menu a:hover {
-                color: var(--primary);
-                background: rgba(255,255,255,0.02);
-            }
-
-            .nav-menu li:last-child a:not(.nav-btn-buy) {
-                border-bottom: none;
-            }
-
-            .nav-btn-buy {
-                margin-top: 40px !important; 
-                display: inline-flex !important;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-                padding: 15px 0 !important;
-                background: linear-gradient(90deg, var(--secondary), #d946ef);
-                border-radius: 50px; 
-                border-bottom: none !important;
-                box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
-                font-size: 1.1rem !important;
-                letter-spacing: 1px;
-            }
-
-            .menu-toggle {
-                display: block;
-                color: white;
-            }
-
-            .pricing-card.pro {
-                transform: scale(1);
-            }
-
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-contact {
-                text-align: center;
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            /* 手机端隐藏悬浮提示，或点击显示（这里简单隐藏，避免遮挡） */
+            .pro-hover-detail { display: none; }
         }
     </style>
 </head>
@@ -1197,6 +1019,13 @@
 
                 <!-- 高级版 (推荐) -->
                 <div class="pricing-card pro popular">
+                    <!-- [新增] 悬停提示框 -->
+                    <div class="pro-hover-detail">
+                        <h4><i class="fas fa-crown"></i> Pro+专享</h4>
+                        <p>💡 <strong>批量生成</strong>：支持设置一个话题生成多篇文章，根据喜好选择性发布</p>
+                        <p>💡 <strong>定时任务</strong>：支持按日期创建定时任务，按设定的日期时间完成生成发布</p>
+                    </div>
+
                     <div class="popular-tag">店长推荐</div>
                     <div class="card-header">
                         <h3>高级版 (Pro)</h3>
@@ -1215,6 +1044,10 @@
 
                 <!-- 定制版 -->
                 <div class="pricing-card custom">
+                    <div class="pro-hover-detail">
+                        <h4><i class="fas fa-crown"></i> Pro+专享</h4>
+                        <p>💡 <strong>热点雷达</strong>：基于全网大数据的爆款操盘手。拒绝同质化、科学蹭热点、主编级策略</p>
+                    </div>
                     <div class="card-header">
                         <h3>定制版</h3>
                         <div class="price">按需 <span>报价</span></div>
