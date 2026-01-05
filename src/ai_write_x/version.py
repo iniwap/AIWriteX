@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-__version__ = "2.3.3"
+__version__ = "2.3.1"
 __author__ = "https://aiwritex.voidai.cc"
 
 
