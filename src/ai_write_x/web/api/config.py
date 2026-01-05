@@ -5,7 +5,11 @@ import json
 from typing import Dict, Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+import requests
+from packaging import version
 
+
+from src.ai_write_x.version import get_version
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.utils import log
 from src.ai_write_x.utils.path_manager import PathManager
@@ -195,7 +199,7 @@ async def get_system_messages():
         system_messages = [
             {"text": "欢迎使用AIWriteX智能内容创作平台", "type": "info"},
             {"text": "本项目禁止用于商业用途，仅限个人使用", "type": "info"},
-            {"text": "如需商业授权，请联系522765228@qq.com", "type": "info"},
+            {"text": "技术支持与业务合作，请联系522765228@qq.com", "type": "info"},
             {
                 "text": "AIWriteX重新定义AI辅助内容创作的边界，融合搜索+借鉴+AI+创意四重能力，多种超绝玩法，让内容创作充满无限可能",
                 "type": "info",
@@ -217,3 +221,76 @@ async def get_page_design_config():
         return None
 
     return page_design
+
+
+@router.get("/help-manual")
+async def get_help_manual():
+    """获取使用手册HTML内容"""
+    from fastapi.responses import HTMLResponse
+    from ..app import templates
+
+    # 渲染模板
+    html_content = templates.TemplateResponse(
+        "components/help-manual.html", {"request": {}}
+    ).body.decode("utf-8")
+
+    return HTMLResponse(content=html_content)
+
+
+@router.get("/check-updates")
+async def check_for_updates():
+    """检查GitHub是否有新版本（仅在启动时调用）"""
+    current_version = get_version()
+
+    try:
+        headers = {"User-Agent": "AIWriteX-Client/1.0", "Accept": "application/vnd.github.v3+json"}
+
+        response = requests.get(
+            "https://api.github.com/repos/iniwap/AIWriteX/releases/latest",
+            timeout=5,
+            headers=headers,
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            latest_version = data["tag_name"].lstrip("Vv")
+            return {
+                "status": "success",
+                "has_update": version.parse(latest_version) > version.parse(current_version),
+                "current_version": current_version,
+                "latest_version": latest_version,
+                "download_url": (
+                    data["assets"][0]["browser_download_url"] if data.get("assets") else ""
+                ),
+                "release_notes": data.get("body", ""),
+                # "release_url": data["html_url"],
+            }
+        elif response.status_code == 403:
+            # 速率限制，静默处理
+            return {
+                "status": "rate_limited",
+                "has_update": False,
+                "current_version": current_version,
+            }
+        else:
+            return {"status": "error", "has_update": False, "current_version": current_version}
+
+    except Exception:
+        # 任何错误都静默处理，不影响启动
+        return {"status": "error", "has_update": False, "current_version": current_version}
+
+
+class URLRequest(BaseModel):
+    url: str
+
+
+@router.post("/open-url")
+async def open_external_url(request: URLRequest):
+    """打开外部链接"""
+    from src.ai_write_x.utils.utils import open_url
+
+    try:
+        result = open_url(request.url)
+        return {"status": "success", "message": result}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}

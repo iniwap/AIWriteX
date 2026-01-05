@@ -5,6 +5,7 @@
 AIWriteX 新架构
 基于FastAPI + PyWebView
 """
+from src.ai_write_x.version import get_version, get_author
 
-__version__ = "2.3.0"
-__author__ = "iniwaper@gmail.com"
+__version__ = get_version()
+__author__ = get_author()

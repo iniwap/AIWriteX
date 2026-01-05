@@ -14,6 +14,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 import uvicorn
 
+from src.ai_write_x.version import get_version
+from src.ai_write_x.version import get_version_with_prefix 
 from src.ai_write_x.utils.path_manager import PathManager
 from src.ai_write_x.config.config import Config
 from src.ai_write_x.utils import utils
@@ -66,7 +68,7 @@ async def lifespan(app: FastAPI):
 # 创建FastAPI应用，使用lifespan
 app = FastAPI(
     title="AIWriteX Web API",
-    version="2.3.0",
+    version=get_version(),
     description="智能内容创作平台Web接口",
     lifespan=lifespan,
 )
@@ -91,7 +93,6 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 templates = Jinja2Templates(directory=str(templates_path))
 
 # 注册API路由
-app.include_router(content_router)
 app.include_router(config_router)
 app.include_router(templates_router)
 app.include_router(articles_router)
@@ -101,7 +102,9 @@ app.include_router(generate_router)
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """返回主界面"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "version": get_version_with_prefix()}  # 传递版本号
+    )
 
 
 @app.get("/health")

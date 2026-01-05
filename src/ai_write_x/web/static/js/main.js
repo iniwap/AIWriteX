@@ -11,7 +11,8 @@ class AIWriteXApp {
         
     init() {    
         this.setupNavigation();    
-        this.showView(this.currentView);    
+        this.showView(this.currentView);
+        new UpdateChecker();    
     }    
         
     // ========== 导航管理 ==========    
