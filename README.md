@@ -22,6 +22,7 @@ AIWriteX 独家**流量预测引擎**，基于物理算法 + AI研判，帮你�
 > *本地复杂算法 + 大模型双重验证，拒绝过时内容！*
 
 <img src="preview.jpg" width="100%">
+<img src="preview1.jpg" width="100%">
 <img src="preview2.jpg" width="100%">
   
 ## 💎 核心功能一览
