@@ -3,8 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIWriteX)
   
 
-**[<u>AIWriteX</u>](https://aiwritex.voidai.cc/) 新一代智能内容创作平台**：一键全自动热点选题 + 实时搜索借鉴 + AI创意生成 + 精美排版 + 微信公众号自动发布  
-融合 **AI + 全网热点雷达 + 微信文章采集下载 + 洗稿润色内容挖掘 + 多智能体协作 + 去AI味润色**，让你的文章快人一步、阅读量10w+不是梦！
+**[<u>AIWriteX</u>](https://aiwritex.voidai.cc/) 新一代智能内容创作平台**：一键全自动热点选题 + 实时搜索借鉴 + AI创意生成 + 精美排版 + 微信公众号自动发布，融合 **AI + 全网热点雷达 + 微信文章采集下载 + 洗稿润色内容挖掘 + 多智能体协作 + 去AI味润色**，让你的文章快人一步、阅读量10w+不是梦！
 
 > **想先看看效果？** 👉 [实例预览](#绝美排版实例预览)  
 > **想用商业稳定版？** 👉 [前往官网](https://aiwritex.voidai.cc/)  
