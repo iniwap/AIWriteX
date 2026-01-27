@@ -24,7 +24,6 @@ from src.ai_write_x.utils import utils
 from .state import app_state
 
 # 导入API路由
-from .api.content import router as content_router
 from .api.config import router as config_router
 from .api.templates import router as templates_router
 from .api.articles import router as articles_router
