@@ -1,1330 +1,1715 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AIWriteX - 智能内容创作平台 | 官方网站</title>
-    <meta name="description" content="AIWriteX 是一款融合搜索、借鉴、AI与创意的智能内容创作平台，专为微信公众号打造的高效写作神器。">
-    <meta name="keywords" content="AI写作, 公众号助手, 智能创作, AIWriteX, 墨智工坊">
-    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <meta
+      name="description"
+      content="AIWriteX 是一款融合搜索、借鉴、AI与创意的智能内容创作平台，专为微信公众号打造的高效写作神器。"
+    />
+    <meta name="keywords" content="AI写作, 公众号助手, 智能创作, AIWriteX, 墨智工坊" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
 
     <!-- 引入字体图标库 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
 
     <style>
-        /* ========== 全局设置 ========== */
-        :root {
-            --bg-dark: #0f172a;
-            --bg-card: rgba(30, 41, 59, 0.6);
-            --primary: #00e5ff;
-            --secondary: #bd00ff;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --glass-blur: 20px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: 0.3s;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        /* ========== 导航栏 ========== */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* 导航栏LOGO容器布局 */
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            /* 图标和文字的间距 */
-            cursor: pointer;
-        }
-
-        /* 导航栏 SVG 样式 */
-        .nav-icon-svg {
-            width: 36px;
-            height: 36px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-            transition: transform 0.3s ease;
-        }
-
-        .nav-logo:hover .nav-icon-svg {
-            transform: scale(1.05);
-            filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
-        }
-
-        .nav-logo .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff, #cbd5e1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-menu a {
-            font-weight: 500;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .nav-menu a:hover {
-            color: var(--primary);
-        }
-
-        .nav-btn-buy {
-            background: linear-gradient(90deg, var(--secondary), #d946ef);
-            padding: 8px 20px;
-            border-radius: 20px;
-            color: white !important;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
-        }
-
-        .nav-btn-buy:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(189, 0, 255, 0.5);
-        }
-
-        .menu-toggle {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        /* ========== Hero 区域 ========== */
-        .hero-section {
-            padding: 140px 20px 80px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-bg-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%; 
-            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Logo 容器 */
-        .logo-container {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 30px;
-            background: linear-gradient(145deg, #1a1f35, #252b46);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .logo-container::before {
-            content: '';
-            position: absolute;
-            top: -10%;
-            left: -10%;
-            right: -10%;
-            bottom: -10%;
-            background: radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, transparent 70%);
-            z-index: -1;
-            border-radius: 50%;
-            animation: energy-pulse 3s infinite ease-in-out;
-        }
-
-        .logo-icon {
-            width: 64px;
-            height: 64px;
-            filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
-        }
-
-        .orbit-path {
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            transform-origin: center;
-        }
-
-        .orbit-1 {
-            stroke: var(--primary);
-            animation: spin-cw 4s linear infinite;
-            stroke-dasharray: 60;
-        }
-
-        .orbit-2 {
-            stroke: var(--secondary);
-            animation: spin-ccw 5s linear infinite;
-            stroke-dasharray: 40;
-            opacity: 0.8;
-        }
-
-        .core-x {
-            fill: none;
-            stroke: url(#grad-core);
-            stroke-width: 6;
-            stroke-linecap: round;
-            animation: breathe 2.5s infinite ease-in-out;
-        }
-
-        /* 标题样式 */
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            line-height: 1.1;
-            letter-spacing: -1px;
-        }
-
-        /* 流动的渐变文字特效 */
-        .gradient-animate {
-            background: linear-gradient(
-                90deg, 
-                var(--primary) 0%, 
-                var(--secondary) 30%, 
-                #ffffff 50%, 
-                var(--secondary) 70%, 
-                var(--primary) 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: text-shine 4s linear infinite;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .workshop-subtitle {
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            min-height: 30px;
-        }
-
-        .cursor-blink {
-            display: inline-block;
-            width: 3px;
-            height: 24px;
-            background-color: var(--primary);
-            animation: blink 1s step-end infinite;
-        }
-
-        .hero-desc {
-            font-size: 1.1rem;
-            color: #cbd5e1;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            line-height: 1.8;
-        }
-
-        /* 按钮组 */
-        .hero-actions {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #2563eb);
-            color: #0f172a;
-            border: none;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-        }
-
-        .glow-effect:hover {
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .os-support {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        /* ========== 通用 Section 样式 ========== */
-        section {
-            padding: 80px 20px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 60px;
-        }
-
-        /* ========== 功能网格 ========== */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 20px;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.2);
-        }
-
-        .feature-card .icon-box {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: var(--primary);
-            background: rgba(0, 229, 255, 0.1);
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 15px;
-        }
-
-        .feature-card h3 {
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .feature-card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        /* ========== 价格/授权方案 ========== */
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            align-items: center;
-            position: relative; 
-        }
-
-        .pricing-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            z-index: 1; 
-        }
-
-        .pricing-card.pro {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
-            border: 1px solid var(--secondary);
-            box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
-            transform: scale(1.05);
-            z-index: 2; /* 默认比普通卡片高 */
-            overflow: visible; 
-        }
-
-        /* [关键优化] 悬停时层级最高，保证提示框遮盖相邻卡片 */
-        .pricing-card:hover {
-            transform: translateY(-8px);
-            z-index: 50 !important; 
-        }
-        
-        /* Pro 卡片保持放大比例 */
-        .pricing-card.pro:hover {
-            transform: scale(1.05) translateY(-8px);
-        }
-
-        /* --- [悬停提示框] 统一组件样式 --- */
-        .pro-hover-detail {
-            position: absolute;
-            top: 20px; /* 顶部对齐略向下 */
-            width: 260px;
-            background: rgba(15, 23, 42, 0.95); /* 深色背景 */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid;
-            border-radius: 12px;
-            padding: 16px;
-            text-align: left;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-            pointer-events: none;
-        }
-
-        /* 标题样式 */
-        .pro-hover-detail h4 {
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* 列表/段落样式 */
-        .pro-hover-detail ul {
-            padding: 0;
-            margin: 0;
-            list-style: none;
-        }
-        
-        .pro-hover-detail p, .pro-hover-detail li {
-            color: #cbd5e1;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .pro-hover-detail strong {
-            color: white;
-            font-weight: 600;
-        }
-
-        /* --- [箭头通用] 使用伪元素制作三角形箭头 --- */
-        .pro-hover-detail::before {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: inherit; /* 继承背景色 */
-            border: inherit;     /* 继承边框 */
-            top: 30px;           /* 箭头垂直位置 */
-            transform: rotate(45deg);
-            z-index: -1;         /* 放在内容层之下 */
-        }
-
-        /* --- [位置变体] --- */
-
-        /* 1. 基础版 (Basic): 显示在右侧，向左重叠 */
-        .pricing-card.basic .pro-hover-detail {
-            left: 85%; /* 重叠位置 */
-            border-color: rgba(0, 229, 255, 0.3); /* 青色边框 */
-            transform: translateX(-10px); /* 初始位移 */
-        }
-        .pricing-card.basic .pro-hover-detail h4 { color: var(--primary); }
-        
-        /* 基础版箭头：在左侧 */
-        .pricing-card.basic .pro-hover-detail::before {
-            left: -6px;
-            border-right-color: transparent;
-            border-top-color: transparent;
-        }
-
-        /* 2. 高级版 (Pro): 显示在右侧，向左重叠 */
-        .pricing-card.pro .pro-hover-detail {
-            left: 85%;
-            border-color: rgba(189, 0, 255, 0.3); /* 紫色边框 */
-            transform: translateX(-10px);
-        }
-        .pricing-card.pro .pro-hover-detail h4 { color: var(--secondary); }
-
-        /* 高级版箭头：在左侧 */
-        .pricing-card.pro .pro-hover-detail::before {
-            left: -6px;
-            border-right-color: transparent;
-            border-top-color: transparent;
-        }
-
-        /* 3. 定制版 (Custom): 显示在左侧，向右重叠 (防止溢出屏幕) */
-        .pricing-card.custom .pro-hover-detail {
-            right: 85%; /* 重叠位置 */
-            left: auto;
-            border-color: rgba(244, 63, 94, 0.3); /* 红色边框 */
-            transform: translateX(10px);
-        }
-        .pricing-card.custom .pro-hover-detail h4 { color: #f43f5e; }
-
-        /* 定制版箭头：在右侧 */
-        .pricing-card.custom .pro-hover-detail::before {
-            right: -6px;
-            border-left-color: transparent;
-            border-bottom-color: transparent;
-        }
-
-        /* --- [触发动画] --- */
-        .pricing-card:hover .pro-hover-detail {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0); /* 回归原位 */
-        }
-
-
-        .popular-tag {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(90deg, var(--secondary), #d946ef);
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-header {
-            margin-bottom: 30px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 20px;
-        }
-
-        .pricing-card h3 {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: white;
-        }
-
-        .price span {
-            font-size: 1rem;
-            color: var(--text-muted);
-            font-weight: normal;
-        }
-
-        .price-sub {
-            font-size: 0.8rem;
-            color: var(--primary);
-            margin-top: 5px;
-        }
-
-        .features-list {
-            margin-bottom: 30px;
-            text-align: left;
-        }
-
-        .features-list li {
-            margin-bottom: 12px;
-            color: #e2e8f0;
-            font-size: 0.95rem;
-        }
-
-        .features-list li i {
-            margin-right: 10px;
-            color: var(--primary);
-            width: 20px;
-            text-align: center;
-        }
-
-        .features-list li.disabled {
-            color: #64748b;
-            text-decoration: line-through;
-        }
-
-        .features-list li.disabled i {
-            color: #64748b;
-        }
-
-        .btn-outline {
-            border: 1px solid var(--border-color);
-            color: white;
-            width: 100%;
-            justify-content: center;
-            background: transparent;
-        }
-
-        .btn-outline:hover {
-            border-color: white;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* ========== 路线图/开发计划样式 (升级版) ========== */
-        .roadmap-section {
-            background: linear-gradient(180deg, var(--bg-dark) 0%, #172033 100%);
-            position: relative;
-            overflow: hidden; /* 防止光束溢出 */
-        }
-        
-        .roadmap-intro {
-            text-align: center;
-            max-width: 700px;
-            margin: -40px auto 60px;
-            color: var(--text-muted);
-        }
-
+      /* ========== 全局设置 ========== */
+      :root {
+        --bg-dark: #0f172a;
+        --bg-card: rgba(30, 41, 59, 0.6);
+        --primary: #00e5ff;
+        --secondary: #bd00ff;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --glass-blur: 20px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+        transition: 0.3s;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      /* ========== 导航栏 ========== */
+      .navbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        z-index: 1000;
+        border-bottom: 1px solid var(--border-color);
+        transition:
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* 导航栏LOGO容器布局 */
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        /* 图标和文字的间距 */
+        cursor: pointer;
+      }
+
+      /* 导航栏 SVG 样式 */
+      .nav-icon-svg {
+        width: 36px;
+        height: 36px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        transition: transform 0.3s ease;
+      }
+
+      .nav-logo:hover .nav-icon-svg {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+      }
+
+      .nav-logo .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .nav-menu {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .nav-menu a {
+        font-weight: 500;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      .nav-menu a:hover {
+        color: var(--primary);
+      }
+
+      .nav-btn-buy {
+        background: linear-gradient(90deg, var(--secondary), #d946ef);
+        padding: 8px 20px;
+        border-radius: 20px;
+        color: white !important;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
+      }
+
+      .nav-btn-buy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(189, 0, 255, 0.5);
+      }
+
+      .menu-toggle {
+        display: none;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      /* ========== Hero 区域 ========== */
+      .hero-section {
+        padding: 140px 20px 80px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-bg-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      /* Logo 容器 */
+      .logo-container {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+        background: linear-gradient(145deg, #1a1f35, #252b46);
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 10px 30px rgba(0, 229, 255, 0.2),
+          inset 0 0 15px rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+      }
+
+      .logo-container::before {
+        content: '';
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        right: -10%;
+        bottom: -10%;
+        background: radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, transparent 70%);
+        z-index: -1;
+        border-radius: 50%;
+        animation: energy-pulse 3s infinite ease-in-out;
+      }
+
+      .logo-icon {
+        width: 64px;
+        height: 64px;
+        filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+      }
+
+      .orbit-path {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        transform-origin: center;
+      }
+
+      .orbit-1 {
+        stroke: var(--primary);
+        animation: spin-cw 4s linear infinite;
+        stroke-dasharray: 60;
+      }
+
+      .orbit-2 {
+        stroke: var(--secondary);
+        animation: spin-ccw 5s linear infinite;
+        stroke-dasharray: 40;
+        opacity: 0.8;
+      }
+
+      .core-x {
+        fill: none;
+        stroke: url(#grad-core);
+        stroke-width: 6;
+        stroke-linecap: round;
+        animation: breathe 2.5s infinite ease-in-out;
+      }
+
+      /* 标题样式 */
+      .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        line-height: 1.1;
+        letter-spacing: -1px;
+      }
+
+      /* 流动的渐变文字特效 */
+      .gradient-animate {
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--secondary) 30%,
+          #ffffff 50%,
+          var(--secondary) 70%,
+          var(--primary) 100%
+        );
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: text-shine 4s linear infinite;
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .workshop-subtitle {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        min-height: 30px;
+      }
+
+      .cursor-blink {
+        display: inline-block;
+        width: 3px;
+        height: 24px;
+        background-color: var(--primary);
+        animation: blink 1s step-end infinite;
+      }
+
+      .hero-desc {
+        font-size: 1.1rem;
+        color: #cbd5e1;
+        max-width: 600px;
+        margin: 0 auto 40px;
+        line-height: 1.8;
+      }
+
+      /* 按钮组 */
+      .hero-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), #2563eb);
+        color: #0f172a;
+        border: none;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+      }
+
+      .glow-effect:hover {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Baidu Netdisk Button (Icon Only) */
+      /* Baidu Netdisk Button (Icon Only - Subtle) */
+      .netdisk-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: transparent;
+        border: 1px solid transparent;
+        color: rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        text-decoration: none;
+      }
+
+      .netdisk-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+
+      .netdisk-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      /* Custom Tooltip */
+      .netdisk-btn::before {
+        content: '百度网盘下载';
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: rgba(15, 23, 42, 0.95);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .netdisk-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 115%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        border: 6px solid transparent;
+        border-top-color: rgba(15, 23, 42, 0.95);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: none;
+      }
+
+      .netdisk-btn:hover::before,
+      .netdisk-btn:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .os-support {
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+
+      /* ========== 通用 Section 样式 ========== */
+      section {
+        padding: 80px 20px;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 60px;
+      }
+
+      /* ========== 功能网格 ========== */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+      }
+
+      .feature-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 30px;
+        border-radius: 20px;
+        transition: 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+        box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.2);
+      }
+
+      .feature-card .icon-box {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: var(--primary);
+        background: rgba(0, 229, 255, 0.1);
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+      }
+
+      .feature-card h3 {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .feature-card p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      /* ========== 价格/授权方案 ========== */
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        align-items: center;
+        position: relative;
+      }
+
+      .pricing-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 40px 30px;
+        text-align: center;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        z-index: 1;
+      }
+
+      .pricing-card.pro {
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+        border: 1px solid var(--secondary);
+        box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
+        transform: scale(1.05);
+        z-index: 2; /* 默认比普通卡片高 */
+        overflow: visible;
+      }
+
+      /* [关键优化] 悬停时层级最高，保证提示框遮盖相邻卡片 */
+      .pricing-card:hover {
+        transform: translateY(-8px);
+        z-index: 50 !important;
+      }
+
+      /* Pro 卡片保持放大比例 */
+      .pricing-card.pro:hover {
+        transform: scale(1.05) translateY(-8px);
+      }
+
+      /* --- [悬停提示框] 统一组件样式 --- */
+      .pro-hover-detail {
+        position: absolute;
+        top: 20px; /* 顶部对齐略向下 */
+        width: 260px;
+        background: rgba(15, 23, 42, 0.95); /* 深色背景 */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: left;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+      }
+
+      /* 标题样式 */
+      .pro-hover-detail h4 {
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* 列表/段落样式 */
+      .pro-hover-detail ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+
+      .pro-hover-detail p,
+      .pro-hover-detail li {
+        color: #cbd5e1;
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+        line-height: 1.4;
+      }
+
+      .pro-hover-detail strong {
+        color: white;
+        font-weight: 600;
+      }
+
+      /* --- [箭头通用] 使用伪元素制作三角形箭头 --- */
+      .pro-hover-detail::before {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: inherit; /* 继承背景色 */
+        border: inherit; /* 继承边框 */
+        top: 30px; /* 箭头垂直位置 */
+        transform: rotate(45deg);
+        z-index: -1; /* 放在内容层之下 */
+      }
+
+      /* --- [位置变体] --- */
+
+      /* 1. 基础版 (Basic): 显示在右侧，向左重叠 */
+      .pricing-card.basic .pro-hover-detail {
+        left: 85%; /* 重叠位置 */
+        border-color: rgba(0, 229, 255, 0.3); /* 青色边框 */
+        transform: translateX(-10px); /* 初始位移 */
+      }
+      .pricing-card.basic .pro-hover-detail h4 {
+        color: var(--primary);
+      }
+
+      /* 基础版箭头：在左侧 */
+      .pricing-card.basic .pro-hover-detail::before {
+        left: -6px;
+        border-right-color: transparent;
+        border-top-color: transparent;
+      }
+
+      /* 2. 高级版 (Pro): 显示在右侧，向左重叠 */
+      .pricing-card.pro .pro-hover-detail {
+        left: 85%;
+        border-color: rgba(189, 0, 255, 0.3); /* 紫色边框 */
+        transform: translateX(-10px);
+      }
+      .pricing-card.pro .pro-hover-detail h4 {
+        color: var(--secondary);
+      }
+
+      /* 高级版箭头：在左侧 */
+      .pricing-card.pro .pro-hover-detail::before {
+        left: -6px;
+        border-right-color: transparent;
+        border-top-color: transparent;
+      }
+
+      /* 3. 定制版 (Custom): 显示在左侧，向右重叠 (防止溢出屏幕) */
+      .pricing-card.custom .pro-hover-detail {
+        right: 85%; /* 重叠位置 */
+        left: auto;
+        border-color: rgba(244, 63, 94, 0.3); /* 红色边框 */
+        transform: translateX(10px);
+      }
+      .pricing-card.custom .pro-hover-detail h4 {
+        color: #f43f5e;
+      }
+
+      /* 定制版箭头：在右侧 */
+      .pricing-card.custom .pro-hover-detail::before {
+        right: -6px;
+        border-left-color: transparent;
+        border-bottom-color: transparent;
+      }
+
+      /* --- [触发动画] --- */
+      .pricing-card:hover .pro-hover-detail {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0); /* 回归原位 */
+      }
+
+      .popular-tag {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(90deg, var(--secondary), #d946ef);
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 20px;
+      }
+
+      .pricing-card h3 {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+
+      .price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      .price span {
+        font-size: 1rem;
+        color: var(--text-muted);
+        font-weight: normal;
+      }
+
+      .price-sub {
+        font-size: 0.8rem;
+        color: var(--primary);
+        margin-top: 5px;
+      }
+
+      .features-list {
+        margin-bottom: 30px;
+        text-align: left;
+      }
+
+      .features-list li {
+        margin-bottom: 12px;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+      }
+
+      .features-list li i {
+        margin-right: 10px;
+        color: var(--primary);
+        width: 20px;
+        text-align: center;
+      }
+
+      .features-list li.disabled {
+        color: #64748b;
+        text-decoration: line-through;
+      }
+
+      .features-list li.disabled i {
+        color: #64748b;
+      }
+
+      .btn-outline {
+        border: 1px solid var(--border-color);
+        color: white;
+        width: 100%;
+        justify-content: center;
+        background: transparent;
+      }
+
+      .btn-outline:hover {
+        border-color: white;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      /* ========== 路线图/开发计划样式 (升级版) ========== */
+      .roadmap-section {
+        background: linear-gradient(180deg, var(--bg-dark) 0%, #172033 100%);
+        position: relative;
+        overflow: hidden; /* 防止光束溢出 */
+      }
+
+      .roadmap-intro {
+        text-align: center;
+        max-width: 700px;
+        margin: -40px auto 60px;
+        color: var(--text-muted);
+      }
+
+      .roadmap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 40px; /* 卡片间距 */
+        position: relative;
+      }
+
+      /* PC端/宽屏优化：强制双列布局，增加卡片宽度 */
+      @media (min-width: 992px) {
         .roadmap-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px; /* 卡片间距 */
-            position: relative;
+          grid-template-columns: repeat(2, 1fr); /* 宽屏下每行显示两个 */
+          gap: 60px 80px; /* 增加水平间距以放下连线 */
+          max-width: 1000px;
+          margin: 0 auto;
         }
 
-        /* PC端/宽屏优化：强制双列布局，增加卡片宽度 */
-        @media (min-width: 992px) {
-            .roadmap-grid {
-                grid-template-columns: repeat(2, 1fr); /* 宽屏下每行显示两个 */
-                gap: 60px 80px; /* 增加水平间距以放下连线 */
-                max-width: 1000px;
-                margin: 0 auto;
-            }
-
-            /* 调整卡片顺序以形成蛇形视觉流 */
-            .roadmap-card:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
-            .roadmap-card:nth-child(2) { grid-column: 2 / 3; grid-row: 1 / 2; }
-            .roadmap-card:nth-child(3) { grid-column: 2 / 3; grid-row: 2 / 3; }
-            .roadmap-card:nth-child(4) { grid-column: 1 / 2; grid-row: 2 / 3; }
-
-            /* === 连线设计 (使用伪元素) === */
-            .roadmap-card::after {
-                content: '';
-                position: absolute;
-                z-index: -1;
-                display: none; 
-                background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 40%, var(--primary) 50%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.05) 100%);
-                background-size: 200% 100%;
-                animation: scanning 3s linear infinite;
-                border-radius: 4px;
-            }
-
-            .roadmap-card::before {
-                content: '';
-                position: absolute;
-                width: 8px;
-                height: 8px;
-                background: var(--primary);
-                border-radius: 50%;
-                box-shadow: 0 0 10px var(--primary);
-                z-index: 3;
-                display: none;
-            }
-
-            /* 1->2 */
-            .roadmap-card:nth-child(1)::after { display: block; height: 4px; width: 100px; top: 50%; right: -90px; transform: translateY(-50%); }
-            .roadmap-card:nth-child(1)::before { display: block; top: 50%; right: -4px; transform: translateY(-50%); }
-
-            /* 2->3 */
-            .roadmap-card:nth-child(2)::after { display: block; width: 4px; height: 100px; left: 50%; bottom: -80px; transform: translateX(-50%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, var(--primary) 50%, rgba(255, 255, 255, 0.05) 100%); background-size: 100% 200%; animation: scanning-v 3s linear infinite; }
-            .roadmap-card:nth-child(2)::before { display: block; bottom: -4px; left: 50%; transform: translateX(-50%); }
-
-            /* 3->4 */
-            .roadmap-card:nth-child(3)::after { display: block; height: 4px; width: 100px; top: 50%; left: -90px; transform: translateY(-50%); animation-direction: reverse; }
-            .roadmap-card:nth-child(3)::before { display: block; top: 50%; left: -4px; transform: translateY(-50%); }
+        /* 调整卡片顺序以形成蛇形视觉流 */
+        .roadmap-card:nth-child(1) {
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
+        }
+        .roadmap-card:nth-child(2) {
+          grid-column: 2 / 3;
+          grid-row: 1 / 2;
+        }
+        .roadmap-card:nth-child(3) {
+          grid-column: 2 / 3;
+          grid-row: 2 / 3;
+        }
+        .roadmap-card:nth-child(4) {
+          grid-column: 1 / 2;
+          grid-row: 2 / 3;
         }
 
-        .roadmap-card {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 35px 30px;
-            border-radius: 16px;
-            position: relative;
-            z-index: 2;
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
-            height: 100%;
+        /* === 连线设计 (使用伪元素) === */
+        .roadmap-card::after {
+          content: '';
+          position: absolute;
+          z-index: -1;
+          display: none;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            var(--primary) 50%,
+            rgba(255, 255, 255, 0.05) 60%,
+            rgba(255, 255, 255, 0.05) 100%
+          );
+          background-size: 200% 100%;
+          animation: scanning 3s linear infinite;
+          border-radius: 4px;
         }
 
-        .roadmap-card:hover {
-            border-color: var(--secondary);
-            transform: translateY(-5px);
-            background: rgba(30, 41, 59, 0.8);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        .roadmap-card::before {
+          content: '';
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background: var(--primary);
+          border-radius: 50%;
+          box-shadow: 0 0 10px var(--primary);
+          z-index: 3;
+          display: none;
         }
 
-        .step-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        /* 1->2 */
+        .roadmap-card:nth-child(1)::after {
+          display: block;
+          height: 4px;
+          width: 100px;
+          top: 50%;
+          right: -90px;
+          transform: translateY(-50%);
+        }
+        .roadmap-card:nth-child(1)::before {
+          display: block;
+          top: 50%;
+          right: -4px;
+          transform: translateY(-50%);
         }
 
-        .roadmap-card.active .step-badge {
-            background: rgba(0, 229, 255, 0.15);
-            color: var(--primary);
-            border-color: var(--primary);
+        /* 2->3 */
+        .roadmap-card:nth-child(2)::after {
+          display: block;
+          width: 4px;
+          height: 100px;
+          left: 50%;
+          bottom: -80px;
+          transform: translateX(-50%);
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            var(--primary) 50%,
+            rgba(255, 255, 255, 0.05) 100%
+          );
+          background-size: 100% 200%;
+          animation: scanning-v 3s linear infinite;
+        }
+        .roadmap-card:nth-child(2)::before {
+          display: block;
+          bottom: -4px;
+          left: 50%;
+          transform: translateX(-50%);
         }
 
-        .roadmap-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-            color: #fff;
+        /* 3->4 */
+        .roadmap-card:nth-child(3)::after {
+          display: block;
+          height: 4px;
+          width: 100px;
+          top: 50%;
+          left: -90px;
+          transform: translateY(-50%);
+          animation-direction: reverse;
         }
-
-        .roadmap-card p {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.6;
+        .roadmap-card:nth-child(3)::before {
+          display: block;
+          top: 50%;
+          left: -4px;
+          transform: translateY(-50%);
         }
+      }
 
-        .status-dot {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #64748b;
+      .roadmap-card {
+        background: rgba(30, 41, 59, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 35px 30px;
+        border-radius: 16px;
+        position: relative;
+        z-index: 2;
+        backdrop-filter: blur(10px);
+        transition: 0.3s;
+        height: 100%;
+      }
+
+      .roadmap-card:hover {
+        border-color: var(--secondary);
+        transform: translateY(-5px);
+        background: rgba(30, 41, 59, 0.8);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .roadmap-card.active .step-badge {
+        background: rgba(0, 229, 255, 0.15);
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+
+      .roadmap-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+        color: #fff;
+      }
+
+      .roadmap-card p {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .status-dot {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #64748b;
+      }
+
+      .status-dot.pulsing {
+        background: var(--primary);
+        box-shadow: 0 0 12px var(--primary);
+        animation: dot-pulse 2s infinite;
+      }
+
+      .status-dot.future {
+        background: var(--secondary);
+      }
+
+      /* ========== 下载区域 ========== */
+      .download-section {
+        background: linear-gradient(180deg, var(--bg-dark) 0%, #1e1b4b 100%);
+        text-align: center;
+      }
+
+      .download-content h2 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+      }
+
+      .download-content p {
+        color: var(--text-muted);
+        margin-bottom: 40px;
+      }
+
+      .download-btns {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .btn-large {
+        padding: 15px 40px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 200px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .btn-large i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .btn-win {
+        border-color: #0078d4;
+        background: rgba(0, 120, 212, 0.1);
+      }
+
+      .btn-win:hover {
+        background: rgba(0, 120, 212, 0.2);
+        transform: scale(1.05);
+      }
+
+      .btn-mac.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-style: dashed;
+      }
+
+      .btn-info {
+        font-size: 0.8rem;
+        font-weight: normal;
+        margin-top: 5px;
+        opacity: 0.7;
+      }
+
+      .download-note {
+        margin-top: 20px;
+        font-size: 0.8rem;
+        color: #475569;
+      }
+
+      /* ========== Footer ========== */
+      footer {
+        border-top: 1px solid var(--border-color);
+        background: #0b1120;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        padding: 40px 20px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .footer-logo {
+        font-weight: bold;
+        color: white;
+      }
+
+      .footer-logo p {
+        font-weight: normal;
+        font-size: 0.8rem;
+        margin-top: 5px;
+      }
+
+      .footer-links a {
+        margin: 0 15px;
+      }
+
+      .footer-links a:hover {
+        color: var(--primary);
+      }
+
+      .footer-contact {
+        text-align: right;
+      }
+
+      /* ========== 动画关键帧 ========== */
+      @keyframes spin-cw {
+        100% {
+          transform: rotate(360deg);
         }
-
-        .status-dot.pulsing {
-            background: var(--primary);
-            box-shadow: 0 0 12px var(--primary);
-            animation: dot-pulse 2s infinite;
+      }
+      @keyframes spin-ccw {
+        100% {
+          transform: rotate(-360deg);
         }
-
-        .status-dot.future {
-            background: var(--secondary);
+      }
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
         }
-
-        /* ========== 下载区域 ========== */
-        .download-section {
-            background: linear-gradient(180deg, var(--bg-dark) 0%, #1e1b4b 100%);
-            text-align: center;
+        50% {
+          transform: scale(0.9);
+          opacity: 0.8;
         }
-
-        .download-content h2 {
-            font-size: 2rem;
-            margin-bottom: 15px;
+      }
+      @keyframes energy-pulse {
+        0%,
+        100% {
+          opacity: 0.2;
+          transform: scale(0.8);
         }
-
-        .download-content p {
-            color: var(--text-muted);
-            margin-bottom: 40px;
+        50% {
+          opacity: 0.6;
+          transform: scale(1);
         }
-
-        .download-btns {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
         }
-
-        .btn-large {
-            padding: 15px 40px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 200px;
-            border: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+        50% {
+          opacity: 0;
         }
-
-        .btn-large i {
-            font-size: 2rem;
-            margin-bottom: 10px;
+      }
+      @keyframes text-shine {
+        0% {
+          background-position: 0% 50%;
         }
-
-        .btn-win {
-            border-color: #0078d4;
-            background: rgba(0, 120, 212, 0.1);
+        100% {
+          background-position: 200% 50%;
         }
-
-        .btn-win:hover {
-            background: rgba(0, 120, 212, 0.2);
-            transform: scale(1.05);
+      }
+      @keyframes dot-pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4);
         }
-
-        .btn-mac.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-style: dashed;
+        70% {
+          box-shadow: 0 0 0 10px rgba(0, 229, 255, 0);
         }
-
-        .btn-info {
-            font-size: 0.8rem;
-            font-weight: normal;
-            margin-top: 5px;
-            opacity: 0.7;
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
         }
-
-        .download-note {
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: #475569;
+      }
+      @keyframes scanning {
+        0% {
+          background-position: 100% 0;
         }
-
-        /* ========== Footer ========== */
-        footer {
-            border-top: 1px solid var(--border-color);
-            background: #0b1120;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            padding: 40px 20px;
+        100% {
+          background-position: -100% 0;
         }
+      }
+      @keyframes scanning-v {
+        0% {
+          background-position: 0 100%;
+        }
+        100% {
+          background-position: 0 -100%;
+        }
+      }
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
+      /* 响应式适配 */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2.5rem;
+        }
+        .hero-actions {
+          flex-direction: column;
+        }
+        .nav-menu {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+          background-color: rgba(15, 23, 42, 0.98);
+          backdrop-filter: blur(20px);
+          flex-direction: column;
+          padding: 40px 30px;
+          text-align: center;
+          border-top: 1px solid var(--border-color);
+          box-shadow: none;
+          z-index: 999;
+        }
+        .nav-menu.active {
+          display: flex;
+          animation: fadeInDown 0.3s ease forwards;
+        }
+        .nav-menu li {
+          margin: 0;
+          width: 100%;
+        }
+        .nav-menu a {
+          display: block;
+          width: 100%;
+          padding: 20px 0;
+          font-size: 1.1rem;
+          color: var(--text-main);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          transition: 0.2s;
+        }
+        .nav-menu a:hover {
+          color: var(--primary);
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .nav-menu li:last-child a:not(.nav-btn-buy) {
+          border-bottom: none;
+        }
+        .nav-btn-buy {
+          margin-top: 40px !important;
+          display: inline-flex !important;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          padding: 15px 0 !important;
+          background: linear-gradient(90deg, var(--secondary), #d946ef);
+          border-radius: 50px;
+          border-bottom: none !important;
+          box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
+          font-size: 1.1rem !important;
+          letter-spacing: 1px;
+        }
+        .menu-toggle {
+          display: block;
+          color: white;
+        }
+        .pricing-card.pro {
+          transform: scale(1);
+        }
         .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
+          flex-direction: column;
+          text-align: center;
         }
-
-        .footer-logo {
-            font-weight: bold;
-            color: white;
-        }
-
-        .footer-logo p {
-            font-weight: normal;
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-
-        .footer-links a {
-            margin: 0 15px;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
-        }
-
         .footer-contact {
-            text-align: right;
+          text-align: center;
         }
 
-        /* ========== 动画关键帧 ========== */
-        @keyframes spin-cw { 100% { transform: rotate(360deg); } }
-        @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
-        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.9); opacity: 0.8; } }
-        @keyframes energy-pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 0.6; transform: scale(1); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes text-shine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        @keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); } }
-        @keyframes scanning { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-        @keyframes scanning-v { 0% { background-position: 0 100%; } 100% { background-position: 0 -100%; } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 响应式适配 */
-        @media (max-width: 768px) {
-            .hero-title { font-size: 2.5rem; }
-            .hero-actions { flex-direction: column; }
-            .nav-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; height: 100vh; background-color: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); flex-direction: column; padding: 40px 30px; text-align: center; border-top: 1px solid var(--border-color); box-shadow: none; z-index: 999; }
-            .nav-menu.active { display: flex; animation: fadeInDown 0.3s ease forwards; }
-            .nav-menu li { margin: 0; width: 100%; }
-            .nav-menu a { display: block; width: 100%; padding: 20px 0; font-size: 1.1rem; color: var(--text-main); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
-            .nav-menu a:hover { color: var(--primary); background: rgba(255,255,255,0.02); }
-            .nav-menu li:last-child a:not(.nav-btn-buy) { border-bottom: none; }
-            .nav-btn-buy { margin-top: 40px !important; display: inline-flex !important; justify-content: center; align-items: center; width: 100%; padding: 15px 0 !important; background: linear-gradient(90deg, var(--secondary), #d946ef); border-radius: 50px; border-bottom: none !important; box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3); font-size: 1.1rem !important; letter-spacing: 1px; }
-            .menu-toggle { display: block; color: white; }
-            .pricing-card.pro { transform: scale(1); }
-            .footer-content { flex-direction: column; text-align: center; }
-            .footer-contact { text-align: center; }
-            
-            /* 手机端隐藏悬浮提示，或点击显示（这里简单隐藏，避免遮挡） */
-            .pro-hover-detail { display: none !important; }
+        /* 手机端隐藏悬浮提示，或点击显示（这里简单隐藏，避免遮挡） */
+        .pro-hover-detail {
+          display: none !important;
         }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo" onclick="window.scrollTo(0,0)">
-                <svg class="nav-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#bd00ff;stop-opacity:1" />
-                        </linearGradient>
-                        <linearGradient id="grad-bg-icon" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
+      <div class="nav-container">
+        <div class="nav-logo" onclick="window.scrollTo(0, 0)">
+          <svg class="nav-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color: #00e5ff; stop-opacity: 1" />
+                <stop offset="100%" style="stop-color: #bd00ff; stop-opacity: 1" />
+              </linearGradient>
+              <linearGradient id="grad-bg-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: #1e293b; stop-opacity: 1" />
+                <stop offset="100%" style="stop-color: #0f172a; stop-opacity: 1" />
+              </linearGradient>
+            </defs>
 
-                    <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#grad-bg-icon)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-                    
-                    <circle cx="32" cy="32" r="24" stroke="#00e5ff" stroke-width="2.5" fill="none"
-                        stroke-dasharray="110 200" stroke-linecap="round"
-                        transform="rotate(138.7 32 32)" opacity="1" />
-                    
-                    <circle cx="32" cy="32" r="16" stroke="#bd00ff" stroke-width="2.5" fill="none"
-                        stroke-dasharray="75 200" stroke-linecap="round"
-                        transform="rotate(315.68 32 32)" opacity="1" />
-                    
-                    <path d="M26 26 L38 38 M38 26 L26 38" stroke="url(#grad-nav)" stroke-width="4"
-                        stroke-linecap="round" fill="none" />
-                    
-                    <circle cx="32" cy="32" r="2.5" fill="white" opacity="0.9" />
-                </svg>
-                <span class="logo-text">AIWriteX</span>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="#features">产品功能</a></li>
-                <li><a href="#versions">价格方案</a></li>
-                <li><a href="#roadmap">产品路线</a></li>
-                <li><a href="#faq">常见问题</a></li>
-                <li><a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy">前往购买</a></li>
-            </ul>
-            <div class="menu-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
+            <rect
+              x="0"
+              y="0"
+              width="64"
+              height="64"
+              rx="16"
+              fill="url(#grad-bg-icon)"
+              stroke="rgba(255,255,255,0.1)"
+              stroke-width="1"
+            />
+
+            <circle
+              cx="32"
+              cy="32"
+              r="24"
+              stroke="#00e5ff"
+              stroke-width="2.5"
+              fill="none"
+              stroke-dasharray="110 200"
+              stroke-linecap="round"
+              transform="rotate(138.7 32 32)"
+              opacity="1"
+            />
+
+            <circle
+              cx="32"
+              cy="32"
+              r="16"
+              stroke="#bd00ff"
+              stroke-width="2.5"
+              fill="none"
+              stroke-dasharray="75 200"
+              stroke-linecap="round"
+              transform="rotate(315.68 32 32)"
+              opacity="1"
+            />
+
+            <path
+              d="M26 26 L38 38 M38 26 L26 38"
+              stroke="url(#grad-nav)"
+              stroke-width="4"
+              stroke-linecap="round"
+              fill="none"
+            />
+
+            <circle cx="32" cy="32" r="2.5" fill="white" opacity="0.9" />
+          </svg>
+          <span class="logo-text">AIWriteX</span>
         </div>
+        <ul class="nav-menu">
+          <li><a href="#features">产品功能</a></li>
+          <li><a href="#versions">价格方案</a></li>
+          <li><a href="#roadmap">产品路线</a></li>
+          <li><a href="#faq">常见问题</a></li>
+          <li>
+            <a href="https://aiforge.taobao.com" target="_blank" class="nav-btn-buy">前往购买</a>
+          </li>
+        </ul>
+        <div class="menu-toggle">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
     </nav>
 
     <!-- 头部 Hero 区域 -->
     <header class="hero-section">
-        <div class="hero-bg-glow"></div>
-        <div class="container">
-            <div class="logo-container">
-                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#bd00ff;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <circle class="orbit-path orbit-1" cx="32" cy="32" r="28" />
-                    <circle class="orbit-path orbit-2" cx="32" cy="32" r="20" />
-                    <path class="core-x" d="M24 24 L40 40 M40 24 L24 40" stroke="url(#grad-core)" stroke-width="6"
-                        stroke-linecap="round" />
-                    <circle cx="32" cy="32" r="4" fill="white">
-                        <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
-                    </circle>
-                </svg>
-            </div>
-
-            <h1 class="hero-title"><span class="gradient-animate">AIWriteX</span></h1>
-
-            <div class="workshop-subtitle">
-                <span class="subtitle-text" id="typewriter-text"></span><span class="cursor-blink"></span>
-            </div>
-
-            <p class="hero-desc">
-                融合 "AI + 创意 + 搜索 + 借鉴" 四重能力。<br>
-                不仅仅是写作工具，更是您的灵感引擎。
-            </p>
-
-            <div class="hero-actions">
-                <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" class="btn btn-primary glow-effect">
-                    <i class="fab fa-windows"></i> 立即下载 (Windows)
-                </a>
-                <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-secondary">
-                    <i class="fas fa-shopping-cart"></i> 获取（试用）授权码
-                </a>
-            </div>
-
-            <p class="os-support"> Windows 10 或更高版本 | macOS 版本敬请期待</p>
+      <div class="hero-bg-glow"></div>
+      <div class="container">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color: #00e5ff; stop-opacity: 1" />
+                <stop offset="100%" style="stop-color: #bd00ff; stop-opacity: 1" />
+              </linearGradient>
+            </defs>
+            <circle class="orbit-path orbit-1" cx="32" cy="32" r="28" />
+            <circle class="orbit-path orbit-2" cx="32" cy="32" r="20" />
+            <path
+              class="core-x"
+              d="M24 24 L40 40 M40 24 L24 40"
+              stroke="url(#grad-core)"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <circle cx="32" cy="32" r="4" fill="white">
+              <animate
+                attributeName="opacity"
+                values="0.4;1;0.4"
+                dur="2s"
+                repeatCount="indefinite"
+              />
+            </circle>
+          </svg>
         </div>
+
+        <h1 class="hero-title"><span class="gradient-animate">AIWriteX</span></h1>
+
+        <div class="workshop-subtitle">
+          <span class="subtitle-text" id="typewriter-text"></span><span class="cursor-blink"></span>
+        </div>
+
+        <p class="hero-desc">
+          融合 "AI + 创意 + 搜索 + 借鉴" 四重能力。<br />
+          不仅仅是写作工具，更是您的灵感引擎。
+        </p>
+
+        <div class="hero-actions">
+          <a
+            href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe"
+            class="btn btn-primary glow-effect"
+          >
+            <i class="fab fa-windows"></i> 立即下载 (Windows)
+          </a>
+          <a href="https://pan.baidu.com/s/1YuGr-FjJhXDahCAWM7rImw?pwd=mzgf" target="_blank" class="netdisk-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path
+                d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"
+              />
+            </svg>
+          </a>
+          <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-shopping-cart"></i> 获取（试用）授权码
+          </a>
+        </div>
+
+        <p class="os-support">Windows 10 或更高版本 | macOS 版本敬请期待</p>
+      </div>
     </header>
 
     <!-- 功能亮点 -->
     <section id="features" class="features-section">
-        <div class="container">
-            <h2 class="section-title">重新定义 <span class="gradient-text">写作体验</span></h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-atom"></i></div>
-                    <h3>全能融合</h3>
-                    <p>独创 "搜索+借鉴+AI+创意" 组合技。打破单一模型局限，让文章既有热度又有深度，更是独一无二。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-palette"></i></div>
-                    <h3>美学排版</h3>
-                    <p>告别枯燥纯文本。内置多款精美模板，AI 自动生成图文并茂的 HTML 排版，让阅读成为享受。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-magic"></i></div>
-                    <h3>创意重塑</h3>
-                    <p>独特的维度化创意变换，李白风格、赛博朋克背景...15种维度任意组合。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-th-large"></i></div>
-                    <h3>内容管家</h3>
-                    <p>可视化文章管理系统。草稿、已发布状态一目了然，支持批量操作与视图切换，构建您的专属内容库。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-copy"></i></div>
-                    <h3>智能借鉴</h3>
-                    <p>不仅仅是洗稿。深度分析参考文章逻辑与风格，生成既有深度又具原创性的内容。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-fire"></i></div>
-                    <h3>热搜追踪</h3>
-                    <p>自动监控微博、知乎热榜，一键生成爆款选题，让您永远不缺写作灵感。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fab fa-weixin"></i></div>
-                    <h3>一键发布</h3>
-                    <p>无缝对接微信公众号，从生成到排版再到发布，全流程自动化处理。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-rocket"></i></div>
-                    <h3>持续进化</h3>
-                    <p>我们承诺持续开发更多新奇功能。购买高级版不仅仅是买断当下，更是锁定了未来所有的创意与惊喜。</p>
-                </div>
-            </div>
+      <div class="container">
+        <h2 class="section-title">重新定义 <span class="gradient-text">写作体验</span></h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-atom"></i></div>
+            <h3>全能融合</h3>
+            <p>
+              独创 "搜索+借鉴+AI+创意"
+              组合技。打破单一模型局限，让文章既有热度又有深度，更是独一无二。
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-palette"></i></div>
+            <h3>美学排版</h3>
+            <p>
+              告别枯燥纯文本。内置多款精美模板，AI 自动生成图文并茂的 HTML 排版，让阅读成为享受。
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-magic"></i></div>
+            <h3>创意重塑</h3>
+            <p>独特的维度化创意变换，李白风格、赛博朋克背景...15种维度任意组合。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-th-large"></i></div>
+            <h3>内容管家</h3>
+            <p>
+              可视化文章管理系统。草稿、已发布状态一目了然，支持批量操作与视图切换，构建您的专属内容库。
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-copy"></i></div>
+            <h3>智能借鉴</h3>
+            <p>不仅仅是洗稿。深度分析参考文章逻辑与风格，生成既有深度又具原创性的内容。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-fire"></i></div>
+            <h3>热搜追踪</h3>
+            <p>自动监控微博、知乎热榜，一键生成爆款选题，让您永远不缺写作灵感。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fab fa-weixin"></i></div>
+            <h3>一键发布</h3>
+            <p>无缝对接微信公众号，从生成到排版再到发布，全流程自动化处理。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-rocket"></i></div>
+            <h3>持续进化</h3>
+            <p>
+              我们承诺持续开发更多新奇功能。购买高级版不仅仅是买断当下，更是锁定了未来所有的创意与惊喜。
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- 授权方案对比 -->
     <section id="versions" class="pricing-section">
-        <div class="container">
-            <h2 class="section-title">选择您的 <span class="gradient-text">创作引擎</span></h2>
-            <div class="pricing-grid">
-                <!-- 基础版 -->
-                <div class="pricing-card basic">
-                    <!-- [新增] 基础版悬停提示 (左边卡片，向右弹出) -->
-                    <div class="pro-hover-detail">
-                        <h4><i class="fas fa-gift"></i> 基础+ (v2.3.4)更新</h4>
-                        <ul>
-                            <li>💡 模型配置重构</li>
-                            <li>💡 微信发布流程重构</li>
-                            <li>💡 新增写作指导功能</li>
-                            <li>💡 其他功能优化以及提升</li>
-                        </ul>
-                    </div>
-
-                    <div class="card-header">
-                        <h3>基础版</h3>
-                        <div class="price">¥99 <span>/ 永久</span></div>
-                    </div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> 所有基础功能</li>
-                        <li><i class="fas fa-check"></i> 基础版本问题修复</li>
-                        <li class="disabled"><i class="fas fa-times"></i> 未来发布的高级功能</li>
-                        <li class="disabled"><i class="fas fa-times"></i> 可升级为定制版本</li>
-                        <li class="disabled"><i class="fas fa-times"></i> 可扩展定制功能</li>
-                        <li class="disabled"><i class="fas fa-times"></i> 专属 1对1 售后支持</li>
-                    </ul>
-                    <a href="#download" class="btn btn-outline">尝鲜体验</a>
-                </div>
-
-                <!-- 高级版 (推荐) -->
-                <div class="pricing-card pro popular">
-                    <!-- [新增] 高级版悬停提示 (中间卡片，向右弹出) -->
-                    <div class="pro-hover-detail">
-                        <h4><i class="fas fa-crown"></i> Pro+专享</h4>
-                        <p>💡 <strong>热点雷达·平台热点</strong>：主流平台热搜话题一览无余</p>
-                        <p>💡 <strong>热点雷达·趋势预测</strong>：聚合全网平台数据，预判未来 12 小时的流量走势</p>
-                        <p>💡 <strong>热点雷达·黑马挖掘</strong>：捕捉那些有爆点潜力的话题，并预测其未来12小时走势</p>
-                        <p>💡 <strong>热点雷达·话题分析</strong>：对话题进行分析，生成爆点分析、完整的写作指导</p>
-                        
-                    </div>
-
-                    <div class="popular-tag">店长推荐</div>
-                    <div class="card-header">
-                        <h3>高级版 (Pro)</h3>
-                        <div class="price">¥399 <span>/ 永久</span></div>
-                        <p class="price-sub">超值划算 未来无限</p>
-                    </div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> <strong>解锁所有高级功能</strong></li>
-                        <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
-                        <li><i class="fas fa-check"></i> 可升级定制版本</li>
-                        <li><i class="fas fa-check"></i> 可扩展定制功能</li>
-                        <li><i class="fas fa-check"></i> 专属 1对1 售后支持</li>
-                    </ul>
-                    <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-primary glow-effect">立即购买</a>
-                </div>
-
-                <!-- 定制版 -->
-                <div class="pricing-card custom">
-                    <!-- [修复] 定制版悬停提示 (右边卡片，向左弹出) -->
-                    <div class="pro-hover-detail">
-                        <h4><i class="fas fa-gem"></i> 定制服务</h4>
-                        <p>💡 <strong>热点雷达</strong>：基于全网大数据的爆款操盘手。拒绝同质化、科学蹭热点、主编级策略</p>
-                    </div>
-
-                    <div class="card-header">
-                        <h3>定制版</h3>
-                        <div class="price">按需 <span>报价</span></div>
-                    </div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> 包含 Pro 版所有功能</li>
-                        <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
-                        <li><i class="fas fa-check"></i> 可扩展定制功能</li>
-                        <li><i class="fas fa-check"></i> <strong>私有定制功能独享</strong></li>
-                        <li><i class="fas fa-check"></i> 7x24小时 极速响应</li>
-                    </ul>
-                    <a href="tencent://message/?uin=522765228" class="btn btn-outline">联系定制</a>
-                </div>
+      <div class="container">
+        <h2 class="section-title">选择您的 <span class="gradient-text">创作引擎</span></h2>
+        <div class="pricing-grid">
+          <!-- 基础版 -->
+          <div class="pricing-card basic">
+            <!-- [新增] 基础版悬停提示 (左边卡片，向右弹出) -->
+            <div class="pro-hover-detail">
+              <h4><i class="fas fa-gift"></i> 基础+ (v2.3.5)更新</h4>
+              <ul>
+                <li>💡 借鉴比例支持100%，即不生成内容，只使用模板</li>
+                <li>💡 借鉴来源支持多种形式：文库、URL、粘贴文本</li>
+              </ul>
             </div>
+
+            <div class="card-header">
+              <h3>基础版</h3>
+              <div class="price">¥99 <span>/ 永久</span></div>
+            </div>
+            <ul class="features-list">
+              <li><i class="fas fa-check"></i> 所有基础功能</li>
+              <li><i class="fas fa-check"></i> 基础版本问题修复</li>
+              <li class="disabled"><i class="fas fa-times"></i> 未来发布的高级功能</li>
+              <li class="disabled"><i class="fas fa-times"></i> 可升级为定制版本</li>
+              <li class="disabled"><i class="fas fa-times"></i> 可扩展定制功能</li>
+              <li class="disabled"><i class="fas fa-times"></i> 专属 1对1 售后支持</li>
+            </ul>
+            <a href="#download" class="btn btn-outline">尝鲜体验</a>
+          </div>
+
+          <!-- 高级版 (推荐) -->
+          <div class="pricing-card pro popular">
+            <!-- [新增] 高级版悬停提示 (中间卡片，向右弹出) -->
+            <div class="pro-hover-detail">
+              <h4><i class="fas fa-crown"></i> Pro+专享</h4>
+              <p>
+                💡
+                <strong>素材文库·微信文库</strong>：支持各种形式的微信文章下载导入，构建本地知识库
+              </p>
+              <p>💡 <strong>素材文库·智能选题</strong>： 基于多维智能算法，生成高价值选题</p>
+              <p>
+                💡 <strong>素材文库·内容挖掘</strong>：对本地知识库进行内容挖掘，整理出有价值的材料
+              </p>
+              <p>
+                💡
+                <strong>热点雷达·全网聚合</strong>：聚合全网热点，整理全网素材，借鉴选题并生成内容
+              </p>
+            </div>
+
+            <div class="popular-tag">店长推荐</div>
+            <div class="card-header">
+              <h3>高级版 (Pro)</h3>
+              <div class="price">¥399 <span>/ 永久</span></div>
+              <p class="price-sub">超值划算 未来无限</p>
+            </div>
+            <ul class="features-list">
+              <li><i class="fas fa-check"></i> <strong>解锁所有高级功能</strong></li>
+              <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
+              <li><i class="fas fa-check"></i> 可升级定制版本</li>
+              <li><i class="fas fa-check"></i> 可扩展定制功能</li>
+              <li><i class="fas fa-check"></i> 专属 1对1 售后支持</li>
+            </ul>
+            <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-primary glow-effect"
+              >立即购买</a
+            >
+          </div>
+
+          <!-- 定制版 -->
+          <div class="pricing-card custom">
+            <!-- [修复] 定制版悬停提示 (右边卡片，向左弹出) -->
+            <div class="pro-hover-detail">
+              <h4><i class="fas fa-gem"></i> 定制服务</h4>
+              <p>
+                💡 <strong>素材文库</strong>：您的本地知识库，告别素材焦虑，打造专属内容护城河！
+              </p>
+            </div>
+
+            <div class="card-header">
+              <h3>定制版</h3>
+              <div class="price">按需 <span>报价</span></div>
+            </div>
+            <ul class="features-list">
+              <li><i class="fas fa-check"></i> 包含 Pro 版所有功能</li>
+              <li><i class="fas fa-check"></i> 未来 <strong>新功能</strong> 更新</li>
+              <li><i class="fas fa-check"></i> 可扩展定制功能</li>
+              <li><i class="fas fa-check"></i> <strong>私有定制功能独享</strong></li>
+              <li><i class="fas fa-check"></i> 7x24小时 极速响应</li>
+            </ul>
+            <a href="tencent://message/?uin=522765228" class="btn btn-outline">联系定制</a>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- [新增] 未来开发计划 (Roadmap) -->
     <section id="roadmap" class="roadmap-section">
-        <div class="container">
-            <h2 class="section-title">未来 <span class="gradient-text">无限可能</span></h2>
-            <p class="roadmap-intro">高级版用户永久免费享受以下所有未来的更新（不含定制）。您的支持是我们持续进化的动力。</p>
-            
-            <div class="roadmap-grid">
-                <!-- 阶段一：当前/下个版本 -->
-                <div class="roadmap-card active">
-                    <div class="status-dot pulsing"></div>
-                    <span class="step-badge">开发中 - 2026 Q1</span>
-                    <!-- [占位符] 请在此处填写您下一个具体的开发计划 -->
-                    <h3>V2.3+ 平台功能升级</h3>
-                    <p>支持设置文章参考文件（PDF/TXT/MD等）；AI检测对抗；支持公众号文章下载/分析等高端场景；界面完全重构，更加符合视觉美学。</p>
-                </div>
+      <div class="container">
+        <h2 class="section-title">未来 <span class="gradient-text">无限可能</span></h2>
+        <p class="roadmap-intro">
+          高级版用户永久免费享受以下所有未来的更新（不含定制）。您的支持是我们持续进化的动力。
+        </p>
 
-                <!-- 阶段二：短期计划 -->
-                <div class="roadmap-card">
-                    <div class="status-dot future"></div>
-                    <span class="step-badge">规划中 - 2026 Q3</span>
-                    <h3>跨平台矩阵引擎</h3>
-                    <p>打破公众号壁垒。一键适配<strong>小红书、知乎、头条号</strong>等平台的排版与语风。一次生成，多平台分发，构建您的全网内容矩阵。</p>
-                </div>
+        <div class="roadmap-grid">
+          <!-- 阶段一：当前/下个版本 -->
+          <div class="roadmap-card active">
+            <div class="status-dot pulsing"></div>
+            <span class="step-badge">开发中 - 2026 Q1</span>
+            <!-- [占位符] 请在此处填写您下一个具体的开发计划 -->
+            <h3>V2.3+ 平台功能升级</h3>
+            <p>AI检测对抗；AI自动配图；界面完全重构，更加符合视觉美学；专家模式。</p>
+          </div>
 
-                <!-- 阶段三：中期愿景 -->
-                <div class="roadmap-card">
-                    <div class="status-dot future"></div>
-                    <span class="step-badge">规划中 - 2026 Q4</span>
-                    <h3>数字孪生 (Digital Twin)</h3>
-                    <p>AI 将深度学习您的历史文章数据，完美克隆您的<strong>个人文风与价值观</strong>。打造专属于您的“数字分身”，让每一篇 AI 文章都像您亲手所写。</p>
-                </div>
+          <!-- 阶段二：短期计划 -->
+          <div class="roadmap-card">
+            <div class="status-dot future"></div>
+            <span class="step-badge">规划中 - 2026 Q3</span>
+            <h3>跨平台矩阵引擎</h3>
+            <p>
+              打破公众号壁垒。一键适配<strong>小红书、知乎、头条号</strong>等平台的排版与语风。一次生成，多平台分发，构建您的全网内容矩阵。
+            </p>
+          </div>
 
-                <!-- 阶段四：长期展望 -->
-                <div class="roadmap-card">
-                    <div class="status-dot future"></div>
-                    <span class="step-badge">远期展望</span>
-                    <h3>视听多维融合</h3>
-                    <p>从文字向视频进军。一键将文章转化为<strong>短视频脚本、AI配音播客</strong>甚至自动生成配套视频素材。让 AIWriteX 成为您的全媒体制作中心。</p>
-                </div>
-            </div>
+          <!-- 阶段三：中期愿景 -->
+          <div class="roadmap-card">
+            <div class="status-dot future"></div>
+            <span class="step-badge">规划中 - 2026 Q4</span>
+            <h3>数字孪生 (Digital Twin)</h3>
+            <p>
+              AI
+              将深度学习您的历史文章数据，完美克隆您的<strong>个人文风与价值观</strong>。打造专属于您的“数字分身”，让每一篇
+              AI 文章都像您亲手所写。
+            </p>
+          </div>
+
+          <!-- 阶段四：长期展望 -->
+          <div class="roadmap-card">
+            <div class="status-dot future"></div>
+            <span class="step-badge">远期展望</span>
+            <h3>视听多维融合</h3>
+            <p>
+              从文字向视频进军。一键将文章转化为<strong>短视频脚本、AI配音播客</strong>甚至自动生成配套视频素材。让
+              AIWriteX 成为您的全媒体制作中心。
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- 下载区域 -->
     <section id="download" class="download-section">
-        <div class="container download-container">
-            <div class="download-content">
-                <h2>准备好释放创造力了吗？</h2>
-                <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
-                <div class="download-btns">
-                    <!-- [修改] 底部下载按钮同步修复链接 -->
-                    <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" target="_blank"
-                        class="btn btn-large btn-win">
-                        <i class="fab fa-windows"></i> 下载 Windows 版
-                        <span class="btn-info">Windows 10 或更高版本 (64位)</span>
-                    </a>
-                    <button class="btn btn-large btn-mac disabled" onclick="alert('Mac 版本正在锐意开发中，敬请期待！')">
-                        <i class="fab fa-apple"></i> 下载 macOS 版
-                        <span class="btn-info">即将推出</span>
-                    </button>
-                </div>
-                <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
-            </div>
+      <div class="container download-container">
+        <div class="download-content">
+          <h2>准备好释放创造力了吗？</h2>
+          <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
+          <div class="download-btns">
+            <!-- [修改] 底部下载按钮同步修复链接 -->
+            <a
+              href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe"
+              target="_blank"
+              class="btn btn-large btn-win"
+            >
+              <i class="fab fa-windows"></i> 下载 Windows 版
+              <span class="btn-info">Windows 10 或更高版本 (64位)</span>
+            </a>
+            <button
+              class="btn btn-large btn-mac disabled"
+              onclick="alert('Mac 版本正在锐意开发中，敬请期待！')"
+            >
+              <i class="fab fa-apple"></i> 下载 macOS 版
+              <span class="btn-info">即将推出</span>
+            </button>
+          </div>
+          <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
         </div>
+      </div>
     </section>
 
     <!-- 常见问题 -->
-    <section id="faq" class="features-section" style="background: rgba(30, 41, 59, 0.3);">
-        <div class="container">
-            <h2 class="section-title">常见 <span class="gradient-text">问题</span></h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <h3>生成文章需要多久？</h3>
-                    <p>通常需要2-5分钟。系统需要实时搜索网络资讯、分析内容并进行AI深度创作，好内容值得等待。</p>
-                </div>
-                <div class="feature-card">
-                    <h3>支持哪些大模型？</h3>
-                    <p>目前完美支持 DeepSeek、OpenRouter 等主流接口，您可以在设置中自由切换和配置 API Key。</p>
-                </div>
-                <div class="feature-card">
-                    <h3>如何购买授权码？</h3>
-                    <p>点击“获取授权码”跳转至淘宝店铺购买。购买后打开软件，输入“订单+手机尾号后4位”即可激活。</p>
-                </div>
-                <div class="feature-card">
-                    <h3>更换电脑怎么办？</h3>
-                    <p>授权码与机器绑定。如需更换设备，请联系售后客服进行解绑重置（高级版用户享有此服务）。</p>
-                </div>
-            </div>
+    <section id="faq" class="features-section" style="background: rgba(30, 41, 59, 0.3)">
+      <div class="container">
+        <h2 class="section-title">常见 <span class="gradient-text">问题</span></h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>生成文章需要多久？</h3>
+            <p>
+              通常需要2-5分钟。系统需要实时搜索网络资讯、分析内容并进行AI深度创作，好内容值得等待。
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>支持哪些大模型？</h3>
+            <p>
+              目前完美支持 DeepSeek、OpenRouter 等主流接口，您可以在设置中自由切换和配置 API Key。
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>如何购买授权码？</h3>
+            <p>
+              点击“获取授权码”跳转至淘宝店铺购买。购买后打开软件，输入“订单+手机尾号后4位”即可激活。
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>更换电脑怎么办？</h3>
+            <p>
+              授权码与机器绑定。如需更换设备，请联系售后客服进行解绑重置（高级版用户享有此服务）。
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- 页脚 -->
     <footer>
-        <div class="container footer-content">
-            <div class="footer-logo">
-                AIWriteX
-                <p>智能内容创作平台</p>
-            </div>
-            <div class="footer-links">
-                <a href="#features">功能</a>
-                <a href="#faq">帮助</a>
-                <a href="https://aiforge.taobao.com" target="_blank">淘宝官方店</a>
-            </div>
-            <div class="footer-contact">
-                <p>技术支持 QQ: 522765228</p>
-                <p>© 2025 墨智工坊 (AIForge). All Rights Reserved.</p>
-            </div>
+      <div class="container footer-content">
+        <div class="footer-logo">
+          AIWriteX
+          <p>智能内容创作平台</p>
         </div>
+        <div class="footer-links">
+          <a href="#features">功能</a>
+          <a href="#faq">帮助</a>
+          <a href="https://aiforge.taobao.com" target="_blank">淘宝官方店</a>
+        </div>
+        <div class="footer-contact">
+          <p>技术支持 QQ: 522765228</p>
+          <p>© 2025 墨智工坊 (AIForge). All Rights Reserved.</p>
+        </div>
+      </div>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. 打字机效果 (输入话题，唤醒无限创意)
-            const textElement = document.getElementById('typewriter-text');
-            const textToType = "输入话题，唤醒无限创意...";
-            let charIndex = 0;
+      document.addEventListener('DOMContentLoaded', () => {
+        // 1. 打字机效果 (输入话题，唤醒无限创意)
+        const textElement = document.getElementById('typewriter-text');
+        const textToType = '输入话题，唤醒无限创意...';
+        let charIndex = 0;
 
-            function typeWriter() {
-                if (charIndex < textToType.length) {
-                    textElement.textContent += textToType.charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeWriter, 100);
-                } else {
-                    setTimeout(deleteText, 3000);
-                }
+        function typeWriter() {
+          if (charIndex < textToType.length) {
+            textElement.textContent += textToType.charAt(charIndex);
+            charIndex++;
+            setTimeout(typeWriter, 100);
+          } else {
+            setTimeout(deleteText, 3000);
+          }
+        }
+
+        function deleteText() {
+          if (charIndex > 0) {
+            textElement.textContent = textToType.substring(0, charIndex - 1);
+            charIndex--;
+            setTimeout(deleteText, 50);
+          } else {
+            setTimeout(typeWriter, 500);
+          }
+        }
+
+        typeWriter();
+
+        // 2. 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+              target.scrollIntoView({
+                behavior: 'smooth',
+              });
             }
-
-            function deleteText() {
-                if (charIndex > 0) {
-                    textElement.textContent = textToType.substring(0, charIndex - 1);
-                    charIndex--;
-                    setTimeout(deleteText, 50);
-                } else {
-                    setTimeout(typeWriter, 500);
-                }
-            }
-
-            typeWriter();
-
-            // 2. 平滑滚动
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-
-            // 3. 简单的 Navbar 滚动效果
-            const navbar = document.querySelector('.navbar');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.style.background = 'rgba(15, 23, 42, 0.95)';
-                    navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-                } else {
-                    navbar.style.background = 'rgba(15, 23, 42, 0.8)';
-                    navbar.style.boxShadow = 'none';
-                }
-            });
-
-            // 4. 移动端菜单切换逻辑
-            const menuToggle = document.querySelector('.menu-toggle');
-            const navMenu = document.querySelector('.nav-menu');
-
-            if (menuToggle && navMenu) {
-                menuToggle.addEventListener('click', () => {
-                    navMenu.classList.toggle('active');
-                });
-                
-                document.querySelectorAll('.nav-menu a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navMenu.classList.remove('active');
-                    });
-                });
-            }
+          });
         });
+
+        // 3. 简单的 Navbar 滚动效果
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+            navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+          } else {
+            navbar.style.background = 'rgba(15, 23, 42, 0.8)';
+            navbar.style.boxShadow = 'none';
+          }
+        });
+
+        // 4. 移动端菜单切换逻辑
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+
+        if (menuToggle && navMenu) {
+          menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+          });
+
+          document.querySelectorAll('.nav-menu a').forEach((link) => {
+            link.addEventListener('click', () => {
+              navMenu.classList.remove('active');
+            });
+          });
+        }
+      });
     </script>
     <script>
     !function(){var e="https://aiwritex-license.voidai.cc/assets/p.gif",t=Date.now(),n="Unknown";function r(){try{var e=localStorage.getItem("awx_stats"),t=Date.now();return e?(e=JSON.parse(e),t-e.last_visit>18e5&&e.count++,e.last_visit=t):(e={first_visit:t,last_visit:t,count:1,uuid:crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).substring(2)}),localStorage.setItem("awx_stats",JSON.stringify(e)),e}catch(e){return{count:1,first_visit:Date.now()}}}var o=r();async function a(){try{var e=Intl.DateTimeFormat().resolvedOptions().timeZone;n=e;var t=new AbortController,r=setTimeout((function(){return t.abort()}),2e3),o=await fetch("https://ipapi.co/json/",{signal:t.signal});clearTimeout(r),o.ok&&(o=await o.json(),n=o.city+", "+o.region+", "+o.country_name)}catch(e){}}function i(r,a){a=void 0===a?{}:a;var i={event_type:r,timestamp:Date.now(),check_sum:"",url:window.location.href,referrer:document.referrer,city:n,is_first_visit:1===o.count,visit_count:o.count,duration:Date.now()-t},c=Object.assign(i,a),s=new Blob([JSON.stringify(c)],{type:"application/json"});navigator.sendBeacon?navigator.sendBeacon(e,s):fetch(e,{method:"POST",body:JSON.stringify(c),keepalive:!0,headers:{"Content-Type":"application/json"}}).catch((function(){}))}window.addEventListener("load",(async function(){["localhost","127.0.0.1"].includes(window.location.hostname)||(await a(),i("page_view"))})),document.addEventListener("visibilitychange",(function(){"hidden"===document.visibilityState&&i("page_leave")}));var c=!1;document.addEventListener("click",(function(e){var t=e.target.closest("a");if(t&&!c){var n=t.href||"",r=t.className||"",o=null;(n.includes("taobao.com")||n.includes("tmall.com")?o="click_shop":n.match(/\.(exe|zip|dmg|pkg)$/i)||n.includes("github.com")||n.includes("releases")||r.includes("btn-win")||r.includes("btn-mac")?o="click_download":void 0)&&(i(o,{target_link:n}),c=!0,setTimeout((function(){return c=!1}),1e3))}}))}();
     </script>
-</body>
+  </body>
 </html>
