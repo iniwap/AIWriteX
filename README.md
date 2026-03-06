@@ -2,21 +2,21 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB)](https://www.python.org/) [![CrewAI](https://img.shields.io/badge/CrewAI-0.102.0+-FF6B6B)](https://pypi.org/project/crewai) [![AIForge](https://img.shields.io/badge/aiforge-0.0.19+-E91E63)](https://pypi.org/project/aiforge-engine) [![PyWebView](https://img.shields.io/badge/PyWebView-4.0.0+-9C27B0)](https://pywebview.flowrl.com/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1+-009688)](https://fastapi.tiangolo.com/) [![GrapesJS](https://img.shields.io/badge/GrapesJS-0.22.13+-4A90E2)](https://grapesjs.com/) [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.45.0+-4CAF50)](https://microsoft.github.io/monaco-editor/) [![Marked](https://img.shields.io/badge/Marked-11.1.1+-00BCD4)](https://marked.js.org/) [![PyWinGUIBuilder](https://img.shields.io/badge/PyWinGUIBuilder-1.0.0+-FFC107)](https://github.com/iniwap/PyWinGUIBuilder) [![Stars](https://img.shields.io/github/stars/iniwap/AIWriteX?label=收藏)](https://iniwap.github.io/AIWriteX)
 
-**[<u>AIWriteX</u>](https://aiwritex.voidai.cc/) 新一代智能内容创作平台**：一键全自动热点选题 + 实时搜索借鉴 + AI创意生成 + 精美排版 + 微信公众号自动发布，融合 **AI + 全网热点雷达 + 微信文章采集下载 + 深度洗稿与内容挖掘 + 多智能体协作 + 去AI味润色 + 手机智能体控制/类OpenClaw**，让你的文章快人一步、阅读量10w+不是梦！
+**[<u>AIWriteX</u>](https://aiwritex.voidai.cc/) 新一代智能内容创作平台**：一键全自动热点选题 + 实时搜索借鉴 + AI创意生成 + 精美排版 + 微信公众号自动发布，融合 **AI + 全网热点雷达 + 微信文章采集下载 + 深度洗稿与内容挖掘 + 多智能体协作 + 去AI味润色 + 手机智能体控制/类OpenClaw + 系统智能自进化**，让你的文章快人一步、阅读量10w+不是梦！
 
 > **想先看看效果？** 👉 [实例预览](#绝美排版实例预览)  
 > **想用商业稳定版？** 👉 [前往官网](https://aiwritex.voidai.cc/)  
 > **喜欢这个项目？** ⭐ 点个 Star 支持一下吧！
 
-## 震撼独家：手机智能体（新版本预览）
-下个版本将支持，通过手机控制AIWriteX，再也不用在电脑前等着了。
-- 支持主流IM：qq、飞书、钉钉、Telegram、Discord
-- 内置直接指令，快捷控制
-- 支持自然语言控制，主要工作流等
+## 震撼独家：手机智能体
+通过手机控制AIWriteX，再也不用在电脑前等着了。
+- 支持QQ、钉钉、飞书、Discord、Telegram 手机机器人控制AIWriteX
+- 支持超多固定指令，快速简单控制
+- 支持自然语言控制，与机器人对话形式完成工作流
 - 最简化操作，用户几乎不需要做什么，简单配置，就可以直接使用  
 <img src="bot.jpg" width="100%">
 
-## 🛡️ 独家黑科技：去AI味/AI对抗检测
+## 🛡️ 去AI味/AI对抗检测
 
 还在为文章被判定为"100% AI生成"而苦恼？AIWriteX 内置**深度对抗检测引擎**，不止是简单的同义词替换，而是从**底层逻辑**打破AI生成的概率链条：
 
