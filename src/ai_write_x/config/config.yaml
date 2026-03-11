@@ -49,16 +49,16 @@ api:
     api_key: []
     model_index: 0
     model:
-      - openrouter/deepseek/deepseek-chat-v3-0324:free
-      - openrouter/deepseek/deepseek-r1-0528:free
-      - openrouter/deepseek/deepseek-prover-v2:free
-      - openrouter/deepseek/deepseek-r1:free
-      - openrouter/deepseek/deepseek-chat:free
-      - openrouter/qwen/qwen3-32b:free
-      - openrouter/qwen/qwq-32b:free
-      - openrouter/google/gemini-2.0-flash-lite-preview-02-05:free
-      - openrouter/google/gemini-2.0-flash-thinking-exp:free
+      - openrouter/openrouter/free
+      - openrouter/qwen/qwen3-coder-480b-a35b:free
+      - openrouter/arcee-ai/trinity-large-preview:free
+      - openrouter/stepfun/step-3.5-flash:free
+      - openrouter/openai/gpt-oss-120b:free
+      - openrouter/qwen/qwen3-next-80b-a3b-instruct:free
+      - openrouter/meta-llama/llama-3.3-70b-instruct:free
+      - openrouter/z-ai/glm-4.5-air:free
     api_base: https://openrouter.ai/api/v1
+    max_tokens: 32768
   Deepseek:
     key: DEEPSEEK_API_KEY
     key_index: 0
@@ -67,15 +67,31 @@ api:
     model:
       - deepseek/deepseek-chat
       - deepseek/deepseek-reasoner
+      - deepseek/deepseek-r1
     api_base: https://api.deepseek.com/v1
+    max_tokens: 8192
   Grok:
     key: XAI_API_KEY
     key_index: 0
     api_key: []
     model_index: 0
     model:
+      - xai/grok-4.2
+      - xai/grok-4.1
       - xai/grok-3
     api_base: https://api.x.ai/v1/chat/completions
+    max_tokens: 32768
+  Claude:
+    key: ANTHROPIC_API_KEY
+    key_index: 0
+    api_key: []
+    model_index: 0
+    model:
+      - claude-3-5-sonnet-20241022
+      - claude-3-5-haiku-20241022
+      - claude-3-opus-20240229
+    api_base: https://api.anthropic.com/v1/messages
+    max_tokens: 8192
   Qwen:
     key: OPENAI_API_KEY
     key_index: 0
@@ -84,16 +100,18 @@ api:
     model:
       - openai/qwen-plus
     api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+    max_tokens: 32768
   Gemini:
     key: GEMINI_API_KEY
     key_index: 0
     api_key: []
     model_index: 0
     model:
-      - gemini/gemini-1.5-flash
-      - gemini/gemini-1.5-pro
-      - gemini/gemini-2.0-flash
+      - gemini/gemini-3-pro-preview
+      - gemini/gemini-3.0-flash
+      - gemini/gemini-2.0-flash-exp
     api_base: https://generativelanguage.googleapis.com/v1beta/openai/
+    max_tokens: 8192
   Ollama:
     key: OPENAI_API_KEY
     model_index: 0
@@ -103,6 +121,7 @@ api:
       - ollama/deepseek-r1:14b
       - ollama/deepseek-r1:7b
     api_base: http://localhost:11434
+    max_tokens: 8192
   SiliconFlow:
     key: OPENAI_API_KEY
     key_index: 0
@@ -114,6 +133,38 @@ api:
       - openai/Qwen/QwQ-32B
       - openai/Qwen/Qwen3-32B
     api_base: https://api.siliconflow.cn/v1
+    max_tokens: 8192
+  Kimi:
+    key: OPENAI_API_KEY
+    key_index: 0
+    api_key: []
+    model_index: 0
+    model:
+      - openai/kimi-k2.5
+    api_base: https://api.moonshot.cn/v1
+    max_tokens: 32768
+  GLM:
+    key: OPENAI_API_KEY
+    key_index: 0
+    api_key: []
+    model_index: 0
+    model:
+      - openai/glm-4.7
+      - openai/glm-4.5-flash
+    api_base: https://open.bigmodel.cn/api/paas/v4
+    max_tokens: 32768
+  MiniMax:
+    key: OPENAI_API_KEY
+    key_index: 0
+    api_key: []
+    model_index: 0
+    model:
+      - openai/MiniMax-M2.5
+      - openai/MiniMax-M2.5-highspeed
+      - openai/MiniMax-M2.1
+      - openai/MiniMax-M2.1-highspeed
+    api_base: https://api.minimaxi.com/v1
+    max_tokens: 32768
 img_api:
   api_type: picsum
   ali:
