@@ -300,7 +300,6 @@ uv pip install -r requirements.txt
 - 利用本项目或其衍生作品提供面向第三方的服务，包括但不限于利用软件提供SaaS、API托管等服务。
 
 📩 如需授权，请联系邮箱：iniwaper@gmail.com 或 522765228@qq.com  
-非盈利性分发可申请免费授权，商业用途需申请付费授权。
 
 ---
 
