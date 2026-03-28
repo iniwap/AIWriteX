@@ -1,0 +1,1789 @@
+<!doctype html>
+<html lang="zh-CN" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 用户使用手册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      document.addEventListener('DOMContentLoaded', function () {
+        // 修改选择器，直接匹配所有target="_blank"的链接
+        const helpLinks = document.querySelectorAll('a[target="_blank"]');
+
+        helpLinks.forEach((link) => {
+          link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const url = link.href;
+
+            try {
+              const response = await fetch('/api/config/open-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url }),
+              });
+
+              const result = await response.json();
+              if (result.status !== 'success') {
+                console.error('打开链接失败:', result.message);
+              }
+            } catch (error) {
+              console.error('请求失败:', error);
+            }
+          });
+        });
+      });
+    </script>
+    <style>
+      /* 基础重置 */
+      body {
+        font-family: 'Source Han Sans CN', sans-serif;
+        font-weight: 300;
+        background-color: #f3f4f6;
+        /* 稍微加深背景，突显纸张 */
+        padding: 40px 0;
+        color: #333;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      blockquote,
+      .serif-font {
+        font-family: 'Noto Serif SC', serif;
+      }
+
+      /* 页面容器 - 智能高度，不再截断 */
+      .magazine-page {
+        width: 794px;
+        min-height: 1123px;
+        /* 保证A4最小高度 */
+        height: auto;
+        /* 【关键修复】内容多时自动长高，绝不截断 */
+        background: #fefefe;
+        margin: 0 auto 50px auto;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+        /* 允许内容自然展示 */
+        position: relative;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.05),
+          0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      }
+
+      .dark .magazine-page {
+        background: #1f2937;
+      }
+
+      .dark p,
+      .dark li {
+        color: #d1d5db;
+      }
+
+      .dark h1,
+      .dark h2,
+      .dark h3,
+      .dark h4 {
+        color: #f9fafb;
+      }
+
+      .dark strong {
+        color: #fff;
+      }
+
+      /* 字体系统 */
+      .std-text {
+        font-size: 18px !important;
+        line-height: 2 !important;
+        font-weight: 400 !important;
+        color: #374151;
+        text-align: justify;
+      }
+
+      .std-quote {
+        font-size: 22px !important;
+        line-height: 1.6 !important;
+        font-style: italic;
+      }
+
+      /* 列表优化 */
+      ul.std-list,
+      ol.std-list {
+        padding-left: 1.2em;
+      }
+
+      li.std-list-item {
+        font-size: 18px !important;
+        line-height: 2 !important;
+        margin-bottom: 0.8em;
+        color: #374151;
+        position: relative;
+      }
+
+      /* 水印装饰 */
+      .chapter-number {
+        font-family: 'Noto Serif SC', serif;
+        position: absolute;
+        right: 0px;
+        top: 40px;
+        font-size: 180px;
+        color: rgba(0, 0, 0, 0.03) !important;
+        z-index: 0;
+        line-height: 1;
+        pointer-events: none;
+      }
+
+      .dark .chapter-number {
+        color: rgba(255, 255, 255, 0.05) !important;
+      }
+
+      /* 内容层 */
+      .content-layer {
+        position: relative;
+        z-index: 10;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        /* 底部留白依然保留，保证美观 */
+        padding: 70px 70px 40px 70px;
+      }
+
+      /* 页脚 - 始终位于底部 */
+      .page-footer {
+        height: auto;
+        min-height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 30px 90px 50px 90px;
+        /* 增加底部padding，抬高视觉重心 */
+        border-top: 1px solid #f3f4f6;
+        font-size: 14px;
+        color: #9ca3af;
+        flex-shrink: 0;
+        background: #fefefe;
+        z-index: 20;
+        margin-top: auto;
+        /* 确保被推到底部 */
+      }
+
+      .dark .page-footer {
+        border-top-color: #374151;
+        background: #1f2937;
+      }
+
+      /* 视觉组件优化 - 去除纯黑块 */
+      .section-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+      }
+
+      /* 柔和的卡片风格 */
+      .card-box {
+        background-color: #f9fafb;
+        /* 极浅灰 */
+        border: 1px solid #e5e7eb;
+        /* 细边框代替色块 */
+        border-radius: 6px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .dark .card-box {
+        background-color: #374151;
+        border-color: #4b5563;
+      }
+
+      /* 标签样式替代纯黑块 */
+      .tag-label {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #e5e7eb;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        letter-spacing: 0.05em;
+      }
+
+      .dark .tag-label {
+        background: #4b5563;
+        color: #e5e7eb;
+      }
+
+      /* 链接按钮 - 线框风格 */
+      .link-btn {
+        display: inline-block;
+        padding: 8px 20px;
+        background: transparent;
+        border: 1px solid #374151;
+        /* 深灰边框 */
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+
+      .link-btn:hover {
+        background: #374151;
+        color: #fff;
+      }
+
+      .dark .link-btn {
+        border-color: #d1d5db;
+        color: #d1d5db;
+      }
+
+      .dark .link-btn:hover {
+        background: #d1d5db;
+        color: #1f2937;
+      }
+
+      /* 序号圆圈 - 空心风格 */
+      .number-circle {
+        width: 32px;
+        height: 32px;
+        border: 2px solid #374151;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin-right: 16px;
+        font-size: 16px;
+        color: #374151;
+        flex-shrink: 0;
+      }
+
+      .dark .number-circle {
+        border-color: #d1d5db;
+        color: #d1d5db;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- PAGE 1: 封面 -->
+    <article class="magazine-page">
+      <div class="chapter-number">01</div>
+      <div class="content-layer" style="justify-content: center">
+        <header class="mb-20 text-center">
+          <!-- 替换纯黑线条为深灰细线 -->
+          <div class="w-16 h-px bg-gray-400 mx-auto mb-10 dark:bg-gray-500"></div>
+          <h1
+            class="text-7xl font-bold text-gray-800 mb-6 leading-tight dark:text-white tracking-tight"
+          >
+            AIWriteX
+          </h1>
+          <p class="text-3xl text-gray-500 font-light serif-font tracking-widest uppercase">
+            User Manual
+          </p>
+          <p class="text-xl text-gray-400 mt-4 font-light">智能内容创作平台·用户使用手册</p>
+        </header>
+
+        <section class="mb-12">
+          <blockquote class="text-center px-8">
+            <p class="std-quote text-gray-700 dark:text-gray-300 leading-relaxed">
+              "融合AI、创意、搜索与借鉴四重能力，<br />让内容创作变得前所未有的简单。"
+            </p>
+          </blockquote>
+        </section>
+
+        <div class="flex justify-center mt-12 space-x-12 text-center">
+          <div>
+            <span class="block text-4xl font-bold mb-2 text-gray-800 dark:text-gray-200">15+</span>
+            <span class="text-gray-400 uppercase text-sm tracking-wider">创意维度</span>
+          </div>
+          <div class="w-px h-12 bg-gray-200"></div>
+          <div>
+            <span class="block text-4xl font-bold mb-2 text-gray-800 dark:text-gray-200">100%</span>
+            <span class="text-gray-400 uppercase text-sm tracking-wider">本地运行</span>
+          </div>
+          <div class="w-px h-12 bg-gray-200"></div>
+          <div>
+            <span class="block text-4xl font-bold mb-2 text-gray-800 dark:text-gray-200">2.0</span>
+            <span class="text-gray-400 uppercase text-sm tracking-wider">自动引擎</span>
+          </div>
+        </div>
+      </div>
+      <footer class="page-footer">
+        <span>Introduction</span>
+        <span>Page 1 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 2: 安装 -->
+    <article class="magazine-page">
+      <div class="chapter-number">02</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">I.</span> 快速开始
+        </h2>
+
+        <!-- 安装 -->
+        <section class="mb-12">
+          <h3
+            class="text-2xl font-bold mb-6 border-b border-gray-200 pb-3 text-gray-800 dark:text-gray-200"
+          >
+            软件安装
+          </h3>
+          <p class="std-text mb-6">选择合适的途径下载并安装 AIWriteX：</p>
+
+          <div class="grid grid-cols-1 gap-6">
+            <div
+              class="card-box flex justify-between items-center hover:shadow-md transition-shadow"
+            >
+              <div>
+                <strong class="block text-lg mb-1 text-gray-800 dark:text-white"
+                  >Windows 版本</strong
+                >
+                <span class="text-gray-500 text-sm">适用于Win 10 或更高版本</span>
+              </div>
+              <a href="https://aiwritex.voidai.cc" class="link-btn">官网下载</a>
+            </div>
+            <div
+              class="card-box flex justify-between items-center hover:shadow-md transition-shadow"
+            >
+              <div>
+                <strong class="block text-lg mb-1 text-gray-800 dark:text-white"
+                  >Windows 版本</strong
+                >
+                <span class="text-gray-500 text-sm">适用于Win 10 或更高版本</span>
+              </div>
+              <a href="" class="link-btn">网盘下载</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- 配置 -->
+        <section class="flex-1">
+          <h3
+            class="text-2xl font-bold mb-6 border-b border-gray-200 pb-3 text-gray-800 dark:text-gray-200"
+          >
+            必填配置项
+          </h3>
+          <p class="std-text mb-6">首次运行，请进入“系统设置”完成初始化：</p>
+
+          <ul class="std-list list-disc space-y-4">
+            <li class="std-list-item">
+              <strong class="block text-gray-800 dark:text-white mb-1"
+                ><b>大模型 API 设置（必须）</b></strong
+              >
+              推荐选择 OpenRouter 或 Deepseek，并填入有效的 API Key。
+            </li>
+            <li class="std-list-item">
+              <strong class="block text-gray-800 dark:text-white mb-1"
+                >微信公众号设置（勾选自动发布时）</strong
+              >
+              需填入微信公众号 AppID、AppSecret 及文章作者名称。
+            </li>
+          </ul>
+
+          <!-- 替换黄色块为更淡雅的灰色提示 -->
+          <div
+            class="mt-8 p-6 rounded bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+          >
+            <p class="italic std-text text-gray-600 dark:text-gray-300 text-sm">
+              <span class="font-bold">提示:</span> <br />
+              1. 免费大模型API推荐：<a
+                href="https://openrouter.ai"
+                target="_blank"
+                class="text-blue-600 underline hover:text-blue-800"
+                >OpenRouter</a
+              >注册登录，创建API Key后填入即可使用。<br />
+              2. 由于免费的不稳定且每日有限额，推荐国内用户使用
+              <a
+                href="https://platform.deepseek.com/api_keys"
+                target="_blank"
+                class="text-blue-600 underline hover:text-blue-800"
+                >Deepseek</a
+              >，稳定速度快，价格便宜。<br />
+              3. 其余配置项系统已预设最佳默认值，初次使用建议保持默认。<br />
+              4. 建议同时配置AIForge的API Key，以提升搜索与内容生成质量。
+            </p>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Installation & Setup</span>
+        <span>Page 2 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 3: 基础操作 -->
+    <article class="magazine-page">
+      <div class="chapter-number">03</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">II.</span> 基础操作
+        </h2>
+
+        <section class="mb-12">
+          <div class="flex items-center mb-4">
+            <!-- 替换黑圆为线框圆 -->
+            <div class="number-circle">A</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">热搜自动话题</h3>
+          </div>
+
+          <p class="std-text mb-6">
+            最轻松的创作方式：自动从微博、抖音等平台抓取当前热门话题，并生成文章。
+          </p>
+          <div class="card-box">
+            <strong
+              class="block mb-4 text-lg border-b border-gray-200 pb-2 text-gray-700 dark:text-gray-300"
+              >操作步骤</strong
+            >
+            <ol class="std-list list-decimal pl-4">
+              <li class="std-list-item">进入“创意工坊”</li>
+              <li class="std-list-item"><strong>保持话题输入框为空</strong></li>
+              <li class="std-list-item">点击“开始生成”</li>
+              <li class="std-list-item">等待 2-5 分钟，全流程自动完成</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">B</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">自定义话题</h3>
+          </div>
+
+          <p class="std-text mb-6">
+            如果您有明确的创作意图，例如“AI如何改变教育”或“秋季养生指南”。
+          </p>
+          <div class="card-box">
+            <strong
+              class="block mb-4 text-lg border-b border-gray-200 pb-2 text-gray-700 dark:text-gray-300"
+              >操作步骤</strong
+            >
+            <ol class="std-list list-decimal pl-4">
+              <li class="std-list-item">在输入框中填入您的主题</li>
+              <li class="std-list-item">点击“开始生成”</li>
+              <li class="std-list-item">系统将基于该主题搜索实时资讯并创作</li>
+            </ol>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Basic Operations</span>
+        <span>Page 3 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 4: 全网爆点 -->
+    <article class="magazine-page">
+      <div class="chapter-number">04</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">IV.</span> 全网爆点雷达
+        </h2>
+        <p class="std-text mb-8">
+          不仅仅是看热搜，更是预知未来。AIWriteX 独有的"物理拟态"算法，为您精准捕捉未来 12
+          小时的流量风口。
+        </p>
+
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">A</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              趋势预测 (Trend Prediction)
+            </h3>
+          </div>
+          <p class="std-text mb-4">
+            基于速度与加速度的科学预测，一眼看穿谁是"真火"，谁是"昙花一现"。
+          </p>
+          <div class="card-box">
+            <ul class="std-list list-none pl-0 space-y-3">
+              <li class="std-list-item flex items-start">
+                <span class="text-xl mr-3">📈</span>
+                <div>
+                  <strong>预测曲线</strong>：<br />
+                  <span class="text-sm text-gray-500"
+                    >实线为历史热度，虚线为未来12小时预测。若曲线昂扬向上，说明话题仍处在爆发期。</span
+                  >
+                </div>
+              </li>
+              <li class="std-list-item flex items-start">
+                <span class="text-xl mr-3">📏</span>
+                <div>
+                  <strong>全网基准线 (灰色虚线)</strong>：<br />
+                  <span class="text-sm text-gray-500"
+                    >代表全网Top 3平均水平。若话题曲线高于此线，说明具备"统御全网"的超级潜质。</span
+                  >
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">B</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              黑马挖掘 (Dark Horse Mining)
+            </h3>
+          </div>
+          <p class="std-text mb-4">
+            在话题登上热搜前 2-6 小时提前锁定。适合追求"首发红利"的创作者。
+          </p>
+          <div class="grid grid-cols-2 gap-4">
+            <div
+              class="p-5 bg-purple-50 rounded border border-purple-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-purple-700 dark:text-purple-400 mb-2"
+                >观察中 (Pending)</strong
+              >
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                系统刚挖掘到的潜在苗子，热度尚未起飞，但在某些圈层已现端倪。建议提前布局。
+              </p>
+            </div>
+            <div
+              class="p-5 bg-green-50 rounded border border-green-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-green-700 dark:text-green-400 mb-2">命中 (Verified)</strong>
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                经过时间验证，系统成功预言并已开始真实上涨的"真黑马"。跟进风险极低，回报极高。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">C</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">聚合视图</h3>
+          </div>
+          <p class="std-text mb-4">多维度聚合分析热点，快速把握全网热搜脉络。</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div
+              class="p-5 bg-blue-50 rounded border border-blue-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-blue-700 dark:text-blue-400 mb-2">全网聚合</strong>
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                一站式查看微博、抖音、百度等所有平台热点，不再逐个切换。
+              </p>
+            </div>
+            <div
+              class="p-5 bg-indigo-50 rounded border border-indigo-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-indigo-700 dark:text-indigo-400 mb-2">平台聚合</strong>
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                按平台分组展示热点，直观对比各平台热度差异，精准选题。
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Hot Radar</span>
+        <span>Page 4 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 5: 借鉴模式配置 -->
+    <article class="magazine-page">
+      <div class="chapter-number">05</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">V.</span> 借鉴模式详解
+        </h2>
+        <p class="std-text mb-10 text-xl font-light text-gray-500">
+          "站在巨人的肩膀上创作。" —— 允许您指定参考文章的风格与内容。
+        </p>
+
+        <section class="flex-1 space-y-10">
+          <!-- 步骤 1 -->
+          <div>
+            <!-- 替换黑色Label -->
+            <span class="tag-label">STEP 01</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">模板选择</h4>
+            <p class="std-text mb-2"><strong>模板分类</strong>：选择文章的领域（如科技、美食）。</p>
+            <p class="std-text"><strong>模板名称</strong>：指定具体的排版样式。留空则随机。</p>
+          </div>
+
+          <div class="w-full h-px bg-gray-200"></div>
+
+          <!-- 步骤 2 -->
+          <div>
+            <span class="tag-label">STEP 02</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">参考链接</h4>
+            <p class="std-text mb-4">
+              输入您想参考的公众号或网页文章链接。支持多篇参考，使用竖线分隔。
+            </p>
+            <div
+              class="bg-gray-50 p-4 rounded text-sm font-mono text-gray-600 break-all border border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+            >
+              https://link1.com | https://link2.com
+            </div>
+          </div>
+
+          <div class="w-full h-px bg-gray-200"></div>
+
+          <!-- 步骤 3 -->
+          <div>
+            <span class="tag-label">STEP 03</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">借鉴比例</h4>
+            <ul class="std-list list-none pl-0">
+              <li class="std-list-item mb-4">
+                <span class="font-bold text-xl mr-2 text-gray-800 dark:text-gray-300">10-30%</span>
+                <span class="text-gray-500">轻度借鉴。主要学习对方的语气和结构。</span>
+              </li>
+              <li class="std-list-item mb-4">
+                <span class="font-bold text-xl mr-2 text-gray-800 dark:text-gray-300">30-50%</span>
+                <span class="text-gray-500">平衡模式（推荐）。适度融合内容与风格。</span>
+              </li>
+              <li class="std-list-item">
+                <span class="font-bold text-xl mr-2 text-gray-800 dark:text-gray-300">50-75%</span>
+                <span class="text-gray-500">深度借鉴。高度还原观点，适合洗稿或仿写。</span>
+              </li>
+              <li class="std-list-item">
+                <span class="font-bold text-xl mr-2 text-gray-800 dark:text-gray-300">100%</span>
+                <span class="text-gray-500">直接使用，用于仅使用模版，不生成文章的场景。</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Borrowing Mode</span>
+        <span>Page 5 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 6: 借鉴场景 -->
+    <article class="magazine-page">
+      <div class="chapter-number">06</div>
+      <div class="content-layer">
+        <h3
+          class="text-3xl font-bold mb-10 pb-4 inline-block text-gray-800 dark:text-gray-100 border-b border-gray-300"
+        >
+          典型应用场景
+        </h3>
+
+        <div class="space-y-8 flex-1">
+          <!-- 场景 1 - 替换彩色边框为柔和灰度 -->
+          <div class="card-box border-l-4 border-l-gray-400">
+            <h4 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+              场景一：风格迁移
+            </h4>
+            <div class="grid grid-cols-[60px_1fr] gap-4">
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Goal</span
+              >
+              <p class="std-text m-0">将枯燥的技术文档改写为通俗易懂的科普文。</p>
+
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Setup</span
+              >
+              <p class="std-text m-0">提供 1-2 篇科普风格文章，设置借鉴比例 20-30%。</p>
+            </div>
+          </div>
+
+          <!-- 场景 2 -->
+          <div class="card-box border-l-4 border-l-gray-600">
+            <h4 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+              场景二：内容扩展
+            </h4>
+            <div class="grid grid-cols-[60px_1fr] gap-4">
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Goal</span
+              >
+              <p class="std-text m-0">综合多个信息源，创作一篇深度行业分析。</p>
+
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Setup</span
+              >
+              <p class="std-text m-0">提供 3-5 篇相关文章链接，设置借鉴比例 50-75%。</p>
+            </div>
+          </div>
+
+          <!-- 场景 3 -->
+          <div class="card-box border-l-4 border-l-gray-800">
+            <h4 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+              场景三：品牌统一
+            </h4>
+            <div class="grid grid-cols-[60px_1fr] gap-4">
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Goal</span
+              >
+              <p class="std-text m-0">保持公众号历史文章的调性一致。</p>
+
+              <span class="font-bold text-xs uppercase text-gray-400 mt-2 tracking-wider"
+                >Setup</span
+              >
+              <p class="std-text m-0">选择特定模板分类，提供品牌过往爆文，比例 20-30%。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="page-footer">
+        <span>Scenarios</span>
+        <span>Page 6 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 7: 维度创意 -->
+    <article class="magazine-page">
+      <div class="chapter-number">07</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">VI.</span> 维度化创意
+        </h2>
+        <p class="std-text mb-8">
+          通过组合15种不同的创意维度，系统能将同一内容裂变出无限可能。<br />
+          <strong>注意：创意模式会重写原文，不要与借鉴模式同时开启。</strong>
+        </p>
+
+        <div class="grid grid-cols-2 gap-8 mb-10">
+          <div>
+            <h4
+              class="font-bold border-b border-gray-300 pb-2 mb-3 text-lg text-gray-700 dark:text-gray-200"
+            >
+              文体与视角
+            </h4>
+            <ul class="std-list list-disc pl-4">
+              <li class="std-list-item">诗歌、散文、小说</li>
+              <li class="std-list-item">学术论文、新闻报道</li>
+              <li class="std-list-item">东方哲学、西方思辨</li>
+            </ul>
+          </div>
+          <div>
+            <h4
+              class="font-bold border-b border-gray-300 pb-2 mb-3 text-lg text-gray-700 dark:text-gray-200"
+            >
+              时空与情感
+            </h4>
+            <ul class="std-list list-disc pl-4">
+              <li class="std-list-item">春秋战国、赛博朋克</li>
+              <li class="std-list-item">治愈系、悬疑惊悚</li>
+              <li class="std-list-item">热血励志、日式物哀</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 替换纯黑背景块为浅灰边框块 -->
+        <section
+          class="flex-1 bg-gray-50 border border-gray-200 p-8 rounded-lg dark:bg-gray-800 dark:border-gray-700"
+        >
+          <h3
+            class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b border-gray-200 pb-2"
+          >
+            创意组合演示
+          </h3>
+
+          <div class="mb-8">
+            <span class="text-gray-400 font-bold uppercase tracking-widest text-xs block mb-2"
+              >Example 01</span
+            >
+            <h4 class="text-xl font-serif mb-2 text-gray-900 dark:text-white">
+              穿越时空的科技评论
+            </h4>
+            <p class="text-gray-600 dark:text-gray-300 std-text">
+              <span class="font-semibold">组合：</span>李白 (角色) + 唐宋盛世 (背景) + 诗歌
+              (文体)<br />
+              <span class="font-semibold">效果：</span>用浪漫主义的古诗词笔触，评论现代 AI
+              技术的发展。
+            </p>
+          </div>
+
+          <div>
+            <span class="text-gray-400 font-bold uppercase tracking-widest text-xs block mb-2"
+              >Example 02</span
+            >
+            <h4 class="text-xl font-serif mb-2 text-gray-900 dark:text-white">魔幻现实主义指南</h4>
+            <p class="text-gray-600 dark:text-gray-300 std-text">
+              <span class="font-semibold">组合：</span>拉美风情 (视角) + 书信体 (格式) + 旅行者
+              (受众)<br />
+              <span class="font-semibold">效果：</span>一篇充满马尔克斯式想象力的城市旅行指南。
+            </p>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Creativity</span>
+        <span>Page 7 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 8: 去AI味 -->
+    <article class="magazine-page">
+      <div class="chapter-number">08</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">VII.</span> 去AI味功能
+        </h2>
+        <p class="std-text mb-8">
+          AI生成的内容往往带有明显的"机械感"，容易被读者察觉。去AI味功能通过智能改写，让文章更加自然、人性化。
+        </p>
+
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">A</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">功能入口</h3>
+          </div>
+          <div class="card-box">
+            <ul class="std-list list-disc">
+              <li class="std-list-item">
+                <strong>创意工坊：</strong>“去AI味”，选择强度开始生成即可
+              </li>
+              <li class="std-list-item">
+                <strong>创意工坊：</strong>文风参考用于模仿非AI文章的文风
+              </li>
+              <li class="std-list-item">
+                <strong>创意工坊：</strong>对本次“去AI味”的结果进行“打分”，以优化算法模型
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">B</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">处理原理</h3>
+          </div>
+          <p class="std-text mb-4">
+            系统会分析文章中的AI痕迹特征，如过于工整的句式、重复的过渡词、模式化的开头结尾等，然后进行针对性改写：
+          </p>
+          <div class="grid grid-cols-2 gap-4">
+            <div
+              class="p-5 bg-red-50 rounded border border-red-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-red-700 dark:text-red-400 mb-2">AI痕迹示例</strong>
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                "首先...其次...最后..."、"值得注意的是"、"综上所述"等模板化表达
+              </p>
+            </div>
+            <div
+              class="p-5 bg-green-50 rounded border border-green-100 dark:bg-gray-800 dark:border-gray-700"
+            >
+              <strong class="block text-green-700 dark:text-green-400 mb-2">改写效果</strong>
+              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                更自然的口语化表达、多样化的句式结构、个性化的观点陈述
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">C</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">使用建议</h3>
+          </div>
+          <div class="card-box">
+            <ul class="std-list list-disc">
+              <li class="std-list-item">
+                <strong>适用场景</strong>：需要发布到对原创要求较高的平台时使用
+              </li>
+              <li class="std-list-item">
+                <strong>处理时间</strong>：根据文章长度，通常需要1-3分钟
+              </li>
+              <li class="std-list-item">
+                <strong>效果检验</strong>：处理后建议通读全文，确保语义连贯
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>De-AI Processing</span>
+        <span>Page 8 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 9: 模板复刻教程 -->
+    <article class="magazine-page">
+      <div class="chapter-number">09</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">VIII.</span> 模板复刻教程
+        </h2>
+        <p class="std-text mb-6 text-xl font-light text-gray-500">
+          "从一篇微信公众号文章链接，到完全复刻其模板并应用到自己的内容" —— 完整流程指南
+        </p>
+
+        <section class="flex-1 space-y-6">
+          <!-- 步骤 1 -->
+          <div>
+            <span class="tag-label">STEP 01 · 导入文章</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">微信文库导入</h4>
+            <div class="card-box">
+              <ol class="std-list list-decimal pl-4">
+                <li class="std-list-item">进入 <strong>内容中心 → 微信文库</strong></li>
+                <li class="std-list-item">点击 <strong>"导入链接"</strong> 按钮</li>
+                <li class="std-list-item">粘贴微信公众号文章链接</li>
+                <li class="std-list-item">等待系统自动抓取文章内容和样式</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="w-full h-px bg-gray-200"></div>
+
+          <!-- 步骤 2 -->
+          <div>
+            <span class="tag-label">STEP 02 · 创建模板</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">清洗并保存模板</h4>
+            <div class="card-box">
+              <ol class="std-list list-decimal pl-4">
+                <li class="std-list-item">进入 <strong>模板管理 → 新建模板</strong></li>
+                <li class="std-list-item">在弹窗中 <strong>从微信文库选择</strong> 刚导入的文章</li>
+                <li class="std-list-item">
+                  勾选 <strong>"清洗HTML"</strong>（重要！微信有大量垃圾代码，建议清洗）
+                </li>
+                <li class="std-list-item">填写模板名称，点击确定等待清洗完成</li>
+              </ol>
+              <div
+                class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-sm dark:bg-gray-800 dark:border-gray-700"
+              >
+                <strong class="text-yellow-700 dark:text-yellow-400">⚠️ 提示：</strong>
+                <span class="text-gray-600 dark:text-gray-300"
+                  >清洗过程需要1-2分钟，请耐心等待。清洗后的模板更精简，渲染效果更好。</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full h-px bg-gray-200"></div>
+
+          <!-- 步骤 3 -->
+          <div>
+            <span class="tag-label">STEP 03 · 应用模板</span>
+            <h4 class="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">
+              使用模板生成文章
+            </h4>
+            <div class="card-box">
+              <ol class="std-list list-decimal pl-4">
+                <li class="std-list-item">进入 <strong>创意工坊</strong></li>
+                <li class="std-list-item">开启 <strong>借鉴模式</strong>，选择刚创建的模板</li>
+                <li class="std-list-item">
+                  将借鉴比例设置为 <strong>100%</strong>（直接使用内容）
+                </li>
+                <li class="std-list-item">
+                  在参考来源选择 <strong>"文本粘贴"</strong>，粘贴您的文章内容
+                </li>
+                <li class="std-list-item">点击 <strong>"开始生成"</strong></li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- 结果说明 -->
+          <div
+            class="p-6 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700"
+          >
+            <p class="std-text text-gray-600 dark:text-gray-300">
+              <strong class="text-gray-800 dark:text-white">🎉 完成！</strong><br />
+              系统将用您提供的内容，套用复刻的微信模板样式，生成一篇视觉效果完全一致的新文章。
+            </p>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Template Cloning Tutorial</span>
+        <span>Page 9 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 10: 手机智能体 - 概述与配置 -->
+    <article class="magazine-page">
+      <div class="chapter-number">10</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">IX.</span> 手机智能体
+        </h2>
+        <p class="std-text mb-8">
+          无需打开电脑，随时随地通过手机 IM 控制 AIWriteX 的全部能力。
+          连接你常用的聊天平台，发一条消息即可完成从选题到生成、发布的全流程。
+        </p>
+
+        <!-- 支持平台 -->
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">A</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">支持平台</h3>
+          </div>
+          <div class="grid grid-cols-5 gap-3 mb-6">
+            <div class="card-box text-center py-5">
+              <span class="block text-2xl mb-2">💬</span>
+              <strong class="text-sm text-gray-800 dark:text-white">QQ</strong>
+            </div>
+            <div class="card-box text-center py-5">
+              <span class="block text-2xl mb-2">✈️</span>
+              <strong class="text-sm text-gray-800 dark:text-white">Telegram</strong>
+            </div>
+            <div class="card-box text-center py-5">
+              <span class="block text-2xl mb-2">🎮</span>
+              <strong class="text-sm text-gray-800 dark:text-white">Discord</strong>
+            </div>
+            <div class="card-box text-center py-5">
+              <span class="block text-2xl mb-2">🔵</span>
+              <strong class="text-sm text-gray-800 dark:text-white">钉钉</strong>
+            </div>
+            <div class="card-box text-center py-5">
+              <span class="block text-2xl mb-2">🟢</span>
+              <strong class="text-sm text-gray-800 dark:text-white">飞书</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- 配置步骤 -->
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">B</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">配置步骤</h3>
+          </div>
+          <p class="std-text mb-6">
+            在 <strong>系统设置 → 机器人设置</strong> 中开启并配置对应平台：
+          </p>
+
+          <div class="space-y-4">
+            <!-- QQ -->
+            <div class="card-box border-l-4 border-l-blue-400">
+              <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">QQ 机器人</h4>
+              <ol class="std-list list-decimal pl-4 text-sm">
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  前往
+                  <a href="https://q.qq.com" target="_blank" class="text-blue-600 underline"
+                    >QQ 开放平台</a
+                  >
+                  创建机器人应用
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  获取 <strong>AppID</strong> 和 <strong>AppSecret</strong>
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  将服务器公网 IP 添加到平台白名单
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-0">
+                  填入 AIWriteX 设置，保存后自动连接
+                </li>
+              </ol>
+            </div>
+
+            <!-- Telegram -->
+            <div class="card-box border-l-4 border-l-sky-400">
+              <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">Telegram Bot</h4>
+              <ol class="std-list list-decimal pl-4 text-sm">
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  在 Telegram 中搜索 <strong>@BotFather</strong>，发送 /newbot 创建机器人
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  获取 <strong>Bot Token</strong>
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-0">
+                  填入 AIWriteX 设置即可（国内可能需要代理）
+                </li>
+              </ol>
+            </div>
+
+            <!-- 钉钉 & 飞书 & Discord -->
+            <div class="card-box border-l-4 border-l-gray-400">
+              <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">
+                钉钉 / 飞书 / Discord
+              </h4>
+              <ol class="std-list list-decimal pl-4 text-sm">
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  在对应的开放平台创建应用/机器人
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-1">
+                  获取应用凭据（App Key / App Secret 等）
+                </li>
+                <li class="std-list-item !text-sm !leading-relaxed !mb-0">
+                  填入 AIWriteX 设置，各平台详细步骤请参考对应开放平台文档
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Smart Agent · Setup</span>
+        <span>Page 10 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 11: 手机智能体 - 自然语言控制 -->
+    <article class="magazine-page">
+      <div class="chapter-number">11</div>
+      <div class="content-layer">
+        <h3
+          class="text-3xl font-bold mb-8 pb-4 inline-block text-gray-800 dark:text-gray-100 border-b border-gray-300"
+        >
+          自然语言控制
+        </h3>
+        <p class="std-text mb-8">
+          不需要记忆命令，直接用<strong>日常对话</strong>即可控制。系统内置 AI
+          意图引擎，自动理解你的需求并执行。
+        </p>
+
+        <!-- 自然语言示例 -->
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">A</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">怎么用</h3>
+          </div>
+          <div class="card-box">
+            <strong
+              class="block mb-4 text-lg border-b border-gray-200 pb-2 text-gray-700 dark:text-gray-300"
+              >直接说你想做什么</strong
+            >
+            <div class="space-y-3">
+              <div class="flex items-start">
+                <span
+                  class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded mr-3 whitespace-nowrap dark:bg-blue-900 dark:text-blue-300"
+                  >你说</span
+                >
+                <p class="text-gray-600 dark:text-gray-300 text-base m-0">
+                  "帮我写一篇关于 AI 教育的文章"
+                </p>
+              </div>
+              <div class="flex items-start">
+                <span
+                  class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded mr-3 whitespace-nowrap dark:bg-blue-900 dark:text-blue-300"
+                  >你说</span
+                >
+                <p class="text-gray-600 dark:text-gray-300 text-base m-0">"看看现在什么话题最火"</p>
+              </div>
+              <div class="flex items-start">
+                <span
+                  class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded mr-3 whitespace-nowrap dark:bg-blue-900 dark:text-blue-300"
+                  >你说</span
+                >
+                <p class="text-gray-600 dark:text-gray-300 text-base m-0">
+                  "根据全网热搜分析选题角度，然后写一篇文章"
+                </p>
+              </div>
+              <div class="flex items-start">
+                <span
+                  class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded mr-3 whitespace-nowrap dark:bg-blue-900 dark:text-blue-300"
+                  >你说</span
+                >
+                <p class="text-gray-600 dark:text-gray-300 text-base m-0">
+                  "把最近生成的文章发布到微信"
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 多步骤工作流 -->
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">B</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">多步骤工作流</h3>
+          </div>
+          <p class="std-text mb-4">
+            一句话下达复合指令，系统自动拆分为多个步骤<strong>链式执行</strong>：
+          </p>
+          <div class="card-box bg-gray-50 dark:bg-gray-800">
+            <p class="text-base font-bold text-gray-800 dark:text-gray-200 mb-4 italic">
+              "根据全网最热的话题，分析写作角度，然后生成文章"
+            </p>
+            <div class="space-y-3 pl-2 border-l-2 border-gray-300 dark:border-gray-600">
+              <div class="flex items-center">
+                <span class="text-sm font-bold text-gray-400 mr-3 w-8">1️⃣</span>
+                <span class="text-gray-700 dark:text-gray-300">获取全网热搜 → 定位最热话题</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-sm font-bold text-gray-400 mr-3 w-8">2️⃣</span>
+                <span class="text-gray-700 dark:text-gray-300">分析选题角度 → 推荐最佳切入点</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-sm font-bold text-gray-400 mr-3 w-8">3️⃣</span>
+                <span class="text-gray-700 dark:text-gray-300">自动生成文章 → 完成创作</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-4 italic">
+              每一步的结果会自动传递给下一步，全程无需人工干预。
+            </p>
+          </div>
+        </section>
+
+        <!-- 指令帮助提示 -->
+        <section class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">C</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">指令模式</h3>
+          </div>
+          <p class="std-text mb-4">
+            除了自然语言，你也可以使用 <strong>/斜杠指令</strong> 精确控制：
+          </p>
+          <div class="card-box">
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              <div class="flex">
+                <code class="text-blue-600 dark:text-blue-400 font-mono mr-2">/帮助</code>
+                <span class="text-gray-500">查看完整指令列表</span>
+              </div>
+              <div class="flex">
+                <code class="text-blue-600 dark:text-blue-400 font-mono mr-2">/生成 AI教育</code>
+                <span class="text-gray-500">生成指定话题文章</span>
+              </div>
+              <div class="flex">
+                <code class="text-blue-600 dark:text-blue-400 font-mono mr-2">/全网热搜</code>
+                <span class="text-gray-500">查看实时热搜</span>
+              </div>
+              <div class="flex">
+                <code class="text-blue-600 dark:text-blue-400 font-mono mr-2">/发布 文章名</code>
+                <span class="text-gray-500">发布到微信公众号</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-400 mt-4 italic">
+              💡 发送
+              <code class="text-blue-500">/帮助</code>
+              可随时查看所有可用指令。推荐优先使用自然语言，更简单直观。
+            </p>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Smart Agent · Usage</span>
+        <span>Page 11 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 12: 管理 -->
+    <article class="magazine-page">
+      <div class="chapter-number">12</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">X.</span> 管理中心
+        </h2>
+
+        <section class="mb-12">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">内容中心</h3>
+          <div class="card-box">
+            <div class="flex gap-3 mb-6">
+              <span class="px-3 py-1 border border-gray-300 rounded text-sm font-bold text-gray-600"
+                >未发布</span
+              >
+              <span
+                class="px-3 py-1 border border-green-300 bg-green-50 rounded text-sm font-bold text-green-700"
+                >已发布</span
+              >
+              <span
+                class="px-3 py-1 border border-red-300 bg-red-50 rounded text-sm font-bold text-red-700"
+                >发布失败</span
+              >
+            </div>
+            <ul class="std-list list-disc">
+              <li class="std-list-item"><strong>搜索</strong>：快速查找历史文章。</li>
+              <li class="std-list-item"><strong>视图</strong>：支持网格与列表两种模式。</li>
+              <li class="std-list-item"><strong>发布</strong>：手动发布文章至微信公众号。</li>
+              <li class="std-list-item">
+                <strong>编辑</strong>：可视化设计页面、自主修改HTML代码。
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 素材文库 -->
+        <section class="mb-10">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">素材文库</h3>
+          <div class="card-box">
+            <p class="std-text mb-4">一站式内容素材管理与智能创作辅助中心。</p>
+            <ul class="std-list list-disc">
+              <li class="std-list-item">
+                <strong>微信文库</strong>：导入并管理微信公众号优质文章，支持 HTML/Markdown
+                双格式预览，一键应用到创意工坊进行二次创作。
+              </li>
+              <li class="std-list-item">
+                <strong>智能选题</strong>：AI
+                自动分析热点趋势，生成选题建议与写作大纲，快速锁定创作方向。
+              </li>
+              <li class="std-list-item">
+                <strong>内容挖掘</strong>：基于多篇参考文章，AI
+                自动整合提炼核心内容，生成高质量融合素材。
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="flex-1">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">模板管理</h3>
+          <p class="std-text mb-6">系统内置十大分类精美模板，覆盖主流公众号赛道。</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              科技数码
+            </div>
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              财经投资
+            </div>
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              教育学习
+            </div>
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              健康养生
+            </div>
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              美食旅行
+            </div>
+            <div
+              class="p-4 bg-gray-50 rounded text-center text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+            >
+              职场发展
+            </div>
+          </div>
+          <p class="mt-4 text-sm text-center text-gray-400 italic">...以及更多分类</p>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Management</span>
+        <span>Page 12 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 9: 设置 -->
+    <article class="magazine-page">
+      <div class="chapter-number">13</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">XI.</span> 系统设置
+        </h2>
+
+        <div class="space-y-10 flex-1">
+          <!-- 界面设置 - 替换色条为细线 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              界面设置
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>主题切换</strong>：支持深色/浅色模式，适应不同光线环境。
+              </li>
+              <li class="std-list-item">
+                <strong>窗口大小</strong>：提供三种窗口大小选项，灵活自由。
+              </li>
+              <li class="std-list-item">
+                <strong>网页设计器主题</strong>：跟随系统更美观，但默认主题功能效果更佳。
+              </li>
+            </ul>
+          </div>
+
+          <!-- 基础设置 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              基础设置
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>文章格式</strong>：输出格式可选 HTML、Markdown 或 TXT。
+              </li>
+              <li class="std-list-item">
+                <strong>字数限制</strong>：设定生成文章的最小与最大字数。
+              </li>
+              <li class="std-list-item">
+                <strong>自动发布</strong>：开启后，生成完毕即刻推送至公众号。
+              </li>
+              <li class="std-list-item">
+                <strong>模板设置</strong>：是否使用本地内置模板，不使用则AI随机生成。
+              </li>
+            </ul>
+          </div>
+
+          <!-- 高级设置 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              高级设置
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>手机智能体</strong>：QQ、飞书、钉钉等手机机器人配置。
+              </li>
+              <li class="std-list-item">
+                <strong>创意设置</strong>：创意功能相关的设置，可自行搭配。
+              </li>
+              <li class="std-list-item">
+                <strong>热搜平台</strong>：随机选取平台时，每个平台被选中的权重。
+              </li>
+              <li class="std-list-item"><strong>微信公众号</strong>：微信公众号相关的配置。</li>
+              <li class="std-list-item">
+                <strong>大模型API</strong>：系统使用的大模型API相关的配置。
+              </li>
+              <li class="std-list-item">
+                <strong>图片生成</strong>：可选配图使用AI生成，否则为随机图片
+              </li>
+              <li class="std-list-item"><strong>AIForge</strong>：系统搜索能力相关的配置。</li>
+              <li class="std-list-item">
+                <strong>页面设计</strong>：网页可视化编辑设计器相关配置。
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <footer class="page-footer">
+        <span>Settings</span>
+        <span>Page 13 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 14: 微信公众号代理转发实现 -->
+    <article class="magazine-page">
+      <div class="chapter-number">14</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">XII.</span> 微信代理转发
+        </h2>
+        <p class="std-text mb-8">
+          针对家用拨号上网或移动办公用户，IP 地址频繁变动会导致微信后台白名单配置极为繁琐。
+          <strong>代理转发</strong>功能允许您通过一台固定 IP
+          的中转服务器发送发布指令，彻底解决此痛点。
+        </p>
+
+        <!-- 实现流程 -->
+        <section class="mb-10">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">1</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">准备工作</h3>
+          </div>
+          <div class="card-box">
+            <p class="std-text">
+              您需要准备一台具备<strong>固定公网 IP</strong>
+              的云服务器。推荐选择<strong>阿里云</strong>、<strong>腾讯云</strong>或<strong>华为云</strong>的“轻量应用服务器”，每月成本极低，且能提供极其稳定的固定出口
+              IP。
+            </p>
+          </div>
+        </section>
+
+        <!-- 服务端代码 -->
+        <section class="mb-10" style="flex: 1; display: flex; flex-direction: column">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">2</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              服务端代码 (Python 示例)
+            </h3>
+          </div>
+          <div class="card-box bg-gray-900 p-4 rounded-lg" style="flex: 1; overflow-y: auto">
+            <pre
+              class="text-sm text-green-400 font-mono"
+              style="white-space: pre-wrap; word-break: break-all"
+            ><code># 环境准备: pip install flask requests
+from flask import Flask, request
+import requests
+
+app = Flask(__name__)
+
+@app.route('/proxy', methods=['POST'])
+def proxy():
+    url = request.args.get('url')
+    if not url: return "Missing URL", 400
+    
+    # 透传请求头、数据与方法
+    headers = {k: v for k, v in request.headers if k.lower() != 'host'}
+    try:
+        response = requests.request(
+            method=request.method,
+            url=url,
+            headers=headers,
+            data=request.get_data(),
+            timeout=10
+        )
+        return (response.content, response.status_code, response.headers.items())
+    except Exception as e:
+        return str(e), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)</code></pre>
+          </div>
+        </section>
+
+        <!-- 配置步骤 -->
+        <section class="mb-6">
+          <div class="flex items-center mb-4">
+            <div class="number-circle">3</div>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">AIWriteX 配置</h3>
+          </div>
+          <div class="card-box">
+            <ol class="std-list list-decimal pl-4">
+              <li class="std-list-item">
+                将上述代码在云服务器部署运行（建议使用 screen 或 pm2 持久化）。
+              </li>
+              <li class="std-list-item">
+                在微信公众号后台将该<strong>服务器固定 IP</strong> 加入 IP 允许列表（白名单）。
+              </li>
+              <li class="std-list-item">
+                在 AIWriteX <strong>系统设置 -> 微信公众号</strong> 中勾选“启用代理转发”。
+              </li>
+              <li class="std-list-item">
+                填入中转地址，例如：<code>http://1.2.3.4:5000/proxy</code>。
+              </li>
+            </ol>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>WeChat Proxy Forwarding</span>
+        <span>Page 14 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 15: 小说连载 -->
+    <article class="magazine-page">
+      <div class="chapter-number">15</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">XV.</span> 小说连载
+        </h2>
+
+        <div class="space-y-10 flex-1">
+          <!-- 章节简介 -->
+          <div>
+            <p class="std-text mb-4">
+              提供了从项目创建、世界观设定、角色管理、章节创作到发布的完整工作流。支持卷结构管理、AI智能大纲规划、章节自动生成等功能，让小说创作更加高效。
+            </p>
+          </div>
+
+          <!-- 操作工作流 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              标准操作工作流
+            </h4>
+            <ul class="std-list list-decimal pl-6">
+              <li class="std-list-item">
+                <strong>创建项目</strong
+                >：点击"新建小说"，填写书名、分类、目标字数，选择是否启用卷结构。
+                支持手动填写或AI智能构建模式。
+              </li>
+              <li class="std-list-item">
+                <strong>AI初始化</strong>：系统会自动生成世界观设定、核心角色和初始大纲。
+              </li>
+              <li class="std-list-item">
+                <strong>生成全局大纲</strong>：点击"AI智能规划"生成完整的全书大纲。
+                <strong>注意：此操作仅在未开始写作时可用，一旦有章节内容将无法重新生成。</strong>
+              </li>
+              <li class="std-list-item">
+                <strong>管理卷结构</strong
+                >：小说大纲面板，编辑可在左侧边栏创建和管理卷，每卷包含若干章节。
+              </li>
+              <li class="std-list-item">
+                <strong>创作章节</strong>：选择或创建章节后，在右侧编辑器中编写内容。
+                可使用"AI自动规划"功能自动生成章节。
+              </li>
+              <li class="std-list-item">
+                <strong>编写章节</strong>：选择章节，在右侧编辑器中编写内容。
+                可使用"AI编写"功能自动生成内容。
+              </li>
+              <li class="std-list-item">
+                <strong>扩展角色</strong>：随着故事发展，可使用"扩展角色"功能AI自动生成新角色。
+                AI会参考已有角色设定，保持风格一致。
+              </li>
+              <li class="std-list-item">
+                <strong>手动大纲编辑</strong>：大纲生成后，可点击编辑按钮手动修改内容。
+                保存后将覆盖原有大纲。
+              </li>
+            </ul>
+          </div>
+
+          <!-- 字数与大纲关系 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              字数对创作的影响
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>3万字</strong>：1卷结构，约15-20章，单一线索，紧凑篇幅
+              </li>
+              <li class="std-list-item">
+                <strong>10万字</strong>：2卷结构，约30-40章，主线+1-2条辅线
+              </li>
+              <li class="std-list-item"><strong>30万字</strong>：3-4卷结构，约60-80章，多线叙事</li>
+              <li class="std-list-item">
+                <strong>50万字</strong>：5-6卷结构，约100-120章，宏大世界观
+              </li>
+              <li class="std-list-item">
+                <strong>100万字</strong>：8-10卷结构，约200-250章，史诗级巨著
+              </li>
+            </ul>
+            <p class="std-text mt-4 text-gray-600 dark:text-gray-400">
+              <strong>重要：</strong
+              >目标字数会深度影响AI生成的大纲结构、世界观复杂度和角色数量。请在创建项目时谨慎选择。
+            </p>
+          </div>
+
+          <!-- 注意事项 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              注意事项
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>大纲不可逆</strong>：一旦开始写作（创建章节），将无法重新生成大纲。
+                如需重大调整，请删除所有章节后重试。
+              </li>
+              <li class="std-list-item">
+                <strong>卷结构选择</strong
+                >：卷结构与字数为独立选项。中长篇建议启用卷结构，便于章节管理；
+                短篇可选择不启用，所有章节平铺显示。
+              </li>
+              <li class="std-list-item">
+                <strong>AI初始化耗时</strong
+                >：首次AI初始化需要生成世界观、角色和大纲，耗时较长（1-2分钟）。
+                后续扩展角色或章节会相对较快。
+              </li>
+              <li class="std-list-item">
+                <strong>角色类型说明</strong
+                >：角色分为"主角(MAIN)"、"配角(SUPPORTING)"和"反派(VILLAIN)"三种。
+                AI生成时将据此设定角色的行为逻辑和成长弧线。
+              </li>
+            </ul>
+          </div>
+
+          <!-- 高端使用技巧 -->
+          <div>
+            <h4 class="text-xl font-bold mb-4 flex items-center text-gray-800 dark:text-gray-200">
+              <span class="w-8 h-px bg-gray-400 mr-3"></span>
+              高端使用技巧
+            </h4>
+            <ul class="std-list list-disc pl-6">
+              <li class="std-list-item">
+                <strong>渐进式生成</strong
+                >：初始只生成2个核心角色+3章大纲，后续通过"扩展角色"和"扩展章节"
+                功能按需扩展，保持创作灵活性。
+              </li>
+              <li class="std-list-item">
+                <strong>手动大纲微调</strong
+                >：AI生成大纲后，可手动编辑调整细节。点击标题旁的编辑图标即可打开编辑器。
+              </li>
+              <li class="std-list-item">
+                <strong>卷章节联动</strong
+                >：大纲生成时会自动解析卷标题并创建对应卷结构。确保大纲中使用"卷一：标题"
+                或"第1卷：标题"格式。
+              </li>
+              <li class="std-list-item">
+                <strong>情绪曲线规划</strong>：大纲中的每个章节都应有明确的情绪走向（爽点/低谷），
+                这将帮助AI在续写时保持情节张力。
+              </li>
+              <li class="std-list-item">
+                <strong>世界观迭代</strong
+                >：随着故事发展，可随时回到"设定集"标签页更新世界观、势力和道具设定。
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <footer class="page-footer">
+        <span>XIV. 小说连载</span>
+        <span>Page 15 / 16</span>
+      </footer>
+    </article>
+
+    <!-- PAGE 16: FAQ -->
+    <article class="magazine-page">
+      <div class="chapter-number">16</div>
+      <div class="content-layer">
+        <h2 class="section-title">
+          <span class="text-5xl mr-4 text-gray-300 font-serif">XVI.</span> 常见问题
+        </h2>
+
+        <section class="flex-1 space-y-8">
+          <div>
+            <h4 class="text-lg font-bold mb-2 flex items-center text-gray-800 dark:text-gray-100">
+              <span class="text-gray-300 mr-2 text-2xl font-serif italic">Q.</span>
+              生成文章需要多长时间？
+            </h4>
+            <p class="std-text pl-8">
+              通常需要 5 分钟左右。具体取决于话题的复杂度和HTML模板适配的耗时。
+            </p>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-2 flex items-center text-gray-800 dark:text-gray-100">
+              <span class="text-gray-300 mr-2 text-2xl font-serif italic">Q.</span>
+              文章为何没有自动发布？
+            </h4>
+            <div class="pl-8">
+              <ul class="std-list list-disc pl-4">
+                <li class="std-list-item">公众号 AppID/Secret 是否填写正确？</li>
+                <li class="std-list-item">是否开启了“自动发布”开关？</li>
+                <li class="std-list-item">服务器 IP 是否已加入公众号后台白名单？</li>
+                <li class="std-list-item">公众号是否认证（未认证只能发布到草稿箱）？</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-2 flex items-center text-gray-800 dark:text-gray-100">
+              <span class="text-gray-300 mr-2 text-2xl font-serif italic">Q.</span>
+              如何提升文章质量？
+            </h4>
+
+            <div class="pl-8">
+              <ul class="std-list list-disc pl-4">
+                <li class="std-list-item">
+                  在<strong>创意工坊</strong>的写作指导里输入更详细的文章要求
+                </li>
+                <li class="std-list-item">
+                  通过<strong>热搜雷达</strong>的话题分析功能，生成写作指导，提示质量；
+                </li>
+                <li class="std-list-item">建议开启<strong>借鉴模式</strong>并提供高质量参考文；</li>
+                <li class="std-list-item">或者尝试组合使用<strong>维度化创意</strong>功能。</li>
+                <li class="std-list-item">借鉴模式和创意组合建议单独使用，二者有一定的冲突。</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold mb-2 flex items-center text-gray-800 dark:text-gray-100">
+              <span class="text-gray-300 mr-2 text-2xl font-serif italic">Q.</span>
+              支持哪些平台发布？
+            </h4>
+            <p class="std-text pl-8">目前主要支持微信公众号，其他平台正在开发中。</p>
+          </div>
+        </section>
+
+        <!-- 终页页脚 -->
+        <section class="mt-auto pt-10 border-t border-gray-200">
+          <div class="flex justify-between items-end">
+            <div>
+              <h3 class="text-2xl font-bold mb-4 font-serif text-gray-800 dark:text-gray-100">
+                技术与服务支持
+              </h3>
+              <p class="std-text mb-2">QQ: 522765228</p>
+              <p class="std-text">
+                官方网站:
+                <a
+                  href="https://aiwritex.voidai.cc"
+                  class="text-gray-800 underline decoration-gray-400 underline-offset-4 dark:text-gray-200"
+                  >墨智工坊</a
+                >
+              </p>
+            </div>
+            <div class="text-right">
+              <div class="text-4xl font-bold tracking-tighter mb-1 text-gray-900 dark:text-white">
+                AIWriteX
+              </div>
+              <div class="text-sm text-gray-400 uppercase tracking-widest">
+                Intelligent Creation
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Support & End</span>
+        <span>Page 16 / 16</span>
+      </footer>
+    </article>
+  </body>
+</html>
