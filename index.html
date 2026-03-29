@@ -2037,7 +2037,29 @@
           }
         });
 
-        // 4. 移动端菜单切换逻辑
+        // 4. 隐藏下载按钮悬停时的链接提示
+        document.querySelectorAll('.download-group a, .hero-actions a.btn').forEach(link => {
+          const href = link.getAttribute('href');
+          if (href && (href.includes('github.com') || href.includes('pan.baidu.com'))) {
+            link.setAttribute('data-href', href);
+            link.removeAttribute('href');
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              const url = this.getAttribute('data-href');
+              if (url) {
+                if (url.includes('pan.baidu.com')) {
+                  // 百度网盘打开新窗口
+                  window.open(url, '_blank');
+                } else {
+                  // GitHub 直接下载（当前窗口）
+                  window.location.href = url;
+                }
+              }
+            });
+          }
+        });
+
+        // 5. 移动端菜单切换逻辑
         const menuToggle = document.querySelector('.menu-toggle');
         const navMenu = document.querySelector('.nav-menu');
 
