@@ -657,10 +657,17 @@
         padding-left: 6px;
         border-radius: 14px;
         transition: background 0.3s ease;
+        flex: 1;
+        min-width: 0;
       }
 
       .download-group:hover {
         background: rgba(255, 255, 255, 0.1);
+      }
+
+      .download-group .btn {
+        flex: 1;
+        min-width: 0;
       }
 
       /* Baidu Netdisk Button (Icon Only) */
@@ -1895,16 +1902,7 @@
               target="_blank"
               class="btn btn-large btn-win"
             >
-              <i class="fab fa-windows"></i> GitHub 下载 Windows 版
-              <span class="btn-info">Windows 10 或更高版本 (64位)</span>
-            </a>
-            <a
-              href="https://pan.baidu.com/s/1x0TEO8aYdtr4C_vWGPqrew?pwd=mzgf"
-              target="_blank"
-              class="btn btn-large btn-win"
-              style="background: rgba(0, 120, 212, 0.15);"
-            >
-              <i class="fas fa-cloud"></i> 百度云下载 Windows 版
+              <i class="fab fa-windows"></i> Windows 版
               <span class="btn-info">Windows 10 或更高版本 (64位)</span>
             </a>
             <!-- macOS 下载选项 -->
@@ -1913,17 +1911,8 @@
               target="_blank"
               class="btn btn-large btn-mac"
             >
-              <i class="fab fa-apple"></i> GitHub 下载 macOS 版
-              <span class="btn-info">macOS 10.15 或更高版本</span>
-            </a>
-            <a
-              href="https://pan.baidu.com/s/11pb27GUfglPrGI3L0Z-XbA?pwd=mzgf"
-              target="_blank"
-              class="btn btn-large btn-mac"
-              style="background: rgba(163, 163, 163, 0.2);"
-            >
-              <i class="fas fa-cloud"></i> 百度云下载 macOS 版
-              <span class="btn-info">macOS 10.15 或更高版本</span>
+              <i class="fab fa-apple"></i> macOS 版
+              <span class="btn-info">macOS 12.7 或更高版本</span>
             </a>
           </div>
           <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
@@ -2038,7 +2027,7 @@
         });
 
         // 4. 隐藏下载按钮悬停时的链接提示
-        document.querySelectorAll('.download-group a, .hero-actions a.btn').forEach(link => {
+        document.querySelectorAll('.download-group a, .hero-actions a.btn, .download-btns a.btn-large').forEach(link => {
           const href = link.getAttribute('href');
           if (href && (href.includes('github.com') || href.includes('pan.baidu.com'))) {
             link.setAttribute('data-href', href);
