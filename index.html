@@ -612,8 +612,8 @@
       }
 
       .btn {
-        padding: 12px 30px;
-        border-radius: 50px;
+        padding: 12px 24px;
+        border-radius: 10px;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
@@ -647,74 +647,51 @@
       }
 
       /* Baidu Netdisk Button (Icon Only) */
-      /* Baidu Netdisk Button (Icon Only - Subtle) */
+      /* Download Group */
+      .download-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 6px;
+        padding-left: 6px;
+        border-radius: 14px;
+        transition: background 0.3s ease;
+      }
+
+      .download-group:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Baidu Netdisk Button (Icon Only) */
       .netdisk-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: transparent;
-        border: 1px solid transparent;
-        color: rgba(255, 255, 255, 0.3);
-        transition: all 0.3s ease;
-        position: relative;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        color: #94a3b8;
+        background: rgba(30, 41, 59, 0.8);
         text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .netdisk-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: scale(1.1);
+        color: var(--primary);
+        background: rgba(30, 41, 59, 1);
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       }
 
-      .netdisk-btn svg {
-        width: 24px;
-        height: 24px;
+      /* macOS Button Style */
+      .btn-mac {
+        background: linear-gradient(135deg, #a3a3a3, #737373) !important;
       }
 
-      /* Custom Tooltip */
-      .netdisk-btn::before {
-        content: '百度网盘下载';
-        position: absolute;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: rgba(15, 23, 42, 0.95);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        pointer-events: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-      }
-
-      .netdisk-btn::after {
-        content: '';
-        position: absolute;
-        bottom: 115%;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        border: 6px solid transparent;
-        border-top-color: rgba(15, 23, 42, 0.95);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        pointer-events: none;
-      }
-
-      .netdisk-btn:hover::before,
-      .netdisk-btn:hover::after {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(-50%) translateY(0);
+      .btn-mac:hover {
+        background: linear-gradient(135deg, #b0b0b0, #808080) !important;
       }
 
       .os-support {
@@ -1287,6 +1264,16 @@
         transform: scale(1.05);
       }
 
+      .btn-mac {
+        border-color: #a3a3a3;
+        background: rgba(163, 163, 163, 0.1);
+      }
+
+      .btn-mac:hover {
+        background: rgba(163, 163, 163, 0.2);
+        transform: scale(1.05);
+      }
+
       .btn-mac.disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -1643,30 +1630,40 @@
           不仅仅是写作工具，更是您的灵感引擎。
         </p>
 
-        <div class="hero-actions">
-          <a
-            href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe"
-            class="btn btn-primary glow-effect"
-          >
-            <i class="fab fa-windows"></i> 立即下载 (Windows)
-          </a>
-          <a
-            href="https://pan.baidu.com/s/1x0TEO8aYdtr4C_vWGPqrew?pwd=mzgf"
-            target="_blank"
-            class="netdisk-btn"
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path
-                d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"
-              />
-            </svg>
-          </a>
+        <!-- 授权码按钮 -->
+        <div class="hero-actions" style="margin-bottom: 20px;">
           <a href="https://aiforge.taobao.com" target="_blank" class="btn btn-secondary">
             <i class="fas fa-shopping-cart"></i> 获取（试用）授权码
           </a>
         </div>
 
-        <p class="os-support">Windows 10 或更高版本 | macOS 版本敬请期待</p>
+        <div class="hero-actions">
+          <!-- Windows 下载组合 -->
+          <div class="download-group">
+            <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" class="btn btn-primary glow-effect">
+              <i class="fab fa-windows"></i> 下载 Windows 版
+            </a>
+            <a href="https://pan.baidu.com/s/1x0TEO8aYdtr4C_vWGPqrew?pwd=mzgf" target="_blank" class="netdisk-btn" title="Windows版 网盘下载">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- macOS 下载组合 -->
+          <div class="download-group">
+            <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Mac.dmg" class="btn btn-primary glow-effect btn-mac">
+              <i class="fab fa-apple"></i> 下载 macOS 版
+            </a>
+            <a href="https://pan.baidu.com/s/11pb27GUfglPrGI3L0Z-XbA?pwd=mzgf" target="_blank" class="netdisk-btn" title="macOS版 网盘下载">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <p class="os-support">Windows 10 或更高版本 | macOS 12.7 或更高版本</p>
       </div>
     </header>
 
@@ -1892,22 +1889,42 @@
           <h2>准备好释放创造力了吗？</h2>
           <p>立即下载 AIWriteX，开启智能写作新纪元。</p>
           <div class="download-btns">
-            <!-- [修改] 底部下载按钮同步修复链接 -->
+            <!-- Windows 下载选项 -->
             <a
               href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe"
               target="_blank"
               class="btn btn-large btn-win"
             >
-              <i class="fab fa-windows"></i> 下载 Windows 版
+              <i class="fab fa-windows"></i> GitHub 下载 Windows 版
               <span class="btn-info">Windows 10 或更高版本 (64位)</span>
             </a>
-            <button
-              class="btn btn-large btn-mac disabled"
-              onclick="alert('Mac 版本正在锐意开发中，敬请期待！')"
+            <a
+              href="https://pan.baidu.com/s/1x0TEO8aYdtr4C_vWGPqrew?pwd=mzgf"
+              target="_blank"
+              class="btn btn-large btn-win"
+              style="background: rgba(0, 120, 212, 0.15);"
             >
-              <i class="fab fa-apple"></i> 下载 macOS 版
-              <span class="btn-info">即将推出</span>
-            </button>
+              <i class="fas fa-cloud"></i> 百度云下载 Windows 版
+              <span class="btn-info">Windows 10 或更高版本 (64位)</span>
+            </a>
+            <!-- macOS 下载选项 -->
+            <a
+              href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Mac.dmg"
+              target="_blank"
+              class="btn btn-large btn-mac"
+            >
+              <i class="fab fa-apple"></i> GitHub 下载 macOS 版
+              <span class="btn-info">macOS 10.15 或更高版本</span>
+            </a>
+            <a
+              href="https://pan.baidu.com/s/11pb27GUfglPrGI3L0Z-XbA?pwd=mzgf"
+              target="_blank"
+              class="btn btn-large btn-mac"
+              style="background: rgba(163, 163, 163, 0.2);"
+            >
+              <i class="fas fa-cloud"></i> 百度云下载 macOS 版
+              <span class="btn-info">macOS 10.15 或更高版本</span>
+            </a>
           </div>
           <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
         </div>
