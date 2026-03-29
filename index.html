@@ -657,8 +657,6 @@
         padding-left: 6px;
         border-radius: 14px;
         transition: background 0.3s ease;
-        flex: 1;
-        min-width: 0;
       }
 
       .download-group:hover {
@@ -668,6 +666,13 @@
       .download-group .btn {
         flex: 1;
         min-width: 0;
+      }
+
+      /* Mobile: Download group full width */
+      @media (max-width: 768px) {
+        .download-group {
+          width: 100%;
+        }
       }
 
       /* Baidu Netdisk Button (Icon Only) */
@@ -1250,7 +1255,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-width: 200px;
+        min-width: 280px;
         border: 1px solid var(--border-color);
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
