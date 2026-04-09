@@ -72,7 +72,7 @@
       }
 
       .wrap {
-        width: min(1100px, calc(100% - 40px));
+        width: min(920px, calc(100% - 40px));
         margin: 0 auto;
         padding: 40px 0 72px;
       }
@@ -143,13 +143,6 @@
         transform: translateY(-1px);
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: 1.5fr 0.9fr;
-        gap: 18px;
-        margin-top: 22px;
-      }
-
       .card {
         border: 1px solid var(--line);
         border-radius: 24px;
@@ -216,33 +209,6 @@
         background: rgba(30, 41, 59, 0.65);
       }
 
-      .sticky-note {
-        position: sticky;
-        top: 18px;
-      }
-
-      .meta {
-        padding: 22px;
-      }
-
-      .meta dl {
-        margin: 0;
-      }
-
-      .meta dt {
-        margin-top: 16px;
-        color: #cbd5e1;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-
-      .meta dd {
-        margin: 6px 0 0;
-        color: var(--text);
-        line-height: 1.8;
-      }
-
       .footer {
         margin-top: 18px;
         padding: 18px 4px 0;
@@ -256,12 +222,8 @@
       }
 
       @media (max-width: 900px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-
         .wrap {
-          width: min(100% - 20px, 1100px);
+          width: min(100% - 20px, 920px);
           padding-top: 20px;
         }
 
@@ -292,8 +254,7 @@
           </div>
         </section>
 
-        <div class="grid">
-          <article class="card section" id="agreement">
+        <article class="card section" id="agreement" style="margin-top: 22px;">
             <h2>一、协议说明</h2>
             <p>
               1. 本《用户服务协议》是 AIWriteX 用户与软件提供方之间就软件使用所达成的基本约定。
@@ -426,25 +387,6 @@
               3. 本页面仅作为软件使用边界说明与风险告知，不替代用户自行对合规义务的审查。
             </p>
           </article>
-
-          <aside class="card sticky-note">
-            <div class="meta">
-              <h2>快速摘要</h2>
-              <dl>
-                <dt>可做</dt>
-                <dd>合法创作、文案润色、素材整理、灵感生成、本地保存与效率提升。</dd>
-                <dt>不可做</dt>
-                <dd>水军、刷量、刷评、批量违规发布、绕过风控、侵权搬运与其他违规自动化。</dd>
-                <dt>数据归属</dt>
-                <dd>用户生成内容默认本地存储，用户对备份和安全负责。</dd>
-                <dt>责任边界</dt>
-                <dd>账号处罚、限流、封禁、争议、投诉与损失由用户自行承担。</dd>
-                <dt>建议</dt>
-                <dd>使用前先阅读平台规则，避免触发截图中所示的非真人自动化违规场景。</dd>
-              </dl>
-            </div>
-          </aside>
-        </div>
 
         <div class="footer">
           © 2025 AIWriteX · 用户服务协议页面
