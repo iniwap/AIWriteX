@@ -1305,6 +1305,18 @@
         color: #475569;
       }
 
+      .download-note a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 2px;
+      }
+
+      .download-note a:hover {
+        color: #4338ca;
+      }
+
       /* ========== Footer ========== */
       footer {
         border-top: 1px solid var(--border-color);
@@ -1335,10 +1347,31 @@
 
       .footer-links a {
         margin: 0 15px;
+        color: var(--text-muted);
+        text-decoration: none;
+        position: relative;
       }
 
       .footer-links a:hover {
         color: var(--primary);
+      }
+
+      .footer-links a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        width: 100%;
+        height: 1px;
+        background: currentColor;
+        opacity: 0;
+        transform: scaleX(0.6);
+        transition: all 0.2s ease;
+      }
+
+      .footer-links a:hover::after {
+        opacity: 1;
+        transform: scaleX(1);
       }
 
       .footer-contact {
@@ -1920,7 +1953,11 @@
               <span class="btn-info">macOS 12.7 或更高版本</span>
             </a>
           </div>
-          <p class="download-note">* 下载即同意《用户服务协议》。软件绿色安全保障。</p>
+          <p class="download-note">
+            * 下载即同意
+            <a href="user-service-agreement.html" target="_blank" rel="noopener noreferrer">《用户服务协议》</a>
+            。软件绿色安全保障。
+          </p>
         </div>
       </div>
     </section>
@@ -1968,6 +2005,7 @@
         <div class="footer-links">
           <a href="#features">功能</a>
           <a href="help-manual.html" target="_blank">帮助</a> 
+          <a href="user-service-agreement.html" target="_blank" rel="noopener noreferrer">用户协议</a>
           <a href="https://aiforge.taobao.com" target="_blank">淘宝官方店</a>
         </div>
         <div class="footer-contact">
