@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 用户服务协议</title>
+    <meta name="description" content="AIWriteX 用户服务协议，说明软件的合法合规使用边界、数据存储方式、第三方平台规则责任与免责声明。" />
+    <meta name="theme-color" content="#6366f1" />
+    <style>
+      :root {
+        --bg: #050816;
+        --bg-2: #0f172a;
+        --card: rgba(15, 23, 42, 0.82);
+        --card-2: rgba(30, 41, 59, 0.7);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent-2: #22c55e;
+        --warning: #f59e0b;
+        --danger: #fb7185;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: "";
+        position: fixed;
+        inset: auto;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(1100px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      .hero {
+        padding: 32px 28px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: var(--text);
+        text-decoration: none;
+        background: rgba(15, 23, 42, 0.55);
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(79, 70, 229, 0.9));
+        border-color: transparent;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.5fr 0.9fr;
+        gap: 18px;
+        margin-top: 22px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        backdrop-filter: blur(16px);
+        box-shadow: var(--shadow);
+      }
+
+      .section {
+        padding: 26px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 22px;
+      }
+
+      .section h3 {
+        margin: 24px 0 12px;
+        font-size: 18px;
+      }
+
+      p, li {
+        color: #dbe4f0;
+        line-height: 1.9;
+        font-size: 15px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .callout {
+        padding: 16px 18px;
+        margin: 16px 0;
+        border-radius: 18px;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .callout.danger {
+        border-color: rgba(251, 113, 133, 0.22);
+        background: rgba(251, 113, 133, 0.08);
+      }
+
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .pill {
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(30, 41, 59, 0.65);
+      }
+
+      .sticky-note {
+        position: sticky;
+        top: 18px;
+      }
+
+      .meta {
+        padding: 22px;
+      }
+
+      .meta dl {
+        margin: 0;
+      }
+
+      .meta dt {
+        margin-top: 16px;
+        color: #cbd5e1;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .meta dd {
+        margin: 6px 0 0;
+        color: var(--text);
+        line-height: 1.8;
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      a {
+        color: #c4b5fd;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .wrap {
+          width: min(100% - 20px, 1100px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .section,
+        .meta {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Service Agreement</span>
+          <h1>用户服务协议</h1>
+          <p class="summary">
+            本协议用于说明 AIWriteX 的使用边界、责任划分、数据存储方式与合规要求。请在使用软件前仔细阅读并确认：
+            软件仅用于合法、合规、正当的 AI 辅助创作与内容生产；任何超出法律法规、平台规则或本协议范围的使用，
+            风险均由用户自行承担。
+          </p>
+          <div class="pill-list">
+            <span class="pill">合法合规使用</span>
+            <span class="pill">本地存储优先</span>
+            <span class="pill">平台规则自负</span>
+            <span class="pill">禁止违规自动化</span>
+          </div>
+        </section>
+
+        <div class="grid">
+          <article class="card section" id="agreement">
+            <h2>一、协议说明</h2>
+            <p>
+              1. 本《用户服务协议》是 AIWriteX 用户与软件提供方之间就软件使用所达成的基本约定。
+              用户下载安装、打开、登录、调用或继续使用本软件，即视为已阅读、理解并同意本协议全部内容。
+            </p>
+            <p>
+              2. 如用户不同意本协议任一条款，请立即停止使用软件并卸载相关程序。
+            </p>
+
+            <h2>二、合法合规使用原则</h2>
+            <p>
+              AIWriteX 仅面向合法、合规、真实、正当的创作、整理、排版、改写、灵感生成、资料归纳与效率提升场景。
+              用户应确保其使用目的、输入内容、输出内容、发布行为及相关业务流程，符合适用法律法规、平台规则、行业规范、
+              社区公约以及第三方服务条款。
+            </p>
+            <div class="callout">
+              本软件不是也不应被用于任何规避监管、批量操控、虚假互动、恶意营销或其他违反平台秩序的用途。
+            </div>
+
+            <h2>三、禁止用途与风险提示</h2>
+            <p>
+              用户不得将本软件用于下列行为，亦不得以本软件为工具从事、协助、教唆或变相参与相关行为：
+            </p>
+            <ul>
+              <li>水军、刷量、刷赞、刷评、刷粉、刷浏览、刷互动等任何形式的虚假流量行为。</li>
+              <li>通过脚本、程序托管、接口编排或批量化流程，进行违反平台规定的连续发布、重复发布、自动化操控账号等行为。</li>
+              <li>生成、传播或协助传播虚假信息、误导性内容、恶意攻击、侵权内容、诈骗信息或其他违法违规内容。</li>
+              <li>绕过平台审核、风控、风控验证、反作弊机制或其他安全机制。</li>
+              <li>侵犯他人知识产权、肖像权、名誉权、商业秘密、隐私权或其他合法权益。</li>
+              <li>利用本软件从事任何法律法规禁止或平台明确限制的活动。</li>
+            </ul>
+            <div class="callout danger">
+              请特别注意：若用户使用本软件参与或协助任何平台明令禁止的自动化创作、批量发布或非真人行为，
+              由此造成的账号限流、封禁、删除、处罚、申诉失败、数据丢失或其他损失，均由用户自行承担。
+            </div>
+
+            <h2>四、平台规则与账号责任</h2>
+            <p>
+              1. 任何第三方平台的社区规范、创作者公约、内容安全规则、API 规则、反作弊规则、账号管理规则与审核标准，
+              均由该第三方平台独立制定并随时变更。用户应自行关注并遵守。
+            </p>
+            <p>
+              2. AIWriteX 不保证用户使用软件后一定通过任何平台审核，也不对平台的内容推荐、限流、下架、封号、封禁、
+              功能降权、风控提醒等结果作出承诺。
+            </p>
+            <p>
+              3. 因用户内容、账号状态、网络环境、设备环境、第三方接口政策变化、平台策略调整或第三方服务中断所导致的任何问题，
+              均不构成 AIWriteX 的违约责任。
+            </p>
+
+            <h2>五、内容与知识产权责任</h2>
+            <p>
+              1. 用户应对自己输入、上传、整理、生成、发布、传播和保存的全部内容负责，确保其拥有合法权利或已获得必要授权。
+            </p>
+            <p>
+              2. 用户不得使用本软件生成或处理侵权、抄袭、洗稿、恶意搬运、冒用他人身份、伪造来源等内容。
+            </p>
+            <p>
+              3. 因用户发布内容引发的任何争议、投诉、索赔、行政调查、平台处罚或司法程序，均由用户自行承担并处理。
+            </p>
+
+            <h2>六、数据存储与隐私说明</h2>
+            <p>
+              AIWriteX 当前设计原则为本地优先。用户生成的内容、草稿、素材、配置、历史记录与相关工作数据，
+              主要存放于用户本地设备或用户自行配置的本地环境中。
+            </p>
+            <ul>
+              <li>软件不以收集用户生成内容为目的。</li>
+              <li>软件不主动上传用户创作正文、草稿、素材到云端作为默认行为。</li>
+              <li>如未来因用户主动开启同步、备份、第三方接口、云服务或插件功能而产生数据流转，应以该功能说明为准。</li>
+            </ul>
+            <div class="callout">
+              请用户自行做好本地数据备份、权限管理、设备安全与账号保护。因设备损坏、误删、系统重装、病毒、勒索软件、
+              磁盘故障或人为操作失误造成的数据损失，软件方不承担恢复义务。
+            </div>
+
+            <h2>七、第三方服务与接口</h2>
+            <p>
+              若软件接入了第三方模型服务、图片服务、搜索服务、登录服务、发布服务或其他外部接口，
+              则该等服务由第三方独立提供并独立承担责任。用户应自行阅读并遵守第三方的使用条款、计费规则与隐私政策。
+            </p>
+            <p>
+              因第三方服务变更、停用、限额、封禁、计费调整、质量波动或接口不可用而产生的影响，
+              不视为 AIWriteX 的故障或违约。
+            </p>
+
+            <h2>八、免责声明与责任限制</h2>
+            <p>
+              1. AIWriteX 按现状提供，不对软件持续无错误、无中断、无漏洞、完全兼容所有环境、完全满足用户预期作出保证。
+            </p>
+            <p>
+              2. 在法律允许的最大范围内，AIWriteX 不对因用户违反法律法规、违反平台规则、违反本协议、
+              使用不当、误操作、账号风险、内容争议、商业损失或间接损失承担责任。
+            </p>
+            <p>
+              3. AIWriteX 对任何因用户行为导致的账号限权、封号、限流、违规提醒、内容删除、收益下降、
+              申诉失败或业务受损，不承担赔偿责任。
+            </p>
+            <p>
+              4. 用户理解并同意，软件提供的是效率工具与创作辅助，不提供违法违规行为的兜底、担保或规避方案。
+            </p>
+
+            <h2>九、用户承诺</h2>
+            <p>用户承诺并保证：</p>
+            <ul>
+              <li>使用本软件的目的合法、正当、真实，不利用软件实施任何违规或违法行为。</li>
+              <li>遵守所在地法律法规，以及所使用平台、网站、社区、应用、接口和服务的全部规则。</li>
+              <li>对账号、密码、授权码、设备及本地数据承担保管责任。</li>
+              <li>不传播、不出售、不转借、不出租、不用于恶意自动化或批量化违规行为。</li>
+              <li>如因自身行为引发争议，自行承担解释、协商、投诉、申诉、整改与赔偿责任。</li>
+            </ul>
+
+            <h2>十、协议变更与终止</h2>
+            <p>
+              AIWriteX 有权基于产品迭代、法律法规变化、监管要求、平台规则变化或运营需要对本协议进行更新。
+              更新后的协议自发布之日起生效。若用户继续使用软件，即视为接受更新后的协议。
+            </p>
+            <p>
+              若用户违反本协议，AIWriteX 有权视情况暂停、限制或终止向用户提供部分或全部功能支持。
+            </p>
+
+            <h2>十一、其他</h2>
+            <p>
+              1. 本协议未尽事宜，按照适用法律法规及行业通行规则处理。
+            </p>
+            <p>
+              2. 本协议条款如与强制性法律规定冲突，以强制性法律规定为准，其余条款继续有效。
+            </p>
+            <p class="muted">
+              3. 本页面仅作为软件使用边界说明与风险告知，不替代用户自行对合规义务的审查。
+            </p>
+          </article>
+
+          <aside class="card sticky-note">
+            <div class="meta">
+              <h2>快速摘要</h2>
+              <dl>
+                <dt>可做</dt>
+                <dd>合法创作、文案润色、素材整理、灵感生成、本地保存与效率提升。</dd>
+                <dt>不可做</dt>
+                <dd>水军、刷量、刷评、批量违规发布、绕过风控、侵权搬运与其他违规自动化。</dd>
+                <dt>数据归属</dt>
+                <dd>用户生成内容默认本地存储，用户对备份和安全负责。</dd>
+                <dt>责任边界</dt>
+                <dd>账号处罚、限流、封禁、争议、投诉与损失由用户自行承担。</dd>
+                <dt>建议</dt>
+                <dd>使用前先阅读平台规则，避免触发截图中所示的非真人自动化违规场景。</dd>
+              </dl>
+            </div>
+          </aside>
+        </div>
+
+        <div class="footer">
+          © 2025 AIWriteX · 用户服务协议页面
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
