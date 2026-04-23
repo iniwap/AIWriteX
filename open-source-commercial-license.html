@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 开源版商业授权协议</title>
+    <meta name="description" content="AIWriteX 开源版商业授权协议，明确 Apache-2.0 基础上的附加使用条款、基础/高级商业授权区别、品牌隔离、源码限制与免责声明。" />
+    <meta name="theme-color" content="#6366f1" />
+    <style>
+      :root {
+        --bg: #050816;
+        --bg-2: #0f172a;
+        --card: rgba(15, 23, 42, 0.82);
+        --card-2: rgba(30, 41, 59, 0.7);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent-2: #22c55e;
+        --warning: #f59e0b;
+        --danger: #fb7185;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: "";
+        position: fixed;
+        inset: auto;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(920px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      .hero {
+        padding: 32px 28px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        backdrop-filter: blur(16px);
+        box-shadow: var(--shadow);
+      }
+
+      .section {
+        padding: 26px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 22px;
+      }
+
+      .section h3 {
+        margin: 24px 0 12px;
+        font-size: 18px;
+      }
+
+      p, li {
+        color: #dbe4f0;
+        line-height: 1.9;
+        font-size: 15px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .callout {
+        padding: 16px 18px;
+        margin: 16px 0;
+        border-radius: 18px;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .callout.danger {
+        border-color: rgba(251, 113, 133, 0.22);
+        background: rgba(251, 113, 133, 0.08);
+      }
+
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .pill {
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(30, 41, 59, 0.65);
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      a {
+        color: #c4b5fd;
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+        margin: 24px 0;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          width: min(100% - 20px, 920px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .section,
+        .meta {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Open Source Commercial License</span>
+          <h1>开源版商业授权协议</h1>
+          <p class="summary">
+            本协议适用于 AIWriteX 开源版的商业使用授权安排。项目基础许可为 Apache License 2.0，
+            同时叠加本页面所列附加使用条款、商业授权分级规则、品牌隔离要求、源码使用限制与免责条款。
+            凡购买、使用、部署、修改或基于本开源版进行商业化运营的，即视为已阅读、理解并同意本协议全部内容。
+          </p>
+          <div class="pill-list">
+            <span class="pill">Apache-2.0 基础</span>
+            <span class="pill">商业授权分级</span>
+            <span class="pill">禁止倒卖源码</span>
+            <span class="pill">品牌隔离与免责</span>
+          </div>
+        </section>
+
+        <article class="card section" id="agreement" style="margin-top: 22px;">
+          <h2>一、适用范围与优先规则</h2>
+          <p>
+            1. AIWriteX 开源版基于 Apache License 2.0 发布；在 Apache License 2.0 许可基础上，额外适用本页面所载《AIWriteX 附加使用条款》及商业授权规则。
+          </p>
+          <p>
+            2. 如 Apache License 2.0 与本页面附加条款、商业授权规则存在冲突，以本页面关于商业化运营、分发限制、服务提供限制、品牌使用、源码限制、免责与违约处理的约定为准。
+          </p>
+
+          <h2>二、AIWriteX 附加使用条款</h2>
+          <p>
+            本项目在 Apache License 2.0 协议基础上，增加以下补充条款：
+          </p>
+
+          <h3>1. 非商业使用</h3>
+          <p>
+            您可以自由地出于非商业目的使用、修改本软件，无需另行取得授权，但前提是保留 LICENSE 文件、本协议页面所对应的 NOTICE / 附加条款文件以及原始版权声明。
+          </p>
+
+          <h3>2. 分发与服务提供限制</h3>
+          <p>
+            未经版权所有人书面授权，禁止以下行为：
+          </p>
+          <ul>
+            <li>分发本项目或其衍生作品，包括但不限于复制、共享、转售、赠送、镜像、打包、上传或通过任何方式传播软件或源代码。</li>
+            <li>利用本项目或其衍生作品向第三方提供服务，包括但不限于 SaaS、API 托管、代运营平台、在线工具、托管部署、账号租赁、按次收费服务或其他面向第三方的服务模式。</li>
+          </ul>
+          <div class="callout">
+            如需相关授权，请联系：iniwaper@gmail.com 或 522765228@qq.com。
+          </div>
+
+          <h3>3. 允许的个人盈利使用</h3>
+          <p>
+            您可以出于个人盈利活动使用本软件，例如个人项目、自营业务或自由职业工作，无需事先授权；但前提是该等使用不涉及分发、不向第三方提供服务，且必须保留 LICENSE、本附加条款及原始版权声明。
+          </p>
+
+          <h3>4. 署名和版权信息要求</h3>
+          <p>在所有使用场景中，必须保留以下内容：</p>
+          <ul>
+            <li>LICENSE 文件；</li>
+            <li>本 NOTICE / 附加条款文件；</li>
+            <li>原始版权声明。</li>
+          </ul>
+          <p>
+            不得删除、更改、隐藏或通过技术方式规避上述声明。违反前述要求的，相关使用授权将自动终止。
+          </p>
+
+          <h3>5. 终止条款</h3>
+          <p>
+            如发现您违反上述任一条款，您的授权将被立即终止，且可能构成侵权责任。版权所有人保留进一步追究经济赔偿与法律责任的权利。
+          </p>
+
+          <h3>6. 法律声明</h3>
+          <p>
+            本条款不构成法律建议。如您不确定自身使用场景是否符合许可条件，请提前联系版权所有人进行确认。
+          </p>
+
+          <hr />
+
+          <h2>三、商业授权类型</h2>
+          <p>
+            对于需要基于 AIWriteX 开源版进行商业化运营的团队或个人，可根据实际经营需求购买下列商业授权。凡购买即视为同意本协议全部条款。
+          </p>
+
+          <h3>授权类型一：开源版（基础）商业授权</h3>
+          <p>
+            适合预算有限、但需要合法合规开展商业化运营的团队或个人。购买后，可获得 AIWriteX 开源版基础商业运营许可。
+          </p>
+          <ul>
+            <li>允许在授权范围内基于开源版开展基础商业运营。</li>
+            <li>必须在产品前端界面的显著位置保留“开源项目AIWriteX”字样，并附带可点击跳转至开源项目主页的链接。</li>
+            <li>显著位置包括但不限于网站首页底部、小程序 / App 的“我的”页面、“关于”页面或其他用户可直接看到的主要展示位置。</li>
+          </ul>
+          <div class="callout danger">
+            基础商业授权下，强制署名义务属于核心限制。购买者删除、隐藏、弱化、规避或通过技术手段绕过署名要求，均视为严重违约与侵权。
+          </div>
+
+          <h3>授权类型二：开源版（高级）商业授权</h3>
+          <p>
+            适合需要完全自主品牌、深度定制、闭环运营的商业化团队。购买后，可获得 AIWriteX 开源版高级商业运营许可，不受基础版的署名限制。
+          </p>
+          <ul>
+            <li>允许自由修改源代码、前端界面及交互表现。</li>
+            <li>允许对白标化产品进行自主品牌包装与商业闭环运营。</li>
+            <li>在高级商业授权范围内，可不适用基础版强制前端署名要求，但仍须保留 LICENSE、NOTICE / 附加条款文件及原始版权声明。</li>
+          </ul>
+
+          <h2>四、通用协议与免责声明</h2>
+          <p>
+            下列条款适用于所有开源版商业授权类型，并优先于前述存在冲突或表述不清的内容。
+          </p>
+
+          <h3>1. 品牌隔离原则</h3>
+          <p>
+            无论购买何种版本，严禁在您对外运营的产品名称、宣传物料、营销话术、商务介绍、案例包装、渠道合作信息、投放素材或其他对外内容中使用“AIWriteX”商标，或利用本开源项目名称进行任何形式的背书、引流与营销。
+          </p>
+          <p>
+            除基础商业授权下必须履行的前端显著署名义务外，购买者不得将 AIWriteX 作为自身品牌背书、官方合作暗示、市场宣传卖点或信任担保。
+          </p>
+
+          <h3>2. 严禁倒卖源码</h3>
+          <p>
+            本授权仅限购买者本人或本企业在自有业务范围内使用。严禁以任何形式直接转售、二次分发、二次授权、开源、共享、出租、出借、打包售卖、拆分售卖或变相传播本源代码、衍生代码或其部署产物。
+          </p>
+
+          <h3>3. 零维保与免责条款</h3>
+          <p>
+            本商品仅提供商业授权许可凭证与开源版源码，不包含任何形式的安装部署、环境适配、Bug 修复、版本维护、性能优化、二次开发、技术解答、培训交付、运维支持或持续升级服务。
+          </p>
+          <p>
+            因第三方平台、第三方接口、审核规则、封禁策略、政策变化、模型变更、依赖失效、系统兼容性变化或外部环境变化导致的软件不可用、业务中断、账号异常、收益损失或其他损害，我方不承担任何连带责任、赔偿责任或兜底义务。
+          </p>
+
+          <h2>五、违约与侵权处理</h2>
+          <p>
+            任何违反本协议的行为，包括但不限于基础版去除署名、倒卖源码、违规营销、冒充官方、利用 AIWriteX 名称引流、超授权分发、向第三方提供服务、抄袭 AIWriteX 商业版、规避版权声明等，均构成严重违约与侵权。
+          </p>
+          <div class="callout danger">
+            对于前述行为，我方有权在不另行通知的情况下，单方面终止全部授权许可，概不退款，并保留追究全部经济赔偿、维权费用与法律责任的权利。
+          </div>
+
+          <h2>六、解释权与其他</h2>
+          <p>
+            1. 为保障双方权益，请在购买、使用、部署或商业化运营前审慎阅读本协议。拍下、付款、获取源码、部署上线、继续使用或开展经营活动，均视为同意本协议。
+          </p>
+          <p>
+            2. 对于本协议的理解、适用、补充与解释，由版权所有人根据实际业务场景、授权边界与风险控制需要进行说明。
+          </p>
+          <p class="muted">
+            3. 如您对自身场景属于非商业使用、个人盈利使用、基础商业授权还是高级商业授权存在疑问，请先联系我方确认后再使用。
+          </p>
+        </article>
+
+        <div class="footer">
+          © 2025 AIWriteX · 开源版商业授权协议
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
