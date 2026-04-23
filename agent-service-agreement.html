@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 代理合作协议</title>
+    <meta name="description" content="AIWriteX 代理合作协议，明确代理合作边界、售后责任、纠纷责任、品牌使用规范、产品迭代与合作终止规则。" />
+    <meta name="theme-color" content="#6366f1" />
+    <style>
+      :root {
+        --bg: #050816;
+        --bg-2: #0f172a;
+        --card: rgba(15, 23, 42, 0.82);
+        --card-2: rgba(30, 41, 59, 0.7);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent-2: #22c55e;
+        --warning: #f59e0b;
+        --danger: #fb7185;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: "";
+        position: fixed;
+        inset: auto;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(920px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      .hero {
+        padding: 32px 28px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        backdrop-filter: blur(16px);
+        box-shadow: var(--shadow);
+      }
+
+      .section {
+        padding: 26px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 22px;
+      }
+
+      .section h3 {
+        margin: 24px 0 12px;
+        font-size: 18px;
+      }
+
+      p, li {
+        color: #dbe4f0;
+        line-height: 1.9;
+        font-size: 15px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .callout {
+        padding: 16px 18px;
+        margin: 16px 0;
+        border-radius: 18px;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .callout.danger {
+        border-color: rgba(251, 113, 133, 0.22);
+        background: rgba(251, 113, 133, 0.08);
+      }
+
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .pill {
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(30, 41, 59, 0.65);
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      a {
+        color: #c4b5fd;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          width: min(100% - 20px, 920px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .section,
+        .meta {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Agency Agreement</span>
+          <h1>代理合作协议</h1>
+          <p class="summary">
+            本协议用于明确 AIWriteX 与代理合作中的责任边界、售后范围、纠纷处理、品牌规范、产品迭代、价格调整与合作终止规则。
+            代理开展宣传、销售、交付、服务或基于 AIWriteX 进行任何经营活动的，即视为已阅读、理解并同意本协议全部内容。
+          </p>
+          <div class="pill-list">
+            <span class="pill">售后责任自担</span>
+            <span class="pill">纠纷责任自担</span>
+            <span class="pill">品牌形象保护</span>
+            <span class="pill">官方可主动调整合作</span>
+          </div>
+        </section>
+
+        <article class="card section" id="agreement" style="margin-top: 22px;">
+          <h2>一、协议说明</h2>
+          <p>
+            1. 本《代理合作协议》是 AIWriteX 与代理之间就代理推广、销售、交付、运营及相关合作事项所作出的基本约定。
+            代理以任何方式参与 AIWriteX 相关代理合作，即视为接受本协议全部内容。
+          </p>
+          <p>
+            2. 如代理不同意本协议任一条款，应立即停止以 AIWriteX 名义开展任何宣传、销售、交付或合作行为。
+          </p>
+
+          <h2>二、合作定位与独立责任</h2>
+          <p>
+            1. 代理系独立经营主体或独立责任主体，与 AIWriteX 之间不构成合伙、联营、劳动、雇佣、共同经营或其他需要由 AIWriteX 对代理经营行为承担连带责任的法律关系。
+          </p>
+          <p>
+            2. 代理无权以 AIWriteX 官方、总部、分公司、关联方、授权代表或其他足以使第三方误认为可代表 AIWriteX 承诺、担保、退款、签约、赔付的身份对外作出陈述。
+          </p>
+          <p>
+            3. 凡因代理自行制定的收费标准、销售政策、宣传话术、附加承诺、二次服务、客户沟通、运营行为或私下约定所引发的责任，均由代理独立承担。
+          </p>
+
+          <h2>三、售前、售后与客户纠纷责任</h2>
+          <p>
+            1. 代理自行拓展、成交、维护的客户及终端用户，其售前咨询、售后处理、培训答疑、退款协商、争议处理、投诉回复、服务补偿等事项，原则上均由代理自行负责。
+          </p>
+          <p>
+            2. AIWriteX 不负责代理客户的任何售后问题，不直接承担代理客户因购买、使用、误解、宣传偏差、附加服务、收费争议、退款争议或履约分歧而提出的要求。
+          </p>
+          <p>
+            3. 因代理客户、终端用户、合作渠道或其他第三方与代理之间产生的投诉、纠纷、索赔、诉讼、仲裁、行政举报或平台处罚，均由代理自行处理并承担全部后果。
+          </p>
+          <div class="callout danger">
+            请特别注意：凡非因 AIWriteX 官方直接原因产生的售后、退款、客诉、赔偿、经营争议或商誉损失，AIWriteX 均不承担责任，也不承担任何连带责任。
+          </div>
+
+          <h2>四、展示、宣传与品牌使用规范</h2>
+          <p>
+            1. 代理不得发布任何虚假、夸大、误导、贬损竞品、承诺兜底、承诺收益、承诺平台不过审也可使用等不实宣传内容。
+          </p>
+          <p>
+            2. 代理不得实施任何损害 AIWriteX 品牌形象、商誉、口碑、市场秩序或用户信任的行为，包括但不限于恶意低价、恶意抹黑、冒充官方、断章取义宣传、违规营销、引导冲突或不当承诺。
+          </p>
+          <div class="callout">
+            如代理的任何行为对 AIWriteX 品牌形象造成现实或潜在损害，AIWriteX 有权立即终止合作、停止供给、取消后续支持或采取其他必要措施。
+          </div>
+
+          <h2>五、价格、授权与产品迭代</h2>
+          <p>
+            1. 随着产品迭代、功能增强、运营策略调整、成本变化或市场环境变化，AIWriteX 有权自主调整产品价格、授权政策、合作政策、功能范围、交付方式与商业安排。
+          </p>
+          <p>
+            2. 已完成购买、已完成授权或已交付的部分，不受后续提价影响；但后续新增采购、续期、扩容、再次授权或新的合作安排，以届时最新政策为准。
+          </p>
+          <p>
+            3. AIWriteX 可基于产品规划、技术路线、市场判断、合规要求或商业安排，对产品功能、界面、价格、支持范围、兼容策略及相关规则进行更新、调整或取舍，无须事先征求代理意见。
+          </p>
+          <p>
+            4. AIWriteX 可接收代理提出的需求、建议与反馈，但接收不代表承诺处理、排期、采纳或上线；是否纳入产品规划，由 AIWriteX 独立判断。
+          </p>
+
+          <h2>六、合作调整与终止</h2>
+          <p>
+            1. 因产品规划变化、市场变化、合规要求、经营策略调整或其他商业原因，AIWriteX 有权主动终止与代理的后续合作、供货、支持或新增授权安排。
+          </p>
+          <p>
+            2. 前述终止原则上不影响终止前已经完成授权并已交付的部分在原授权范围内继续使用，但不当然延伸为新的授权、持续供货、额外售后或新增合作义务。
+          </p>
+          <p>
+            3. 若代理存在损害品牌形象、虚假宣传、冒充官方、恶意竞争、违法违规经营、侵权投诉集中、拒不处理纠纷、扰乱市场秩序等行为，AIWriteX 有权立即终止合作，并保留追究相关责任的权利。
+          </p>
+
+          <h2>七、合法合规经营义务</h2>
+          <p>
+            代理不得利用 AIWriteX 从事任何违法违规活动，不得将 AIWriteX 用于诈骗、虚假宣传、洗稿侵权、非法经营、违规引流、违规获客、规避平台规则或其他法律法规、平台规则明确禁止的行为。
+          </p>
+          <ul>
+            <li>代理应自行确保其宣传内容、销售行为、收款行为、开票行为、数据处理、客户沟通及运营行为合法合规。</li>
+            <li>代理应自行遵守所在地法律法规、行业规范、平台规则及监管要求。</li>
+            <li>代理因自身违法违规行为引发的一切后果，包括但不限于投诉、罚款、封号、索赔、诉讼、行政处罚、刑事风险及商誉损失，均由代理自行承担。</li>
+          </ul>
+          <div class="callout danger">
+            如代理利用 AIWriteX 从事任何违法违规活动，AIWriteX 不承担任何连带责任、补充责任或共同责任，全部法律后果均由代理自行承担。
+          </div>
+
+          <h2>八、免责声明与责任限制</h2>
+          <p>
+            1. AIWriteX 仅对其自身直接提供的产品与授权范围负责，不对代理自行承诺、附加包装、私下交易、定制服务、培训服务、代运营服务、客户关系维护或任何超出官方明确承诺之外的事项负责。
+          </p>
+          <p>
+            2. 凡与 AIWriteX 本身无直接关系，或并非由 AIWriteX 官方直接原因导致的任何问题、争议、损失或风险，均由代理自行承担。
+          </p>
+          <p>
+            3. 对于代理经营过程中产生的间接损失、预期收益损失、商誉损失、客户流失、机会损失、处罚损失等，AIWriteX 不承担赔偿责任。
+          </p>
+
+          <h2>九、协议更新与其他</h2>
+          <p>
+            1. AIWriteX 有权根据业务发展、产品调整、法律法规变化或合作需要，对本协议内容进行更新，更新版本发布后生效。
+          </p>
+          <p>
+            2. 本协议未尽事宜，由 AIWriteX 结合实际合作政策、适用法律法规及行业规则进行解释和处理。
+          </p>
+          <p class="muted">
+            3. 本页面用于明确代理合作边界与责任划分，不构成 AIWriteX 对代理经营结果、收益、客户关系或市场表现的任何承诺。
+          </p>
+        </article>
+
+        <div class="footer">
+          © 2025 AIWriteX · 代理合作协议
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
