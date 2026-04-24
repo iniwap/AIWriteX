@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 代理合作与接口说明</title>
+    <meta
+      name="description"
+      content="AIWriteX 代理合作与接口说明，面向代理合作方展示合作模式、能力范围、接口字段含义、缓存与刷新规则以及对接流程。"
+    />
+    <meta name="theme-color" content="#6366f1" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
+    <style>
+      :root {
+        --bg: #050816;
+        --bg-2: #0f172a;
+        --card: rgba(15, 23, 42, 0.82);
+        --card-2: rgba(30, 41, 59, 0.7);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent-2: #22c55e;
+        --warning: #f59e0b;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: '';
+        position: fixed;
+        inset: auto;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(980px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      .hero {
+        padding: 34px 30px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 880px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .pill,
+      .toc a {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(30, 41, 59, 0.65);
+        text-decoration: none;
+      }
+
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .toc a:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        color: #ddd6fe;
+      }
+
+      .grid {
+        display: grid;
+        gap: 22px;
+        margin-top: 22px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        backdrop-filter: blur(16px);
+        box-shadow: var(--shadow);
+      }
+
+      .section {
+        padding: 26px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 24px;
+      }
+
+      .section h3 {
+        margin: 24px 0 12px;
+        font-size: 18px;
+      }
+
+      p,
+      li {
+        color: #dbe4f0;
+        line-height: 1.9;
+        font-size: 15px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .callout {
+        padding: 16px 18px;
+        margin: 16px 0;
+        border-radius: 18px;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .meta-card {
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.55);
+        padding: 16px;
+      }
+
+      .meta-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        margin-top: 14px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 680px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        text-align: left;
+        vertical-align: top;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      th {
+        color: #ddd6fe;
+        font-weight: 700;
+      }
+
+      pre {
+        margin: 16px 0 0;
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        overflow-x: auto;
+        color: #e2e8f0;
+        font-size: 13px;
+        line-height: 1.75;
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      a {
+        color: #c4b5fd;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          width: min(100% - 20px, 980px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .section {
+          padding: 20px;
+        }
+
+        .meta-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Agency Center</span>
+          <h1>AIWriteX 代理合作与接口说明</h1>
+          <p class="summary">
+            本页面面向代理合作方，集中说明当前支持的代理合作能力、适合的合作模式、推荐的落地路径，以及代理服务器与客户端之间的接口字段含义与使用规则。
+          </p>
+          <div class="pill-list">
+            <span class="pill">合作说明</span>
+            <span class="pill">文本模型</span>
+            <span class="pill">图片模型</span>
+            <span class="pill">AIForge</span>
+            <span class="pill">接口字段</span>
+            <span class="pill">缓存与刷新</span>
+          </div>
+          <nav class="toc" aria-label="页面目录">
+            <a href="#cooperation">合作说明</a>
+            <a href="#capabilities">能力范围</a>
+            <a href="#request">请求参数</a>
+            <a href="#response">响应结构</a>
+            <a href="#fields">字段与界面含义</a>
+            <a href="#rules">生效规则</a>
+            <a href="#cache">缓存与刷新</a>
+            <a href="#contact">合作联系</a>
+          </nav>
+        </section>
+
+        <div class="grid">
+          <article class="card section" id="cooperation">
+            <h2>一、合作说明</h2>
+            <p>
+              AIWriteX 当前已经支持代理模式接入。代理服务器可以为客户端统一下发文本模型、图片模型与
+              AIForge 配置，用户无需手动填写多套模型配置，即可按代理提供的能力直接使用。
+            </p>
+            <div class="meta-grid">
+              <div class="meta-card">
+                <strong>适合的合作方向</strong>
+                <p class="muted">文本模型代理、图文一体代理、完整能力代理。</p>
+              </div>
+              <div class="meta-card">
+                <strong>当前可形成的服务</strong>
+                <p class="muted">默认模型下发、统一中转、套餐控制、字段锁定、日志与配额管理。</p>
+              </div>
+            </div>
+            <h3>推荐的合作切入方式</h3>
+            <ol>
+              <li>先接入文本模型配置与文本中转。</li>
+              <li>在稳定运行后增加图片模型能力。</li>
+              <li>根据业务需要再增加 AIForge 能力。</li>
+              <li>后续再叠加套餐、后台和统计能力。</li>
+            </ol>
+            <h3>当前适合的代理业务模式</h3>
+            <ul>
+              <li><strong>仅文本代理</strong>：接入门槛最低，最适合快速落地。</li>
+              <li><strong>文本 + 图片代理</strong>：适合提供更完整的图文生成能力。</li>
+              <li><strong>文本 + 图片 + AIForge</strong>：适合高级版、团队版或完整方案。</li>
+            </ul>
+          </article>
+
+          <article class="card section" id="capabilities">
+            <h2>二、能力范围</h2>
+            <h3>文本模型</h3>
+            <ul>
+              <li>可下发文本模型地址</li>
+              <li>可下发文本模型 Token</li>
+              <li>可下发文本模型列表</li>
+              <li>可指定默认模型</li>
+              <li>可设置默认最大输出长度</li>
+            </ul>
+            <h3>图片模型</h3>
+            <ul>
+              <li>可下发图片模型地址</li>
+              <li>可下发图片模型 Token</li>
+              <li>可下发图片模型列表</li>
+              <li>可指定默认模型</li>
+              <li>可设置默认分辨率</li>
+            </ul>
+            <h3>AIForge</h3>
+            <ul>
+              <li>可下发 AIForge 地址</li>
+              <li>可下发 AIForge Token</li>
+              <li>可指定默认模型</li>
+              <li>可设置默认超时时间</li>
+              <li>可设置默认最大输出长度</li>
+            </ul>
+            <h3>字段锁定与能力开关</h3>
+            <ul>
+              <li>可控制是否允许用户修改默认代理设置</li>
+              <li>可单独决定是否开放文本、图片或 AIForge</li>
+              <li>可根据套餐返回不同的能力范围</li>
+            </ul>
+          </article>
+
+          <article class="card section" id="request">
+            <h2>三、请求参数</h2>
+            <p>建议代理服务器提供一个配置接口，例如：<strong>POST /v1/client-config</strong>。</p>
+            <p>客户端会以 JSON 方式向代理服务器发送请求。</p>
+            <pre><code>{
+  "agency_id": "D002",
+  "license_id": "D002-XXXX-XXXX",
+  "machine_id": "4c7d8a2b-xxxx-xxxx",
+  "client_version": "1.0.0",
+  "capabilities": {
+    "text": true,
+    "image": true,
+    "aiforge": true
+  }
+}</code></pre>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>字段</th>
+                    <th>含义</th>
+                    <th>建议用途</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>agency_id</td>
+                    <td>代理标识</td>
+                    <td>用于识别当前属于哪个代理体系</td>
+                  </tr>
+                  <tr>
+                    <td>license_id</td>
+                    <td>用户授权标识</td>
+                    <td>用于查询套餐、状态、额度与权限</td>
+                  </tr>
+                  <tr>
+                    <td>machine_id</td>
+                    <td>设备标识</td>
+                    <td>用于风控、设备绑定或审计记录</td>
+                  </tr>
+                  <tr>
+                    <td>client_version</td>
+                    <td>客户端版本号</td>
+                    <td>用于兼容性判断和字段灰度控制</td>
+                  </tr>
+                  <tr>
+                    <td>capabilities</td>
+                    <td>客户端支持的能力范围</td>
+                    <td>用于决定返回文本、图片、AIForge中的哪些项</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card section" id="response">
+            <h2>四、响应结构</h2>
+            <p>代理服务器应返回一个 JSON 对象。</p>
+            <pre><code>{
+  "mode": "agency",
+  "ttl_seconds": 300,
+  "version": "2026-04-24",
+  "locked": {
+    "text": true,
+    "image": true,
+    "aiforge": true
+  },
+  "text": {
+    "enabled": true,
+    "api_base": "https://proxy.example.com/llm/v1",
+    "api_key": "agt_text_xxx",
+    "models": ["gpt-4.1-mini", "gpt-4.1"],
+    "model_index": 0,
+    "max_tokens": 32768
+  },
+  "image": {
+    "enabled": true,
+    "api_base": "https://proxy.example.com/image/v1",
+    "api_key": "agt_img_xxx",
+    "models": [
+      { "id": "gpt-image-1" },
+      { "id": "flux-dev" }
+    ],
+    "model_index": 0,
+    "resolution": "1024x1024"
+  },
+  "aiforge": {
+    "enabled": true,
+    "type": "openai",
+    "base_url": "https://proxy.example.com/aiforge/v1",
+    "api_key": "agt_search_xxx",
+    "model": "gpt-4.1-mini",
+    "timeout": 60,
+    "max_tokens": 32768
+  }
+}</code></pre>
+            <div class="callout">
+              建议返回完整、稳定、可直接使用的默认值。如果某一项尚未准备好，建议直接返回为未启用状态，而不是返回不完整配置。
+            </div>
+          </article>
+
+          <article class="card section" id="fields">
+            <h2>五、字段与界面含义</h2>
+            <h3>文本模型配置</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>字段</th>
+                    <th>界面含义</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>enabled</td>
+                    <td>是否显示文本模型的代理配置入口</td>
+                  </tr>
+                  <tr>
+                    <td>api_base</td>
+                    <td>文本模型地址</td>
+                  </tr>
+                  <tr>
+                    <td>api_key</td>
+                    <td>文本模型 Token</td>
+                  </tr>
+                  <tr>
+                    <td>models</td>
+                    <td>文本模型下拉列表</td>
+                  </tr>
+                  <tr>
+                    <td>model_index</td>
+                    <td>默认选中的文本模型</td>
+                  </tr>
+                  <tr>
+                    <td>max_tokens</td>
+                    <td>默认最大输出长度</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>图片模型配置</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>字段</th>
+                    <th>界面含义</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>enabled</td>
+                    <td>是否显示图片模型的代理配置入口</td>
+                  </tr>
+                  <tr>
+                    <td>api_base</td>
+                    <td>图片模型地址</td>
+                  </tr>
+                  <tr>
+                    <td>api_key</td>
+                    <td>图片模型 Token</td>
+                  </tr>
+                  <tr>
+                    <td>models</td>
+                    <td>图片模型下拉列表</td>
+                  </tr>
+                  <tr>
+                    <td>model_index</td>
+                    <td>默认选中的图片模型</td>
+                  </tr>
+                  <tr>
+                    <td>resolution</td>
+                    <td>默认分辨率</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>AIForge 配置</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>字段</th>
+                    <th>界面含义</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>enabled</td>
+                    <td>是否显示 AIForge 的代理配置入口</td>
+                  </tr>
+                  <tr>
+                    <td>base_url</td>
+                    <td>AIForge 地址</td>
+                  </tr>
+                  <tr>
+                    <td>api_key</td>
+                    <td>AIForge Token</td>
+                  </tr>
+                  <tr>
+                    <td>model</td>
+                    <td>AIForge 默认模型</td>
+                  </tr>
+                  <tr>
+                    <td>timeout</td>
+                    <td>默认超时时间</td>
+                  </tr>
+                  <tr>
+                    <td>max_tokens</td>
+                    <td>默认最大输出长度</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>锁定字段与缓存时间</h3>
+            <ul>
+              <li><strong>locked</strong>：决定当前代理设置是否允许用户修改。</li>
+              <li><strong>ttl_seconds</strong>：决定客户端缓存这份代理配置多久。</li>
+            </ul>
+          </article>
+
+          <article class="card section" id="rules">
+            <h2>六、生效规则</h2>
+            <h3>文本配置是整体前提</h3>
+            <p>
+              如果文本配置无效，则客户端不会进入代理配置模式。这意味着文本、图片、AIForge
+              三类“自定义”入口都不会显示。
+            </p>
+            <h3>图片配置是可选项</h3>
+            <p>只有在文本配置有效的前提下，图片配置也有效时，图片界面才会显示“自定义”。</p>
+            <h3>AIForge 配置是可选项</h3>
+            <p>只有在文本配置有效的前提下，AIForge 配置也有效时，AIForge 界面才会显示“自定义”。</p>
+            <h3>建议的有效性要求</h3>
+            <ul>
+              <li>文本：已启用、地址有效、Token 非空、模型列表非空、默认模型索引有效</li>
+              <li>图片：已启用、地址有效、Token 非空、模型列表非空、默认模型索引有效</li>
+              <li>AIForge：已启用、地址有效、Token 非空、默认模型非空</li>
+            </ul>
+          </article>
+
+          <article class="card section" id="cache">
+            <h2>七、缓存与刷新</h2>
+            <h3>自动缓存</h3>
+            <p>客户端会缓存代理服务器返回的配置快照。</p>
+            <h3>自动刷新</h3>
+            <p>缓存到期后，客户端会重新请求代理配置。</p>
+            <h3>手动刷新</h3>
+            <p>
+              只有在某一项已经显示并切换到“自定义”时，界面上才会显示刷新按钮。没有有效代理配置时，不会显示刷新按钮。
+            </p>
+            <div class="callout">
+              建议代理服务器返回稳定的缓存时间与完整配置，避免客户端频繁回退到本地普通模式。
+            </div>
+          </article>
+
+          <article class="card section" id="contact">
+            <h2>八、合作联系</h2>
+            <p>
+              如果需要进一步了解代理合作、实施方式、套餐能力或商务合作细节，可通过官网页面中的商务联系方式进一步沟通。
+            </p>
+            <ul>
+              <li>
+                推荐先明确：合作模式、预计开放能力、目标用户类型、是否需要文本/图片/AIForge
+                全量支持。
+              </li>
+              <li>推荐先落地文本模型代理，再逐步扩展到图片与 AIForge。</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="footer">AIWriteX · 代理合作与接口说明</div>
+      </main>
+    </div>
+  </body>
+</html>
