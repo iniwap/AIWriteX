@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 服务协议</title>
+    <meta
+      name="description"
+      content="AIWriteX 服务协议中心，集中展示用户协议、代理协议与开源版商业授权协议。"
+    />
+    <meta name="theme-color" content="#6366f1" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
+    <style>
+      :root {
+        --bg: #050816;
+        --card: rgba(15, 23, 42, 0.82);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: '';
+        position: fixed;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        padding: 30px 28px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 900px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 22px;
+        margin-top: 22px;
+      }
+
+      .sidebar,
+      .viewer-card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 24px;
+        height: fit-content;
+        padding: 14px;
+      }
+
+      .nav-title {
+        margin: 4px 8px 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .agreement-nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .agreement-nav a {
+        display: block;
+        padding: 13px 14px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        color: var(--text);
+        text-decoration: none;
+        background: rgba(15, 23, 42, 0.45);
+        transition: 0.2s ease;
+      }
+
+      .agreement-nav a:hover,
+      .agreement-nav a.active {
+        border-color: rgba(139, 92, 246, 0.45);
+        background: rgba(139, 92, 246, 0.18);
+      }
+
+      .agreement-nav span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .viewer-card {
+        overflow: hidden;
+      }
+
+      .viewer-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(15, 23, 42, 0.7);
+      }
+
+      .viewer-title {
+        margin: 0;
+        font-size: 15px;
+        color: #dbe4f0;
+      }
+
+      .open-link {
+        color: #c4b5fd;
+        font-size: 13px;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 78vh;
+        min-height: 680px;
+        border: 0;
+        background: #050816;
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          width: min(100% - 20px, 1180px);
+          padding-top: 20px;
+        }
+
+        .hero {
+          padding: 20px;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+
+        .agreement-nav {
+          grid-template-columns: 1fr;
+        }
+
+        iframe {
+          height: 72vh;
+          min-height: 560px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Agreements</span>
+          <h1>服务协议</h1>
+          <p class="summary">
+            这里集中展示 AIWriteX 的用户协议、代理协议与商业授权协议。请根据您的身份和使用场景阅读对应协议；
+            如您继续使用、代理、购买、部署或基于 AIWriteX 进行商业化运营，即视为已阅读并同意相应协议内容。
+          </p>
+        </section>
+
+        <section class="layout" aria-label="服务协议列表">
+          <aside class="sidebar">
+            <div class="nav-title">选择协议</div>
+            <nav class="agreement-nav">
+              <a class="active" href="user-service-agreement.html" data-title="用户协议" data-key="user" target="agreementFrame">
+                用户协议
+                <span>普通用户的软件使用边界、合规要求与免责声明</span>
+              </a>
+              <a href="agent-service-agreement.html" data-title="代理协议" data-key="agent" target="agreementFrame">
+                代理协议
+                <span>代理合作、售后责任、品牌规范与合作终止规则</span>
+              </a>
+              <a href="open-source-commercial-license.html" data-title="商业授权协议" data-key="commercial" target="agreementFrame">
+                商业授权协议
+                <span>开源版商业授权、署名限制、白标权限与源码限制</span>
+              </a>
+            </nav>
+          </aside>
+
+          <div class="viewer-card">
+            <div class="viewer-toolbar">
+              <p class="viewer-title" id="viewerTitle">用户协议</p>
+              <a class="open-link" id="openLink" href="user-service-agreement.html" target="_blank" rel="noopener noreferrer">
+                新窗口打开
+              </a>
+            </div>
+            <iframe
+              name="agreementFrame"
+              id="agreementFrame"
+              src="user-service-agreement.html"
+              title="AIWriteX 用户协议"
+            ></iframe>
+          </div>
+        </section>
+
+        <div class="footer">© 2025 AIWriteX · 服务协议中心</div>
+      </main>
+    </div>
+
+    <script>
+      const agreements = Array.from(document.querySelectorAll('.agreement-nav a'));
+      const frame = document.getElementById('agreementFrame');
+      const viewerTitle = document.getElementById('viewerTitle');
+      const openLink = document.getElementById('openLink');
+
+      function activateAgreement(link, updateHash = true) {
+        agreements.forEach((item) => item.classList.toggle('active', item === link));
+        viewerTitle.textContent = link.dataset.title;
+        openLink.href = link.getAttribute('href');
+        frame.title = `AIWriteX ${link.dataset.title}`;
+
+        if (frame.getAttribute('src') !== link.getAttribute('href')) {
+          frame.setAttribute('src', link.getAttribute('href'));
+        }
+
+        if (updateHash) {
+          history.replaceState(null, '', `#${link.dataset.key}`);
+        }
+      }
+
+      agreements.forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          activateAgreement(link);
+        });
+      });
+
+      const initialKey = window.location.hash.replace('#', '');
+      const initialLink = agreements.find((link) => link.dataset.key === initialKey);
+
+      if (initialLink) {
+        activateAgreement(initialLink, false);
+      }
+    </script>
+  </body>
+</html>
