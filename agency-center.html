@@ -151,6 +151,55 @@
         color: #ddd6fe;
       }
 
+      .download-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .download-panel p {
+        margin: 0;
+      }
+
+      .download-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .download-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 168px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(79, 70, 229, 0.9));
+        box-shadow: 0 14px 34px rgba(79, 70, 229, 0.22);
+        transition: 0.2s ease;
+      }
+
+      .download-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 42px rgba(79, 70, 229, 0.3);
+      }
+
+      .download-btn.mac {
+        border-color: rgba(34, 197, 94, 0.32);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.92), rgba(20, 184, 166, 0.88));
+        box-shadow: 0 14px 34px rgba(20, 184, 166, 0.18);
+      }
+
+      .download-btn.mac:hover {
+        box-shadow: 0 18px 42px rgba(20, 184, 166, 0.26);
+      }
+
       .grid {
         display: grid;
         gap: 22px;
@@ -285,8 +334,17 @@
           padding: 20px;
         }
 
-        .meta-grid {
+        .meta-grid,
+        .download-panel {
           grid-template-columns: 1fr;
+        }
+
+        .download-actions {
+          justify-content: stretch;
+        }
+
+        .download-btn {
+          flex: 1 1 100%;
         }
       }
     </style>
@@ -310,6 +368,7 @@
           </div>
           <nav class="toc" aria-label="页面目录">
             <a href="#cooperation">合作说明</a>
+            <a href="#agent-download">代理版本下载</a>
             <a href="#capabilities">能力范围</a>
             <a href="#request">请求参数</a>
             <a href="#response">响应结构</a>
@@ -352,8 +411,37 @@
             </ul>
           </article>
 
+          <article class="card section" id="agent-download">
+            <div class="download-panel">
+              <div>
+                <h2>二、代理版本下载</h2>
+                <p class="muted">
+                  代理合作方请下载代理版本客户端进行部署与测试；当前仅提供云盘下载入口。
+                </p>
+              </div>
+              <div class="download-actions" aria-label="代理版本下载">
+                <a
+                  class="download-btn"
+                  href="https://pan.baidu.com/s/1KrpPzWg8-uRezRXK0ZBvpQ?pwd=mzgf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Windows 代理版
+                </a>
+                <a
+                  class="download-btn mac"
+                  href="https://pan.baidu.com/s/1GMlI-v3JqrndfnFMxm2oDg?pwd=mzgf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  macOS 代理版
+                </a>
+              </div>
+            </div>
+          </article>
+
           <article class="card section" id="capabilities">
-            <h2>二、能力范围</h2>
+            <h2>三、能力范围</h2>
             <h3>文本模型</h3>
             <ul>
               <li>可下发文本模型地址</li>
@@ -387,7 +475,7 @@
           </article>
 
           <article class="card section" id="request">
-            <h2>三、请求参数</h2>
+            <h2>四、请求参数</h2>
             <p>建议代理服务器提供一个配置接口，例如：<strong>POST /v1/client-config</strong>。</p>
             <p>客户端会以 JSON 方式向代理服务器发送请求。</p>
             <pre><code>{
@@ -442,7 +530,7 @@
           </article>
 
           <article class="card section" id="response">
-            <h2>四、响应结构</h2>
+            <h2>五、响应结构</h2>
             <p>代理服务器应返回一个 JSON 对象。</p>
             <pre><code>{
   "mode": "agency",
@@ -488,7 +576,7 @@
           </article>
 
           <article class="card section" id="fields">
-            <h2>五、字段与界面含义</h2>
+            <h2>六、字段与界面含义</h2>
             <h3>文本模型配置</h3>
             <div class="table-wrap">
               <table>
@@ -611,7 +699,7 @@
           </article>
 
           <article class="card section" id="rules">
-            <h2>六、生效规则</h2>
+            <h2>七、生效规则</h2>
             <h3>文本配置是整体前提</h3>
             <p>
               如果文本配置无效，则客户端不会进入代理配置模式。这意味着文本、图片、AIForge
@@ -630,7 +718,7 @@
           </article>
 
           <article class="card section" id="cache">
-            <h2>七、缓存与刷新</h2>
+            <h2>八、缓存与刷新</h2>
             <h3>自动缓存</h3>
             <p>客户端会缓存代理服务器返回的配置快照。</p>
             <h3>自动刷新</h3>
@@ -645,7 +733,7 @@
           </article>
 
           <article class="card section" id="contact">
-            <h2>八、合作联系</h2>
+            <h2>九、合作联系</h2>
             <p>
               如果需要进一步了解代理合作、实施方式、套餐能力或商务合作细节，可通过官网页面中的商务联系方式进一步沟通。
             </p>
