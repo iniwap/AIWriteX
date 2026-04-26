@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIWriteX 历史下载</title>
+    <meta
+      name="description"
+      content="AIWriteX 历史版本下载列表，从 GitHub Releases 获取 Windows 与 macOS 安装包，仅展示 v2.4.1 及之后版本。"
+    />
+    <meta name="theme-color" content="#6366f1" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
+    <style>
+      :root {
+        --bg: #050816;
+        --card: rgba(15, 23, 42, 0.82);
+        --line: rgba(148, 163, 184, 0.18);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent-2: #22c55e;
+        --danger: #fb7185;
+        --shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.26), transparent 32%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #020617 0%, #0b1120 42%, #050816 100%);
+      }
+
+      .shell {
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: '';
+        position: fixed;
+        width: 28rem;
+        height: 28rem;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .shell::before {
+        top: -8rem;
+        right: -8rem;
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .shell::after {
+        left: -10rem;
+        bottom: -10rem;
+        background: rgba(34, 197, 94, 0.4);
+      }
+
+      .wrap {
+        width: min(980px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero,
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .hero {
+        padding: 32px 28px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        padding: 8px 14px;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #ddd6fe;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(91, 33, 182, 0.2);
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .summary {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .card {
+        margin-top: 22px;
+        padding: 26px;
+      }
+
+      .status {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.9;
+      }
+
+      .release-list {
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .release-card {
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 22px;
+        padding: 18px;
+        background: rgba(15, 23, 42, 0.62);
+      }
+
+      .release-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .release-title {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .release-date {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .asset-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .download-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 168px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(79, 70, 229, 0.9));
+        box-shadow: 0 14px 34px rgba(79, 70, 229, 0.22);
+        transition: 0.2s ease;
+      }
+
+      .download-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 42px rgba(79, 70, 229, 0.3);
+      }
+
+      .download-btn.mac {
+        border-color: rgba(34, 197, 94, 0.32);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.92), rgba(20, 184, 166, 0.88));
+        box-shadow: 0 14px 34px rgba(20, 184, 166, 0.18);
+      }
+
+      .empty,
+      .error {
+        padding: 16px 18px;
+        border-radius: 18px;
+        line-height: 1.8;
+      }
+
+      .empty {
+        color: var(--muted);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(30, 41, 59, 0.4);
+      }
+
+      .error {
+        color: #fecdd3;
+        border: 1px solid rgba(251, 113, 133, 0.22);
+        background: rgba(251, 113, 133, 0.08);
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding: 18px 4px 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      a {
+        color: #c4b5fd;
+      }
+
+      @media (max-width: 720px) {
+        .wrap {
+          width: min(100% - 20px, 980px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .card {
+          padding: 20px;
+        }
+
+        .release-head {
+          display: grid;
+        }
+
+        .release-date {
+          white-space: normal;
+        }
+
+        .download-btn {
+          flex: 1 1 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main class="wrap">
+        <section class="hero">
+          <span class="eyebrow">AIWriteX Release Archive</span>
+          <h1>历史下载</h1>
+          <p class="summary">
+            本页提供 AIWriteX 历史版本下载。
+          </p>
+        </section>
+
+        <section class="card" aria-label="历史下载列表">
+          <p class="status" id="status">正在获取历史版本...</p>
+          <div class="release-list" id="releaseList"></div>
+        </section>
+
+        <div class="footer">© 2025 AIWriteX · 历史下载</div>
+      </main>
+    </div>
+
+    <script>
+      const MIN_VERSION = '2.4.1';
+      const RELEASES_API = 'https://api.github.com/repos/iniwap/AIWriteX/releases';
+      const statusEl = document.getElementById('status');
+      const releaseListEl = document.getElementById('releaseList');
+
+      function parseVersion(tagName) {
+        const match = tagName.match(/v?(\d+)\.(\d+)\.(\d+)/i);
+        return match ? match.slice(1).map(Number) : null;
+      }
+
+      function compareVersion(a, b) {
+        for (let index = 0; index < 3; index++) {
+          if (a[index] !== b[index]) {
+            return a[index] - b[index];
+          }
+        }
+        return 0;
+      }
+
+      function findAsset(assets, type) {
+        return assets.find((asset) => {
+          const name = asset.name.toLowerCase();
+          if (type === 'windows') {
+            return name.endsWith('.exe') || name.endsWith('.zip');
+          }
+          return name.endsWith('.dmg') || name.endsWith('.pkg');
+        });
+      }
+
+      function formatDate(value) {
+        return new Intl.DateTimeFormat('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(new Date(value));
+      }
+
+      function createDownloadLink(asset, label, className = '') {
+        const link = document.createElement('a');
+        link.className = `download-btn ${className}`.trim();
+        link.dataset.href = asset.browser_download_url;
+        link.role = 'button';
+        link.tabIndex = 0;
+        link.textContent = label;
+        return link;
+      }
+
+      function renderReleases(releases) {
+        const minVersion = parseVersion(MIN_VERSION);
+        const visibleReleases = releases
+          .map((release) => ({
+            release,
+            version: parseVersion(release.tag_name || release.name || ''),
+            windowsAsset: findAsset(release.assets || [], 'windows'),
+            macAsset: findAsset(release.assets || [], 'mac'),
+          }))
+          .filter((item) => {
+            return (
+              item.version &&
+              compareVersion(item.version, minVersion) >= 0 &&
+              item.windowsAsset &&
+              item.macAsset &&
+              !item.release.draft
+            );
+          });
+
+        statusEl.textContent = '';
+
+        if (!visibleReleases.length) {
+          releaseListEl.innerHTML = '<div class="empty">暂无可展示的历史版本。</div>';
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        visibleReleases.forEach(({ release, windowsAsset, macAsset }) => {
+          const card = document.createElement('article');
+          card.className = 'release-card';
+
+          const head = document.createElement('div');
+          head.className = 'release-head';
+
+          const title = document.createElement('h2');
+          title.className = 'release-title';
+          title.textContent = release.name || release.tag_name;
+
+          const date = document.createElement('span');
+          date.className = 'release-date';
+          date.textContent = formatDate(release.published_at || release.created_at);
+
+          head.append(title, date);
+
+          const actions = document.createElement('div');
+          actions.className = 'asset-actions';
+          actions.append(
+            createDownloadLink(windowsAsset, 'Windows 版'),
+            createDownloadLink(macAsset, 'macOS 版', 'mac'),
+          );
+
+          card.append(head, actions);
+          fragment.append(card);
+        });
+
+        releaseListEl.append(fragment);
+      }
+
+      releaseListEl.addEventListener('click', (event) => {
+        const link = event.target.closest('.download-btn');
+        if (!link) {
+          return;
+        }
+
+        event.preventDefault();
+        const url = link.dataset.href;
+        if (url) {
+          window.location.href = url;
+        }
+      });
+
+      releaseListEl.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+          return;
+        }
+
+        const link = event.target.closest('.download-btn');
+        if (!link) {
+          return;
+        }
+
+        event.preventDefault();
+        const url = link.dataset.href;
+        if (url) {
+          window.location.href = url;
+        }
+      });
+
+      fetch(RELEASES_API, { headers: { Accept: 'application/vnd.github+json' } })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('GitHub Releases 获取失败');
+          }
+          return response.json();
+        })
+        .then(renderReleases)
+        .catch(() => {
+          statusEl.textContent = '';
+          releaseListEl.innerHTML = '<div class="error">历史下载列表暂时无法加载，请稍后刷新页面重试。</div>';
+        });
+    </script>
+  </body>
+</html>
