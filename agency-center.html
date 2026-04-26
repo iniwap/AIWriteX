@@ -422,17 +422,17 @@
               <div class="download-actions" aria-label="代理版本下载">
                 <a
                   class="download-btn"
-                  href="https://pan.baidu.com/s/1KrpPzWg8-uRezRXK0ZBvpQ?pwd=mzgf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  data-href="https://pan.baidu.com/s/13fLNN2H3fRNALLST6s1wbQ?pwd=mzgf"
+                  role="button"
+                  tabindex="0"
                 >
                   Windows 代理版
                 </a>
                 <a
                   class="download-btn mac"
-                  href="https://pan.baidu.com/s/1GMlI-v3JqrndfnFMxm2oDg?pwd=mzgf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  data-href="https://pan.baidu.com/s/1-Gix2a5C58xorn2n9LuU1w?pwd=mzgf"
+                  role="button"
+                  tabindex="0"
                 >
                   macOS 代理版
                 </a>
@@ -750,5 +750,30 @@
         <div class="footer">AIWriteX · 代理合作与接口说明</div>
       </main>
     </div>
+
+    <script>
+      document.querySelectorAll('.download-btn').forEach((link) => {
+        function openDownload() {
+          const url = link.dataset.href;
+          if (url) {
+            window.open(url, '_blank');
+          }
+        }
+
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          openDownload();
+        });
+
+        link.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') {
+            return;
+          }
+
+          event.preventDefault();
+          openDownload();
+        });
+      });
+    </script>
   </body>
 </html>
