@@ -293,14 +293,13 @@
         return 0;
       }
 
+      const STANDARD_ASSETS = {
+        windows: 'aiwritex_setup.exe',
+        mac: 'aiwritex_setup.dmg',
+      };
+
       function findAsset(assets, type) {
-        return assets.find((asset) => {
-          const name = asset.name.toLowerCase();
-          if (type === 'windows') {
-            return name.endsWith('.exe') || name.endsWith('.zip');
-          }
-          return name.endsWith('.dmg') || name.endsWith('.pkg');
-        });
+        return assets.find((asset) => asset.name.toLowerCase() === STANDARD_ASSETS[type]);
       }
 
       function formatDate(value) {
