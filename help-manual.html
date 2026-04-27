@@ -3,8 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
     <title>AIWriteX 用户使用手册</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -331,41 +329,6 @@
           <span class="text-5xl mr-4 text-gray-300 font-serif">I.</span> 快速开始
         </h2>
 
-        <!-- 安装 -->
-        <section class="mb-12">
-          <h3
-            class="text-2xl font-bold mb-6 border-b border-gray-200 pb-3 text-gray-800 dark:text-gray-200"
-          >
-            软件安装
-          </h3>
-          <p class="std-text mb-6">选择合适的途径下载并安装 AIWriteX：</p>
-
-          <div class="grid grid-cols-1 gap-6">
-            <div
-              class="card-box flex justify-between items-center hover:shadow-md transition-shadow"
-            >
-              <div>
-                <strong class="block text-lg mb-1 text-gray-800 dark:text-white"
-                  >Windows 版本</strong
-                >
-                <span class="text-gray-500 text-sm">适用于Win 10 或更高版本</span>
-              </div>
-              <a href="https://aiwritex.voidai.cc" class="link-btn">官网下载</a>
-            </div>
-            <div
-              class="card-box flex justify-between items-center hover:shadow-md transition-shadow"
-            >
-              <div>
-                <strong class="block text-lg mb-1 text-gray-800 dark:text-white"
-                  >Windows 版本</strong
-                >
-                <span class="text-gray-500 text-sm">适用于Win 10 或更高版本</span>
-              </div>
-              <a href="" class="link-btn">网盘下载</a>
-            </div>
-          </div>
-        </section>
-
         <!-- 配置 -->
         <section class="flex-1">
           <h3
@@ -409,8 +372,7 @@
                 class="text-blue-600 underline hover:text-blue-800"
                 >Deepseek</a
               >，稳定速度快，价格便宜。<br />
-              3. 其余配置项系统已预设最佳默认值，初次使用建议保持默认。<br />
-              4. 建议同时配置AIForge的API Key，以提升搜索与内容生成质量。
+              3. 其余配置项系统已预设最佳默认值，初次使用建议保持默认。
             </p>
           </div>
         </section>
@@ -1424,7 +1386,6 @@
               <li class="std-list-item">
                 <strong>图片生成</strong>：可选配图使用AI生成，否则为随机图片
               </li>
-              <li class="std-list-item"><strong>AIForge</strong>：系统搜索能力相关的配置。</li>
               <li class="std-list-item">
                 <strong>页面设计</strong>：网页可视化编辑设计器相关配置。
               </li>
@@ -1447,8 +1408,8 @@
         </h2>
         <p class="std-text mb-8">
           针对家用拨号上网或移动办公用户，IP 地址频繁变动会导致微信后台白名单配置极为繁琐。
-          <strong>代理转发</strong>功能允许您通过一台固定 IP
-          的中转服务器发送发布指令，彻底解决此痛点。
+          <strong>代理转发</strong>功能会让获取 access_token、上传素材、创建草稿与发布等微信 API
+          请求通过固定出口 IP 的 HTTP/HTTPS 代理发出。
         </p>
 
         <!-- 实现流程 -->
@@ -1460,51 +1421,57 @@
           <div class="card-box">
             <p class="std-text">
               您需要准备一台具备<strong>固定公网 IP</strong>
-              的云服务器。推荐选择<strong>阿里云</strong>、<strong>腾讯云</strong>或<strong>华为云</strong>的“轻量应用服务器”，每月成本极低，且能提供极其稳定的固定出口
-              IP。
+              的云服务器，并在服务器上部署一个<strong>仅本机监听</strong>的标准 HTTP/HTTPS
+              代理服务。通过 SSH 隧道让 AIWriteX
+              连接该代理，公网无需开放代理端口，也不需要在配置中填写代理账号密码。
             </p>
           </div>
         </section>
 
-        <!-- 服务端代码 -->
+        <!-- 服务端代理搭建 -->
         <section class="mb-10" style="flex: 1; display: flex; flex-direction: column">
           <div class="flex items-center mb-4">
             <div class="number-circle">2</div>
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              服务端代码 (Python 示例)
-            </h3>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">搭建服务端代理</h3>
           </div>
           <div class="card-box bg-gray-900 p-4 rounded-lg" style="flex: 1; overflow-y: auto">
             <pre
               class="text-sm text-green-400 font-mono"
               style="white-space: pre-wrap; word-break: break-all"
-            ><code># 环境准备: pip install flask requests
-from flask import Flask, request
-import requests
+            ><code>方案 A：Linux 服务端（Ubuntu / Debian + Squid）
 
-app = Flask(__name__)
+sudo apt update
+sudo apt install -y squid
 
-@app.route('/proxy', methods=['POST'])
-def proxy():
-    url = request.args.get('url')
-    if not url: return "Missing URL", 400
-    
-    # 透传请求头、数据与方法
-    headers = {k: v for k, v in request.headers if k.lower() != 'host'}
-    try:
-        response = requests.request(
-            method=request.method,
-            url=url,
-            headers=headers,
-            data=request.get_data(),
-            timeout=10
-        )
-        return (response.content, response.status_code, response.headers.items())
-    except Exception as e:
-        return str(e), 500
+# 编辑 /etc/squid/squid.conf，保留或添加以下配置
+http_port 127.0.0.1:3128
+acl local_proxy src 127.0.0.1/32
+http_access allow local_proxy
+http_access deny all
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)</code></pre>
+sudo systemctl restart squid
+sudo systemctl enable squid
+
+# 在运行 AIWriteX 的电脑建立 SSH 隧道
+ssh -N -L 127.0.0.1:3128:127.0.0.1:3128 root@服务器公网IP
+
+方案 B：Windows 服务端（Windows Server + 3proxy）
+
+# 1. 在“设置 -> 系统 -> 可选功能”安装 OpenSSH Server，并启动 sshd 服务
+# 2. 安装 3proxy，将 3proxy.cfg 放在 3proxy.exe 同目录
+# 3. 3proxy.cfg 使用以下最小配置，让代理只监听服务器本机
+internal 127.0.0.1
+proxy -p3128 -i127.0.0.1
+
+# 4. 启动 3proxy；生产环境可用 NSSM 或任务计划程序设为开机启动
+3proxy.exe 3proxy.cfg
+
+# 5. 云防火墙和 Windows 防火墙只允许 SSH 端口，3128 保持本机监听
+# 6. 在运行 AIWriteX 的电脑建立 SSH 隧道
+ssh -N -L 127.0.0.1:3128:127.0.0.1:3128 Administrator@服务器公网IP
+
+AIWriteX 中填写本地代理地址：
+http://127.0.0.1:3128</code></pre>
           </div>
         </section>
 
@@ -1517,16 +1484,18 @@ if __name__ == '__main__':
           <div class="card-box">
             <ol class="std-list list-decimal pl-4">
               <li class="std-list-item">
-                将上述代码在云服务器部署运行（建议使用 screen 或 pm2 持久化）。
+                在云服务器部署仅本机监听的标准 HTTP/HTTPS 代理，并在 AIWriteX 机器上建立 SSH
+                本地端口转发。
               </li>
               <li class="std-list-item">
-                在微信公众号后台将该<strong>服务器固定 IP</strong> 加入 IP 允许列表（白名单）。
+                在微信公众号后台将该<strong>服务器固定公网出口 IP</strong> 加入 IP
+                允许列表（白名单）。
               </li>
               <li class="std-list-item">
                 在 AIWriteX <strong>系统设置 -> 微信公众号</strong> 中勾选“启用代理转发”。
               </li>
               <li class="std-list-item">
-                填入中转地址，例如：<code>http://1.2.3.4:5000/proxy</code>。
+                填入本地隧道代理地址，例如：<code>http://127.0.0.1:3128</code>。
               </li>
             </ol>
           </div>
@@ -1761,11 +1730,12 @@ if __name__ == '__main__':
               <h3 class="text-2xl font-bold mb-4 font-serif text-gray-800 dark:text-gray-100">
                 技术与服务支持
               </h3>
-              <p class="std-text mb-2">QQ: 522765228</p>
+              <p class="std-text mb-2">联系方式: QQ522765228</p>
               <p class="std-text">
                 官方网站:
                 <a
-                  href="https://aiwritex.voidai.cc"
+                  href="#"
+                  data-official-link="site"
                   class="text-gray-800 underline decoration-gray-400 underline-offset-4 dark:text-gray-200"
                   >墨智工坊</a
                 >
