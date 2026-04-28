@@ -119,13 +119,6 @@
         line-height: 1.9;
       }
 
-      .pill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-      }
-
       .pill,
       .toc a {
         display: inline-flex;
@@ -137,6 +130,13 @@
         border: 1px solid rgba(148, 163, 184, 0.18);
         background: rgba(30, 41, 59, 0.65);
         text-decoration: none;
+      }
+
+      .toc a.highlight {
+        color: #fff7ed;
+        border-color: rgba(245, 158, 11, 0.58);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(139, 92, 246, 0.28));
+        box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.08), 0 10px 28px rgba(245, 158, 11, 0.12);
       }
 
       .toc {
@@ -358,13 +358,6 @@
           <p class="summary">
             本页面面向代理合作方，集中说明当前支持的代理合作能力、适合的合作模式、推荐的落地路径，以及代理服务器与客户端之间的接口字段含义与使用规则。
           </p>
-          <div class="pill-list">
-            <span class="pill">合作说明</span>
-            <span class="pill">文本模型</span>
-            <span class="pill">图片模型</span>
-            <span class="pill">接口字段</span>
-            <span class="pill">缓存与刷新</span>
-          </div>
           <nav class="toc" aria-label="页面目录">
             <a href="#cooperation">合作说明</a>
             <a href="#agent-download">代理版本下载</a>
@@ -373,6 +366,7 @@
             <a href="#response">响应结构</a>
             <a href="#fields">字段与界面含义</a>
             <a href="#rules">生效规则</a>
+            <a class="highlight" href="#server-implementation">服务端实现</a>
             <a href="#cache">缓存与刷新</a>
             <a href="#contact">合作联系</a>
           </nav>
@@ -456,15 +450,15 @@
             </ul>
             <h3>微信 API 中继</h3>
             <ul>
-              <li>可下发微信 API 专用中继地址</li>
-              <li>可下发中继密钥</li>
+              <li>可作为独立能力下发微信 API 专用中继地址</li>
+              <li>推荐使用统一授权 Token，由代理服务端按 wechat_relay 能力鉴权、封禁、限额和审计</li>
               <li>用于解决微信公众号 IP 白名单频繁变化问题</li>
               <li>未返回中继参数时不影响客户端本地配置</li>
             </ul>
             <h3>字段锁定与能力开关</h3>
             <ul>
               <li>可控制是否允许用户修改默认代理设置</li>
-              <li>可单独决定是否开放文本或图片</li>
+              <li>文本、图片、微信中继三种能力可分别启用、禁用或封禁</li>
               <li>可根据套餐返回不同的能力范围</li>
             </ul>
           </article>
@@ -478,6 +472,11 @@
   "license_id": "D002-XXXX-XXXX",
   "machine_id": "4c7d8a2b-xxxx-xxxx",
   "client_version": "1.0.0",
+  "contract_version": 2,
+  "auth_preference": {
+    "header": "Authorization",
+    "scheme": "Bearer"
+  },
   "capabilities": {
     "text": true,
     "image": true,
@@ -512,7 +511,17 @@
                   <tr>
                     <td>client_version</td>
                     <td>客户端版本号</td>
-                    <td>用于兼容性判断和字段灰度控制</td>
+                    <td>用于版本判断和字段灰度控制</td>
+                  </tr>
+                  <tr>
+                    <td>contract_version</td>
+                    <td>代理配置协议版本</td>
+                    <td>当前建议返回 v2 字段，用于统一授权和能力分流</td>
+                  </tr>
+                  <tr>
+                    <td>auth_preference</td>
+                    <td>客户端推荐的授权头格式</td>
+                    <td>默认使用 Authorization: Bearer &lt;token&gt;</td>
                   </tr>
                   <tr>
                     <td>capabilities</td>
@@ -531,14 +540,19 @@
   "mode": "agency",
   "ttl_seconds": 300,
   "version": "2026-04-24",
+  "authorization": {
+    "header": "Authorization",
+    "scheme": "Bearer",
+    "token": "agt_unified_user_token"
+  },
   "locked": {
     "text": true,
-    "image": true
+    "image": true,
+    "wechat_relay": true
   },
   "text": {
     "enabled": true,
     "api_base": "https://proxy.example.com/llm/v1",
-    "api_key": "agt_text_xxx",
     "models": ["gpt-4.1-mini", "gpt-4.1"],
     "model_index": 0,
     "max_tokens": 32768
@@ -546,7 +560,6 @@
   "image": {
     "enabled": true,
     "api_base": "https://proxy.example.com/image/v1",
-    "api_key": "agt_img_xxx",
     "models": [
       { "id": "gpt-image-1" },
       { "id": "flux-dev" }
@@ -556,13 +569,22 @@
   },
   "wechat": {
     "relay": {
+      "enabled": true,
       "url": "https://relay.example.com",
-      "key": "aiwritex_wechat_relay_default_key"
+      "authorization": {
+        "header": "Authorization",
+        "scheme": "Bearer"
+      }
     }
+  },
+  "policy": {
+    "text": { "enabled": true, "quota": "server_enforced" },
+    "image": { "enabled": true, "quota": "server_enforced" },
+    "wechat_relay": { "enabled": true, "audit": true, "rate_limit": "server_enforced" }
   }
 }</code></pre>
             <div class="callout">
-              建议返回完整、稳定、可直接使用的默认值。如果某一项尚未准备好，建议直接返回为未启用状态，而不是返回不完整配置。
+              建议返回完整、稳定、可直接使用的默认值。文本、图片、微信中继是互相独立的能力：返回有效段时客户端只覆盖该段；未返回某段时客户端保持本地原配置不变。
             </div>
           </article>
 
@@ -587,8 +609,8 @@
                     <td>文本模型地址</td>
                   </tr>
                   <tr>
-                    <td>api_key</td>
-                    <td>文本模型 Token</td>
+                    <td>authorization.token</td>
+                    <td>文本模型统一授权 Token；如未单独返回，则使用顶层 authorization.token</td>
                   </tr>
                   <tr>
                     <td>models</td>
@@ -625,8 +647,8 @@
                     <td>图片模型地址</td>
                   </tr>
                   <tr>
-                    <td>api_key</td>
-                    <td>图片模型 Token</td>
+                    <td>authorization.token</td>
+                    <td>图片模型统一授权 Token；如未单独返回，则使用顶层 authorization.token</td>
                   </tr>
                   <tr>
                     <td>models</td>
@@ -659,15 +681,22 @@
                     <td>微信 API 专用中继地址，例如 https://relay.example.com</td>
                   </tr>
                   <tr>
-                    <td>wechat.relay.key</td>
-                    <td>中继密钥，未返回时客户端使用默认密钥</td>
+                    <td>wechat.relay.authorization</td>
+                    <td>微信中继统一授权配置；未写 token 时复用顶层 authorization.token</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div class="callout">
-              微信中继参数仅代理发行版使用；返回有效中继地址时会启用，未返回则保持客户端本地默认配置不变。中继服务只应转发微信官方 cgi-bin 接口，不应提供通用代理能力。
+              微信中继参数仅代理发行版使用；返回有效中继地址时会启用，未返回则保持客户端本地默认配置不变。中继服务只应转发微信官方 cgi-bin 接口，不应提供通用代理能力。代理服务端应根据用户授权码或统一 Token 的 wechat_relay 能力做启用、封禁、限额和审计。
             </div>
+
+            <h3>统一授权与能力分流</h3>
+            <ul>
+              <li><strong>authorization.token</strong>：统一用户 Token，可同时用于文本、图片、微信中继。</li>
+              <li>代理服务端根据请求路径、能力类型或内部策略分流到 text、image、wechat_relay。</li>
+              <li>如果某个能力需要单独 Token，可在该能力段返回 authorization.token 覆盖顶层 Token。</li>
+            </ul>
 
             <h3>锁定字段与缓存时间</h3>
             <ul>
@@ -678,22 +707,296 @@
 
           <article class="card section" id="rules">
             <h2>七、生效规则</h2>
-            <h3>文本配置是整体前提</h3>
+            <h3>三种能力独立生效</h3>
             <p>
-              如果文本配置无效，则客户端不会进入代理配置模式。这意味着文本、图片两类“自定义”入口都不会显示。
+              文本、图片、微信中继互不依赖。代理服务器返回某个有效能力段时，客户端只覆盖该能力段；没有返回的能力段保持客户端原有本地配置，不会被清空或回退。
             </p>
-            <h3>图片配置是可选项</h3>
-            <p>只有在文本配置有效的前提下，图片配置也有效时，图片界面才会显示“自定义”。</p>
             <h3>建议的有效性要求</h3>
             <ul>
               <li>文本：已启用、地址有效、Token 非空、模型列表非空、默认模型索引有效</li>
               <li>图片：已启用、地址有效、Token 非空、模型列表非空、默认模型索引有效</li>
-              <li>微信中继：返回有效 URL 时启用；未返回时保持客户端本地默认配置</li>
+              <li>微信中继：返回有效 URL 和 authorization.token 时启用，由代理服务端按 wechat_relay 能力鉴权</li>
+            </ul>
+            <h3>封禁、限额与审计</h3>
+            <p>
+              客户端只负责携带授权信息和应用有效配置；用户是否可使用 text、image、wechat_relay，应由代理服务端根据授权码、统一 Token、套餐、额度、风控状态进行判断。
+            </p>
+          </article>
+
+          <article class="card section" id="server-implementation">
+            <h2>八、服务端实现参考</h2>
+            <p>
+              代理服务端建议同时提供配置下发、文本模型代理、图片模型代理和微信 API 中继四类接口。三种能力必须独立判断，用户能用哪个能力由服务端按授权、套餐、额度和风控状态决定。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>接口</th>
+                    <th>用途</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>POST /v1/client-config</td>
+                    <td>AIWriteX 客户端拉取代理配置</td>
+                  </tr>
+                  <tr>
+                    <td>/llm/v1/*</td>
+                    <td>文本模型代理，建议兼容 OpenAI Chat Completions 风格</td>
+                  </tr>
+                  <tr>
+                    <td>/image/v1/*</td>
+                    <td>图片模型代理，建议兼容 OpenAI Images 风格</td>
+                  </tr>
+                  <tr>
+                    <td>/wechat-relay/relay/*</td>
+                    <td>微信 API 专用中继，只转发微信官方 cgi-bin 接口</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>基础数据结构</h3>
+            <pre><code>USERS = {
+    "D002-XXXX-XXXX": {
+        "enabled": True,
+        "token": "agt_user_token_xxx",
+        "capabilities": {
+            "text": {"enabled": True, "quota": 1000000},
+            "image": {"enabled": True, "quota": 200},
+            "wechat_relay": {"enabled": True, "quota": 5000},
+        },
+    }
+}</code></pre>
+            <h3>最小 FastAPI 框架</h3>
+            <pre><code>import hmac
+import os
+from typing import Any, Dict, Optional
+
+import requests
+from fastapi import FastAPI, Header, HTTPException, Request, Response
+from pydantic import BaseModel
+
+app = FastAPI(title="AIWriteX Agency Server")
+
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://proxy.example.com").rstrip("/")
+UPSTREAM_TEXT_BASE = os.environ.get("UPSTREAM_TEXT_BASE", "https://api.openai.com/v1").rstrip("/")
+UPSTREAM_TEXT_KEY = os.environ.get("UPSTREAM_TEXT_KEY", "")
+UPSTREAM_IMAGE_BASE = os.environ.get("UPSTREAM_IMAGE_BASE", "https://api.openai.com/v1").rstrip("/")
+UPSTREAM_IMAGE_KEY = os.environ.get("UPSTREAM_IMAGE_KEY", "")
+WECHAT_CGI_BASE_URL = "https://api.weixin.qq.com/cgi-bin"
+
+USERS = {
+    "D002-XXXX-XXXX": {
+        "enabled": True,
+        "token": "agt_user_token_xxx",
+        "capabilities": {
+            "text": {"enabled": True},
+            "image": {"enabled": True},
+            "wechat_relay": {"enabled": True},
+        },
+    }
+}
+
+HOP_BY_HOP_HEADERS = {
+    "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+    "te", "trailers", "transfer-encoding", "upgrade", "host",
+    "content-length", "content-encoding",
+}
+
+
+class ClientConfigRequest(BaseModel):
+    agency_id: str = ""
+    license_id: str = ""
+    machine_id: str = ""
+    client_version: str = ""
+    contract_version: int = 2
+    auth_preference: Dict[str, Any] = {}
+    capabilities: Dict[str, bool] = {}
+
+
+def get_user_by_license(license_id: str) -> Optional[Dict[str, Any]]:
+    user = USERS.get(license_id)
+    if not user or not user.get("enabled"):
+        return None
+    return user
+
+
+def get_token_from_authorization(authorization: Optional[str]) -> str:
+    scheme, _, token = (authorization or "").partition(" ")
+    return token.strip() if scheme.lower() == "bearer" else ""
+
+
+def get_user_by_token(token: str) -> Optional[Dict[str, Any]]:
+    if not token:
+        return None
+    for user in USERS.values():
+        if user.get("enabled") and hmac.compare_digest(user.get("token", ""), token):
+            return user
+    return None
+
+
+def require_capability(authorization: Optional[str], capability: str) -> Dict[str, Any]:
+    user = get_user_by_token(get_token_from_authorization(authorization))
+    if not user:
+        raise HTTPException(status_code=401, detail="授权无效")
+    cap = user.get("capabilities", {}).get(capability, {})
+    if not cap.get("enabled"):
+        raise HTTPException(status_code=403, detail="当前能力未开通或已被禁用")
+    return user
+
+
+def forward_headers(request: Request, upstream_token: str = "") -> Dict[str, str]:
+    headers = {
+        name: value
+        for name, value in request.headers.items()
+        if name.lower() not in HOP_BY_HOP_HEADERS and name.lower() != "authorization"
+    }
+    if upstream_token:
+        headers["Authorization"] = f"Bearer {upstream_token}"
+    return headers
+
+
+def response_headers(headers: Dict[str, str]) -> Dict[str, str]:
+    return {name: value for name, value in headers.items() if name.lower() not in HOP_BY_HOP_HEADERS}
+
+
+def proxy_request(request: Request, body: bytes, upstream_url: str, upstream_token: str, timeout: int) -> Response:
+    upstream_response = requests.request(
+        method=request.method,
+        url=upstream_url,
+        params=request.url.query,
+        data=body,
+        headers=forward_headers(request, upstream_token),
+        timeout=timeout,
+    )
+    return Response(
+        content=upstream_response.content,
+        status_code=upstream_response.status_code,
+        headers=response_headers(upstream_response.headers),
+        media_type=upstream_response.headers.get("content-type"),
+    )
+
+
+@app.post("/v1/client-config")
+def client_config(payload: ClientConfigRequest):
+    user = get_user_by_license(payload.license_id)
+    if not user:
+        return {"mode": "local"}
+
+    token = user["token"]
+    caps = user.get("capabilities", {})
+    response: Dict[str, Any] = {
+        "mode": "agency",
+        "ttl_seconds": 300,
+        "authorization": {"header": "Authorization", "scheme": "Bearer", "token": token},
+        "locked": {},
+        "policy": {},
+    }
+
+    if caps.get("text", {}).get("enabled"):
+        response["locked"]["text"] = True
+        response["policy"]["text"] = {"enabled": True, "quota": "server_enforced"}
+        response["text"] = {
+            "enabled": True,
+            "api_base": f"{PUBLIC_BASE_URL}/llm/v1",
+            "models": ["gpt-4.1-mini"],
+            "model_index": 0,
+            "max_tokens": 32768,
+        }
+
+    if caps.get("image", {}).get("enabled"):
+        response["locked"]["image"] = True
+        response["policy"]["image"] = {"enabled": True, "quota": "server_enforced"}
+        response["image"] = {
+            "enabled": True,
+            "api_base": f"{PUBLIC_BASE_URL}/image/v1",
+            "models": [{"id": "gpt-image-1"}],
+            "model_index": 0,
+            "resolution": "1024x1024",
+        }
+
+    if caps.get("wechat_relay", {}).get("enabled"):
+        response["locked"]["wechat_relay"] = True
+        response["policy"]["wechat_relay"] = {"enabled": True, "audit": True, "rate_limit": "server_enforced"}
+        response["wechat"] = {
+            "relay": {
+                "enabled": True,
+                "url": f"{PUBLIC_BASE_URL}/wechat-relay",
+                "authorization": {"header": "Authorization", "scheme": "Bearer"},
+            }
+        }
+
+    return response if any(key in response for key in ("text", "image", "wechat")) else {"mode": "local"}
+
+
+@app.api_route("/llm/v1/{path:path}", methods=["GET", "POST"])
+async def llm_proxy(path: str, request: Request, authorization: Optional[str] = Header(default=None)):
+    require_capability(authorization, "text")
+    body = await request.body()
+    return proxy_request(request, body, f"{UPSTREAM_TEXT_BASE}/{path}", UPSTREAM_TEXT_KEY, timeout=120)
+
+
+@app.api_route("/image/v1/{path:path}", methods=["GET", "POST"])
+async def image_proxy(path: str, request: Request, authorization: Optional[str] = Header(default=None)):
+    require_capability(authorization, "image")
+    body = await request.body()
+    return proxy_request(request, body, f"{UPSTREAM_IMAGE_BASE}/{path}", UPSTREAM_IMAGE_KEY, timeout=180)
+
+
+@app.get("/wechat-relay/relay/meta/egress-ip")
+def wechat_relay_egress_ip(authorization: Optional[str] = Header(default=None)):
+    require_capability(authorization, "wechat_relay")
+    for url in ("https://api.ipify.org", "http://icanhazip.com", "https://ifconfig.me/ip"):
+        try:
+            resp = requests.get(url, timeout=5)
+            resp.raise_for_status()
+            if resp.text.strip():
+                return {"status": "success", "ip": resp.text.strip()}
+        except Exception:
+            pass
+    raise HTTPException(status_code=502, detail="获取中继出口 IP 失败")
+
+
+@app.api_route("/wechat-relay/relay/cgi-bin/{wx_path:path}", methods=["GET", "POST"])
+async def wechat_relay(wx_path: str, request: Request, authorization: Optional[str] = Header(default=None)):
+    require_capability(authorization, "wechat_relay")
+    if not wx_path or wx_path.startswith("/") or ".." in wx_path.split("/"):
+        raise HTTPException(status_code=400, detail="微信 API 路径无效")
+
+    upstream_response = requests.request(
+        method=request.method,
+        url=f"{WECHAT_CGI_BASE_URL}/{wx_path}",
+        params=request.url.query,
+        data=await request.body(),
+        headers=forward_headers(request),
+        timeout=60,
+    )
+    return Response(
+        content=upstream_response.content,
+        status_code=upstream_response.status_code,
+        headers=response_headers(upstream_response.headers),
+        media_type=upstream_response.headers.get("content-type"),
+    )</code></pre>
+            <h3>生产环境必须补齐</h3>
+            <ul>
+              <li>用户、套餐、到期时间、统一 Token 必须放到数据库或后台管理系统。</li>
+              <li>文本、图片、微信中继分别做启用、封禁、限额和审计，不要依赖客户端判断。</li>
+              <li>不要把上游模型 API Key 返回给客户端；客户端只拿代理服务端签发的用户 Token。</li>
+              <li>微信中继只允许转发到 <code>https://api.weixin.qq.com/cgi-bin/</code>，不允许任意目标 URL。</li>
+              <li>微信中继服务器需要固定公网出口 IP，并在微信公众号后台加入白名单。</li>
+            </ul>
+            <h3>排查清单</h3>
+            <ul>
+              <li>客户端没有代理配置：检查 <code>/v1/client-config</code> 是否返回 <code>mode: agency</code>。</li>
+              <li>文本不生效：检查 <code>text.enabled</code>、<code>text.api_base</code>、模型列表和顶层 Token。</li>
+              <li>图片不生效：检查 <code>image.enabled</code>、<code>image.api_base</code>、<code>models[].id</code> 和顶层 Token。</li>
+              <li>微信中继不生效：检查 <code>wechat.relay.url</code> 是否可访问，以及 Token 是否通过 <code>wechat_relay</code> 能力鉴权。</li>
             </ul>
           </article>
 
           <article class="card section" id="cache">
-            <h2>八、缓存与刷新</h2>
+            <h2>九、缓存与刷新</h2>
             <h3>自动缓存</h3>
             <p>客户端会缓存代理服务器返回的配置快照。</p>
             <h3>自动刷新</h3>
@@ -708,15 +1011,15 @@
           </article>
 
           <article class="card section" id="contact">
-            <h2>九、合作联系</h2>
+            <h2>十、合作联系</h2>
             <p>
               如果需要进一步了解代理合作、实施方式、套餐能力或商务合作细节，可通过官网页面中的商务联系方式进一步沟通。
             </p>
             <ul>
               <li>
-                推荐先明确：合作模式、预计开放能力、目标用户类型、是否需要文本/图片全量支持。
+                推荐先明确：合作模式、预计开放能力、目标用户类型、是否需要文本/图片/微信中继全量支持。
               </li>
-              <li>推荐先落地文本模型代理，再逐步扩展到图片。</li>
+              <li>推荐先落地统一授权 Token，再按套餐逐步开放文本、图片、微信中继能力。</li>
             </ul>
           </article>
         </div>
