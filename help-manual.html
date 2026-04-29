@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico" />
     <title>AIWriteX 用户使用手册</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -1399,17 +1401,16 @@
       </footer>
     </article>
 
-    <!-- PAGE 14: 微信公众号代理转发实现 -->
+    <!-- PAGE 14: 微信公众号 API 中继 -->
     <article class="magazine-page">
       <div class="chapter-number">14</div>
       <div class="content-layer">
         <h2 class="section-title">
-          <span class="text-5xl mr-4 text-gray-300 font-serif">XII.</span> 微信代理转发
+          <span class="text-5xl mr-4 text-gray-300 font-serif">XII.</span> 微信 API 中继
         </h2>
         <p class="std-text mb-8">
-          针对家用拨号上网或移动办公用户，IP 地址频繁变动会导致微信后台白名单配置极为繁琐。
-          <strong>代理转发</strong>功能会让获取 access_token、上传素材、创建草稿与发布等微信 API
-          请求通过固定出口 IP 的 HTTP/HTTPS 代理发出。
+          本页说明普通用户<strong>自建固定出口微信 API 中继</strong>的方式。针对家用拨号上网或移动办公用户，IP 地址频繁变动会导致微信后台白名单配置极为繁琐。
+          启用后，获取 access_token、上传素材、创建草稿与发布等微信 API 请求会通过自建中继服务器发出。中继只转发微信官方 API，不具备通用代理能力，也不涉及文本/图片模型代理。
         </p>
 
         <!-- 实现流程 -->
@@ -1421,57 +1422,124 @@
           <div class="card-box">
             <p class="std-text">
               您需要准备一台具备<strong>固定公网 IP</strong>
-              的云服务器，并在服务器上部署一个<strong>仅本机监听</strong>的标准 HTTP/HTTPS
-              代理服务。通过 SSH 隧道让 AIWriteX
-              连接该代理，公网无需开放代理端口，也不需要在配置中填写代理账号密码。
+              的云服务器，并在服务器上部署微信 API 中继服务。AIWriteX 客户端只需要填写自建中继地址和授权 Token；
+              中继服务只允许访问 <code>https://api.weixin.qq.com/cgi-bin/</code> 下的接口，不接受任意转发目标。
+              如果使用代理合作方提供的代理版能力，则由代理服务端统一下发和管理微信中继配置，普通用户无需按本页自行搭建。
             </p>
           </div>
         </section>
 
-        <!-- 服务端代理搭建 -->
+        <!-- 服务端中继搭建 -->
         <section class="mb-10" style="flex: 1; display: flex; flex-direction: column">
           <div class="flex items-center mb-4">
             <div class="number-circle">2</div>
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">搭建服务端代理</h3>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">搭建微信 API 中继</h3>
           </div>
           <div class="card-box bg-gray-900 p-4 rounded-lg" style="flex: 1; overflow-y: auto">
             <pre
               class="text-sm text-green-400 font-mono"
               style="white-space: pre-wrap; word-break: break-all"
-            ><code>方案 A：Linux 服务端（Ubuntu / Debian + Squid）
+            ><code># 1. 在固定公网 IP 云服务器上新建 wechat_relay_server.py
+# 2. 复制以下完整代码并运行：python wechat_relay_server.py
+# 3. 生产环境建议用 Nginx/Caddy 套 HTTPS 域名，例如 https://relay.example.com
 
-sudo apt update
-sudo apt install -y squid
+import hmac
+import os
+from typing import Optional
 
-# 编辑 /etc/squid/squid.conf，保留或添加以下配置
-http_port 127.0.0.1:3128
-acl local_proxy src 127.0.0.1/32
-http_access allow local_proxy
-http_access deny all
+import requests
+from fastapi import FastAPI, Header, HTTPException, Request, Response
 
-sudo systemctl restart squid
-sudo systemctl enable squid
+WECHAT_CGI_BASE_URL = "https://api.weixin.qq.com/cgi-bin"
+RELAY_TOKEN = os.environ.get("AIWRITEX_WECHAT_RELAY_TOKEN", "").strip()
+HOP_BY_HOP_HEADERS = {
+    "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+    "te", "trailers", "transfer-encoding", "upgrade", "host",
+    "content-length", "content-encoding",
+}
 
-# 在运行 AIWriteX 的电脑建立 SSH 隧道
-ssh -N -L 127.0.0.1:3128:127.0.0.1:3128 root@服务器公网IP
+app = FastAPI(title="AIWriteX WeChat Relay")
 
-方案 B：Windows 服务端（Windows Server + 3proxy）
 
-# 1. 在“设置 -> 系统 -> 可选功能”安装 OpenSSH Server，并启动 sshd 服务
-# 2. 安装 3proxy，将 3proxy.cfg 放在 3proxy.exe 同目录
-# 3. 3proxy.cfg 使用以下最小配置，让代理只监听服务器本机
-internal 127.0.0.1
-proxy -p3128 -i127.0.0.1
+def require_relay_token(authorization: Optional[str]) -> None:
+    if not RELAY_TOKEN:
+        raise HTTPException(status_code=500, detail="中继授权 Token 未配置")
+    scheme, _, token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or not hmac.compare_digest(token.strip(), RELAY_TOKEN):
+        raise HTTPException(status_code=401, detail="中继授权无效")
 
-# 4. 启动 3proxy；生产环境可用 NSSM 或任务计划程序设为开机启动
-3proxy.exe 3proxy.cfg
 
-# 5. 云防火墙和 Windows 防火墙只允许 SSH 端口，3128 保持本机监听
-# 6. 在运行 AIWriteX 的电脑建立 SSH 隧道
-ssh -N -L 127.0.0.1:3128:127.0.0.1:3128 Administrator@服务器公网IP
+def forward_headers(request: Request) -> dict:
+    return {
+        name: value
+        for name, value in request.headers.items()
+        if name.lower() not in HOP_BY_HOP_HEADERS and name.lower() != "authorization"
+    }
 
-AIWriteX 中填写本地代理地址：
-http://127.0.0.1:3128</code></pre>
+
+def response_headers(headers) -> dict:
+    return {name: value for name, value in headers.items() if name.lower() not in HOP_BY_HOP_HEADERS}
+
+
+@app.get("/relay/health")
+def health():
+    return {"status": "success", "service": "aiwritex-wechat-relay"}
+
+
+@app.get("/relay/meta/egress-ip")
+def egress_ip(authorization: Optional[str] = Header(default=None)):
+    require_relay_token(authorization)
+    for url in ("https://api.ipify.org", "http://icanhazip.com", "https://ifconfig.me/ip"):
+        try:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            ip = response.text.strip()
+            if ip:
+                return {"status": "success", "ip": ip}
+        except Exception:
+            pass
+    raise HTTPException(status_code=502, detail="获取中继出口 IP 失败")
+
+
+@app.api_route("/relay/cgi-bin/{wx_path:path}", methods=["GET", "POST"])
+async def relay_wechat_api(
+    wx_path: str,
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+):
+    require_relay_token(authorization)
+    if not wx_path or wx_path.startswith("/") or ".." in wx_path.split("/"):
+        raise HTTPException(status_code=400, detail="微信 API 路径无效")
+
+    try:
+        upstream_response = requests.request(
+            method=request.method,
+            url=f"{WECHAT_CGI_BASE_URL}/{wx_path}",
+            params=request.url.query,
+            data=await request.body(),
+            headers=forward_headers(request),
+            timeout=60,
+        )
+    except requests.exceptions.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"请求微信 API 失败: {exc}") from exc
+
+    return Response(
+        content=upstream_response.content,
+        status_code=upstream_response.status_code,
+        headers=response_headers(upstream_response.headers),
+        media_type=upstream_response.headers.get("content-type"),
+    )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8787)
+
+# AIWriteX 客户端中填写：
+# 中继地址：https://relay.example.com
+# 授权 Token：服务端 AIWRITEX_WECHAT_RELAY_TOKEN 对应值
+# 微信后台白名单：填写这台云服务器的公网出口 IP</code></pre>
           </div>
         </section>
 
@@ -1484,25 +1552,24 @@ http://127.0.0.1:3128</code></pre>
           <div class="card-box">
             <ol class="std-list list-decimal pl-4">
               <li class="std-list-item">
-                在云服务器部署仅本机监听的标准 HTTP/HTTPS 代理，并在 AIWriteX 机器上建立 SSH
-                本地端口转发。
-              </li>
-              <li class="std-list-item">
-                在微信公众号后台将该<strong>服务器固定公网出口 IP</strong> 加入 IP
+                在微信公众号后台将该<strong>中继服务器固定公网出口 IP</strong> 加入 IP
                 允许列表（白名单）。
               </li>
               <li class="std-list-item">
-                在 AIWriteX <strong>系统设置 -> 微信公众号</strong> 中勾选“启用代理转发”。
+                在 AIWriteX <strong>系统设置 -> 微信公众号</strong> 中勾选“启用微信 API 中继”。
               </li>
               <li class="std-list-item">
-                填入本地隧道代理地址，例如：<code>http://127.0.0.1:3128</code>。
+                填入中继地址，例如：<code>https://relay.example.com</code>。
+              </li>
+              <li class="std-list-item">
+                填入授权 Token。该值需与服务端 <code>AIWRITEX_WECHAT_RELAY_TOKEN</code> 一致。
               </li>
             </ol>
           </div>
         </section>
       </div>
       <footer class="page-footer">
-        <span>WeChat Proxy Forwarding</span>
+        <span>WeChat API Relay</span>
         <span>Page 14 / 16</span>
       </footer>
     </article>
