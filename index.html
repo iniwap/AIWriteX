@@ -2085,27 +2085,106 @@
           }
         });
 
-        // 4. 隐藏下载按钮悬停时的链接提示
-        document.querySelectorAll('.download-group a, .hero-actions a.btn, .download-btns a.btn-large').forEach(link => {
-          const href = link.getAttribute('href');
-          if (href && (href.includes('github.com') || href.includes('pan.baidu.com'))) {
-            link.setAttribute('data-href', href);
-            link.removeAttribute('href');
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              const url = this.getAttribute('data-href');
-              if (url) {
-                if (url.includes('pan.baidu.com')) {
-                  // 百度网盘打开新窗口
-                  window.open(url, '_blank');
-                } else {
-                  // GitHub 直接下载（当前窗口）
-                  window.location.href = url;
-                }
-              }
-            });
+        // 4. 隐藏下载按钮悬停时的链接提示 + 下载可用性检测（GitHub Releases API）
+        const _ghReleaseCache = { data: null, ts: 0 };
+        async function checkGithubAsset(filename) {
+          const now = Date.now();
+          if (_ghReleaseCache.data && now - _ghReleaseCache.ts < 120000) {
+            return _ghReleaseCache.data.includes(filename);
           }
-        });
+          try {
+            const resp = await fetch(
+              'https://api.github.com/repos/iniwap/AIWriteX/releases/latest',
+            );
+            if (resp.ok) {
+              const json = await resp.json();
+              _ghReleaseCache.data = (json.assets || []).map((a) => a.name);
+              _ghReleaseCache.ts = now;
+              return _ghReleaseCache.data.includes(filename);
+            }
+          } catch (e) {
+            /* ignore */
+          }
+          return null; // API不可用
+        }
+
+        document
+          .querySelectorAll('.download-group a, .hero-actions a.btn, .download-btns a.btn-large')
+          .forEach((link) => {
+            const href = link.getAttribute('href');
+            if (href && (href.includes('github.com') || href.includes('pan.baidu.com'))) {
+              link.setAttribute('data-href', href);
+              link.removeAttribute('href');
+              link.style.cursor = 'pointer';
+              link.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('data-href');
+                if (!url) return;
+
+                if (url.includes('pan.baidu.com')) {
+                  window.open(url, '_blank');
+                  return;
+                }
+
+                // GitHub 下载：先通过 API 检测文件是否存在
+                const btnEl = this;
+                const origHTML = btnEl.innerHTML;
+                const isWin = url.toLowerCase().includes('.exe');
+                const platformName = isWin ? 'Windows' : 'macOS';
+                const fileName = url.split('/').pop();
+
+                // 显示检测中状态
+                btnEl.style.pointerEvents = 'none';
+                btnEl.style.opacity = '0.6';
+                btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在检测...';
+
+                try {
+                  const available = await checkGithubAsset(fileName);
+                  if (available === true) {
+                    // API确认文件存在，创建隐藏链接触发下载（不暴露地址栏）
+                    const dlLink = document.createElement('a');
+                    dlLink.href = url;
+                    dlLink.download = '';
+                    dlLink.style.display = 'none';
+                    document.body.appendChild(dlLink);
+                    dlLink.click();
+                    setTimeout(() => document.body.removeChild(dlLink), 1000);
+                  } else if (available === false) {
+                    // API成功响应，但文件中不存在于 asset 列表——该版本确实未发布
+                    alert(
+                      platformName +
+                        ' 版本暂未发布，正在打包中，请稍后再来~\n\n' +
+                        '（' +
+                        fileName +
+                        ' 尚未上传）\n\n' +
+                        '您可以先使用旁边的【网盘下载】，或等待版本发布后再试。',
+                    );
+                  } else {
+                    // API请求失败（网络问题/限流）——无法判断，尝试直接下载并告知用户
+                    alert(
+                      '网络连接不稳定，无法检测版本状态。\n\n' +
+                        '正在为您尝试直接下载 ' +
+                        platformName +
+                        ' 版...\n' +
+                        '若下载未开始，请使用旁边的【网盘下载】。',
+                    );
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = url;
+                    document.body.appendChild(iframe);
+                    setTimeout(() => document.body.removeChild(iframe), 5000);
+                  }
+                } catch (err) {
+                  // 意外错误（理论上不会到这里，兜底保护）
+                  alert('下载时出现意外错误，请稍后再试。\n\n您也可以使用旁边的【网盘下载】。');
+                } finally {
+                  btnEl.innerHTML = origHTML;
+                  btnEl.style.pointerEvents = '';
+                  btnEl.style.opacity = '';
+                }
+              });
+            }
+          });
 
         // 5. 移动端菜单切换逻辑
         const menuToggle = document.querySelector('.menu-toggle');
@@ -2125,7 +2204,7 @@
       });
     </script>
     <script>
-      !function(){var e="https://aiwritex-license.voidai.cc/assets/p.gif",t=Date.now(),n="Unknown";function r(){try{var e=localStorage.getItem("awx_stats"),t=Date.now();return e?(e=JSON.parse(e),t-e.last_visit>18e5&&e.count++,e.last_visit=t):(e={first_visit:t,last_visit:t,count:1,uuid:crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).substring(2)}),localStorage.setItem("awx_stats",JSON.stringify(e)),e}catch(e){return{count:1,first_visit:Date.now()}}}var o=r();async function a(){try{var e=Intl.DateTimeFormat().resolvedOptions().timeZone;n=e;var t=new AbortController,r=setTimeout((function(){return t.abort()}),2e3),o=await fetch("https://ipapi.co/json/",{signal:t.signal});clearTimeout(r),o.ok&&(o=await o.json(),n=o.city+", "+o.region+", "+o.country_name)}catch(e){}}function i(r,a){a=void 0===a?{}:a;var i={event_type:r,timestamp:Date.now(),check_sum:"",url:window.location.href,referrer:document.referrer,city:n,is_first_visit:1===o.count,visit_count:o.count,duration:Date.now()-t},c=Object.assign(i,a),s=new Blob([JSON.stringify(c)],{type:"application/json"});navigator.sendBeacon?navigator.sendBeacon(e,s):fetch(e,{method:"POST",body:JSON.stringify(c),keepalive:!0,headers:{"Content-Type":"application/json"}}).catch((function(){}))}window.addEventListener("load",(async function(){["localhost","127.0.0.1"].includes(window.location.hostname)||(await a(),i("page_view"))})),document.addEventListener("visibilitychange",(function(){"hidden"===document.visibilityState&&i("page_leave")}));var c=!1;document.addEventListener("click",(function(e){var t=e.target.closest("a");if(t&&!c){var n=t.href||"",r=t.className||"",o=null;(n.includes("taobao.com")||n.includes("tmall.com")?o="click_shop":n.match(/\.(exe|zip|dmg|pkg)$/i)||n.includes("github.com")||n.includes("releases")||r.includes("btn-win")||r.includes("btn-mac")?o="click_download":void 0)&&(i(o,{target_link:n}),c=!0,setTimeout((function(){return c=!1}),1e3))}}))}();
+      !function(){var e="https://aiwritex-license.voidai.cc/assets/p.gif",t=Date.now(),n="Unknown";function r(){try{var e=localStorage.getItem("awx_stats"),t=Date.now();return e?(e=JSON.parse(e),t-e.last_visit>18e5&&e.count++,e.last_visit=t):(e={first_visit:t,last_visit:t,count:1,uuid:crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).substring(2)}),localStorage.setItem("awx_stats",JSON.stringify(e)),e}catch(e){return{count:1,first_visit:Date.now()}}}var o=r();async function a(){try{var e=Intl.DateTimeFormat().resolvedOptions().timeZone;n=e;var t=new AbortController,r=setTimeout((function(){return t.abort()}),2e3),o=await fetch("https://ipapi.co/json/",{signal:t.signal});clearTimeout(r),o.ok&&(o=await o.json(),n=o.city+", "+o.region+", "+o.country_name)}catch(e){}}function i(r,a){a=void 0===a?{}:a;var i={event_type:r,timestamp:Date.now(),check_sum:"",url:window.location.href,referrer:document.referrer,city:n,is_first_visit:1===o.count,visit_count:o.count,duration:Date.now()-t},c=Object.assign(i,a),s=new Blob([JSON.stringify(c)],{type:"application/json"});navigator.sendBeacon?navigator.sendBeacon(e,s):fetch(e,{method:"POST",body:JSON.stringify(c),keepalive:!0,headers:{"Content-Type":"application/json"}}).catch((function(){}))}window.addEventListener("load",(async function(){["localhost","127.0.0.1"].includes(window.location.hostname)||(await a(),i("page_view"))})),document.addEventListener("visibilitychange",(function(){"hidden"===document.visibilityState&&i("page_leave")}));var c=!1;document.addEventListener("click",(function(e){var t=e.target.closest("a");if(t&&!c){var n=t.href||t.getAttribute('data-href')||'',r=t.className||"",o=null;(n.includes("taobao.com")||n.includes("tmall.com")?o="click_shop":n.match(/\.(exe|zip|dmg|pkg)$/i)||n.includes("github.com")||n.includes("releases")||r.includes("btn-win")||r.includes("btn-mac")?o="click_download":void 0)&&(i(o,{target_link:n}),c=!0,setTimeout((function(){return c=!1}),1e3))}}))}();
     </script>
   </body>
 </html>
