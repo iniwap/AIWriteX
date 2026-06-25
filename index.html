@@ -750,22 +750,42 @@
         box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.2);
       }
 
+      .feature-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
       .feature-card .icon-box {
-        font-size: 2rem;
-        margin-bottom: 20px;
+        font-size: 1.5rem;
+        margin-bottom: 0;
         color: var(--primary);
         background: rgba(0, 229, 255, 0.1);
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 15px;
+        border-radius: 12px;
+        flex-shrink: 0;
+      }
+
+      .module-label {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        letter-spacing: 0.5px;
       }
 
       .feature-card h3 {
-        margin-bottom: 15px;
-        font-size: 1.2rem;
+        margin-bottom: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .feature-card p {
@@ -1721,53 +1741,68 @@
         <h2 class="section-title">重新定义 <span class="gradient-text">写作体验</span></h2>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-atom"></i></div>
-            <h3>全能融合</h3>
-            <p>
-              独创 "搜索+借鉴+AI+创意"
-              组合技。打破单一模型局限，让文章既有热度又有深度，更是独一无二。
-            </p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+              <span class="module-label">去AI味引擎</span>
+            </div>
+            <h3>文章不像 AI 写的</h3>
+            <p>平台检测？读者吐槽？不存在的。文章自然得像真人执笔，自信发布每一个字。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-palette"></i></div>
-            <h3>美学排版</h3>
-            <p>
-              告别枯燥纯文本。内置多款精美模板，AI 自动生成图文并茂的 HTML 排版，让阅读成为享受。
-            </p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-crown"></i></div>
+              <span class="module-label">热点雷达</span>
+            </div>
+            <h3>每篇都是爆款潜力股</h3>
+            <p>与其自己憋选题，不如让 AI 告诉你什么正在火、什么即将火。流量密码，尽在掌握。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-magic"></i></div>
-            <h3>手机智能体</h3>
-            <p>支持QQ、飞书、钉钉、Discord、Telegram手机随时随地使用AIWriteX。</p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-bullseye"></i></div>
+              <span class="module-label">专家赛道</span>
+            </div>
+            <h3>写得像行业专家</h3>
+            <p>养生号不说外行话，财经号不犯低级错。每个领域都有专属的写作标准，读者看完想关注。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-th-large"></i></div>
-            <h3>内容管家</h3>
-            <p>
-              可视化文章管理系统。草稿、已发布状态一目了然，支持批量操作与视图切换，构建您的专属内容库。
-            </p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-layer-group"></i></div>
+              <span class="module-label">矩阵发布</span>
+            </div>
+            <h3>写一篇，发全网</h3>
+            <p>公众号、小红书、头条、百家号……一次创作，多平台同步发布。同样的内容，矩阵式曝光。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-copy"></i></div>
-            <h3>智能借鉴</h3>
-            <p>深度分析参考文章逻辑与风格，生成既有深度又具原创性的内容。</p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-image"></i></div>
+              <span class="module-label">AI智能配图</span>
+            </div>
+            <h3>排版好看，才有人读完</h3>
+            <p>封面配图自动生成，版式精美不输大号。告别光秃秃的纯文本，让阅读本身成为享受。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-fire"></i></div>
-            <h3>热搜追踪</h3>
-            <p>自动监控微博、知乎热榜，一键生成爆款选题，让您永远不缺写作灵感。</p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-clock"></i></div>
+              <span class="module-label">极速创作</span>
+            </div>
+            <h3>省下的时间，都是利润</h3>
+            <p>日更不再是负担。一篇 2000 字好文从选题到成稿只需几分钟，把时间留给更重要的事。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fab fa-weixin"></i></div>
-            <h3>一键发布</h3>
-            <p>无缝对接微信公众号，从生成到排版再到发布，全流程自动化处理。</p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+              <span class="module-label">手机智能体</span>
+            </div>
+            <h3>不在电脑前，照样写</h3>
+            <p>QQ、微信、飞书、钉钉上说句话，AI 帮你写好发好。通勤路上、吃饭间隙，创作不停。</p>
           </div>
           <div class="feature-card">
-            <div class="icon-box"><i class="fas fa-rocket"></i></div>
-            <h3>持续进化</h3>
-            <p>
-              我们承诺持续开发更多新奇功能。购买高级版不仅仅是买断当下，更是锁定了未来所有的创意与惊喜。
-            </p>
+            <div class="feature-header">
+              <div class="icon-box"><i class="fas fa-infinity"></i></div>
+              <span class="module-label">永久买断</span>
+            </div>
+            <h3>一次购买，持续进化</h3>
+            <p>买断制，不订阅。今天买的功能是你的，未来更新的功能也是你的。越用越强，永不过时。</p>
           </div>
         </div>
       </div>
