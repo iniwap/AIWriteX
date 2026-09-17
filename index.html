@@ -1355,6 +1355,71 @@
         color: #4338ca;
       }
 
+      /* ========== 自定义弹窗 ========== */
+      .custom-alert-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        animation: customAlertFadeIn 0.2s ease;
+      }
+
+      .custom-alert-box {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        animation: customAlertZoomIn 0.25s ease;
+      }
+
+      .custom-alert-msg {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin-bottom: 28px;
+      }
+
+      .custom-alert-btn {
+        display: block;
+        margin-left: auto;
+        padding: 10px 32px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #00e5ff, #bd00ff);
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s;
+      }
+
+      .custom-alert-btn:hover {
+        opacity: 0.9;
+      }
+
+      .custom-alert-btn:active {
+        transform: scale(0.96);
+      }
+
+      @keyframes customAlertFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes customAlertZoomIn {
+        from { opacity: 0; transform: scale(0.92); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
       /* ========== Footer ========== */
       footer {
         border-top: 1px solid var(--border-color);
@@ -1752,7 +1817,7 @@
             <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.exe" class="btn btn-primary glow-effect"  title="若卡顿或无法下载，请点击☁通过网盘下载">
               <i class="fab fa-windows"></i> 下载 Windows 版
             </a>
-            <a href="https://pan.baidu.com/s/1qA8nKCkOk2bt7MHAle_4TQ?pwd=mzgf" target="_blank" class="netdisk-btn" title="Windows版 网盘下载">
+            <a href="https://pan.baidu.com/s/1P02jKoAA1iP_SdaPWzVC5Q?pwd=mzgf" target="_blank" class="netdisk-btn" title="Windows版 网盘下载">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
               </svg>
@@ -1764,7 +1829,7 @@
             <a href="https://github.com/iniwap/AIWriteX/releases/latest/download/AIWriteX_Setup.dmg" class="btn btn-primary glow-effect btn-mac"  title="若卡顿或无法下载，请点击☁通过网盘下载">
               <i class="fab fa-apple"></i> 下载 macOS 版
             </a>
-            <a href="https://pan.baidu.com/s/13mDkMn_ixqFaVd7m9J_ckw?pwd=mzgf" target="_blank" class="netdisk-btn" title="macOS版 网盘下载">
+            <a href="https://pan.baidu.com/s/1JZeKHZWSml8wD9WC3Y9vVw?pwd=mzgf" target="_blank" class="netdisk-btn" title="macOS版 网盘下载">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
               </svg>
@@ -1858,11 +1923,10 @@
           <div class="pricing-card basic">
             <!-- [新增] 基础版悬停提示 (左边卡片，向右弹出) -->
             <div class="pro-hover-detail">
-              <h4><i class="fas fa-gift"></i> 基础+ (v2.5.1)更新</h4>
+              <h4><i class="fas fa-gift"></i> 基础+ (v2.5.0)更新</h4>
               <ul>
-                <li>💡 新增图片赛道</li>
-                <li>💡 新增RSS订阅</li>
-                <li>💡 大幅提升去AI味效果</li>
+                <li>💡 新增文案武库模式</li>
+                <li>💡 微信文库支持导入图片消息</li>
                 <li>💡 其他问题修复与优化</li>
               </ul>
             </div>
@@ -2189,6 +2253,25 @@
           return null; // API不可用
         }
 
+        function showCustomAlert(msg) {
+          const overlay = document.createElement('div');
+          overlay.className = 'custom-alert-overlay';
+          overlay.innerHTML =
+            '<div class="custom-alert-box">' +
+            '<div class="custom-alert-msg">' + msg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+            '<button class="custom-alert-btn">确定</button>' +
+            '</div>';
+          document.body.appendChild(overlay);
+          const btn = overlay.querySelector('.custom-alert-btn');
+          const close = () => {
+            overlay.style.animation = 'customAlertFadeIn 0.15s ease reverse';
+            overlay.querySelector('.custom-alert-box').style.animation = 'customAlertZoomIn 0.15s ease reverse';
+            setTimeout(() => overlay.remove(), 150);
+          };
+          btn.addEventListener('click', close);
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        }
+
         document
           .querySelectorAll('.download-group a, .hero-actions a.btn, .download-btns a.btn-large')
           .forEach((link) => {
@@ -2232,7 +2315,7 @@
                     setTimeout(() => document.body.removeChild(dlLink), 1000);
                   } else if (available === false) {
                     // API成功响应，但文件中不存在于 asset 列表——该版本确实未发布
-                    alert(
+                    showCustomAlert(
                       platformName +
                         ' 版本暂未发布，正在打包中，请稍后再来~\n\n' +
                         '（' +
@@ -2242,7 +2325,7 @@
                     );
                   } else {
                     // API请求失败（网络问题/限流）——无法判断，尝试直接下载并告知用户
-                    alert(
+                    showCustomAlert(
                       '网络连接不稳定，无法检测版本状态。\n\n' +
                         '正在为您尝试直接下载 ' +
                         platformName +
@@ -2257,7 +2340,7 @@
                   }
                 } catch (err) {
                   // 意外错误（理论上不会到这里，兜底保护）
-                  alert('下载时出现意外错误，请稍后再试。\n\n您也可以使用旁边的【网盘下载】。');
+                  showCustomAlert('下载时出现意外错误，请稍后再试。\n\n您也可以使用旁边的【网盘下载】。');
                 } finally {
                   btnEl.innerHTML = origHTML;
                   btnEl.style.pointerEvents = '';
