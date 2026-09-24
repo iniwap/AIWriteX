@@ -690,8 +690,9 @@
         }
       }
 
-      /* Quark Netdisk Button (Icon Only) */
+/* Quark Netdisk Button (Icon Only) */
       .netdisk-btn {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -700,16 +701,46 @@
         border-radius: 10px;
         color: #94a3b8;
         background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.15);
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        animation: netdiskPulse 3s ease-in-out infinite;
+      }
+
+      /* 外圈扩散光环 */
+      .netdisk-btn::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 13px;
+        border: 1.5px solid rgba(99, 102, 241, 0.25);
+        animation: netdiskRing 3s ease-in-out infinite;
+        pointer-events: none;
       }
 
       .netdisk-btn:hover {
-        color: var(--primary);
-        background: rgba(30, 41, 59, 1);
-        transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: #c7d2fe;
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.2);
+        animation: none;
+      }
+
+      .netdisk-btn:hover::before {
+        border-color: rgba(99, 102, 241, 0.5);
+        animation: none;
+      }
+
+      @keyframes netdiskPulse {
+        0%, 100% { border-color: rgba(148, 163, 184, 0.15); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        50% { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 2px 12px rgba(99, 102, 241, 0.12); }
+      }
+
+      @keyframes netdiskRing {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.06); }
       }
 
       /* macOS Button Style */
