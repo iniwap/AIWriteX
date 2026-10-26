@@ -315,7 +315,7 @@
           </div>
           <div class="w-px h-10 bg-gray-200"></div>
           <div>
-            <span class="block text-3xl font-bold mb-1 text-gray-800 dark:text-gray-200">20+</span
+            <span class="block text-3xl font-bold mb-1 text-gray-800 dark:text-gray-200">20</span
             ><span class="text-gray-400 text-sm">内置文案场景</span>
           </div>
         </div>
@@ -430,6 +430,28 @@
         <p class="std-text mb-6">
           所有文章都在这里生成。工具栏提供以下功能按钮，点击展开对应设置面板。
         </p>
+        <div class="card-box mb-4">
+          <h4 class="font-bold text-gray-800 dark:text-white mb-1">
+            🔎 写作模式：标题创作 / 研究写作
+          </h4>
+          <p class="text-sm text-gray-500">
+            顶部可切换两种模式。<strong>标题创作</strong>：输入话题直接生成；<strong>研究写作</strong>：粘贴完整需求，系统自动完成“研究简报 → 本地/联网检索 → 证据表 → 正文 → 去AI味”，一键成文，中途无需确认。适合政策、行业、深度报告等需要证据的选题。
+          </p>
+          <ul class="mt-2 text-sm text-gray-500 list-disc pl-5 space-y-1">
+            <li>
+              AI 搜索优先使用当前供应商内置搜索（默认开启）；不支持或失败时自动回退软件搜索引擎。
+            </li>
+            <li>
+              只有带正文的本地文章才作为本地证据；仅标题热点只作线索，AI 摘要会标注“非原文”，只作事实线索。
+            </li>
+            <li>
+              最终正文不显示引用标记、参考列表或来源链接；无证据时默认不重复检索，按“资料不足”约束写作。
+            </li>
+            <li>
+              研究写作下对标、文案场景不可用；专家赛道可叠加（仅文字赛道），去AI味开启后自动执行、无需人工确认。
+            </li>
+          </ul>
+        </div>
         <div class="space-y-4 flex-1">
           <div class="card-box">
             <h4 class="font-bold text-gray-800 dark:text-white mb-1">📝 话题与写作指导</h4>
@@ -823,7 +845,7 @@
             <ul class="std-list list-disc">
               <li class="std-list-item">
                 在"系统设置 →
-                热搜设置"中调整各平台权重和启用状态，权重越高越容易被选中作为自动话题来源。全部不启用时默认采用微博。
+                信息源设置"中调整各平台权重和启用状态，权重越高越容易被选中作为自动话题来源。全部不启用时默认采用微博。
               </li>
               <li class="std-list-item">
                 关注"趋势预测"中上升趋势线的话题，提前布局抢占首发红利。
@@ -1712,7 +1734,7 @@ if __name__ == "__main__":
             </p>
           </div>
           <div class="card-box">
-            <h4 class="font-bold text-gray-800 dark:text-white text-sm">📡 热搜设置</h4>
+            <h4 class="font-bold text-gray-800 dark:text-white text-sm">📡 信息源设置</h4>
             <p class="text-xs text-gray-500 mt-1">
               各平台热搜权重和启用状态。权重越高越容易被选为自动话题来源。全部不启用时默认使用微博。
             </p>
@@ -1735,7 +1757,7 @@ if __name__ == "__main__":
             </h4>
             <p class="text-xs text-gray-500 mt-1">
               支持 12+ 平台。默认参数已配好，原则上只需填 API Key。推荐
-              Deepseek-V4-Flash（速度极快）。使用 Qwen/Doubao 时务必开启免费额度。
+              deepseek-flash（速度极快）。使用 Qwen/Doubao 时务必开启免费额度。
             </p>
           </div>
           <div class="card-box">
@@ -1873,6 +1895,9 @@ if __name__ == "__main__":
                   class="text-gray-800 underline dark:text-gray-200"
                   >墨智工坊</a
                 >
+              </p>
+              <p class="text-sm text-gray-500 mt-2">
+                遇到问题或有功能建议，可在软件内 <strong>消息中心</strong> 反馈。
               </p>
             </div>
             <div class="text-right">
