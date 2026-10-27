@@ -7,7 +7,7 @@ PyYAML==6.0.1
 Requests==2.32.3
 setuptools==65.5.0
 tomlkit==0.13.2
-aiforge-engine>=0.0.19
+aiforge-engine>=0.0.20
 rich
 python_dateutil==2.8.2
 markdown==3.8.2
