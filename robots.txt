@@ -1,5 +1,5 @@
 # AIWriteX 官网
-# 稳定文件：仅域名或爬虫策略变化时更新，日常发版无需改动
+
 User-agent: *
 Allow: /
 
