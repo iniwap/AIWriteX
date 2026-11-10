@@ -1,0 +1,28 @@
+# AIWriteX 官网
+# 稳定文件：仅域名或爬虫策略变化时更新，日常发版无需改动
+User-agent: *
+Allow: /
+
+# 中文搜索引擎
+User-agent: Baiduspider
+Allow: /
+User-agent: Sogou web spider
+Allow: /
+User-agent: 360Spider
+Allow: /
+
+# AI 搜索与生成式引擎
+User-agent: Bytespider
+Allow: /
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+
+Sitemap: https://aiwritex.voidai.cc/sitemap.xml
