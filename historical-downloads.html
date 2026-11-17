@@ -197,6 +197,73 @@
         box-shadow: 0 14px 34px rgba(20, 184, 166, 0.18);
       }
 
+      .download-btn.disabled {
+        cursor: not-allowed;
+        color: var(--muted);
+        border-color: rgba(148, 163, 184, 0.25);
+        background: rgba(51, 65, 85, 0.5);
+        box-shadow: none;
+        opacity: 0.7;
+      }
+
+      .download-btn.disabled:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(2, 6, 23, 0.7);
+        backdrop-filter: blur(6px);
+      }
+
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal {
+        width: min(420px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 26px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.96));
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      .modal h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+
+      .modal p {
+        margin: 0 0 20px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .modal-close {
+        padding: 12px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: transparent;
+        color: var(--muted);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
       .empty,
       .error {
         padding: 16px 18px;
@@ -259,9 +326,7 @@
         <section class="hero">
           <span class="eyebrow">AIWriteX Release Archive</span>
           <h1>历史下载</h1>
-          <p class="summary">
-            本页提供 AIWriteX 历史版本下载。
-          </p>
+          <p class="summary">本页提供 AIWriteX 历史版本下载。</p>
         </section>
 
         <section class="card" aria-label="历史下载列表">
@@ -271,6 +336,17 @@
 
         <div class="footer">© 2025 AIWriteX · 历史下载</div>
       </main>
+    </div>
+
+    <div class="modal-overlay" id="unavailableModal" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unavailableTitle">
+        <h3 id="unavailableTitle">旧版本已不可下载</h3>
+        <p>旧版本已不可下载，请下载最新版本。</p>
+        <div class="modal-actions">
+          <a class="download-btn" href="index.html">下载最新版本</a>
+          <button class="modal-close" id="unavailableClose" type="button">关闭</button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -313,10 +389,18 @@
       function createDownloadLink(asset, label, className = '') {
         const link = document.createElement('a');
         link.className = `download-btn ${className}`.trim();
-        link.dataset.href = asset.browser_download_url;
         link.role = 'button';
         link.tabIndex = 0;
         link.textContent = label;
+        if (asset && asset.browser_download_url) {
+          link.dataset.href = asset.browser_download_url;
+        } else {
+          // 安装包已下架: 禁用按钮; 即使被点击也弹窗引导下载最新版。
+          link.classList.add('disabled');
+          link.dataset.unavailable = '1';
+          link.setAttribute('aria-disabled', 'true');
+          link.title = '旧版本已不可下载，请下载最新版本';
+        }
         return link;
       }
 
@@ -330,12 +414,9 @@
             macAsset: findAsset(release.assets || [], 'mac'),
           }))
           .filter((item) => {
+            // 保留版本发布即展示; 安装包缺失仅禁用对应按钮, 不再整版隐藏。
             return (
-              item.version &&
-              compareVersion(item.version, minVersion) >= 0 &&
-              item.windowsAsset &&
-              item.macAsset &&
-              !item.release.draft
+              item.version && compareVersion(item.version, minVersion) >= 0 && !item.release.draft
             );
           });
 
@@ -379,6 +460,31 @@
         releaseListEl.append(fragment);
       }
 
+      const unavailableModal = document.getElementById('unavailableModal');
+      function showUnavailableModal() {
+        unavailableModal.hidden = false;
+      }
+      document.getElementById('unavailableClose').addEventListener('click', () => {
+        unavailableModal.hidden = true;
+      });
+      unavailableModal.addEventListener('click', (event) => {
+        if (event.target === unavailableModal) {
+          unavailableModal.hidden = true;
+        }
+      });
+
+      function activateLink(link) {
+        // 下架按钮: 无论是否成功禁用, 点击一律弹窗引导最新版, 不触发下载。
+        if (link.dataset.unavailable) {
+          showUnavailableModal();
+          return;
+        }
+        const url = link.dataset.href;
+        if (url) {
+          window.location.href = url;
+        }
+      }
+
       releaseListEl.addEventListener('click', (event) => {
         const link = event.target.closest('.download-btn');
         if (!link) {
@@ -386,10 +492,7 @@
         }
 
         event.preventDefault();
-        const url = link.dataset.href;
-        if (url) {
-          window.location.href = url;
-        }
+        activateLink(link);
       });
 
       releaseListEl.addEventListener('keydown', (event) => {
@@ -403,10 +506,7 @@
         }
 
         event.preventDefault();
-        const url = link.dataset.href;
-        if (url) {
-          window.location.href = url;
-        }
+        activateLink(link);
       });
 
       fetch(RELEASES_API, { headers: { Accept: 'application/vnd.github+json' } })
@@ -419,7 +519,8 @@
         .then(renderReleases)
         .catch(() => {
           statusEl.textContent = '';
-          releaseListEl.innerHTML = '<div class="error">历史下载列表暂时无法加载，请稍后刷新页面重试。</div>';
+          releaseListEl.innerHTML =
+            '<div class="error">历史下载列表暂时无法加载，请稍后刷新页面重试。</div>';
         });
     </script>
   </body>
